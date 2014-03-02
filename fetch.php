@@ -22,7 +22,7 @@
         $query_criteriaGroup_is_cached = array( "criteriaGroup" => $criteriaGroupName );
         $cached_criteria_group = $cache->findOne( $query_criteriaGroup_is_cached );
 
-        $fileName = "cache/" . $criteriaGroupName . ".json";
+        $fileName = "cache/json/" . $criteriaGroupName . ".json";
 
         if (!isset($cached_criteria_group) || !file_exists($fileName)) {
             $query = "SELECT *
@@ -54,18 +54,22 @@
                             "output" => "json"
             );
 
-            $ch = curl_init();
-
-            curl_setopt($ch, CURLOPT_URL, "http://dbpedia.org/sparql");
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
-            curl_setopt($ch, CURLOPT_ENCODING, "gzip");
-
-            $page = curl_exec($ch);
+            $page = curl_get_contents("http://dbpedia.org/sparql", $parameters);
             file_put_contents($fileName, $page);
 
-            curl_close($ch);
+            $pageAsJson = json_decode($page);
+
+            foreach($pageAsJson->results->bindings as $result) {
+                $imageMap = $result->imageMap->value;
+
+                $imageMapExtension = substr($imageMap, strrpos($imageMap, "."));
+                $imageMapName = substr($imageMap, 0, strlen($imageMap) - strlen($imageMapExtension));
+                if (strtolower($imageMapExtension) === ".svg") {
+                    $imageMapUrl = getCommonsImageURL($imageMapName, $imageMapExtension);
+                    echo $imageMapUrl.'<br />';
+                    file_put_contents("cache/svg/".$imageMap, curl_get_contents($imageMapUrl, array(), "GET"));
+                }
+            }
 
             foreach($criteriaGroup as $key =>$value) {
                 $document = array( "criteriaGroup" => $criteriaGroupName, "key" => $key, "value" => $value );
@@ -77,9 +81,41 @@
 
     $cursor = $cache->find();
 
-    // traverse les résultats
-    foreach ($cursor as $document) {
-        echo "<pre>".print_r($document, true)."</pre>";
+//    foreach ($cursor as $document) {
+//        echo "<pre>".print_r($document, true)."</pre>";
+//    }
+
+    function curl_get_contents($url, $parameters = array(), $type = "POST") {
+
+        $ch = curl_init();
+
+        if ($type === "POST") {
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
+        }
+        else {
+            $url .= '?' . http_build_query($parameters);
+        }
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_ENCODING, "gzip");
+
+        $page = curl_exec($ch);
+
+        curl_close($ch);
+
+        return $page;
+    }
+
+    function getCommonsImageURL($imageMapName, $imageMapExtension) {
+        $url = "http://tools.wmflabs.org/magnus-toolserver/commonsapi.php";
+        $page = curl_get_contents($url, array("image" => trim($imageMapName).$imageMapExtension), "GET");
+
+        echo '<pre>'.print_r($page, true).'</pre><br /><br />';
+
+        $xmlFormatedPage = new SimpleXMLElement($page);
+
+        return $xmlFormatedPage->file->urls->file;
     }
 
 ?>
