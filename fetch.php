@@ -66,8 +66,13 @@
                 $imageMapName = substr($imageMap, 0, strlen($imageMap) - strlen($imageMapExtension));
                 if (strtolower($imageMapExtension) === ".svg") {
                     $imageMapUrl = getCommonsImageURL($imageMapName, $imageMapExtension);
-                    echo $imageMapUrl.'<br />';
-                    file_put_contents("cache/svg/".$imageMap, curl_get_contents($imageMapUrl, array(), "GET"));
+                    if (!is_null($imageMapUrl)) {
+                        echo 'Fetched '.$imageMapUrl.'<br />';
+                        $svg = curl_get_contents($imageMapUrl, array(), "GET");
+                        if (!empty($svg)) {
+                            file_put_contents("cache/svg/".$imageMap, $svg);
+                        }
+                    }
                 }
             }
 
@@ -81,9 +86,9 @@
 
     $cursor = $cache->find();
 
-//    foreach ($cursor as $document) {
-//        echo "<pre>".print_r($document, true)."</pre>";
-//    }
+    foreach ($cursor as $document) {
+        echo "<pre>".print_r($document, true)."</pre>";
+    }
 
     function curl_get_contents($url, $parameters = array(), $type = "POST") {
 
@@ -111,11 +116,15 @@
         $url = "http://tools.wmflabs.org/magnus-toolserver/commonsapi.php";
         $page = curl_get_contents($url, array("image" => trim($imageMapName).$imageMapExtension), "GET");
 
-        echo '<pre>'.print_r($page, true).'</pre><br /><br />';
-
         $xmlFormatedPage = new SimpleXMLElement($page);
 
-        return $xmlFormatedPage->file->urls->file;
+        if (isset($xmlFormatedPage->error)) {
+            echo '<b>Error : '.$xmlFormatedPage->error.'</b><br />';
+            return null;
+        }
+        else {
+            return $xmlFormatedPage->file->urls->file;
+        }
     }
 
 ?>
