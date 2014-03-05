@@ -1,0 +1,21 @@
+{
+	"name": "bperel/geotime",
+	"description": "Kingdoms though time.",
+	"minimum-stability": "dev",
+	"license": "cc-by-sa",
+	"authors": [
+		{
+			"name": "Bruno Perel",
+			"email": "brunoperel@gmail.com"
+		}
+	],
+
+	"require": {
+		"phpunit/phpunit": "3.7.*"
+	},
+	"autoload": {
+		"psr-0": {
+			"geotime": "lib/"
+		}
+	}
+}
