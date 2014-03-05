@@ -2,6 +2,7 @@
 
 namespace geotime;
 
+include_once('Database.php');
 include_once('Util.php');
 
 class Fetch {
@@ -17,9 +18,7 @@ class Fetch {
             )
         );
 
-        $m = new MongoClient();
-        $db = $m->geotime;
-        $cache = $db->cache;
+        $cache = Database::$db->selectCollection("cache");
 
         if (isset($_GET['clean'])) {
             $cache->drop();
@@ -62,7 +61,7 @@ class Fetch {
                                 "output" => "json"
                 );
 
-                $page = Util::curl_get_contents("http://dbpedia.org/sparql", $parameters);
+                $page = \Util::curl_get_contents("http://dbpedia.org/sparql", $parameters);
                 file_put_contents($fileName, $page);
 
                 $pageAsJson = json_decode($page);
@@ -76,7 +75,7 @@ class Fetch {
                         $imageMapUrl = self::getCommonsImageURL($imageMapName, $imageMapExtension);
                         if (!is_null($imageMapUrl)) {
                             echo 'Fetched '.$imageMapUrl.'<br />';
-                            $svg = Util::curl_get_contents($imageMapUrl, array(), "GET");
+                            $svg = \Util::curl_get_contents($imageMapUrl, array(), "GET");
                             if (!empty($svg)) {
                                 file_put_contents("cache/svg/".$imageMap, $svg);
                             }
