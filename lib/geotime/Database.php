@@ -15,6 +15,6 @@ class Database {
     }
 }
 
-if (isset(Database::$db)) {
+if (!isset(Database::$db)) {
     Database::connect();
 }

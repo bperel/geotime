@@ -7,7 +7,7 @@ include_once('Util.php');
 
 class Fetch {
 
-    function fetchSvgs() {
+    function fetchSvgs($clean) {
 
         $criteriaGroups = array(
             "Former Empires" => array(
@@ -20,7 +20,7 @@ class Fetch {
 
         $cache = Database::$db->selectCollection("cache");
 
-        if (isset($_GET['clean'])) {
+        if ($clean) {
             $cache->drop();
         }
 
@@ -90,7 +90,10 @@ class Fetch {
                 }
             }
         }
+    }
 
+    function showCache() {
+        $cache = Database::$db->selectCollection("cache");
         $cursor = $cache->find();
 
         foreach ($cursor as $document) {
