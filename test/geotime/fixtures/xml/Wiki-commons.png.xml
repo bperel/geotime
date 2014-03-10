@@ -1,0 +1,40 @@
+<response version="0.92">
+    <file>
+        <name>Wiki-commons.png</name>
+        <title>File:Wiki-commons.png</title>
+        <urls>
+            <file>
+                http://upload.wikimedia.org/wikipedia/commons/7/79/Wiki-commons.png
+            </file>
+            <description>
+                http://commons.wikimedia.org/wiki/File:Wiki-commons.png
+            </description>
+        </urls>
+        <size>4455</size>
+        <width>135</width>
+        <height>155</height>
+        <uploader>Zscout370</uploader>
+        <upload_date>2006-10-02T01:19:24Z</upload_date>
+        <sha1>cece055aa99b3c92e7eff47739bfa365dccf7c2c</sha1>
+        <date>
+            circa <time class="dtstart" datetime="2005">2005</time>
+        </date>
+        <author>
+            <a href="//meta.wikimedia.org/wiki/User:Reidab" class="extiw" title="meta:User:Reidab">Reidab</a>; copyright held by the Wikimedia Foundation
+        </author>
+        <source><span class="int-own-work">Own work</span></source>
+        <permission/>
+    </file>
+    <description>
+        <language code="default">
+            <div class="description mw-content-ltr en" dir="ltr" lang="en" style=""><span class="language en" title=""><b>English:</b></span> The <a href="http://commons.wikimedia.org/wiki/File:Commons-logo-en.png" title="File:Commons-logo-en.png">Wikimedia Commons logo</a> in a default size for MediaWiki installations. <b>Note:</b> this is the file visible in the upper left corner of every page on this wiki. If you change it, you should know what you are doing!</div>
+        </language>
+    </description>
+    <categories>
+        <category>Copyright by Wikimedia</category>
+        <category>Trademarks and logos of Wikimedia</category>
+        <category>Upload protected files</category>
+        <category>Wikimedia Commons logos</category>
+    </categories>
+    <licenses/>
+</response>
