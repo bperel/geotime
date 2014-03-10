@@ -6,23 +6,33 @@ use geotime\Fetch;
 
 class FetchTest extends \PHPUnit_Framework_TestCase {
 
-    private function getMockedClass($fixtureFilename) {
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    var $mock;
+
+    protected function setUp() {
+        $this->mock = $this->getMockBuilder('geotime\Fetch')
+            ->setMethods(array('getCommonsImageXMLInfo'))
+            ->getMock();
+    }
+
+    private function setCommonsXMLFixture($fixtureFilename) {
         $response = file_get_contents('test/geotime/fixtures/xml/'.$fixtureFilename);
 
-        $mock = $this->getMockBuilder('geotime\Fetch')->setMethods(array('getCommonsImageXMLInfo'))->getMock();
-        $mock->expects($this->any())
+        $this->mock->expects($this->any())
             ->method('getCommonsImageXMLInfo')
             ->will($this->returnValue($response));
-
-        return $mock;
     }
+
+    /* Tests */
 
     public function testGetImageURL()
     {
-        $mock = $this->getMockedClass('nonexistent.png.xml');
+        $this->setCommonsXMLFixture('nonexistent.png.xml');
 
         ob_start();
-        $imageURL = $mock->getCommonsImageURL('nonexistent', '.png');
+        $imageURL = $this->mock->getCommonsImageURL('nonexistent', '.png');
         $echoOutput = ob_get_clean();
 
         $this->assertNull($imageURL);
@@ -30,10 +40,10 @@ class FetchTest extends \PHPUnit_Framework_TestCase {
     }
     public function testGetInexistantImageURL()
     {
-        $mock = $this->getMockedClass('Wiki-commons.png.xml');
+        $this->setCommonsXMLFixture('Wiki-commons.png.xml');
 
         ob_start();
-        $imageURL = $mock->getCommonsImageURL('Wiki-commons', '.png');
+        $imageURL = $this->mock->getCommonsImageURL('Wiki-commons', '.png');
         $echoOutput = ob_get_clean();
 
         $this->assertNotEmpty($imageURL);

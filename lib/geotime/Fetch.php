@@ -32,38 +32,9 @@ class Fetch {
             $fileName = "cache/json/" . $criteriaGroupName . ".json";
 
             if (!isset($cached_criteria_group) || !file_exists($fileName)) {
-                $query = "SELECT *
-                          WHERE
-                            {
-                             ";
-                $criteriaStrings = array();
-                foreach($criteriaGroup as $key =>$value) {
-                    $criteriaStrings[]= "?e $key $value";
-                }
 
-                $query.=implode(" . \n", $criteriaStrings)
-                      ."}\n"
-                      ."ORDER BY DESC(?date1)";
-
-                $parameters = array(
-                    "default-graph-uri" => "http://dbpedia.org",
-                    "query" => "PREFIX owl: <http://www.w3.org/2002/07/owl#>
-                                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-                                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                                PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-                                PREFIX dc: <http://purl.org/dc/elements/1.1/>
-                                PREFIX : <http://dbpedia.org/resource/>
-                                PREFIX dbpedia2: <http://dbpedia.org/property/>
-                                PREFIX dbpedia: <http://dbpedia.org/>
-                                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-                                $query",
-                                "output" => "json"
-                );
-
-                $page = \Util::curl_get_contents("http://dbpedia.org/sparql", $parameters);
+                $page = $this->getSparqlQueryResults($criteriaGroup);
                 file_put_contents($fileName, $page);
-
                 $pageAsJson = json_decode($page);
 
                 foreach($pageAsJson->results->bindings as $result) {
@@ -99,6 +70,39 @@ class Fetch {
         foreach ($cursor as $document) {
             echo "<pre>".print_r($document, true)."</pre>";
         }
+    }
+
+    function getSparqlQueryResults($criteriaGroup) {
+        $query = "SELECT *
+                          WHERE
+                            {
+                             ";
+        $criteriaStrings = array();
+        foreach($criteriaGroup as $key =>$value) {
+            $criteriaStrings[]= "?e $key $value";
+        }
+
+        $query.=implode(" . \n", $criteriaStrings)
+            ."}\n"
+            ."ORDER BY DESC(?date1)";
+
+        $parameters = array(
+            "default-graph-uri" => "http://dbpedia.org",
+            "query" => "PREFIX owl: <http://www.w3.org/2002/07/owl#>
+                                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+                                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                                PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                                PREFIX dc: <http://purl.org/dc/elements/1.1/>
+                                PREFIX : <http://dbpedia.org/resource/>
+                                PREFIX dbpedia2: <http://dbpedia.org/property/>
+                                PREFIX dbpedia: <http://dbpedia.org/>
+                                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                                $query",
+            "output" => "json"
+        );
+
+        return \Util::curl_get_contents("http://dbpedia.org/sparql", $parameters);
     }
 
     function getCommonsImageURL($imageMapName, $imageMapExtension) {
