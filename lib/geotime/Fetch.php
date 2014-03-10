@@ -72,7 +72,7 @@ class Fetch {
                     $imageMapExtension = substr($imageMap, strrpos($imageMap, "."));
                     $imageMapName = substr($imageMap, 0, strlen($imageMap) - strlen($imageMapExtension));
                     if (strtolower($imageMapExtension) === ".svg") {
-                        $imageMapUrl = self::getCommonsImageURL($imageMapName, $imageMapExtension);
+                        $imageMapUrl = $this->getCommonsImageURL($imageMapName, $imageMapExtension);
                         if (!is_null($imageMapUrl)) {
                             echo 'Fetched '.$imageMapUrl.'<br />';
                             $svg = \Util::curl_get_contents($imageMapUrl, array(), "GET");
@@ -101,12 +101,8 @@ class Fetch {
         }
     }
 
-    static function getCommonsImageURL($imageMapName, $imageMapExtension) {
-        $url = "http://tools.wmflabs.org/magnus-toolserver/commonsapi.php";
-        $page = \Util::curl_get_contents($url, array("image" => trim($imageMapName).$imageMapExtension), "GET");
-
-        $xmlFormatedPage = new \SimpleXMLElement($page);
-
+    function getCommonsImageURL($imageMapName, $imageMapExtension) {
+        $xmlFormatedPage = new \SimpleXMLElement($this->getCommonsImageXMLInfo($imageMapName, $imageMapExtension));
         if (isset($xmlFormatedPage->error)) {
             echo '<b>Error : '.$xmlFormatedPage->error.'</b><br />';
             return null;
@@ -114,6 +110,11 @@ class Fetch {
         else {
             return $xmlFormatedPage->file->urls->file;
         }
+    }
+
+    function getCommonsImageXMLInfo($imageMapName, $imageMapExtension) {
+        $url = "http://tools.wmflabs.org/magnus-toolserver/commonsapi.php";
+        return \Util::curl_get_contents($url, array("image" => trim($imageMapName).$imageMapExtension), "GET");
     }
 }
 
