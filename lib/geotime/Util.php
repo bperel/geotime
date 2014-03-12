@@ -22,4 +22,14 @@ class Util {
 
         return $page;
     }
+
+    static function getImageExtension($imageMapFullName) {
+        return substr($imageMapFullName, strrpos($imageMapFullName, "."));
+    }
+
+    static function cleanupImageName($imageMapFullName) {
+        $imageMapExtension = self::getImageExtension($imageMapFullName);
+        $imageMapName = substr($imageMapFullName, 0, strlen($imageMapFullName) - strlen($imageMapExtension));
+        return trim($imageMapName).$imageMapExtension;
+    }
 }

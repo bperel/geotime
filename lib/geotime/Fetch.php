@@ -7,14 +7,22 @@ include_once('Util.php');
 
 class Fetch {
 
-    function fetchSvgs($clean) {
+    static $cache_dir_json = "cache/json/";
+    static $cache_dir_svg = "cache/svg/";
+
+    function execute($clean) {
 
         $criteriaGroups = array(
             "Former Empires" => array(
-                "<http://purl.org/dc/terms/subject>"            => "<http://dbpedia.org/resource/Category:Former_empires>",
-                "<http://dbpedia.org/ontology/foundingDate>"    => "?date1",
-                "<http://dbpedia.org/ontology/dissolutionDate>" => "?date2",
-                "<http://dbpedia.org/property/imageMap>"        => "?imageMap"
+                "fields" => array(
+                    "<http://purl.org/dc/terms/subject>"            => "<http://dbpedia.org/resource/Category:Former_empires>",
+                    "<http://dbpedia.org/ontology/foundingDate>"    => "?date1",
+                    "<http://dbpedia.org/ontology/dissolutionDate>" => "?date2",
+                    "<http://dbpedia.org/property/imageMap>"        => "?imageMap"
+                ),
+                "sort" => array(
+                    "DESC(?date1)"
+                )
             )
         );
 
@@ -29,29 +37,15 @@ class Fetch {
             $query_criteriaGroup_is_cached = array( "criteriaGroup" => $criteriaGroupName );
             $cached_criteria_group = $cache->findOne( $query_criteriaGroup_is_cached );
 
-            $fileName = "cache/json/" . $criteriaGroupName . ".json";
+            $fileName = self::$cache_dir_json . $criteriaGroupName . ".json";
 
             if (!isset($cached_criteria_group) || !file_exists($fileName)) {
 
-                $page = $this->getSparqlQueryResults($criteriaGroup);
-                file_put_contents($fileName, $page);
-                $pageAsJson = json_decode($page);
+                $imageNames = $this->fetchSvgFilenamesFromCriteriaGroup($criteriaGroup, $fileName);
+                $svgUrls = $this->getCommonsURLs($imageNames);
 
-                foreach($pageAsJson->results->bindings as $result) {
-                    $imageMap = $result->imageMap->value;
-
-                    $imageMapExtension = substr($imageMap, strrpos($imageMap, "."));
-                    $imageMapName = substr($imageMap, 0, strlen($imageMap) - strlen($imageMapExtension));
-                    if (strtolower($imageMapExtension) === ".svg") {
-                        $imageMapUrl = $this->getCommonsImageURL($imageMapName, $imageMapExtension);
-                        if (!is_null($imageMapUrl)) {
-                            echo 'Fetched '.$imageMapUrl.'<br />';
-                            $svg = \Util::curl_get_contents($imageMapUrl, array(), "GET");
-                            if (!empty($svg)) {
-                                file_put_contents("cache/svg/".$imageMap, $svg);
-                            }
-                        }
-                    }
+                foreach ($svgUrls as $imageMapFullName => $imageMapUrl) {
+                    $this->fetchImage($imageMapUrl, $imageMapFullName);
                 }
 
                 foreach($criteriaGroup as $key =>$value) {
@@ -78,13 +72,14 @@ class Fetch {
                             {
                              ";
         $criteriaStrings = array();
-        foreach($criteriaGroup as $key =>$value) {
+        foreach($criteriaGroup["fields"] as $key =>$value) {
             $criteriaStrings[]= "?e $key $value";
         }
 
-        $query.=implode(" . \n", $criteriaStrings)
-            ."}\n"
-            ."ORDER BY DESC(?date1)";
+        $query.=implode(" . \n", $criteriaStrings)."}\n";
+        if (isset($criteriaStrings["sort"])) {
+            $query.="ORDER BY ".implode(", ".$criteriaStrings["sort"]);
+        }
 
         $parameters = array(
             "default-graph-uri" => "http://dbpedia.org",
@@ -105,8 +100,8 @@ class Fetch {
         return \Util::curl_get_contents("http://dbpedia.org/sparql", $parameters);
     }
 
-    function getCommonsImageURL($imageMapName, $imageMapExtension) {
-        $xmlFormatedPage = new \SimpleXMLElement($this->getCommonsImageXMLInfo($imageMapName, $imageMapExtension));
+    function getCommonsImageURL($imageMapFullName) {
+        $xmlFormatedPage = new \SimpleXMLElement($this->getCommonsImageXMLInfo($imageMapFullName));
         if (isset($xmlFormatedPage->error)) {
             echo '<b>Error : '.$xmlFormatedPage->error.'</b><br />';
             return null;
@@ -116,9 +111,79 @@ class Fetch {
         }
     }
 
-    function getCommonsImageXMLInfo($imageMapName, $imageMapExtension) {
+    function getCommonsImageXMLInfo($imageMapFullName) {
         $url = "http://tools.wmflabs.org/magnus-toolserver/commonsapi.php";
-        return \Util::curl_get_contents($url, array("image" => trim($imageMapName).$imageMapExtension), "GET");
+        return \Util::curl_get_contents($url, array("image" => $imageMapFullName), "GET");
+    }
+
+    /**
+     * @param $imageMapUrl
+     * @param $fileName
+     * @return mixed|null
+     */
+    function fetchImage($imageMapUrl, $fileName = null) {
+        if (!is_null($imageMapUrl)) {
+            $svg = \Util::curl_get_contents($imageMapUrl, array(), "GET");
+            if (!empty($svg)) {
+                echo 'Fetched ' . $imageMapUrl . '<br />';
+                if (!is_null($fileName)) {
+                    file_put_contents(self::$cache_dir_svg.$fileName, $svg);
+                }
+                return $svg;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Fetch the image filenames corresponding to a criteria group
+     * @param $criteriaGroup
+     * @param $fileName
+     * @return array
+     */
+    public function fetchSvgFilenamesFromCriteriaGroup($criteriaGroup, $fileName = null)
+    {
+        $page = $this->getSparqlQueryResults($criteriaGroup);
+        if (!is_null($fileName)) {
+            file_put_contents($fileName, $page);
+        }
+        $pageAsJson = json_decode($page);
+
+        return $this->fetchSvgFilenamesFromSparqlResults($pageAsJson);
+    }
+
+    /**
+     * Fetch the image filenames from a JSON-formatted SPARQL page
+     * @param $pageAsJson
+     * @return array
+     */
+    public function fetchSvgFilenamesFromSparqlResults($pageAsJson)
+    {
+        $imageNames = array();
+        foreach ($pageAsJson->results->bindings as $result) {
+            $imageMapFullName = \Util::cleanupImageName($result->imageMap->value);
+
+            if (strtolower(\Util::getImageExtension($imageMapFullName)) === ".svg") {
+                $imageNames[]=$imageMapFullName;
+            }
+        }
+
+        return $imageNames;
+    }
+
+    /**
+     * Get the images' Wikimedia Commons URLs
+     * @param $imageNames
+     * @return array An associative name=>URL array
+     */
+    public function getCommonsURLs($imageNames) {
+        $urls = array();
+        foreach($imageNames as $imageName) {
+            $imageMapUrl = $this->getCommonsImageURL($imageName);
+            $urls[$imageName] = $imageMapUrl;
+        }
+
+        return $urls;
     }
 }
 
