@@ -2,6 +2,8 @@
 
 namespace geotime;
 
+use geotime\models\Criteria;
+
 include_once('Database.php');
 include_once('Util.php');
 
@@ -9,17 +11,6 @@ class Fetch {
 
     static $cache_dir_json = "cache/json/";
     static $cache_dir_svg = "cache/svg/";
-
-    /**
-     * @var \MongoCollection
-     */
-    static $cacheCollection;
-
-    function __construct() {
-        if (!isset(self::$cacheCollection)) {
-            self::$cacheCollection = Database::$db->selectCollection("cache");
-        }
-    }
 
     function execute($clean) {
 
@@ -37,19 +28,18 @@ class Fetch {
             )
         );
 
-
         if ($clean) {
-            self::$cacheCollection->drop();
+            Criteria::drop();
         }
 
         foreach($criteriaGroups as $criteriaGroupName => $criteriaGroup) {
 
             $query_criteriaGroup_is_cached = array( "criteriaGroup" => $criteriaGroupName );
-            $cached_criteria_group = self::$cacheCollection->findOne( $query_criteriaGroup_is_cached );
+            $cached_criteria_group = Criteria::find( $query_criteriaGroup_is_cached );
 
             $fileName = self::$cache_dir_json . $criteriaGroupName . ".json";
 
-            if (!isset($cached_criteria_group) || !file_exists($fileName)) {
+            if ($cached_criteria_group->count() === 0 || !file_exists($fileName)) {
 
                 $imageNames = $this->fetchSvgFilenamesFromCriteriaGroup($criteriaGroup, $fileName);
                 $svgUrls = $this->getCommonsURLs($imageNames);
@@ -195,8 +185,12 @@ class Fetch {
     public function storeCriteriaGroup($criteriaGroupName, $criteriaGroup) {
         foreach($criteriaGroup as $key =>$value) {
             $document = array( "criteriaGroup" => $criteriaGroupName, "key" => $key, "value" => $value );
-            self::$cacheCollection->remove($document);
-            self::$cacheCollection->insert($document);
+            $existingCriteriaGroup = Criteria::one($document);
+            if (!is_null($existingCriteriaGroup)) {
+                $existingCriteriaGroup->delete();
+            }
+            $newCriteriaGroup = new Criteria($document);
+            $newCriteriaGroup->save();
         }
     }
 }

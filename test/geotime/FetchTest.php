@@ -3,11 +3,15 @@ namespace geotime\Test;
 
 use PHPUnit_Framework_TestCase;
 use geotime\Fetch;
+use geotime\Database;
+use geotime\models\Criteria;
+
+Database::changeDb("test_geotime");
 
 class FetchTest extends \PHPUnit_Framework_TestCase {
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
+     * @var \PHPUnit_Framework_MockObject_MockObject|Fetch
      */
     var $mock;
 
@@ -22,6 +26,7 @@ class FetchTest extends \PHPUnit_Framework_TestCase {
             ->getMock();
 
         $this->f = new Fetch();
+        Criteria::drop();
     }
 
     private function setCommonsXMLFixture($fixtureFilename) {
@@ -112,9 +117,27 @@ class FetchTest extends \PHPUnit_Framework_TestCase {
         $this->assertEmpty($echoOutput);
     }
 
+    /* This test uses the live toolserver */
     public function testGetCommonsImageURL() {
         $xmlInfo = new \SimpleXMLElement($this->f->getCommonsImageXMLInfo('Wiki-commons.png'));
         $fixtureXML = new \SimpleXMLElement(file_get_contents('test/geotime/fixtures/xml/Wiki-commons.png.xml'));
         $this->assertEquals(trim($fixtureXML->file->urls->file), trim($xmlInfo->file->urls->file));
+    }
+
+    public function testStoreCriteriaGroup() {
+        $this->assertEquals(Criteria::count(), 0);
+
+        $this->f->storeCriteriaGroup("testGroupName", array("criteria1" => "value1", "criteria2" => "value2"));
+
+        $this->assertEquals(Criteria::count(), 2);
+        $this->assertEquals(Criteria::count(array("key"=>"criteria1")), 1);
+    }
+
+    public function testStoreExistingCriteriaGroup() {
+        $this->f->storeCriteriaGroup("testGroupName", array("criteria1" => "value1", "criteria2" => "value2"));
+        $this->assertEquals(Criteria::count(), 2);
+
+        $this->f->storeCriteriaGroup("testGroupName", array("criteria1" => "value1", "criteria2" => "value2"));
+        $this->assertEquals(Criteria::count(), 2);
     }
 } 
