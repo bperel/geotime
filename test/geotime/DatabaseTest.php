@@ -2,6 +2,7 @@
 
 namespace geotime\Test;
 
+use PHPUnit_Framework_TestCase;
 use geotime\Database;
 
 

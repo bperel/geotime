@@ -10,6 +10,17 @@ class Fetch {
     static $cache_dir_json = "cache/json/";
     static $cache_dir_svg = "cache/svg/";
 
+    /**
+     * @var \MongoCollection
+     */
+    static $cacheCollection;
+
+    function __construct() {
+        if (!isset(self::$cacheCollection)) {
+            self::$cacheCollection = Database::$db->selectCollection("cache");
+        }
+    }
+
     function execute($clean) {
 
         $criteriaGroups = array(
@@ -26,16 +37,15 @@ class Fetch {
             )
         );
 
-        $cache = Database::$db->selectCollection("cache");
 
         if ($clean) {
-            $cache->drop();
+            self::$cacheCollection->drop();
         }
 
         foreach($criteriaGroups as $criteriaGroupName => $criteriaGroup) {
 
             $query_criteriaGroup_is_cached = array( "criteriaGroup" => $criteriaGroupName );
-            $cached_criteria_group = $cache->findOne( $query_criteriaGroup_is_cached );
+            $cached_criteria_group = self::$cacheCollection->findOne( $query_criteriaGroup_is_cached );
 
             $fileName = self::$cache_dir_json . $criteriaGroupName . ".json";
 
@@ -48,11 +58,7 @@ class Fetch {
                     $this->fetchImage($imageMapUrl, $imageMapFullName);
                 }
 
-                foreach($criteriaGroup as $key =>$value) {
-                    $document = array( "criteriaGroup" => $criteriaGroupName, "key" => $key, "value" => $value );
-                    $cache->remove($document);
-                    $cache->insert($document);
-                }
+                $this->storeCriteriaGroup($criteriaGroupName, $criteriaGroup);
             }
         }
     }
@@ -184,6 +190,14 @@ class Fetch {
         }
 
         return $urls;
+    }
+
+    public function storeCriteriaGroup($criteriaGroupName, $criteriaGroup) {
+        foreach($criteriaGroup as $key =>$value) {
+            $document = array( "criteriaGroup" => $criteriaGroupName, "key" => $key, "value" => $value );
+            self::$cacheCollection->remove($document);
+            self::$cacheCollection->insert($document);
+        }
     }
 }
 
