@@ -3,8 +3,8 @@
 namespace geotime;
 
 use geotime\models\Criteria;
+use geotime\models\CriteriaGroup;
 
-include_once('Database.php');
 include_once('Util.php');
 
 class Fetch {
@@ -12,27 +12,27 @@ class Fetch {
     static $cache_dir_json = "cache/json/";
     static $cache_dir_svg = "cache/svg/";
 
+    /**
+     * @var \Purekid\Mongodm\Collection
+     */
+    static $criteriaGroups;
+
+    static function initCriteriaGroups() {
+        if (!isset(self::$criteriaGroups)) {
+            self::$criteriaGroups = CriteriaGroup::find();
+        }
+    }
+
     function execute($clean) {
 
-        $criteriaGroups = array(
-            "Former Empires" => array(
-                "fields" => array(
-                    "<http://purl.org/dc/terms/subject>"            => "<http://dbpedia.org/resource/Category:Former_empires>",
-                    "<http://dbpedia.org/ontology/foundingDate>"    => "?date1",
-                    "<http://dbpedia.org/ontology/dissolutionDate>" => "?date2",
-                    "<http://dbpedia.org/property/imageMap>"        => "?imageMap"
-                ),
-                "sort" => array(
-                    "DESC(?date1)"
-                )
-            )
-        );
+        self::initCriteriaGroups();
 
         if ($clean) {
             Criteria::drop();
+            CriteriaGroup::drop();
         }
 
-        foreach($criteriaGroups as $criteriaGroupName => $criteriaGroup) {
+        foreach(self::$criteriaGroups as $criteriaGroupName => $criteriaGroup) {
 
             $query_criteriaGroup_is_cached = array( "criteriaGroup" => $criteriaGroupName );
             $cached_criteria_group = Criteria::find( $query_criteriaGroup_is_cached );
@@ -47,8 +47,6 @@ class Fetch {
                 foreach ($svgUrls as $imageMapFullName => $imageMapUrl) {
                     $this->fetchImage($imageMapUrl, $imageMapFullName);
                 }
-
-                $this->storeCriteriaGroup($criteriaGroupName, $criteriaGroup);
             }
         }
     }
@@ -180,18 +178,6 @@ class Fetch {
         }
 
         return $urls;
-    }
-
-    public function storeCriteriaGroup($criteriaGroupName, $criteriaGroup) {
-        foreach($criteriaGroup as $key =>$value) {
-            $document = array( "criteriaGroup" => $criteriaGroupName, "key" => $key, "value" => $value );
-            $existingCriteriaGroup = Criteria::one($document);
-            if (!is_null($existingCriteriaGroup)) {
-                $existingCriteriaGroup->delete();
-            }
-            $newCriteriaGroup = new Criteria($document);
-            $newCriteriaGroup->save();
-        }
     }
 }
 

@@ -4,9 +4,7 @@ namespace geotime\Test;
 use PHPUnit_Framework_TestCase;
 use geotime\Fetch;
 use geotime\Database;
-use geotime\models\Criteria;
-
-Database::changeDb("test_geotime");
+use geotime\models\CriteriaGroup;
 
 class FetchTest extends \PHPUnit_Framework_TestCase {
 
@@ -26,7 +24,11 @@ class FetchTest extends \PHPUnit_Framework_TestCase {
             ->getMock();
 
         $this->f = new Fetch();
-        Criteria::drop();
+
+        Database::connect("geotime_test");
+
+        CriteriaGroup::drop();
+        CriteriaGroup::importFromJson("test/geotime/data/criteriaGroups.json");
     }
 
     private function setCommonsXMLFixture($fixtureFilename) {
@@ -54,6 +56,21 @@ class FetchTest extends \PHPUnit_Framework_TestCase {
     }
 
     /* Tests */
+
+    public function testImportFromJson() {
+        CriteriaGroup::drop();
+
+        $this->assertEquals(0, CriteriaGroup::count());
+        CriteriaGroup::importFromJson("test/geotime/data/criteriaGroups.json");
+        $this->assertEquals(1, CriteriaGroup::count());
+    }
+
+    public function testInitCriteriaGroups() {
+        $this->assertEmpty(Fetch::$criteriaGroups);
+        Fetch::initCriteriaGroups();
+        $this->assertEquals(1, CriteriaGroup::count());
+
+    }
 
     /* This test uses the live Dbpedia results */
     /*
@@ -122,22 +139,5 @@ class FetchTest extends \PHPUnit_Framework_TestCase {
         $xmlInfo = new \SimpleXMLElement($this->f->getCommonsImageXMLInfo('Wiki-commons.png'));
         $fixtureXML = new \SimpleXMLElement(file_get_contents('test/geotime/fixtures/xml/Wiki-commons.png.xml'));
         $this->assertEquals(trim($fixtureXML->file->urls->file), trim($xmlInfo->file->urls->file));
-    }
-
-    public function testStoreCriteriaGroup() {
-        $this->assertEquals(Criteria::count(), 0);
-
-        $this->f->storeCriteriaGroup("testGroupName", array("criteria1" => "value1", "criteria2" => "value2"));
-
-        $this->assertEquals(Criteria::count(), 2);
-        $this->assertEquals(Criteria::count(array("key"=>"criteria1")), 1);
-    }
-
-    public function testStoreExistingCriteriaGroup() {
-        $this->f->storeCriteriaGroup("testGroupName", array("criteria1" => "value1", "criteria2" => "value2"));
-        $this->assertEquals(Criteria::count(), 2);
-
-        $this->f->storeCriteriaGroup("testGroupName", array("criteria1" => "value1", "criteria2" => "value2"));
-        $this->assertEquals(Criteria::count(), 2);
     }
 } 
