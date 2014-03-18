@@ -7,7 +7,7 @@ use geotime\models\CriteriaGroup;
 
 include_once('Util.php');
 
-class Fetch {
+class Import {
 
     static $cache_dir_json = "cache/json/";
     static $cache_dir_svg = "cache/svg/";
@@ -51,47 +51,44 @@ class Fetch {
         }
     }
 
-    function showCache() {
-        $cache = Database::$db->selectCollection("cache");
-        $cursor = $cache->find();
-
-        foreach ($cursor as $document) {
-            echo "<pre>".print_r($document, true)."</pre>";
-        }
-    }
-
     function getSparqlQueryResults($criteriaGroup) {
-        $query = "SELECT *
-                          WHERE
-                            {
-                             ";
-        $criteriaStrings = array();
-        foreach($criteriaGroup["fields"] as $key =>$value) {
-            $criteriaStrings[]= "?e $key $value";
-        }
-
-        $query.=implode(" . \n", $criteriaStrings)."}\n";
-        if (isset($criteriaStrings["sort"])) {
-            $query.="ORDER BY ".implode(", ".$criteriaStrings["sort"]);
-        }
 
         $parameters = array(
             "default-graph-uri" => "http://dbpedia.org",
             "query" => "PREFIX owl: <http://www.w3.org/2002/07/owl#>
-                                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-                                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                                PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-                                PREFIX dc: <http://purl.org/dc/elements/1.1/>
-                                PREFIX : <http://dbpedia.org/resource/>
-                                PREFIX dbpedia2: <http://dbpedia.org/property/>
-                                PREFIX dbpedia: <http://dbpedia.org/>
-                                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-                                $query",
+                        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+                        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                        PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                        PREFIX dc: <http://purl.org/dc/elements/1.1/>
+                        PREFIX : <http://dbpedia.org/resource/>
+                        PREFIX dbpedia2: <http://dbpedia.org/property/>
+                        PREFIX dbpedia: <http://dbpedia.org/>
+                        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                      ".$this->buildSparqlQuery($criteriaGroup),
             "output" => "json"
         );
 
-        return \Util::curl_get_contents("http://dbpedia.org/sparql", $parameters);
+        return \Util::curl_get_contents("http://dbpedia.org/sparql", "POST", $parameters);
+    }
+
+    function buildSparqlQuery(CriteriaGroup $criteriaGroup) {
+        $criteriaStrings = array();
+        foreach($criteriaGroup->getCriteriaList() as $criteria) {
+            $criteriaStrings[]= implode(" ", array("?e", $criteria->getKey(), $criteria->getValue()));
+        }
+
+        $query = "SELECT * WHERE "
+                ."{ "
+                .implode(" . ", $criteriaStrings)
+                ."} ";
+
+        $sort = $criteriaGroup->getSort();
+        if (count($sort) > 0) {
+            $query.="ORDER BY ".implode(", ", $sort);
+        }
+
+        return $query;
     }
 
     function getCommonsImageURL($imageMapFullName) {
@@ -107,7 +104,7 @@ class Fetch {
 
     function getCommonsImageXMLInfo($imageMapFullName) {
         $url = "http://tools.wmflabs.org/magnus-toolserver/commonsapi.php";
-        return \Util::curl_get_contents($url, array("image" => $imageMapFullName), "GET");
+        return \Util::curl_get_contents($url, "GET", array("image" => $imageMapFullName));
     }
 
     /**
@@ -117,7 +114,7 @@ class Fetch {
      */
     function fetchImage($imageMapUrl, $fileName = null) {
         if (!is_null($imageMapUrl)) {
-            $svg = \Util::curl_get_contents($imageMapUrl, array(), "GET");
+            $svg = \Util::curl_get_contents($imageMapUrl, "GET", array());
             if (!empty($svg)) {
                 echo 'Fetched ' . $imageMapUrl . '<br />';
                 if (!is_null($fileName)) {
@@ -131,11 +128,11 @@ class Fetch {
 
     /**
      * Fetch the image filenames corresponding to a criteria group
-     * @param $criteriaGroup
-     * @param $fileName
+     * @param CriteriaGroup $criteriaGroup
+     * @param string $fileName
      * @return array
      */
-    public function fetchSvgFilenamesFromCriteriaGroup($criteriaGroup, $fileName = null)
+    public function fetchSvgFilenamesFromCriteriaGroup(CriteriaGroup $criteriaGroup, $fileName = null)
     {
         $page = $this->getSparqlQueryResults($criteriaGroup);
         if (!is_null($fileName)) {

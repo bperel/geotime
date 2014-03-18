@@ -1,7 +1,7 @@
 <?php
 
 class Util {
-    static function curl_get_contents($url, $parameters = array(), $type = "POST") {
+    static function curl_get_contents($url, $type, $parameters = array()) {
 
         $ch = curl_init();
 

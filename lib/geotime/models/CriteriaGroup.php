@@ -10,20 +10,34 @@ class CriteriaGroup extends Model {
     static $collection = 'criteriaGroups';
 
     protected static $attrs = array(
-        'criteria' => array('model' => 'geotime\models\Criteria', 'type' => 'references'),
-        'sort' => array('type' => 'string'),
+        'criteriaList' => array('model' => 'geotime\models\Criteria', 'type' => 'embeds'),
+        'sort' => array('type' => 'array'),
         'name' => array('type' => 'string')
     );
 
     /**
-     * @param array $criteria
+     * @return Criteria[]
      */
-    public function setCriteria(array $criteria) {
-        $this->__setter('criteria', $criteria);
+    public function getCriteriaList() {
+        return $this->__getter('criteriaList');
     }
 
     /**
-     * @param string $sort
+     * @param array $criteriaList
+     */
+    public function setCriteriaList(array $criteriaList) {
+        $this->__setter('criteriaList', $criteriaList);
+    }
+
+    /**
+     * @return array
+     */
+    public function getSort() {
+        return $this->__getter('sort');
+    }
+
+    /**
+     * @param array $sort
      */
     public function setSort($sort) {
         $this->__setter('sort', $sort);

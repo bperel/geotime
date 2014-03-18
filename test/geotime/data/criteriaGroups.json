@@ -1,6 +1,6 @@
 [{
 	"name": "Former empires",
-	"criteria": [{
+	"criteriaList": [{
 		"key":  "<http://purl.org/dc/terms/subject>",
 		"value":"<http://dbpedia.org/resource/Category:Former_empires>"
 	},
@@ -16,5 +16,5 @@
 		"key":  "<http://dbpedia.org/property/imageMap>",
 		"value":"?imageMap"
 	}],
-	"sort": "DESC(?date1)"
+	"sort": ["DESC(?date1)"]
 }]

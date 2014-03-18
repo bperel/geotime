@@ -1,38 +1,41 @@
 <?php
 namespace geotime\Test;
 
+use geotime\models\Criteria;
 use PHPUnit_Framework_TestCase;
-use geotime\Fetch;
+use geotime\Import;
 use geotime\Database;
 use geotime\models\CriteriaGroup;
 
-class FetchTest extends \PHPUnit_Framework_TestCase {
+class ImportTest extends \PHPUnit_Framework_TestCase {
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|Fetch
+     * @var \PHPUnit_Framework_MockObject_MockObject|Import
      */
     var $mock;
 
     /**
-     * @var \geotime\Fetch
+     * @var \geotime\Import
      */
-    var $f;
+    var $import;
 
     protected function setUp() {
-        $this->mock = $this->getMockBuilder('geotime\Fetch')
+        $this->mock = $this->getMockBuilder('geotime\Import')
             ->setMethods(array('getCommonsImageXMLInfo', 'getSparqlQueryResults', 'getCommonsURLs'))
             ->getMock();
 
-        $this->f = new Fetch();
+        $this->import = new Import();
 
         Database::connect("geotime_test");
 
+        Criteria::drop();
         CriteriaGroup::drop();
         CriteriaGroup::importFromJson("test/geotime/data/criteriaGroups.json");
     }
 
     protected function tearDown() {
         CriteriaGroup::drop();
+        Criteria::drop();
     }
 
     private function setCommonsXMLFixture($fixtureFilename) {
@@ -59,6 +62,21 @@ class FetchTest extends \PHPUnit_Framework_TestCase {
             ->will($this->returnValue($response));
     }
 
+    private function generateSampleCriteriaGroup() {
+        $criteria1 = new Criteria(array('key'=>'field1', 'value'=>'value1'));
+        $criteria1->save();
+
+        $criteria2 = new Criteria(array('key'=>'field2', 'value'=>'value2'));
+        $criteria2->save();
+
+        $c = new CriteriaGroup();
+        $c->setSort(array("field1"));
+        $c->setCriteriaList(array($criteria1, $criteria2));
+        $c->save();
+
+        return CriteriaGroup::one();
+    }
+
     /* Tests */
 
     public function testImportFromJson() {
@@ -80,8 +98,8 @@ class FetchTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testInitCriteriaGroups() {
-        $this->assertEmpty(Fetch::$criteriaGroups);
-        Fetch::initCriteriaGroups();
+        $this->assertEmpty(Import::$criteriaGroups);
+        Import::initCriteriaGroups();
         $this->assertEquals(1, CriteriaGroup::count());
 
     }
@@ -104,18 +122,16 @@ class FetchTest extends \PHPUnit_Framework_TestCase {
     }
     */
 
+    public function testBuildSparqlQuery() {
+        CriteriaGroup::drop();
+        $query = $this->import->buildSparqlQuery($this->generateSampleCriteriaGroup());
+
+        $this->assertEquals("SELECT * WHERE { ?e field1 value1 . ?e field2 value2} ORDER BY field1", $query);
+    }
+
     public function testFetchSvgUrlsFromSparqlResults() {
-        $criteriaGroup = array(
-            "fields" => array(
-                "<http://purl.org/dc/terms/subject>"            => "<http://dbpedia.org/resource/Category:Former_empires>",
-                "<http://dbpedia.org/ontology/foundingDate>"    => "?date1",
-                "<http://dbpedia.org/ontology/dissolutionDate>" => "?date2",
-                "<http://dbpedia.org/property/imageMap>"        => "?imageMap"
-            ),
-            "sort" => array(
-                "DESC(?date1)"
-            )
-        );
+        CriteriaGroup::drop();
+        $criteriaGroup = $this->generateSampleCriteriaGroup();
 
         $this->setSparqlJsonFixture('Former Empires.json');
         $this->setFetchSvgUrlsFixture();
@@ -150,7 +166,7 @@ class FetchTest extends \PHPUnit_Framework_TestCase {
 
     /* This test uses the live toolserver */
     public function testGetCommonsImageURL() {
-        $xmlInfo = new \SimpleXMLElement($this->f->getCommonsImageXMLInfo('Wiki-commons.png'));
+        $xmlInfo = new \SimpleXMLElement($this->import->getCommonsImageXMLInfo('Wiki-commons.png'));
         $fixtureXML = new \SimpleXMLElement(file_get_contents('test/geotime/fixtures/xml/Wiki-commons.png.xml'));
         $this->assertEquals(trim($fixtureXML->file->urls->file), trim($xmlInfo->file->urls->file));
     }
