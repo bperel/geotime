@@ -36,9 +36,14 @@ class CriteriaGroup extends Model {
         $this->__setter('name', $name);
     }
 
+    /**
+     * @param $fileName : Fichier JSON à importer
+     * @return string Code de retour de la commande
+     * @throws \InvalidArgumentException
+     */
     public static function importFromJson($fileName) {
         if (!preg_match('#^[./a-zA-Z0-9]+$#', $fileName)) {
-            throw new \Exception('Invalid file name for JSON import : '.$fileName."\n");
+            throw new \InvalidArgumentException('Invalid file name for JSON import : '.$fileName."\n");
         }
         else {
             $command = 'mongoimport --jsonArray -u '.Database::$username.' -p '.Database::$password.' -d '.Database::$db.' -c '.self::$collection.' '.(getcwd())."/".$fileName. ' 2>&1';

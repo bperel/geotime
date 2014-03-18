@@ -65,8 +65,18 @@ class FetchTest extends \PHPUnit_Framework_TestCase {
         CriteriaGroup::drop();
 
         $this->assertEquals(0, CriteriaGroup::count());
-        CriteriaGroup::importFromJson("test/geotime/data/criteriaGroups.json");
+        CriteriaGroup::importFromJson('test/geotime/data/criteriaGroups.json');
         $this->assertEquals(1, CriteriaGroup::count());
+    }
+
+    public function testImportFromJsonInvalidFile() {
+        try {
+            CriteriaGroup::importFromJson('test\geotime\data\criteriaGroups.json');
+            $this->fail();
+        }
+        catch (\InvalidArgumentException $e) {
+            $this->assertStringStartsWith('Invalid file name for JSON import', $e->getMessage());
+        }
     }
 
     public function testInitCriteriaGroups() {
