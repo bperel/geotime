@@ -31,6 +31,10 @@ class FetchTest extends \PHPUnit_Framework_TestCase {
         CriteriaGroup::importFromJson("test/geotime/data/criteriaGroups.json");
     }
 
+    protected function tearDown() {
+        CriteriaGroup::drop();
+    }
+
     private function setCommonsXMLFixture($fixtureFilename) {
         $response = file_get_contents('test/geotime/fixtures/xml/'.$fixtureFilename);
 
