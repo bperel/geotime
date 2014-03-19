@@ -9,9 +9,6 @@ include_once('Util.php');
 
 class Import {
 
-    static $cache_dir_json = "cache/json/";
-    static $cache_dir_svg = "cache/svg/";
-
     /**
      * @var \Purekid\Mongodm\Collection
      */
@@ -37,7 +34,7 @@ class Import {
             $query_criteriaGroup_is_cached = array( "criteriaGroup" => $criteriaGroupName );
             $cached_criteria_group = Criteria::find( $query_criteriaGroup_is_cached );
 
-            $fileName = self::$cache_dir_json . $criteriaGroupName . ".json";
+            $fileName = Util::$cache_dir_json . $criteriaGroupName . ".json";
 
             if ($cached_criteria_group->count() === 0 || !file_exists($fileName)) {
 
@@ -45,7 +42,7 @@ class Import {
                 $svgUrls = $this->getCommonsURLs($imageNames);
 
                 foreach ($svgUrls as $imageMapFullName => $imageMapUrl) {
-                    $this->fetchImage($imageMapUrl, $imageMapFullName);
+                    Util::fetchImage($imageMapUrl, $imageMapFullName);
                 }
             }
         }
@@ -69,7 +66,7 @@ class Import {
             "output" => "json"
         );
 
-        return \Util::curl_get_contents("http://dbpedia.org/sparql", "POST", $parameters);
+        return Util::curl_get_contents("http://dbpedia.org/sparql", "POST", $parameters);
     }
 
     function buildSparqlQuery(CriteriaGroup $criteriaGroup) {
@@ -104,26 +101,7 @@ class Import {
 
     function getCommonsImageXMLInfo($imageMapFullName) {
         $url = "http://tools.wmflabs.org/magnus-toolserver/commonsapi.php";
-        return \Util::curl_get_contents($url, "GET", array("image" => $imageMapFullName));
-    }
-
-    /**
-     * @param $imageMapUrl
-     * @param $fileName
-     * @return mixed|null
-     */
-    function fetchImage($imageMapUrl, $fileName = null) {
-        if (!is_null($imageMapUrl)) {
-            $svg = \Util::curl_get_contents($imageMapUrl, "GET", array());
-            if (!empty($svg)) {
-                echo 'Fetched ' . $imageMapUrl . '<br />';
-                if (!is_null($fileName)) {
-                    file_put_contents(self::$cache_dir_svg.$fileName, $svg);
-                }
-                return $svg;
-            }
-        }
-        return null;
+        return Util::curl_get_contents($url, "GET", array("image" => $imageMapFullName));
     }
 
     /**
@@ -152,9 +130,9 @@ class Import {
     {
         $imageNames = array();
         foreach ($pageAsJson->results->bindings as $result) {
-            $imageMapFullName = \Util::cleanupImageName($result->imageMap->value);
+            $imageMapFullName = Util::cleanupImageName($result->imageMap->value);
 
-            if (strtolower(\Util::getImageExtension($imageMapFullName)) === ".svg") {
+            if (strtolower(Util::getImageExtension($imageMapFullName)) === ".svg") {
                 $imageNames[]=$imageMapFullName;
             }
         }
