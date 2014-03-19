@@ -5,6 +5,7 @@ namespace geotime;
 use geotime\models\Criteria;
 use geotime\models\CriteriaGroup;
 
+include_once('Database.php');
 include_once('Util.php');
 
 class Import {
@@ -17,20 +18,22 @@ class Import {
     static function initCriteriaGroups() {
         if (!isset(self::$criteriaGroups)) {
             self::$criteriaGroups = CriteriaGroup::find();
+            echo self::$criteriaGroups->count()." criteria groups found";
         }
     }
 
     function execute($clean) {
-
-        self::initCriteriaGroups();
 
         if ($clean) {
             Criteria::drop();
             CriteriaGroup::drop();
         }
 
-        foreach(self::$criteriaGroups as $criteriaGroupName => $criteriaGroup) {
+        self::initCriteriaGroups();
 
+        /** @var CriteriaGroup $criteriaGroup */
+        foreach(self::$criteriaGroups as $criteriaGroup) {
+            $criteriaGroupName = $criteriaGroup->getName();
             $query_criteriaGroup_is_cached = array( "criteriaGroup" => $criteriaGroupName );
             $cached_criteria_group = Criteria::find( $query_criteriaGroup_is_cached );
 

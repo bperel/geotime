@@ -1,0 +1,20 @@
+[{
+	"name": "Former empires",
+	"criteriaList": [{
+		"key":  "<http://purl.org/dc/terms/subject>",
+		"value":"<http://dbpedia.org/resource/Category:Former_empires>"
+	},
+	{
+		"key":  "<http://dbpedia.org/ontology/foundingDate>",
+		"value":"?date1"
+	},
+	{
+		"key":  "<http://dbpedia.org/ontology/dissolutionDate>",
+		"value":"?date2"
+	},
+	{	
+		"key":  "<http://dbpedia.org/property/imageMap>",
+		"value":"?imageMap"
+	}],
+	"sort": ["DESC(?date1)"]
+}]

@@ -1,20 +1,12 @@
 [{
-	"name": "Former empires",
+	"name": "Test criteria group",
 	"criteriaList": [{
-		"key":  "<http://purl.org/dc/terms/subject>",
-		"value":"<http://dbpedia.org/resource/Category:Former_empires>"
+		"key":  "criteria_test_1",
+		"value":"criteria_test-value_1"
 	},
 	{
-		"key":  "<http://dbpedia.org/ontology/foundingDate>",
-		"value":"?date1"
-	},
-	{
-		"key":  "<http://dbpedia.org/ontology/dissolutionDate>",
-		"value":"?date2"
-	},
-	{	
-		"key":  "<http://dbpedia.org/property/imageMap>",
-		"value":"?imageMap"
+		"key":  "criteria_test_2",
+		"value":"criteria_test_value_2"
 	}],
-	"sort": ["DESC(?date1)"]
+	"sort": ["DESC(?criteria_test_value_2)"]
 }]

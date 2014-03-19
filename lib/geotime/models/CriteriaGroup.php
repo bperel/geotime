@@ -44,6 +44,13 @@ class CriteriaGroup extends Model {
     }
 
     /**
+     * @return string
+     */
+    public function getName() {
+        return $this->__getter('name');
+    }
+
+    /**
      * @param string $name
      */
     public function setName($name) {

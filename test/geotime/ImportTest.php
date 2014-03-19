@@ -1,11 +1,13 @@
 <?php
 namespace geotime\Test;
 
-use geotime\models\Criteria;
 use PHPUnit_Framework_TestCase;
+
+use geotime\models\CriteriaGroup;
+use geotime\models\Criteria;
+
 use geotime\Import;
 use geotime\Database;
-use geotime\models\CriteriaGroup;
 
 class ImportTest extends \PHPUnit_Framework_TestCase {
 
