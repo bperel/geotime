@@ -38,6 +38,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         Criteria::drop();
     }
 
+    /* Fixtures */
+
     private function setCommonsXMLFixture($fixtureFilename) {
         $response = file_get_contents('test/geotime/fixtures/xml/'.$fixtureFilename);
 
@@ -61,6 +63,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
             ->method('getSparqlQueryResults')
             ->will($this->returnValue($response));
     }
+
+    /* Util methods for tests */
 
     private function generateSampleCriteriaGroup() {
         $criteria1 = new Criteria(array('key'=>'field1', 'value'=>'value1'));

@@ -88,22 +88,6 @@ class Import {
         return $query;
     }
 
-    function getCommonsImageURL($imageMapFullName) {
-        $xmlFormatedPage = new \SimpleXMLElement($this->getCommonsImageXMLInfo($imageMapFullName));
-        if (isset($xmlFormatedPage->error)) {
-            echo '<b>Error : '.$xmlFormatedPage->error.'</b><br />';
-            return null;
-        }
-        else {
-            return $xmlFormatedPage->file->urls->file;
-        }
-    }
-
-    function getCommonsImageXMLInfo($imageMapFullName) {
-        $url = "http://tools.wmflabs.org/magnus-toolserver/commonsapi.php";
-        return Util::curl_get_contents($url, "GET", array("image" => $imageMapFullName));
-    }
-
     /**
      * Fetch the image filenames corresponding to a criteria group
      * @param CriteriaGroup $criteriaGroup
@@ -153,6 +137,32 @@ class Import {
         }
 
         return $urls;
+    }
+
+    /**
+     * Get the Wikimedia Commons URL of an image
+     * @param $imageMapFullName
+     * @return string|null
+     */
+    function getCommonsImageURL($imageMapFullName) {
+        $xmlFormatedPage = new \SimpleXMLElement($this->getCommonsImageXMLInfo($imageMapFullName));
+        if (isset($xmlFormatedPage->error)) {
+            echo '<b>Error : '.$xmlFormatedPage->error.'</b><br />';
+            return null;
+        }
+        else {
+            return $xmlFormatedPage->file->urls->file;
+        }
+    }
+
+    /**
+     * Get the informations about a Wikimedia Commons image
+     * @param $imageMapFullName
+     * @return string
+     */
+    function getCommonsImageXMLInfo($imageMapFullName) {
+        $url = "http://tools.wmflabs.org/magnus-toolserver/commonsapi.php";
+        return Util::curl_get_contents($url, "GET", array("image" => $imageMapFullName));
     }
 }
 
