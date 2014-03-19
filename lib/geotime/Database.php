@@ -2,6 +2,8 @@
 
 namespace geotime;
 
+use Purekid\Mongodm\MongoDB;
+
 class Database {
 
     static $username;
@@ -13,7 +15,7 @@ class Database {
     static function connect($dbName) {
         self::$db = $dbName;
 
-        \Purekid\Mongodm\MongoDB::setConfigBlock('default', array(
+        MongoDB::setConfigBlock('default', array(
             'connection' => array(
                 'hostnames' => 'localhost',
                 'database'  => self::$db,
