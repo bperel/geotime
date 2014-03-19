@@ -12,7 +12,9 @@
 
 	"require": {
 		"phpunit/phpunit": "3.7.*",
-		"purekid/mongodm": "1.4.0"
+		"purekid/mongodm": "1.4.0",
+		"psr/log": "1.0.0",
+		"apache/log4php": "2.3.0"
 	},
 	"autoload": {
 		"psr-0": {

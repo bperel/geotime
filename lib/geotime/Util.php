@@ -3,8 +3,8 @@
 namespace geotime;
 
 class Util {
-    public static $cache_dir_svg = "../cache/svg/";
-    public static $cache_dir_json = "../cache/json/";
+    public static $cache_dir_svg = "cache/svg/";
+    public static $cache_dir_json = "cache/json/";
 
     static function curl_get_contents($url, $type, $parameters = array()) {
 

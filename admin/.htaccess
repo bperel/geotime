@@ -1,4 +1,4 @@
 AuthType Basic
-AuthName "AdminArea"
+AuthName "Admin area"
 AuthUserFile /home/geotime/admin_auth.txt
 Require user admin

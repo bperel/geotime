@@ -21,6 +21,14 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
      */
     var $import;
 
+    static function setUpBeforeClass() {
+        Import::$log->info("Starting tests");
+    }
+
+    static function tearDownAfterClass() {
+        Import::$log->info("Tests ended");
+    }
+
     protected function setUp() {
         $this->mock = $this->getMockBuilder('geotime\Import')
             ->setMethods(array('getCommonsImageXMLInfo', 'getSparqlQueryResults', 'getCommonsURLs'))
@@ -156,7 +164,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $echoOutput = ob_get_clean();
 
         $this->assertNull($imageURL);
-        $this->assertStringStartsWith('<b>Error', $echoOutput);
+        $this->assertStringStartsWith('ERROR - ', $echoOutput);
     }
     public function testGetImageURL()
     {

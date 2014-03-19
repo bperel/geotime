@@ -4,21 +4,25 @@ namespace geotime;
 
 use geotime\models\Criteria;
 use geotime\models\CriteriaGroup;
+use Logger;
+
+Logger::configure(stream_resolve_include_path("logger.xml"));
 
 include_once('Database.php');
 include_once('Util.php');
 
 class Import {
 
-    /**
-     * @var \Purekid\Mongodm\Collection
-     */
+    /** @var \Purekid\Mongodm\Collection */
     static $criteriaGroups;
+
+    /** @var \Logger */
+    static $log;
 
     static function initCriteriaGroups() {
         if (!isset(self::$criteriaGroups)) {
             self::$criteriaGroups = CriteriaGroup::find();
-            echo self::$criteriaGroups->count()." criteria groups found";
+            self::$log->info(self::$criteriaGroups->count()." criteria groups found");
         }
     }
 
@@ -150,7 +154,8 @@ class Import {
     function getCommonsImageURL($imageMapFullName) {
         $xmlFormatedPage = new \SimpleXMLElement($this->getCommonsImageXMLInfo($imageMapFullName));
         if (isset($xmlFormatedPage->error)) {
-            echo '<b>Error : '.$xmlFormatedPage->error.'</b><br />';
+            $firstLevelChildren = (array) $xmlFormatedPage->children();
+            self::$log->error($firstLevelChildren['error']);
             return null;
         }
         else {
@@ -168,5 +173,7 @@ class Import {
         return Util::curl_get_contents($url, "GET", array("image" => $imageMapFullName));
     }
 }
+
+Import::$log = Logger::getLogger("main");
 
 ?>
