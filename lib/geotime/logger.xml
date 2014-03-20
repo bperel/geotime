@@ -1,6 +1,6 @@
 <configuration xmlns="http://logging.apache.org/log4php/">
 
-    <appender name="myEchoAppender" class="LoggerAppenderEcho" threshold="WARN">
+    <appender name="myEchoAppender" class="LoggerAppenderEcho" threshold="INFO">
         <param name="htmlLineBreaks" value="true" />
     </appender>
 

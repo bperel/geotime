@@ -12,8 +12,12 @@ class Database {
 
     static $connected = false;
 
-    static function connect($dbName) {
-        self::$db = $dbName;
+    static function connect($dbName = null) {
+        $conf = parse_ini_file('/home/geotime/config.ini');
+        Database::$username = $conf['username'];
+        Database::$password = $conf['password'];
+
+        self::$db = is_null($dbName) ? 'geotime' : $dbName;
 
         MongoDB::setConfigBlock('default', array(
             'connection' => array(
@@ -26,13 +30,4 @@ class Database {
         ));
         self::$connected = true;
     }
-}
-
-if (!Database::$connected) {
-    $conf = parse_ini_file('/home/geotime/config.ini');
-    Database::$username = $conf['username'];
-    Database::$password = $conf['password'];
-
-    $dbName = isset($dbName) ? $dbName : 'geotime';
-    Database::connect($dbName);
 }

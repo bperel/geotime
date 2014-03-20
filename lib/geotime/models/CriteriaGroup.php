@@ -58,8 +58,8 @@ class CriteriaGroup extends Model {
     }
 
     /**
-     * @param $fileName : Fichier JSON à importer
-     * @return string Code de retour de la commande
+     * @param $fileName : JSON file to import
+     * @return integer|null Number of imported object, or NULL on error
      * @throws \InvalidArgumentException
      */
     public static function importFromJson($fileName) {
@@ -68,7 +68,9 @@ class CriteriaGroup extends Model {
         }
         else {
             $command = 'mongoimport --jsonArray -u '.Database::$username.' -p '.Database::$password.' -d '.Database::$db.' -c '.self::$collection.' '.(getcwd())."/".$fileName. ' 2>&1';
-            return shell_exec($command)."\n";
+            $status = shell_exec($command);
+            preg_match('#imported ([\d]+) objects$#', $status, $match);
+            return intval($match[1]);
         }
     }
 } 

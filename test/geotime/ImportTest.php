@@ -97,8 +97,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         CriteriaGroup::drop();
 
         $this->assertEquals(0, CriteriaGroup::count());
-        CriteriaGroup::importFromJson('test/geotime/data/criteriaGroups.json');
+        $nbImportedObjects = CriteriaGroup::importFromJson('test/geotime/data/criteriaGroups.json');
         $this->assertEquals(1, CriteriaGroup::count());
+        $this->assertEquals(1, $nbImportedObjects);
     }
 
     public function testImportFromJsonInvalidFile() {

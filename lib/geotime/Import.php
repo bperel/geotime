@@ -8,7 +8,6 @@ use Logger;
 
 Logger::configure(stream_resolve_include_path("logger.xml"));
 
-include_once('Database.php');
 include_once('Util.php');
 
 class Import {
@@ -26,12 +25,7 @@ class Import {
         }
     }
 
-    function execute($clean) {
-
-        if ($clean) {
-            Criteria::drop();
-            CriteriaGroup::drop();
-        }
+    function execute() {
 
         self::initCriteriaGroups();
 
