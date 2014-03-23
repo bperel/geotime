@@ -9,12 +9,12 @@ class Period extends Model {
     static $collection = "periods";
 
     protected static $attrs = array(
-        'start' => array('type' => 'timestamp'),
-        'end' => array('type' => 'timestamp')
+        'start' => array('type' => 'date'),
+        'end' => array('type' => 'date')
     );
 
     /**
-     * @return \MongoTimestamp
+     * @return \MongoDate
      */
     public function getStart()
     {
@@ -22,7 +22,7 @@ class Period extends Model {
     }
 
     /**
-     * @param \MongoTimestamp $start
+     * @param \MongoDate $start
      */
     public function setStart($start)
     {
@@ -30,7 +30,7 @@ class Period extends Model {
     }
 
     /**
-     * @return \MongoTimestamp
+     * @return \MongoDate
      */
     public function getEnd()
     {
@@ -38,11 +38,18 @@ class Period extends Model {
     }
 
     /**
-     * @param \MongoTimestamp $end
+     * @param \MongoDate $end
      */
     public function setEnd($end)
     {
         $this->__setter('end', $end);
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString() {
+        return 'Period '.date('Y', $this->getStart()->sec).' to '.date('Y', $this->getEnd()->sec);
     }
 
 

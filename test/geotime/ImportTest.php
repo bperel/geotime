@@ -22,11 +22,11 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     var $import;
 
     static function setUpBeforeClass() {
-        Import::$log->info("Starting ".__CLASS__." tests");
+        Import::$log->info(__CLASS__." tests started");
     }
 
     static function tearDownAfterClass() {
-        Import::$log->info(__CLASS__." Tests ended");
+        Import::$log->info(__CLASS__." tests ended");
     }
 
     protected function setUp() {

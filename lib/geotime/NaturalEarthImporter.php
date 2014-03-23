@@ -27,8 +27,8 @@ class NaturalEarthImporter {
     function import($fileName) {
 
         $p = new Period();
-        $p->setStart(new \MongoTimestamp(strtotime('01-01-'.self::$dataYear)));
-        $p->setEnd(new \MongoTimestamp(strtotime('01-01-'.self::$dataYear)));
+        $p->setStart(new \MongoDate(strtotime('01-01-'.self::$dataYear)));
+        $p->setEnd(new \MongoDate(strtotime('01-01-'.self::$dataYear)));
         $p->save();
 
 

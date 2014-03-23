@@ -1,3 +1,13 @@
+<?php
+namespace geotime\admin;
+
+use geotime\Database;
+use geotime\Geotime;
+chdir("..");
+require_once("vendor/autoload.php");
+Database::connect();
+?>
+
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -18,6 +28,10 @@
 <body>
 
 <h1>Geotime admin area</h1>
+
+<?php
+Geotime::showStatus();
+?>
 
 <p style="margin: 10px">
     <a href="initCriteriaGroups.php">Initialize database</a> (i.e. insert criteria groups)

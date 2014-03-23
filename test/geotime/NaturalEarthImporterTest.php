@@ -17,21 +17,16 @@ use geotime\Database;
 class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject|Import
-     */
-    var $mock;
-
-    /**
      * @var \geotime\NaturalEarthImporter
      */
     var $neImport;
 
     static function setUpBeforeClass() {
-        Import::$log->info("Starting ".__CLASS__." tests");
+        Import::$log->info(__CLASS__." tests started");
     }
 
     static function tearDownAfterClass() {
-        Import::$log->info(__CLASS__." Tests ended");
+        Import::$log->info(__CLASS__." tests ended");
     }
 
     protected function setUp() {
@@ -72,12 +67,12 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
 
         $nbCountriesImported = $this->neImport->import('test/geotime/data/countries.json');
 
-        $this->assertEquals(1, $nbCountriesImported);
+        $this->assertEquals(2, $nbCountriesImported);
 
         /** @var TerritoryWithPeriod $territoryWithPeriod */
         $territoryWithPeriod = TerritoryWithPeriod::one();
         $this->assertNotNull(1, $territoryWithPeriod->getPeriod());
-        $this->assertNotNull(1, $territoryWithPeriod->getTerritory());
+        $this->assertNotNull(2, $territoryWithPeriod->getTerritory());
 
     }
 } 
