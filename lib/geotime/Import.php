@@ -99,7 +99,9 @@ class Import {
     {
         $page = $this->getSparqlQueryResults($criteriaGroup);
         if (!is_null($fileName)) {
-            file_put_contents($fileName, $page);
+            if (false !== file_put_contents($fileName, $page)) {
+                self::$log->info('Successfully stored JSON file '.$fileName);
+            }
         }
         $pageAsJson = json_decode($page);
 

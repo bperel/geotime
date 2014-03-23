@@ -20,5 +20,10 @@ $nbImportedObjects = CriteriaGroup::importFromJson("data/criteriaGroups.json");
 if (is_int($nbImportedObjects)) {
     $log->info("Successfully imported $nbImportedObjects criteria group(s)");
 }
+else {
+    $log->info('An error occured while importing criteria groups');
+}
+
+?><br /><a href="index.html">Back to admin home</a>
 
 

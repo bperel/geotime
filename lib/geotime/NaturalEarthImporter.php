@@ -22,6 +22,7 @@ class NaturalEarthImporter {
 
     /**
      * @param string $fileName
+     * @return int
      */
     function import($fileName) {
 
@@ -58,6 +59,14 @@ class NaturalEarthImporter {
             $tp->setTerritory($t);
             $tp->save();
         }
+
+        return count($countriesAndCoordinates);
+    }
+
+    function clean() {
+        TerritoryWithPeriod::drop();
+        Territory::drop();
+        Period::drop();
     }
 }
 

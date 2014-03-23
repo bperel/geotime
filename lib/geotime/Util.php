@@ -2,9 +2,16 @@
 
 namespace geotime;
 
+use Logger;
+
+Logger::configure(stream_resolve_include_path("logger.xml"));
+
 class Util {
     public static $cache_dir_svg = "cache/svg/";
     public static $cache_dir_json = "cache/json/";
+
+    /** @var \Logger */
+    static $log;
 
     static function curl_get_contents($url, $type, $parameters = array()) {
 
@@ -48,9 +55,10 @@ class Util {
         if (!is_null($imageMapUrl)) {
             $svg = self::curl_get_contents($imageMapUrl, "GET", array());
             if (!empty($svg)) {
-//                echo 'Fetched ' . $imageMapUrl . '<br />';
                 if (!is_null($fileName)) {
-                    file_put_contents(self::$cache_dir_svg . $fileName, $svg);
+                    if (false !== file_put_contents(self::$cache_dir_svg . $fileName, $svg)) {
+                        self::$log->info('Successfully stored SVG file '.$fileName);
+                    }
                 }
                 return $svg;
             }
@@ -58,3 +66,5 @@ class Util {
         return null;
     }
 }
+
+Util::$log = Logger::getLogger("main");

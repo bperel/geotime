@@ -38,23 +38,41 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
         Database::connect("geotime_test");
 
         $this->neImport = new NaturalEarthImporter();
-
-        TerritoryWithPeriod::drop();
-        Territory::drop();
-        Period::drop();
+        $this->neImport->clean();
     }
 
     protected function tearDown() {
-        TerritoryWithPeriod::drop();
-        Territory::drop();
-        Period::drop();
+        $this->neImport->clean();
     }
 
     /* Tests */
 
+    public function testClean() {
+        $p = new Period();
+        $p->save();
+        $this->assertEquals(1, Period::count());
+
+        $t = new Territory();
+        $t->save();
+        $this->assertEquals(1, Territory::count());
+
+        $tp = new TerritoryWithPeriod();
+        $tp->save();
+        $this->assertEquals(1, TerritoryWithPeriod::count());
+
+        $this->neImport->clean();
+
+        $this->assertEquals(0, Period::count());
+        $this->assertEquals(0, Territory::count());
+        $this->assertEquals(0, TerritoryWithPeriod::count());
+
+    }
+
     public function testImportFromJson() {
 
-        $this->neImport->import('test/geotime/data/countries.json');
+        $nbCountriesImported = $this->neImport->import('test/geotime/data/countries.json');
+
+        $this->assertEquals(1, $nbCountriesImported);
 
         /** @var TerritoryWithPeriod $territoryWithPeriod */
         $territoryWithPeriod = TerritoryWithPeriod::one();
