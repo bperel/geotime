@@ -24,6 +24,6 @@ else {
     $log->info('An error occured while importing criteria groups');
 }
 
-?><br /><a href="index.html">Back to admin home</a>
+?><br /><a href="index.php">Back to admin home</a>
 
 

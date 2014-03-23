@@ -25,4 +25,4 @@ if (is_int($nbImportedCountries)) {
 $import = new Import();
 $import->execute();
 
-?><br /><a href="index.html">Back to admin home</a>
+?><br /><a href="index.php">Back to admin home</a>
