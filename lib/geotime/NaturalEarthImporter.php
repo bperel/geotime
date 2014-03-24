@@ -16,7 +16,7 @@ class NaturalEarthImporter {
     /** @var \Logger */
     static $log;
 
-    static $dataYear = 2012;
+    static $dataDate = '01-01-2012';
 
     /**
      * @param string $fileName
@@ -25,8 +25,8 @@ class NaturalEarthImporter {
     function import($fileName) {
 
         $p = new Period();
-        $p->setStart(new \MongoDate(strtotime('01-01-'.self::$dataYear)));
-        $p->setEnd(new \MongoDate(strtotime('01-01-'.self::$dataYear)));
+        $p->setStart(new \MongoDate(strtotime(self::$dataDate)));
+        $p->setEnd(new \MongoDate(strtotime(self::$dataDate)));
         $p->save();
 
 

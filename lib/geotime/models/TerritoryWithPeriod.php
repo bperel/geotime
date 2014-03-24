@@ -45,5 +45,19 @@ class TerritoryWithPeriod extends Model {
         $this->__setter('period', $period);
     }
 
+    /**
+     * @param Period $period
+     * @param bool $locatedTerritoriesOnly
+     * @return int
+     */
+    public static function countTerritories($period, $locatedTerritoriesOnly=false) {
+        $parameters = array('period.$id'=>new \MongoId($period->getId()));
+        if ($locatedTerritoriesOnly ) {
+            $parameters['territory'] = array('$exists'=>true);
+        }
+
+        return TerritoryWithPeriod::count($parameters);
+    }
+
 
 } 

@@ -23,10 +23,12 @@ class Geotime {
         $periodsAndTerritoriesCount = array();
 
         /** @var Period[] $periods */
-        $periods = Period::find();
+        $periods = Period::find(array(), array('start'=>1, 'end'=>1));
 
         foreach($periods as $period) {
-            $periodsAndTerritoriesCount[$period->__toString()] = TerritoryWithPeriod::count(array('period.$id'=>new \MongoId($period->getId())));
+            $territoriesCount = TerritoryWithPeriod::countTerritories($period);
+            $locatedTerritoriesCount = TerritoryWithPeriod::countTerritories($period, true);
+            $periodsAndTerritoriesCount[$period->__toString()] = array('total'=>$territoriesCount, 'located'=>$locatedTerritoriesCount);
         }
 
         return $periodsAndTerritoriesCount;
@@ -40,7 +42,7 @@ class Geotime {
 
         self::$log->info(count($periodsAndTerritoriesCount).' periods found');
         foreach($periodsAndTerritoriesCount as $periodStr=>$territoryCount) {
-            self::$log->info($periodStr.' : '.$territoryCount.' territories located');
+            self::$log->info($periodStr.' : '.$territoryCount['total'].' territories referenced, '.$territoryCount['located'].' of them located');
         }
     }
 }
