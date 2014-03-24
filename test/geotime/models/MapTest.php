@@ -4,6 +4,7 @@ namespace geotime\Test;
 
 use PHPUnit_Framework_TestCase;
 use geotime\models\Map;
+use geotime\Database;
 
 
 class MapTest extends \PHPUnit_Framework_TestCase {
@@ -14,6 +15,11 @@ class MapTest extends \PHPUnit_Framework_TestCase {
 
     static function tearDownAfterClass() {
         Map::$log->info(__CLASS__." tests ended");
+    }
+
+
+    protected function setUp() {
+        Database::connect("geotime_test");
     }
 
     public function testGenerateMap() {
