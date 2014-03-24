@@ -65,7 +65,7 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
 
     public function testImportFromJson() {
 
-        $nbCountriesImported = $this->neImport->import('test/geotime/data/countries.json');
+        $nbCountriesImported = $this->neImport->import('test/geotime/_data/countries.json');
 
         $this->assertEquals(2, $nbCountriesImported);
 

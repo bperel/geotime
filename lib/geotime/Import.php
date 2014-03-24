@@ -4,6 +4,8 @@ namespace geotime;
 
 use geotime\models\Criteria;
 use geotime\models\CriteriaGroup;
+use geotime\models\Map;
+
 use Logger;
 
 Logger::configure(stream_resolve_include_path("logger.xml"));
@@ -39,11 +41,11 @@ class Import {
 
             if ($cached_criteria_group->count() === 0 || !file_exists($fileName)) {
 
-                $imageNames = $this->fetchSvgFilenamesFromCriteriaGroup($criteriaGroup, $fileName);
-                $svgUrls = $this->getCommonsURLs($imageNames);
+                $maps = $this->getMapsFromCriteriaGroup($criteriaGroup, $fileName);
+                $svgUrls = $this->getCommonsURLs($maps);
 
                 foreach ($svgUrls as $imageMapFullName => $imageMapUrl) {
-                    Util::fetchImage($imageMapUrl, $imageMapFullName);
+                    $this->fetchAndStoreImage($maps[$imageMapFullName], $imageMapUrl);
                 }
             }
         }
@@ -90,12 +92,12 @@ class Import {
     }
 
     /**
-     * Fetch the image filenames corresponding to a criteria group
+     * Create Map object instances from the results of a criteria group
      * @param CriteriaGroup $criteriaGroup
      * @param string $fileName
-     * @return array
+     * @return Map[]
      */
-    public function fetchSvgFilenamesFromCriteriaGroup(CriteriaGroup $criteriaGroup, $fileName = null)
+    public function getMapsFromCriteriaGroup(CriteriaGroup $criteriaGroup, $fileName = null)
     {
         $page = $this->getSparqlQueryResults($criteriaGroup);
         if (!is_null($fileName)) {
@@ -105,26 +107,27 @@ class Import {
         }
         $pageAsJson = json_decode($page);
 
-        return $this->fetchSvgFilenamesFromSparqlResults($pageAsJson);
+        return $this->getMapsFromSparqlResults($pageAsJson);
     }
 
     /**
-     * Fetch the image filenames from a JSON-formatted SPARQL page
+     * Create Map object instances from a JSON-formatted SPARQL page
      * @param $pageAsJson
-     * @return array
+     * @return Map[]
      */
-    public function fetchSvgFilenamesFromSparqlResults($pageAsJson)
+    public function getMapsFromSparqlResults($pageAsJson)
     {
-        $imageNames = array();
+        $maps = array();
         foreach ($pageAsJson->results->bindings as $result) {
             $imageMapFullName = Util::cleanupImageName($result->imageMap->value);
 
             if (strtolower(Util::getImageExtension($imageMapFullName)) === ".svg") {
-                $imageNames[]=$imageMapFullName;
+                $map = Map::generateAndSaveReferences($imageMapFullName, $result->date1->value, $result->date2->value);
+                $maps[$imageMapFullName]=$map;
             }
         }
 
-        return $imageNames;
+        return $maps;
     }
 
     /**
@@ -167,6 +170,16 @@ class Import {
     function getCommonsImageXMLInfo($imageMapFullName) {
         $url = "http://tools.wmflabs.org/magnus-toolserver/commonsapi.php";
         return Util::curl_get_contents($url, "GET", array("image" => $imageMapFullName));
+    }
+
+    /**
+     * @param Map $map
+     * @param string $imageMapUrl
+     */
+    function fetchAndStoreImage($map, $imageMapUrl=null) {
+        if (is_null($imageMapUrl) || Util::fetchImage($imageMapUrl, $map->getFileName())) {
+            $map->save();
+        }
     }
 }
 

@@ -52,5 +52,13 @@ class Period extends Model {
         return 'Period '.date('Y', $this->getStart()->sec).' to '.date('Y', $this->getEnd()->sec);
     }
 
+    public static function generate($startDateStr, $endDateStr) {
+        $period = new Period();
+        $period->setStart(new \MongoDate(strtotime($startDateStr)));
+        $period->setEnd(new \MongoDate(strtotime($endDateStr)));
+
+        return $period;
+    }
+
 
 } 

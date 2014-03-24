@@ -63,7 +63,7 @@ class CriteriaGroup extends Model {
      * @throws \InvalidArgumentException
      */
     public static function importFromJson($fileName) {
-        if (!preg_match('#^[./a-zA-Z0-9]+$#', $fileName)) {
+        if (!preg_match('#^[./_a-zA-Z0-9]+$#', $fileName)) {
             throw new \InvalidArgumentException('Invalid file name for JSON import : '.$fileName."\n");
         }
         else {

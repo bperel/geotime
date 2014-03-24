@@ -3,8 +3,13 @@ namespace geotime\Test;
 
 use PHPUnit_Framework_TestCase;
 
+use geotime\models\Territory;
+use geotime\models\TerritoryWithPeriod;
+use geotime\models\Period;
+
 use geotime\models\CriteriaGroup;
 use geotime\models\Criteria;
+use geotime\models\Map;
 
 use geotime\Import;
 use geotime\Database;
@@ -34,24 +39,38 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
             ->setMethods(array('getCommonsImageXMLInfo', 'getSparqlQueryResults', 'getCommonsURLs'))
             ->getMock();
 
+        $this->mockUtil = $this->getMockBuilder('geotime\Util')
+            ->setMethods(array('fetchImage'))
+            ->getMock();
+
         $this->import = new Import();
 
         Database::connect("geotime_test");
 
+        Period::drop();
+        Territory::drop();
+        TerritoryWithPeriod::drop();
+        Map::drop();
+
         Criteria::drop();
         CriteriaGroup::drop();
-        CriteriaGroup::importFromJson("test/geotime/data/criteriaGroups.json");
+        CriteriaGroup::importFromJson("test/geotime/_data/criteriaGroups.json");
     }
 
     protected function tearDown() {
         CriteriaGroup::drop();
         Criteria::drop();
+
+        Map::drop();
+        TerritoryWithPeriod::drop();
+        Period::drop();
+        Territory::drop();
     }
 
     /* Fixtures */
 
     private function setCommonsXMLFixture($fixtureFilename) {
-        $response = file_get_contents('test/geotime/fixtures/xml/'.$fixtureFilename);
+        $response = file_get_contents('test/geotime/_fixtures/xml/'.$fixtureFilename);
 
         $this->mock->expects($this->any())
             ->method('getCommonsImageXMLInfo')
@@ -59,7 +78,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     private function setFetchSvgUrlsFixture() {
-        $urls = json_decode(file_get_contents('test/geotime/fixtures/urls.json'));
+        $urls = json_decode(file_get_contents('test/geotime/_fixtures/urls.json'));
 
         $this->mock->expects($this->any())
             ->method('getCommonsURLs')
@@ -67,7 +86,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     private function setSparqlJsonFixture($fixtureFilename) {
-        $response = file_get_contents('test/geotime/fixtures/json/'.$fixtureFilename);
+        $response = file_get_contents('test/geotime/_fixtures/json/'.$fixtureFilename);
 
         $this->mock->expects($this->any())
             ->method('getSparqlQueryResults')
@@ -76,6 +95,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
     /* Util methods for tests */
 
+    /**
+     * @return CriteriaGroup
+     */
     private function generateSampleCriteriaGroup() {
         $criteria1 = new Criteria(array('key'=>'field1', 'value'=>'value1'));
         $criteria1->save();
@@ -97,7 +119,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         CriteriaGroup::drop();
 
         $this->assertEquals(0, CriteriaGroup::count());
-        $nbImportedObjects = CriteriaGroup::importFromJson('test/geotime/data/criteriaGroups.json');
+        $nbImportedObjects = CriteriaGroup::importFromJson('test/geotime/_data/criteriaGroups.json');
         $this->assertEquals(1, CriteriaGroup::count());
         $this->assertEquals(1, $nbImportedObjects);
     }
@@ -144,16 +166,25 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals("SELECT * WHERE { ?e field1 value1 . ?e field2 value2} ORDER BY field1", $query);
     }
 
-    public function testFetchSvgUrlsFromSparqlResults() {
+    public function testGetMapsFromCriteriaGroup() {
         CriteriaGroup::drop();
         $criteriaGroup = $this->generateSampleCriteriaGroup();
 
         $this->setSparqlJsonFixture('Former Empires.json');
         $this->setFetchSvgUrlsFixture();
 
-        $svgUrls = $this->mock->fetchSvgFilenamesFromCriteriaGroup($criteriaGroup);
+        $maps = $this->mock->getMapsFromCriteriaGroup($criteriaGroup);
+        $this->assertEquals(1, count($maps));
 
-        $this->assertEquals(1, count($svgUrls));
+        $firstMap = $maps[key($maps)];
+        $this->assertEquals('German Empire 1914.svg', $firstMap->getFileName());
+        $this->assertEquals(1, count($firstMap->getTerritoriesWithPeriods()));
+
+        $territoriesWithPeriods = $firstMap->getTerritoriesWithPeriods();
+        $this->assertNull($territoriesWithPeriods[0]->getTerritory());
+        $this->assertNotNull($territoriesWithPeriods[0]->getPeriod());
+        $this->assertEquals(new \MongoDate(strtotime('1871-01-18')), $territoriesWithPeriods[0]->getPeriod()->getStart());
+        $this->assertEquals(new \MongoDate(strtotime('1918-11-18')), $territoriesWithPeriods[0]->getPeriod()->getEnd());
     }
 
     public function testGetNonexistantImageURL()
@@ -182,7 +213,20 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     /* This test uses the live toolserver */
     public function testGetCommonsImageURL() {
         $xmlInfo = new \SimpleXMLElement($this->import->getCommonsImageXMLInfo('Wiki-commons.png'));
-        $fixtureXML = new \SimpleXMLElement(file_get_contents('test/geotime/fixtures/xml/Wiki-commons.png.xml'));
+        $fixtureXML = new \SimpleXMLElement(file_get_contents('test/geotime/_fixtures/xml/Wiki-commons.png.xml'));
         $this->assertEquals(trim($fixtureXML->file->urls->file), trim($xmlInfo->file->urls->file));
+    }
+
+    public function testFetchAndStoreImage() {
+        $map = Map::generateAndSaveReferences('testImage.svg', '1980-01-02', '1991-02-03');
+        $this->import->fetchAndStoreImage($map);
+
+        $this->assertEquals(1, Map::count());
+
+        /** @var Map $storedMap */
+        $storedMap = Map::one();
+        $territoriesWithPeriods = $storedMap->getTerritoriesWithPeriods();
+        $this->assertEquals(new \MongoDate(strtotime('1980-01-02')), $territoriesWithPeriods[0]->getPeriod()->getStart());
+        $this->assertEquals(new \MongoDate(strtotime('1991-02-03')), $territoriesWithPeriods[0]->getPeriod()->getEnd());
     }
 } 

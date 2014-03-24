@@ -2,6 +2,8 @@
 
 namespace geotime;
 
+use geotime\models\Map;
+use geotime\models\TerritoryWithPeriod;
 use Logger;
 
 Logger::configure(stream_resolve_include_path("logger.xml"));
@@ -48,7 +50,7 @@ class Util {
     /**
      * @param $imageMapUrl
      * @param $fileName
-     * @return mixed|null
+     * @return boolean
      */
     static function fetchImage($imageMapUrl, $fileName = null)
     {
@@ -60,10 +62,10 @@ class Util {
                         self::$log->info('Successfully stored SVG file '.$fileName);
                     }
                 }
-                return $svg;
+                return true;
             }
         }
-        return null;
+        return false;
     }
 }
 
