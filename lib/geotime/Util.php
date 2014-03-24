@@ -2,8 +2,6 @@
 
 namespace geotime;
 
-use geotime\models\Map;
-use geotime\models\TerritoryWithPeriod;
 use Logger;
 
 Logger::configure(stream_resolve_include_path("logger.xml"));

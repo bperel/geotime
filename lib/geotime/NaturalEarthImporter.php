@@ -2,8 +2,6 @@
 
 namespace geotime;
 
-use geotime\models\Criteria;
-use geotime\models\CriteriaGroup;
 use geotime\models\Period;
 use geotime\models\Territory;
 use geotime\models\TerritoryWithPeriod;
