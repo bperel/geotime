@@ -70,7 +70,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     /* Fixtures */
 
     private function setCommonsXMLFixture($fixtureFilename) {
-        $response = file_get_contents('test/geotime/_fixtures/xml/'.$fixtureFilename);
+        $response = new \SimpleXMLElement(file_get_contents('test/geotime/_fixtures/xml/'.$fixtureFilename));
 
         $this->mock->expects($this->any())
             ->method('getCommonsImageXMLInfo')
@@ -212,7 +212,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
     /* This test uses the live toolserver */
     public function testGetCommonsImageURL() {
-        $xmlInfo = new \SimpleXMLElement($this->import->getCommonsImageXMLInfo('Wiki-commons.png'));
+        $xmlInfo = $this->import->getCommonsImageXMLInfo('Wiki-commons.png');
         $fixtureXML = new \SimpleXMLElement(file_get_contents('test/geotime/_fixtures/xml/Wiki-commons.png.xml'));
         $this->assertEquals(trim($fixtureXML->file->urls->file), trim($xmlInfo->file->urls->file));
     }

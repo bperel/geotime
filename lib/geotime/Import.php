@@ -112,7 +112,7 @@ class Import {
 
     /**
      * Create Map object instances from a JSON-formatted SPARQL page
-     * @param $pageAsJson
+     * @param string $pageAsJson
      * @return Map[]
      */
     public function getMapsFromSparqlResults($pageAsJson)
@@ -132,14 +132,14 @@ class Import {
 
     /**
      * Get the images' Wikimedia Commons URLs
-     * @param $imageNames
+     * @param Map[] $maps
      * @return array An associative name=>URL array
      */
-    public function getCommonsURLs($imageNames) {
+    public function getCommonsURLs($maps) {
         $urls = array();
-        foreach($imageNames as $imageName) {
-            $imageMapUrl = $this->getCommonsImageURL($imageName);
-            $urls[$imageName] = $imageMapUrl;
+        foreach($maps as $map) {
+            $imageMapUrl = $this->getCommonsImageURL($map->getFileName());
+            $urls[$map->getFileName()] = $imageMapUrl;
         }
 
         return $urls;
@@ -147,11 +147,11 @@ class Import {
 
     /**
      * Get the Wikimedia Commons URL of an image
-     * @param $imageMapFullName
+     * @param string $imageMapFullName
      * @return string|null
      */
     function getCommonsImageURL($imageMapFullName) {
-        $xmlFormatedPage = new \SimpleXMLElement($this->getCommonsImageXMLInfo($imageMapFullName));
+        $xmlFormatedPage = $this->getCommonsImageXMLInfo($imageMapFullName);
         if (isset($xmlFormatedPage->error)) {
             $firstLevelChildren = (array) $xmlFormatedPage->children();
             self::$log->error($firstLevelChildren['error']);
@@ -164,12 +164,19 @@ class Import {
 
     /**
      * Get the informations about a Wikimedia Commons image
-     * @param $imageMapFullName
-     * @return string
+     * @param string $imageMapFullName
+     * @return \SimpleXMLElement
      */
     function getCommonsImageXMLInfo($imageMapFullName) {
         $url = "http://tools.wmflabs.org/magnus-toolserver/commonsapi.php";
-        return Util::curl_get_contents($url, "GET", array("image" => $imageMapFullName));
+        $contents = Util::curl_get_contents($url, "GET", array("image" => $imageMapFullName));
+        if ($contents === false) {
+            return null;
+        }
+        else {
+            self::$log->info('Successfully retrieved XML file for image '.$imageMapFullName);
+        }
+        return new \SimpleXMLElement($contents);
     }
 
     /**
