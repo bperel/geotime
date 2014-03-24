@@ -21,6 +21,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         Database::connect("geotime_test");
 
         $neImport = new NaturalEarthImporter();
+        $neImport->clean();
         $neImport->import('test/geotime/_data/countries.json');
     }
 

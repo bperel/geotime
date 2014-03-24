@@ -4,7 +4,7 @@ namespace geotime;
 
 use Logger;
 
-Logger::configure(stream_resolve_include_path("logger.xml"));
+Logger::configure("lib/geotime/logger.xml");
 
 class Util {
     public static $cache_dir_svg = "cache/svg/";

@@ -7,7 +7,7 @@ use geotime\models\Territory;
 use geotime\models\TerritoryWithPeriod;
 use Logger;
 
-Logger::configure(stream_resolve_include_path("logger.xml"));
+Logger::configure("lib/geotime/logger.xml");
 
 include_once('Util.php');
 

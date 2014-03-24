@@ -5,7 +5,7 @@ namespace geotime\models;
 use Purekid\Mongodm\Model;
 use Logger;
 
-Logger::configure(stream_resolve_include_path("logger.xml"));
+Logger::configure("lib/geotime/logger.xml");
 
 
 class Map extends Model {

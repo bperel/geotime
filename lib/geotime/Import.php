@@ -8,7 +8,7 @@ use geotime\models\Map;
 
 use Logger;
 
-Logger::configure(stream_resolve_include_path("logger.xml"));
+Logger::configure("lib/geotime/logger.xml");
 
 include_once('Util.php');
 
