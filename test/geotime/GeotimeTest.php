@@ -51,7 +51,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(1, $territoriesCountSvgData['total']);
 
         $territoriesCountNEData = $periodsAndTerritoriesCount[$neDataPeriod->__toString()];
-        $this->assertEquals(2, $territoriesCountNEData['located']);
-        $this->assertEquals(2, $territoriesCountNEData['total']);
+        $this->assertEquals(3, $territoriesCountNEData['located']);
+        $this->assertEquals(3, $territoriesCountNEData['total']);
     }
 } 

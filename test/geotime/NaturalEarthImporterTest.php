@@ -40,6 +40,24 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
         $this->neImport->clean();
     }
 
+    /* Util functions */
+
+    /**
+     * @param string $territoryName
+     * @return float
+     */
+    private function getCoordinatesCount($territoryName) {
+
+        /** @var TerritoryWithPeriod $territoryWithPeriod */
+        $territory = Territory::one(array('name'=>$territoryName));
+        $territoryWithPeriod = TerritoryWithPeriod::one(array('territory.$id'=>new \MongoId($territory->getId())));
+        $this->assertNotNull($territoryWithPeriod->getPeriod());
+        $this->assertNotNull($territoryWithPeriod->getTerritory());
+
+        $coordinates = $territoryWithPeriod->getTerritory()->getPolygon()->{'$geoWithin'}['$polygon'];
+        return (count($coordinates, COUNT_RECURSIVE) - 2*count($coordinates)) / 3;
+    }
+
     /* Tests */
 
     public function testClean() {
@@ -67,12 +85,9 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
 
         $nbCountriesImported = $this->neImport->import('test/geotime/_data/countries.json');
 
-        $this->assertEquals(2, $nbCountriesImported);
+        $this->assertEquals(3, $nbCountriesImported);
 
-        /** @var TerritoryWithPeriod $territoryWithPeriod */
-        $territoryWithPeriod = TerritoryWithPeriod::one();
-        $this->assertNotNull(1, $territoryWithPeriod->getPeriod());
-        $this->assertNotNull(2, $territoryWithPeriod->getTerritory());
-
+        $this->assertEquals(7, $this->getCoordinatesCount('Luxembourg'));
+        $this->assertEquals(12 + 37 + 16, $this->getCoordinatesCount('Japan')); // Japan is made up, in the map, of 3 islands => 12 + 37 + 16 coordinates.
     }
 } 

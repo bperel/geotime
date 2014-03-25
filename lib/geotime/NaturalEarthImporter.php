@@ -38,10 +38,16 @@ class NaturalEarthImporter {
             $countryName = $country->properties->sovereignt;
 
             if (!array_key_exists($countryName, $countriesAndCoordinates)) {
-                $countriesAndCoordinates[$countryName] = array();
+                if (isset($country->geometry->coordinates[0][0][0][0])) { // Japan, for instance, which posesses several separated lands
+                    $countriesAndCoordinates[$countryName] = $country->geometry->coordinates;
+                }
+                else {
+                    $countriesAndCoordinates[$countryName] = array($country->geometry->coordinates);
+                }
             }
-
-            $countriesAndCoordinates[$countryName] = array_merge($countriesAndCoordinates[$countryName], $country->geometry->coordinates[0]);
+            else {
+                $countriesAndCoordinates[$countryName] = array_merge($countriesAndCoordinates[$countryName], $country->geometry->coordinates);
+            }
         }
 
         foreach($countriesAndCoordinates as $countryName=>$coordinates) {
