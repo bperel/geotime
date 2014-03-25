@@ -51,11 +51,10 @@ class NaturalEarthImporter {
         }
 
         foreach($countriesAndCoordinates as $countryName=>$coordinates) {
-            $polygon = array('$geoWithin' => array('$polygon'=>$coordinates));
 
             $t = new Territory();
             $t->setName($countryName);
-            $t->setPolygon(json_decode(json_encode($polygon)));
+            $t->setPolygon($coordinates);
             $t->save();
 
             $tp = new TerritoryWithPeriod();

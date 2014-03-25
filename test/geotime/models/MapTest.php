@@ -2,6 +2,8 @@
 
 namespace geotime\Test;
 
+use geotime\models\Period;
+use geotime\models\TerritoryWithPeriod;
 use PHPUnit_Framework_TestCase;
 use geotime\models\Map;
 use geotime\Database;
@@ -17,9 +19,13 @@ class MapTest extends \PHPUnit_Framework_TestCase {
         Map::$log->info(__CLASS__." tests ended");
     }
 
-
     protected function setUp() {
         Database::connect("geotime_test");
+    }
+
+    protected function tearDown() {
+        TerritoryWithPeriod::drop();
+        Period::drop();
     }
 
     public function testGenerateMap() {
