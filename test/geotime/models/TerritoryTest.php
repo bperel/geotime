@@ -4,6 +4,8 @@ namespace geotime\Test;
 
 use PHPUnit_Framework_TestCase;
 use geotime\models\Territory;
+
+use geotime\Geotime;
 use geotime\NaturalEarthImporter;
 use geotime\Database;
 
@@ -21,15 +23,15 @@ class TerritoryTest extends \PHPUnit_Framework_TestCase {
     protected function setUp() {
         Database::connect("geotime_test");
 
+        Geotime::clean();
+
         $neImport = new NaturalEarthImporter();
-        $neImport->clean();
         $neImport->import('test/geotime/_data/countries.json');
     }
 
 
     protected function tearDown() {
-        $neImport = new NaturalEarthImporter();
-        $neImport->clean();
+        Geotime::clean();
     }
 
     public function testGetTerritoryArea() {

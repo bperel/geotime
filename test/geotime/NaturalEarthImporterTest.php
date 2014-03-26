@@ -8,6 +8,7 @@ use geotime\models\Period;
 use geotime\NaturalEarthImporter;
 use PHPUnit_Framework_TestCase;
 
+use geotime\Geotime;
 use geotime\Import;
 use geotime\Database;
 
@@ -29,12 +30,14 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
     protected function setUp() {
         Database::connect("geotime_test");
 
+        Geotime::clean();
+
         $this->neImport = new NaturalEarthImporter();
         $this->neImport->import('test/geotime/_data/countries.json');
     }
 
     protected function tearDown() {
-        $this->neImport->clean();
+        Geotime::clean();
     }
 
     /* Util functions */
@@ -54,40 +57,10 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
 
     /* Tests */
 
-    public function testCleanAfterJsonImport() {
-
-        $this->neImport->clean();
-        $this->assertEquals(0, Period::count());
-        $this->assertEquals(0, Territory::count());
-        $this->assertEquals(0, TerritoryWithPeriod::count());
-    }
-
-    public function testCleanAfterManualImport() {
-
-        $this->neImport->clean();
-
-        $p = new Period();
-        $p->save();
-        $this->assertEquals(1, Period::count());
-
-        $t = new Territory();
-        $t->save();
-        $this->assertEquals(1, Territory::count());
-
-        $tp = new TerritoryWithPeriod();
-        $tp->save();
-        $this->assertEquals(1, TerritoryWithPeriod::count());
-
-        $this->neImport->clean();
-
-        $this->assertEquals(0, Period::count());
-        $this->assertEquals(0, Territory::count());
-        $this->assertEquals(0, TerritoryWithPeriod::count());
-    }
-
     public function testImportFromJson() {
 
-        $this->neImport->clean();
+        Geotime::clean();
+
         $nbCountriesImported = $this->neImport->import('test/geotime/_data/countries.json');
         $this->assertEquals(3, $nbCountriesImported);
     }

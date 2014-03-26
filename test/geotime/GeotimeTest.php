@@ -4,6 +4,8 @@ namespace geotime\Test;
 use geotime\Database;
 use geotime\models\Map;
 use geotime\models\Period;
+use geotime\models\Territory;
+use geotime\models\TerritoryWithPeriod;
 
 use geotime\Geotime;
 use geotime\NaturalEarthImporter;
@@ -22,20 +24,17 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
     protected function setUp() {
         Database::connect("geotime_test");
 
+        Geotime::clean();
+
         $neImport = new NaturalEarthImporter();
-        $neImport->clean();
         $neImport->import('test/geotime/_data/countries.json');
 
-        Map::drop();
         $map = Map::generateAndSaveReferences('testImage.svg', '1980-01-02', '1991-02-03');
         $map->save();
     }
 
     protected function tearDown() {
-        $neImport = new NaturalEarthImporter();
-        $neImport->clean();
-
-        Map::drop();
+        Geotime::clean();
     }
 
     public function testGetPeriodsAndTerritoriesCount() {
@@ -53,5 +52,37 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $territoriesCountNEData = $periodsAndTerritoriesCount[$neDataPeriod->__toString()];
         $this->assertEquals(3, $territoriesCountNEData['located']);
         $this->assertEquals(3, $territoriesCountNEData['total']);
+    }
+
+    public function testClean() {
+
+        Geotime::clean();
+        $this->assertEquals(0, Period::count());
+        $this->assertEquals(0, Territory::count());
+        $this->assertEquals(0, TerritoryWithPeriod::count());
+        $this->assertEquals(0, Map::count());
+    }
+
+    public function testCleanAfterManualImport() {
+
+        Geotime::clean();
+
+        $p = new Period();
+        $p->save();
+        $this->assertEquals(1, Period::count());
+
+        $t = new Territory();
+        $t->save();
+        $this->assertEquals(1, Territory::count());
+
+        $tp = new TerritoryWithPeriod();
+        $tp->save();
+        $this->assertEquals(1, TerritoryWithPeriod::count());
+
+        Geotime::clean();
+
+        $this->assertEquals(0, Period::count());
+        $this->assertEquals(0, Territory::count());
+        $this->assertEquals(0, TerritoryWithPeriod::count());
     }
 } 

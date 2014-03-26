@@ -2,8 +2,9 @@
 
 namespace geotime\admin;
 
-use geotime\Import;
 use geotime\Database;
+use geotime\Geotime;
+use geotime\Import;
 use geotime\NaturalEarthImporter;
 use Logger;
 
@@ -14,8 +15,9 @@ Database::connect();
 Logger::configure(stream_resolve_include_path("lib/geotime/logger.xml"));
 $log = Logger::getLogger("main");
 
+Geotime::clean();
+
 $naturalEarthImporter = new NaturalEarthImporter();
-$naturalEarthImporter->clean();
 $nbImportedCountries = $naturalEarthImporter->import('data/external/ne_110m_admin_0_countries.json');
 
 if (is_int($nbImportedCountries)) {

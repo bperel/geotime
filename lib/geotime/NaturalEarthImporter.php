@@ -65,12 +65,6 @@ class NaturalEarthImporter {
 
         return count($countriesAndCoordinates);
     }
-
-    function clean() {
-        TerritoryWithPeriod::drop();
-        Territory::drop();
-        Period::drop();
-    }
 }
 
 NaturalEarthImporter::$log = Logger::getLogger("main");

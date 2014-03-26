@@ -3,7 +3,9 @@
 namespace geotime;
 
 use geotime\models\Period;
+use geotime\models\Territory;
 use geotime\models\TerritoryWithPeriod;
+use geotime\models\Map;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
@@ -44,6 +46,13 @@ class Geotime {
         foreach($periodsAndTerritoriesCount as $periodStr=>$territoryCount) {
             self::$log->info($periodStr.' : '.$territoryCount['total'].' territories referenced, '.$territoryCount['located'].' of them located');
         }
+    }
+
+    static function clean() {
+        Map::drop();
+        TerritoryWithPeriod::drop();
+        Territory::drop();
+        Period::drop();
     }
 }
 
