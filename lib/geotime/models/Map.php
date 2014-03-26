@@ -16,6 +16,7 @@ class Map extends Model {
 
     protected static $attrs = array(
         'fileName' => array('type' => 'string'),
+        'uploadDate' => array('type' => 'date'),
         'territoriesWithPeriods' => array('model' => 'geotime\models\TerritoryWithPeriod', 'type' => 'references')
     );
 
@@ -31,6 +32,20 @@ class Map extends Model {
      */
     public function setFileName($fileName) {
         $this->__setter('fileName', $fileName);
+    }
+
+    /**
+     * @return \MongoDate
+     */
+    public function getUploadDate() {
+        return $this->__getter('uploadDate');
+    }
+
+    /**
+     * @param \MongoDate $uploadDate
+     */
+    public function setUploadDate($uploadDate) {
+        $this->__setter('uploadDate', $uploadDate);
     }
 
     /**

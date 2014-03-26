@@ -29,6 +29,9 @@ class Import {
 
     function execute() {
 
+        $importStartTime = time();
+        self::$log->info('Starting SVG and JSON importation.');
+
         self::initCriteriaGroups();
 
         /** @var CriteriaGroup $criteriaGroup */
@@ -42,13 +45,18 @@ class Import {
             if ($cached_criteria_group->count() === 0 || !file_exists($fileName)) {
 
                 $maps = $this->getMapsFromCriteriaGroup($criteriaGroup, $fileName);
-                $svgUrls = $this->getCommonsURLs($maps);
+                $svgInfos = $this->getCommonsInfos($maps);
 
-                foreach ($svgUrls as $imageMapFullName => $imageMapUrl) {
-                    $this->fetchAndStoreImage($maps[$imageMapFullName], $imageMapUrl);
+                foreach ($svgInfos as $imageMapFullName => $imageMapUrlAndUploadDate) {
+                    $imageMapUrl = $imageMapUrlAndUploadDate['url'];
+                    $imageMapUploadDate = $imageMapUrlAndUploadDate['uploadDate'];
+                    $this->fetchAndStoreImage($maps[$imageMapFullName], $imageMapUploadDate, $imageMapUrl);
                 }
             }
         }
+
+        $importEndTime = time();
+        self::$log->info('SVG and JSON importation done in '.($importEndTime-$importStartTime).'s.');
     }
 
     function getSparqlQueryResults($criteriaGroup) {
@@ -118,7 +126,7 @@ class Import {
 
     /**
      * Create Map object instances from a JSON-formatted SPARQL page
-     * @param string $pageAsJson
+     * @param object $pageAsJson
      * @return Map[]
      */
     public function getMapsFromSparqlResults($pageAsJson)
@@ -128,8 +136,14 @@ class Import {
             $imageMapFullName = Util::cleanupImageName($result->imageMap->value);
 
             if (strtolower(Util::getImageExtension($imageMapFullName)) === ".svg") {
-                $map = Map::generateAndSaveReferences($imageMapFullName, $result->date1->value, $result->date2->value);
-                $maps[$imageMapFullName]=$map;
+                $existingMap = Map::one(array('fileName'=>$imageMapFullName));
+                if (is_null($existingMap)) {
+                    $map = Map::generateAndSaveReferences($imageMapFullName, $result->date1->value, $result->date2->value);
+                    $maps[$imageMapFullName]=$map;
+                }
+                else {
+                    $maps[$imageMapFullName]=$existingMap;
+                }
             }
         }
 
@@ -137,26 +151,26 @@ class Import {
     }
 
     /**
-     * Get the images' Wikimedia Commons URLs
+     * Get the images' Wikimedia Commons URLs and upload dates
      * @param Map[] $maps
-     * @return array An associative name=>URL array
+     * @return array An associative array in the form 'name'=>['url'=>url, 'uploadDate'=>uploadDate]
      */
-    public function getCommonsURLs($maps) {
-        $urls = array();
+    public function getCommonsInfos($maps) {
+        $imageInfos = array();
         foreach($maps as $map) {
-            $imageMapUrl = $this->getCommonsImageURL($map->getFileName());
-            $urls[$map->getFileName()] = $imageMapUrl;
+            $fileName = $map->getFileName();
+            $imageInfos[$fileName] = $this->getCommonsImageInfos($fileName);
         }
 
-        return $urls;
+        return $imageInfos;
     }
 
     /**
      * Get the Wikimedia Commons URL of an image
      * @param string $imageMapFullName
-     * @return string|null
+     * @return array|null
      */
-    function getCommonsImageURL($imageMapFullName) {
+    function getCommonsImageInfos($imageMapFullName) {
         $xmlFormatedPage = $this->getCommonsImageXMLInfo($imageMapFullName);
         if (isset($xmlFormatedPage->error)) {
             $firstLevelChildren = (array) $xmlFormatedPage->children();
@@ -164,7 +178,10 @@ class Import {
             return null;
         }
         else {
-            return $xmlFormatedPage->file->urls->file;
+            return array(
+                'url'=>trim($xmlFormatedPage->file->urls->file),
+                'uploadDate'=>new \MongoDate(strtotime($xmlFormatedPage->file->upload_date))
+            );
         }
     }
 
@@ -187,12 +204,28 @@ class Import {
 
     /**
      * @param Map $map
-     * @param string $imageMapUrl
+     * @param \MongoDate $imageMapUploadDate
+     * @param string $imageMapUrl NULL if we want the Map object to be stored but not the file to be retrieved
+     * @return boolean TRUE if a new map has been stored, FALSE if we keep the existing one
      */
-    function fetchAndStoreImage($map, $imageMapUrl=null) {
+    function fetchAndStoreImage($map, $imageMapUploadDate, $imageMapUrl = null) {
+        // Check if map exists in DB
+        // If the retrieved image upload date is the same as the stored map, we keep the map in DB
+        if (!is_null($map->getId())) {
+            if ($map->getUploadDate()->sec === $imageMapUploadDate->sec)
+            {
+                self::$log->info('SVG file is already in cache : '.$map->getFileName());
+                return false;
+            }
+            else {
+                self::$log->info('SVG file is outdated and will be retrieved again : '.$map->getFileName());
+            }
+        }
         if (is_null($imageMapUrl) || Util::fetchImage($imageMapUrl, $map->getFileName())) {
+            $map->setUploadDate($imageMapUploadDate);
             $map->save();
         }
+        return true;
     }
 }
 

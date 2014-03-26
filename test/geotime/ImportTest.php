@@ -113,6 +113,21 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         return CriteriaGroup::one();
     }
 
+    /**
+     * @param string $fileName
+     * @param \MongoDate $uploadDate
+     * @return Map
+     */
+    private function generateAndSaveSampleMap($fileName, $uploadDate) {
+
+        $map = new Map();
+        $map->setFileName($fileName);
+        $map->setUploadDate($uploadDate);
+        $map->save();
+
+        return Map::one();
+    }
+
     /* Tests */
 
     public function testImportFromJson() {
@@ -203,10 +218,10 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->setCommonsXMLFixture('nonexistent.png.xml');
 
         ob_start();
-        $imageURL = $this->mock->getCommonsImageURL('nonexistent.png');
+        $imageInfos = $this->mock->getCommonsImageInfos('nonexistent.png');
         $echoOutput = ob_get_clean();
 
-        $this->assertNull($imageURL);
+        $this->assertNull($imageInfos);
         $this->assertStringStartsWith('ERROR - ', $echoOutput);
     }
     public function testGetImageURL()
@@ -214,10 +229,11 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->setCommonsXMLFixture('Wiki-commons.png.xml');
 
         ob_start();
-        $imageURL = $this->mock->getCommonsImageURL('Wiki-commons.png');
+        $imageInfos = $this->mock->getCommonsImageInfos('Wiki-commons.png');
         $echoOutput = ob_get_clean();
 
-        $this->assertNotEmpty($imageURL);
+        $this->assertEquals('http://upload.wikimedia.org/wikipedia/commons/7/79/Wiki-commons.png', $imageInfos['url']);
+        $this->assertEquals(strtotime('2006-10-02T01:19:24Z'), $imageInfos['uploadDate']->sec);
         $this->assertEmpty($echoOutput);
     }
 
@@ -228,10 +244,11 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(trim($fixtureXML->file->urls->file), trim($xmlInfo->file->urls->file));
     }
 
-    public function testFetchAndStoreImage() {
+    public function testFetchAndStoreImageNewMap() {
         $map = Map::generateAndSaveReferences('testImage.svg', '1980-01-02', '1991-02-03');
-        $this->import->fetchAndStoreImage($map);
+        $hasCreatedMap = $this->import->fetchAndStoreImage($map, new \MongoDate(strtotime('2013-07-25T17:33:40Z')));
 
+        $this->assertTrue($hasCreatedMap);
         $this->assertEquals(1, Map::count());
 
         /** @var Map $storedMap */
@@ -239,5 +256,28 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $territoriesWithPeriods = $storedMap->getTerritoriesWithPeriods();
         $this->assertEquals(new \MongoDate(strtotime('1980-01-02')), $territoriesWithPeriods[0]->getPeriod()->getStart());
         $this->assertEquals(new \MongoDate(strtotime('1991-02-03')), $territoriesWithPeriods[0]->getPeriod()->getEnd());
+    }
+
+    public function testFetchAndStoreImageExistingMap() {
+        $uploadDate = new \MongoDate(strtotime('2013-01-02T03:04:05Z'));
+
+        $map = $this->generateAndSaveSampleMap('testImage.svg', $uploadDate);
+
+        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $uploadDate);
+
+        $this->assertFalse($hasCreatedMap);
+        $this->assertEquals(1, Map::count());
+    }
+
+    public function testFetchAndStoreImageOutdatedMap() {
+        $storedMapUploadDate = new \MongoDate(strtotime('2012-01-02T03:04:05Z'));
+        $uploadDate = new \MongoDate(strtotime('2013-01-02T03:04:05Z'));
+
+        $map = $this->generateAndSaveSampleMap('testImage.svg', $storedMapUploadDate);
+
+        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $uploadDate);
+
+        $this->assertTrue($hasCreatedMap);
+        $this->assertEquals(1, Map::count());
     }
 } 

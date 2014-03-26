@@ -48,8 +48,10 @@ class Geotime {
         }
     }
 
-    static function clean() {
-        Map::drop();
+    static function clean($keepMaps=false) {
+        if (!$keepMaps) {
+            Map::drop();
+        }
         TerritoryWithPeriod::drop();
         Territory::drop();
         Period::drop();

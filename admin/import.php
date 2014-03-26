@@ -15,7 +15,7 @@ Database::connect();
 Logger::configure(stream_resolve_include_path("lib/geotime/logger.xml"));
 $log = Logger::getLogger("main");
 
-Geotime::clean();
+Geotime::clean(true);
 
 $naturalEarthImporter = new NaturalEarthImporter();
 $nbImportedCountries = $naturalEarthImporter->import('data/external/ne_110m_admin_0_countries.json');
