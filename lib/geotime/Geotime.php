@@ -37,7 +37,7 @@ class Geotime {
     }
 
     /**
-     * @ return void
+     * @return void
      */
     static function showStatus() {
         $periodsAndTerritoriesCount = self::getPeriodsAndTerritoriesCount();

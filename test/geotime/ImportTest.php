@@ -192,6 +192,22 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->assertStringStartsWith('ERROR - ', $echoOutput);
     }
 
+    public function testGetMapsFromCriteriaGroupExistingMap() {
+        CriteriaGroup::drop();
+        $criteriaGroup = $this->generateSampleCriteriaGroup();
+
+        $this->setSparqlJsonFixture('Former Empires.json');
+        $this->setFetchSvgUrlsFixture();
+
+        $this->generateAndSaveSampleMap('German Empire 1914.svg', new \MongoDate());
+
+        $maps = $this->mock->getMapsFromCriteriaGroup($criteriaGroup);
+        $this->assertEquals(1, count($maps));
+
+        $firstMap = $maps[key($maps)];
+        $this->assertNotNull($firstMap->getId());
+    }
+
     public function testGetMapsFromCriteriaGroup() {
         CriteriaGroup::drop();
         $criteriaGroup = $this->generateSampleCriteriaGroup();
@@ -203,6 +219,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(1, count($maps));
 
         $firstMap = $maps[key($maps)];
+        $this->assertNull($firstMap->getId());
         $this->assertEquals('German Empire 1914.svg', $firstMap->getFileName());
         $this->assertEquals(1, count($firstMap->getTerritoriesWithPeriods()));
 
