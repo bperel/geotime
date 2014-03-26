@@ -170,7 +170,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
                 "DESC(?date1)"
             )
         );
-        $this->assertJson($this->f->getSparqlQueryResults($criteriaGroup));
+        $this->assertJson($this->import->getSparqlQueryResults($criteriaGroup));
     }
     */
 
@@ -230,6 +230,18 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(new \MongoDate(strtotime('1918-11-18')), $territoriesWithPeriods[0]->getPeriod()->getEnd());
     }
 
+    public function testGetInaccessibleImageURL()
+    {
+        $this->setCommonsXMLFixture('inaccessible.png.xml');
+
+        ob_start();
+        $imageInfos = $this->mock->getCommonsImageInfos('inaccessible.png');
+        $echoOutput = ob_get_clean();
+
+        $this->assertNull($imageInfos);
+        $this->assertStringStartsWith('ERROR - ', $echoOutput);
+    }
+
     public function testGetNonexistantImageURL()
     {
         $this->setCommonsXMLFixture('nonexistent.png.xml');
@@ -239,9 +251,10 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $echoOutput = ob_get_clean();
 
         $this->assertNull($imageInfos);
-        $this->assertStringStartsWith('ERROR - ', $echoOutput);
+        $this->assertStringStartsWith('WARN - ', $echoOutput);
     }
-    public function testGetImageURL()
+
+    public function testGetImageInfo()
     {
         $this->setCommonsXMLFixture('Wiki-commons.png.xml');
 
@@ -255,10 +268,25 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     /* This test uses the live toolserver */
-    public function testGetCommonsImageURL() {
+    public function testGetCommonsImageInfos() {
         $xmlInfo = $this->import->getCommonsImageXMLInfo('Wiki-commons.png');
         $fixtureXML = new \SimpleXMLElement(file_get_contents('test/geotime/_fixtures/xml/Wiki-commons.png.xml'));
         $this->assertEquals(trim($fixtureXML->file->urls->file), trim($xmlInfo->file->urls->file));
+    }
+
+    public function testGetMultipleImageInfo()
+    {
+        $fileName = 'Wiki-commons.png.xml';
+        $map = new Map();
+        $map->setFileName($fileName);
+
+        $this->setCommonsXMLFixture($fileName);
+
+        $infos = $this->mock->getCommonsInfos(array($map));
+
+        $this->assertInternalType('array', $infos);
+        $this->assertArrayHasKey($fileName, $infos);
+        $this->assertInternalType('array', $infos[$fileName]);
     }
 
     public function testFetchAndStoreImageNewMap() {

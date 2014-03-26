@@ -48,9 +48,11 @@ class Import {
                 $svgInfos = $this->getCommonsInfos($maps);
 
                 foreach ($svgInfos as $imageMapFullName => $imageMapUrlAndUploadDate) {
-                    $imageMapUrl = $imageMapUrlAndUploadDate['url'];
-                    $imageMapUploadDate = $imageMapUrlAndUploadDate['uploadDate'];
-                    $this->fetchAndStoreImage($maps[$imageMapFullName], $imageMapUploadDate, $imageMapUrl);
+                    if (!is_null($imageMapUrlAndUploadDate)) {
+                        $imageMapUrl = $imageMapUrlAndUploadDate['url'];
+                        $imageMapUploadDate = $imageMapUrlAndUploadDate['uploadDate'];
+                        $this->fetchAndStoreImage($maps[$imageMapFullName], $imageMapUploadDate, $imageMapUrl);
+                    }
                 }
             }
         }
@@ -174,7 +176,13 @@ class Import {
         $xmlFormatedPage = $this->getCommonsImageXMLInfo($imageMapFullName);
         if (isset($xmlFormatedPage->error)) {
             $firstLevelChildren = (array) $xmlFormatedPage->children();
-            self::$log->error($firstLevelChildren['error']);
+            $error = $firstLevelChildren['error'];
+            if (strpos($error, 'File does not exist') !== false) {
+                self::$log->warn($error);
+            }
+            else {
+                self::$log->error($error);
+            }
             return null;
         }
         else {
