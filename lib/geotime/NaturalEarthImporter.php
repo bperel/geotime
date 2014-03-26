@@ -2,6 +2,7 @@
 
 namespace geotime;
 
+use geotime\models\Map;
 use geotime\models\Period;
 use geotime\models\Territory;
 use geotime\models\TerritoryWithPeriod;
@@ -23,6 +24,16 @@ class NaturalEarthImporter {
      * @return int
      */
     function import($fileName) {
+
+        /** @var Map $naturalDataMap */
+        $naturalDataMap = Map::one(array('fileName'=>$fileName));
+        if (!is_null($naturalDataMap)) {
+            $nbImportedCountries = count($naturalDataMap->getTerritoriesWithPeriods());
+            self::$log->info('The Natural Earth data has already been imported');
+            self::$log->info($nbImportedCountries.' country positions from Natural Earth data are stored');
+
+            return $nbImportedCountries;
+        }
 
         $p = new Period();
         $p->setStart(new \MongoDate(strtotime(self::$dataDate)));
@@ -50,6 +61,7 @@ class NaturalEarthImporter {
             }
         }
 
+        $territoriesWithPeriods = array();
         foreach($countriesAndCoordinates as $countryName=>$coordinates) {
 
             $t = new Territory();
@@ -61,9 +73,22 @@ class NaturalEarthImporter {
             $tp->setPeriod($p);
             $tp->setTerritory($t);
             $tp->save();
+
+            $territoriesWithPeriods[] = $tp;
         }
 
-        return count($countriesAndCoordinates);
+        $map = new Map();
+        $map->setFileName($fileName);
+        $map->setTerritoriesWithPeriods($territoriesWithPeriods);
+        $map->save();
+
+        $nbImportedCountries = count($countriesAndCoordinates);
+
+        if (is_int($nbImportedCountries)) {
+            self::$log->info($nbImportedCountries.' country positions have been imported from Natural Earth data');
+        }
+
+        return $nbImportedCountries;
     }
 }
 

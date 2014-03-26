@@ -48,10 +48,16 @@ class Import {
                 $svgInfos = $this->getCommonsInfos($maps);
 
                 foreach ($svgInfos as $imageMapFullName => $imageMapUrlAndUploadDate) {
-                    if (!is_null($imageMapUrlAndUploadDate)) {
+                    $currentMap = $maps[$imageMapFullName];
+
+                    // The map image couldn't be retrieved => the Map object that we started to fill and its references are deleted
+                    if (is_null($imageMapUrlAndUploadDate)) {
+                        $currentMap->deleteReferences();
+                    }
+                    else {
                         $imageMapUrl = $imageMapUrlAndUploadDate['url'];
                         $imageMapUploadDate = $imageMapUrlAndUploadDate['uploadDate'];
-                        $this->fetchAndStoreImage($maps[$imageMapFullName], $imageMapUploadDate, $imageMapUrl);
+                        $this->fetchAndStoreImage($currentMap, $imageMapUploadDate, $imageMapUrl);
                     }
                 }
             }
@@ -109,21 +115,27 @@ class Import {
      */
     public function getMapsFromCriteriaGroup(CriteriaGroup $criteriaGroup, $fileName = null)
     {
-        $page = $this->getSparqlQueryResults($criteriaGroup);
-        if (!is_null($fileName)) {
-            if (false !== file_put_contents($fileName, $page)) {
-                self::$log->info('Successfully stored JSON file '.$fileName);
-            }
-        }
-        $pageAsJson = json_decode($page);
 
-        if (is_null($pageAsJson)) {
-            self::$log->error('Cannot decode JSON file '.$fileName);
-            return array();
+        if (!is_null($fileName) && file_exists($fileName)) {
+            self::$log->info('Using cached JSON file '.$fileName);
+            $pageAsJson = json_decode(file_get_contents($fileName));
         }
         else {
-            return $this->getMapsFromSparqlResults($pageAsJson);
+            $page = $this->getSparqlQueryResults($criteriaGroup);
+            $pageAsJson = json_decode($page);
+
+            if (is_null($pageAsJson)) {
+                self::$log->error('Cannot decode JSON file '.$fileName);
+                return array();
+            }
+
+            if (!is_null($fileName)) {
+                if (false !== file_put_contents($fileName, $page)) {
+                    self::$log->info('Successfully stored JSON file '.$fileName);
+                }
+            }
         }
+        return $this->getMapsFromSparqlResults($pageAsJson);
     }
 
     /**
@@ -141,11 +153,11 @@ class Import {
                 $existingMap = Map::one(array('fileName'=>$imageMapFullName));
                 if (is_null($existingMap)) {
                     $map = Map::generateAndSaveReferences($imageMapFullName, $result->date1->value, $result->date2->value);
-                    $maps[$imageMapFullName]=$map;
                 }
                 else {
-                    $maps[$imageMapFullName]=$existingMap;
+                    $map = $existingMap;
                 }
+                $maps[$imageMapFullName]=$map;
             }
         }
 

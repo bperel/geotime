@@ -11,8 +11,9 @@ use geotime\models\CriteriaGroup;
 use geotime\models\Criteria;
 use geotime\models\Map;
 
-use geotime\Import;
 use geotime\Database;
+use geotime\Import;
+use geotime\Util;
 
 class ImportTest extends \PHPUnit_Framework_TestCase {
 
@@ -28,10 +29,17 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
     static function setUpBeforeClass() {
         Import::$log->info(__CLASS__." tests started");
+
+        Util::$cache_dir_svg = "test/geotime/cache/svg/";
+        Util::$cache_dir_json = "test/geotime/cache/json/";
+
+        copy("test/geotime/_fixtures/json/Former Empires.json", Util::$cache_dir_json."Former Empires.json");
     }
 
     static function tearDownAfterClass() {
         Import::$log->info(__CLASS__." tests ended");
+
+        unlink(Util::$cache_dir_json."Former Empires.json");
     }
 
     protected function setUp() {
@@ -181,7 +189,13 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals("SELECT * WHERE { ?e field1 value1 . ?e field2 value2} ORDER BY field1", $query);
     }
 
-    public function testGetMapsFromInvalidJson() {
+    public function testGetMapsFromCriteriaGroupCachedJson() {
+        $maps = $this->mock->getMapsFromCriteriaGroup(new CriteriaGroup(), Util::$cache_dir_json."Former Empires.json");
+
+        $this->assertEquals(1, count($maps));
+    }
+
+    public function testGetMapsFromCriteriaGroupInvalidJson() {
         $this->setSparqlJsonFixture('invalid.json');
 
         ob_start();

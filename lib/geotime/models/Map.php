@@ -70,6 +70,8 @@ class Map extends Model {
      */
     public static function generateAndSaveReferences($imageMapFullName, $startDateStr, $endDateStr)
     {
+        self::$log->debug('Generating references for map '.$imageMapFullName);
+
         $period = Period::generate($startDateStr, $endDateStr);
         $period->save();
 
@@ -82,6 +84,15 @@ class Map extends Model {
         $map->setTerritoriesWithPeriods(array($territoryWithPeriod));
 
         return $map;
+    }
+
+    public function deleteReferences() {
+        self::$log->debug('Deleting references of map '.$this->getFileName());
+
+        foreach($this->getTerritoriesWithPeriods() as $territoryWithPeriod) {
+            $territoryWithPeriod->getPeriod()->delete();
+            $territoryWithPeriod->delete();
+        }
     }
 }
 
