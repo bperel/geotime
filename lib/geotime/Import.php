@@ -107,7 +107,13 @@ class Import {
         }
         $pageAsJson = json_decode($page);
 
-        return $this->getMapsFromSparqlResults($pageAsJson);
+        if (is_null($pageAsJson)) {
+            self::$log->error('Cannot decode JSON file '.$fileName);
+            return array();
+        }
+        else {
+            return $this->getMapsFromSparqlResults($pageAsJson);
+        }
     }
 
     /**

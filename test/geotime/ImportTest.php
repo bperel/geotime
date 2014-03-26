@@ -166,6 +166,17 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals("SELECT * WHERE { ?e field1 value1 . ?e field2 value2} ORDER BY field1", $query);
     }
 
+    public function testGetMapsFromInvalidJson() {
+        $this->setSparqlJsonFixture('invalid.json');
+
+        ob_start();
+        $maps = $this->mock->getMapsFromCriteriaGroup(new CriteriaGroup());
+        $echoOutput = ob_get_clean();
+
+        $this->assertEmpty($maps);
+        $this->assertStringStartsWith('ERROR - ', $echoOutput);
+    }
+
     public function testGetMapsFromCriteriaGroup() {
         CriteriaGroup::drop();
         $criteriaGroup = $this->generateSampleCriteriaGroup();
