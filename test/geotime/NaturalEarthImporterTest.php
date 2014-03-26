@@ -92,7 +92,7 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(3, $nbCountriesImported);
     }
 
-    public function testFullImportedCountry() {
+    public function testFullyImportedCountry() {
 
         /** @var Territory $luxembourg */
         $luxembourg = Territory::one(array('name'=>'Luxembourg'));
