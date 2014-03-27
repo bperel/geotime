@@ -36,6 +36,38 @@ class Geotime {
     }
 
     /**
+     * Get the land coverage stored for each period
+     *
+     * @return array An associative (Period string) => (coverage integer) array
+     */
+    static function getPeriodsAndCoverage() {
+
+        $periodsAndCoverage = Territory::aggregate(
+            array(
+                array(
+                    '$group' => array(
+                        '_id' => '$period',
+                        'areaSum' => array(
+                            '$sum' => '$area'
+                        )
+                    )
+                )
+            )
+        );
+
+        $formattedPeriodsAndCoverage = array();
+        foreach($periodsAndCoverage['result'] as $periodAndCoverage) {
+            /** @var Period $period */
+            $period = Period::one(array('_id'=>new \MongoId($periodAndCoverage['_id']['$id'])));
+
+            $formattedPeriodsAndCoverage[$period->__toString()] = $periodAndCoverage['areaSum'];
+        }
+
+        return $formattedPeriodsAndCoverage;
+
+    }
+
+    /**
      * @return void
      */
     static function showStatus() {

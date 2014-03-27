@@ -77,4 +77,14 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(0, Period::count());
         $this->assertEquals(0, Territory::count());
     }
+
+    public function testGetPeriodsAndCoverage() {
+        $periodsAndCoverage = Geotime::getPeriodsAndCoverage();
+        $this->assertEquals(0, $periodsAndCoverage['Period 1980 to 1991']);
+        $this->assertEquals(
+            405267 /* Japan */
+           +  2412 /* Luxembourg */
+           + 11578 /* French Southern and Antarctic Lands */,
+            $periodsAndCoverage['Period 2012 to 2012']);
+    }
 } 
