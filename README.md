@@ -73,7 +73,7 @@ $ htpasswd -c /path/to/my/web/directory/passwords admin
 ###Running tests
 
 ```bash
-./vendor/bin/phpunit
+$ ./vendor/bin/phpunit
 ```
 
 An HTML coverage report will be generated in the coverage/ folder.
