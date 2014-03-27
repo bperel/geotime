@@ -22,7 +22,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
     }
 
     protected function setUp() {
-        Database::connect("geotime_test");
+        Database::connect(Database::$testDbName);
 
         Geotime::clean();
 

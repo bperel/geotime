@@ -10,6 +10,9 @@ class Database {
     static $password;
     static $db;
 
+    static $dbName = 'geotime';
+    static $testDbName = 'geotime_test';
+
     static $connected = false;
 
     static function connect($dbName = null) {
@@ -17,7 +20,7 @@ class Database {
         Database::$username = $conf['username'];
         Database::$password = $conf['password'];
 
-        self::$db = is_null($dbName) ? 'geotime' : $dbName;
+        self::$db = is_null($dbName) ? Database::$dbName : $dbName;
 
         MongoDB::setConfigBlock('default', array(
             'connection' => array(

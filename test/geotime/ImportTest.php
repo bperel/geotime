@@ -53,7 +53,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
         $this->import = new Import();
 
-        Database::connect("geotime_test");
+        Database::connect(Database::$testDbName);
 
         Period::drop();
         Territory::drop();
