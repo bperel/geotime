@@ -3,7 +3,7 @@
 namespace geotime\Test;
 
 use geotime\models\Period;
-use geotime\models\TerritoryWithPeriod;
+use geotime\models\Territory;
 use PHPUnit_Framework_TestCase;
 use geotime\models\Map;
 use geotime\Database;
@@ -24,7 +24,7 @@ class MapTest extends \PHPUnit_Framework_TestCase {
     }
 
     protected function tearDown() {
-        TerritoryWithPeriod::drop();
+        Territory::drop();
         Period::drop();
     }
 
@@ -37,9 +37,9 @@ class MapTest extends \PHPUnit_Framework_TestCase {
         $this->assertNotNull($map);
         $this->assertEquals($imageFileName, $map->getFileName());
 
-        $territoriesWithPeriods = $map->getTerritoriesWithPeriods();
-        $this->assertInstanceOf('MongoDate', $territoriesWithPeriods[0]->getPeriod()->getStart());
-        $this->assertInstanceOf('MongoDate', $territoriesWithPeriods[0]->getPeriod()->getEnd());
+        $territories = $map->getTerritories();
+        $this->assertInstanceOf('MongoDate', $territories[0]->getPeriod()->getStart());
+        $this->assertInstanceOf('MongoDate', $territories[0]->getPeriod()->getEnd());
     }
 }
  

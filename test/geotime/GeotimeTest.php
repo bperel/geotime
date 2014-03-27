@@ -5,7 +5,6 @@ use geotime\Database;
 use geotime\models\Map;
 use geotime\models\Period;
 use geotime\models\Territory;
-use geotime\models\TerritoryWithPeriod;
 
 use geotime\Geotime;
 use geotime\NaturalEarthImporter;
@@ -59,7 +58,6 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         Geotime::clean();
         $this->assertEquals(0, Period::count());
         $this->assertEquals(0, Territory::count());
-        $this->assertEquals(0, TerritoryWithPeriod::count());
         $this->assertEquals(0, Map::count());
     }
 
@@ -75,14 +73,9 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $t->save();
         $this->assertEquals(1, Territory::count());
 
-        $tp = new TerritoryWithPeriod();
-        $tp->save();
-        $this->assertEquals(1, TerritoryWithPeriod::count());
-
         Geotime::clean();
 
         $this->assertEquals(0, Period::count());
         $this->assertEquals(0, Territory::count());
-        $this->assertEquals(0, TerritoryWithPeriod::count());
     }
 } 

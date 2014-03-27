@@ -17,7 +17,7 @@ class Map extends Model {
     protected static $attrs = array(
         'fileName' => array('type' => 'string'),
         'uploadDate' => array('type' => 'date'),
-        'territoriesWithPeriods' => array('model' => 'geotime\models\TerritoryWithPeriod', 'type' => 'references')
+        'territories' => array('model' => 'geotime\models\Territory', 'type' => 'references')
     );
 
     /**
@@ -49,17 +49,17 @@ class Map extends Model {
     }
 
     /**
-     * @return TerritoryWithPeriod[]
+     * @return Territory[]
      */
-    public function getTerritoriesWithPeriods() {
-        return $this->__getter('territoriesWithPeriods');
+    public function getTerritories() {
+        return $this->__getter('territories');
     }
 
     /**
-     * @param TerritoryWithPeriod[] $territoriesWithPeriods
+     * @param Territory[] $territories
      */
-    public function setTerritoriesWithPeriods($territoriesWithPeriods) {
-        $this->__setter('territoriesWithPeriods', $territoriesWithPeriods);
+    public function setTerritories($territories) {
+        $this->__setter('territories', $territories);
     }
 
     /**
@@ -75,13 +75,13 @@ class Map extends Model {
         $period = Period::generate($startDateStr, $endDateStr);
         $period->save();
 
-        $territoryWithPeriod = new TerritoryWithPeriod();
-        $territoryWithPeriod->setPeriod($period);
-        $territoryWithPeriod->save();
+        $territory = new Territory();
+        $territory->setPeriod($period);
+        $territory->save();
 
         $map = new Map();
         $map->setFileName($imageMapFullName);
-        $map->setTerritoriesWithPeriods(array($territoryWithPeriod));
+        $map->setTerritories(array($territory));
 
         return $map;
     }
@@ -89,9 +89,9 @@ class Map extends Model {
     public function deleteReferences() {
         self::$log->debug('Deleting references of map '.$this->getFileName());
 
-        foreach($this->getTerritoriesWithPeriods() as $territoryWithPeriod) {
-            $territoryWithPeriod->getPeriod()->delete();
-            $territoryWithPeriod->delete();
+        foreach($this->getTerritories() as $territory) {
+            $territory->getPeriod()->delete();
+            $territory->delete();
         }
     }
 }

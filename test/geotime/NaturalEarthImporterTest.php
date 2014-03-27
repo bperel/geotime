@@ -1,9 +1,7 @@
 <?php
 namespace geotime\Test;
 
-use geotime\models\TerritoryWithPeriod;
 use geotime\models\Territory;
-use geotime\models\Period;
 
 use geotime\NaturalEarthImporter;
 use PHPUnit_Framework_TestCase;
@@ -48,10 +46,7 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
      */
     private function getCoordinatesCount($territory) {
 
-        /** @var TerritoryWithPeriod $territoryWithPeriod */
-        $territoryWithPeriod = TerritoryWithPeriod::one(array('territory.$id'=>new \MongoId($territory->getId())));
-
-        $coordinates = $territoryWithPeriod->getTerritory()->getPolygon();
+        $coordinates = $territory->getPolygon();
         return (count($coordinates, COUNT_RECURSIVE) - 2*count($coordinates)) / 3;
     }
 
@@ -70,13 +65,9 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
         /** @var Territory $luxembourg */
         $luxembourg = Territory::one(array('name'=>'Luxembourg'));
 
-        /** @var TerritoryWithPeriod $territoryWithPeriod */
-        $territoryWithPeriod = TerritoryWithPeriod::one(array('territory.$id'=>new \MongoId($luxembourg->getId())));
-
-        $this->assertNotNull($territoryWithPeriod->getPeriod());
-        $this->assertNotNull($territoryWithPeriod->getTerritory());
-        $this->assertNotNull($territoryWithPeriod->getTerritory()->getArea());
-        $this->assertGreaterThan(0, $territoryWithPeriod->getTerritory()->getArea()); // The area should also exist (calculated in preSave method)
+        $this->assertNotNull($luxembourg->getPeriod());
+        $this->assertNotNull($luxembourg->getArea());
+        $this->assertGreaterThan(0, $luxembourg->getArea()); // The area should also exist (calculated in preSave method)
     }
 
     public function testCountImportedCountries() {

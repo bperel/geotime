@@ -4,7 +4,6 @@ namespace geotime;
 
 use geotime\models\Period;
 use geotime\models\Territory;
-use geotime\models\TerritoryWithPeriod;
 use geotime\models\Map;
 use Logger;
 
@@ -28,8 +27,8 @@ class Geotime {
         $periods = Period::find(array(), array('start'=>1, 'end'=>1));
 
         foreach($periods as $period) {
-            $territoriesCount = TerritoryWithPeriod::countTerritories($period);
-            $locatedTerritoriesCount = TerritoryWithPeriod::countTerritories($period, true);
+            $territoriesCount = Territory::countForPeriod($period);
+            $locatedTerritoriesCount = Territory::countForPeriod($period, true);
             $periodsAndTerritoriesCount[$period->__toString()] = array('total'=>$territoriesCount, 'located'=>$locatedTerritoriesCount);
         }
 
@@ -52,7 +51,6 @@ class Geotime {
         if (!$keepMaps) {
             Map::drop();
         }
-        TerritoryWithPeriod::drop();
         Territory::drop();
         Period::drop();
     }

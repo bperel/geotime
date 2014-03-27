@@ -16,7 +16,8 @@ class Territory extends Model {
     protected static $attrs = array(
         'name' => array('type' => 'string'),
         'polygon' => array('type' => 'object'),
-        'area' => array('type' => 'int')
+        'area' => array('type' => 'int'),
+        'period' => array('model' => 'geotime\models\Period', 'type' => 'reference')
     );
 
     static $equatorialRadius = 6378137;
@@ -76,6 +77,22 @@ class Territory extends Model {
         $this->__setter('area', $area);
     }
 
+    /**
+     * @return Period
+     */
+    public function getPeriod()
+    {
+        return $this->__getter('period');
+    }
+
+    /**
+     * @param Period $period
+     */
+    public function setPeriod($period)
+    {
+        $this->__setter('period', $period);
+    }
+
     protected function __preSave()
     {
         $this->setArea($this->calculateArea());
@@ -130,6 +147,20 @@ class Territory extends Model {
 
     private static function rad($measure) {
         return $measure * pi() / 180;
+    }
+
+    /**
+     * @param Period $period
+     * @param bool $locatedTerritoriesOnly
+     * @return int
+     */
+    public static function countForPeriod($period, $locatedTerritoriesOnly=false) {
+        $parameters = array('period.$id'=>new \MongoId($period->getId()));
+        if ($locatedTerritoriesOnly) {
+            $parameters['polygon'] = array('$exists'=>true);
+        }
+
+        return Territory::count($parameters);
     }
 }
 

@@ -5,7 +5,6 @@ namespace geotime;
 use geotime\models\Map;
 use geotime\models\Period;
 use geotime\models\Territory;
-use geotime\models\TerritoryWithPeriod;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
@@ -28,7 +27,7 @@ class NaturalEarthImporter {
         /** @var Map $naturalDataMap */
         $naturalDataMap = Map::one(array('fileName'=>$fileName));
         if (!is_null($naturalDataMap)) {
-            $nbImportedCountries = count($naturalDataMap->getTerritoriesWithPeriods());
+            $nbImportedCountries = count($naturalDataMap->getTerritories());
             self::$log->info('The Natural Earth data has already been imported');
             self::$log->info($nbImportedCountries.' country positions from Natural Earth data are stored');
 
@@ -61,25 +60,21 @@ class NaturalEarthImporter {
             }
         }
 
-        $territoriesWithPeriods = array();
+        $territories = array();
         foreach($countriesAndCoordinates as $countryName=>$coordinates) {
 
             $t = new Territory();
             $t->setName($countryName);
             $t->setPolygon($coordinates);
+            $t->setPeriod($p);
             $t->save();
 
-            $tp = new TerritoryWithPeriod();
-            $tp->setPeriod($p);
-            $tp->setTerritory($t);
-            $tp->save();
-
-            $territoriesWithPeriods[] = $tp;
+            $territories[] = $t;
         }
 
         $map = new Map();
         $map->setFileName($fileName);
-        $map->setTerritoriesWithPeriods($territoriesWithPeriods);
+        $map->setTerritories($territories);
         $map->save();
 
         $nbImportedCountries = count($countriesAndCoordinates);

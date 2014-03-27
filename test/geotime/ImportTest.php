@@ -4,7 +4,6 @@ namespace geotime\Test;
 use PHPUnit_Framework_TestCase;
 
 use geotime\models\Territory;
-use geotime\models\TerritoryWithPeriod;
 use geotime\models\Period;
 
 use geotime\models\CriteriaGroup;
@@ -57,7 +56,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
         Period::drop();
         Territory::drop();
-        TerritoryWithPeriod::drop();
         Map::drop();
 
         Criteria::drop();
@@ -70,7 +68,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         Criteria::drop();
 
         Map::drop();
-        TerritoryWithPeriod::drop();
         Period::drop();
         Territory::drop();
     }
@@ -235,13 +232,12 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $firstMap = $maps[key($maps)];
         $this->assertNull($firstMap->getId());
         $this->assertEquals('German Empire 1914.svg', $firstMap->getFileName());
-        $this->assertEquals(1, count($firstMap->getTerritoriesWithPeriods()));
+        $this->assertEquals(1, count($firstMap->getTerritories()));
 
-        $territoriesWithPeriods = $firstMap->getTerritoriesWithPeriods();
-        $this->assertNull($territoriesWithPeriods[0]->getTerritory());
-        $this->assertNotNull($territoriesWithPeriods[0]->getPeriod());
-        $this->assertEquals(new \MongoDate(strtotime('1871-01-18')), $territoriesWithPeriods[0]->getPeriod()->getStart());
-        $this->assertEquals(new \MongoDate(strtotime('1918-11-18')), $territoriesWithPeriods[0]->getPeriod()->getEnd());
+        $territories = $firstMap->getTerritories();
+        $this->assertNotNull($territories[0]->getPeriod());
+        $this->assertEquals(new \MongoDate(strtotime('1871-01-18')), $territories[0]->getPeriod()->getStart());
+        $this->assertEquals(new \MongoDate(strtotime('1918-11-18')), $territories[0]->getPeriod()->getEnd());
     }
 
     public function testGetInaccessibleImageURL()
@@ -312,9 +308,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
         /** @var Map $storedMap */
         $storedMap = Map::one();
-        $territoriesWithPeriods = $storedMap->getTerritoriesWithPeriods();
-        $this->assertEquals(new \MongoDate(strtotime('1980-01-02')), $territoriesWithPeriods[0]->getPeriod()->getStart());
-        $this->assertEquals(new \MongoDate(strtotime('1991-02-03')), $territoriesWithPeriods[0]->getPeriod()->getEnd());
+        $territories = $storedMap->getTerritories();
+        $this->assertEquals(new \MongoDate(strtotime('1980-01-02')), $territories[0]->getPeriod()->getStart());
+        $this->assertEquals(new \MongoDate(strtotime('1991-02-03')), $territories[0]->getPeriod()->getEnd());
     }
 
     public function testFetchAndStoreImageExistingMap() {
