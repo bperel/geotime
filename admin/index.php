@@ -3,6 +3,7 @@ namespace geotime\admin;
 
 use geotime\Database;
 use geotime\Geotime;
+
 chdir("..");
 require_once("vendor/autoload.php");
 Database::connect();

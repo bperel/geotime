@@ -2,11 +2,10 @@
 namespace geotime\Test;
 
 use geotime\Database;
+use geotime\Geotime;
 use geotime\models\Map;
 use geotime\models\Period;
 use geotime\models\Territory;
-
-use geotime\Geotime;
 use geotime\NaturalEarthImporter;
 use PHPUnit_Framework_TestCase;
 

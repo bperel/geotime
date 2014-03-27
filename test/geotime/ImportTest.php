@@ -1,18 +1,14 @@
 <?php
 namespace geotime\Test;
 
-use PHPUnit_Framework_TestCase;
-
-use geotime\models\Territory;
-use geotime\models\Period;
-
-use geotime\models\CriteriaGroup;
-use geotime\models\Criteria;
-use geotime\models\Map;
-
 use geotime\Database;
+use geotime\Geotime;
 use geotime\Import;
+use geotime\models\Criteria;
+use geotime\models\CriteriaGroup;
+use geotime\models\Map;
 use geotime\Util;
+use PHPUnit_Framework_TestCase;
 
 class ImportTest extends \PHPUnit_Framework_TestCase {
 
@@ -54,9 +50,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
         Database::connect(Database::$testDbName);
 
-        Period::drop();
-        Territory::drop();
-        Map::drop();
+        Geotime::clean();
 
         Criteria::drop();
         CriteriaGroup::drop();
@@ -67,9 +61,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         CriteriaGroup::drop();
         Criteria::drop();
 
-        Map::drop();
-        Period::drop();
-        Territory::drop();
+        Geotime::clean();
     }
 
     /* Fixtures */

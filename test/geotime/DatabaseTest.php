@@ -2,8 +2,8 @@
 
 namespace geotime\Test;
 
-use PHPUnit_Framework_TestCase;
 use geotime\Database;
+use PHPUnit_Framework_TestCase;
 
 
 class DatabaseTest extends \PHPUnit_Framework_TestCase {

@@ -2,8 +2,8 @@
 
 namespace geotime\models;
 
-use Purekid\Mongodm\Model;
 use Logger;
+use Purekid\Mongodm\Model;
 
 Logger::configure("lib/geotime/logger.xml");
 

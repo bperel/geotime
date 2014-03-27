@@ -2,9 +2,9 @@
 
 namespace geotime;
 
+use geotime\models\Map;
 use geotime\models\Period;
 use geotime\models\Territory;
-use geotime\models\Map;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");

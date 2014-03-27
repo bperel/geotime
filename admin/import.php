@@ -3,7 +3,6 @@
 namespace geotime\admin;
 
 use geotime\Database;
-use geotime\Geotime;
 use geotime\Import;
 use geotime\NaturalEarthImporter;
 

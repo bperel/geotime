@@ -2,8 +2,8 @@
 
 namespace geotime\models;
 
-use Purekid\Mongodm\Model;
 use geotime\Database;
+use Purekid\Mongodm\Model;
 
 
 class CriteriaGroup extends Model {

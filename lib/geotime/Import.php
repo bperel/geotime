@@ -5,7 +5,6 @@ namespace geotime;
 use geotime\models\Criteria;
 use geotime\models\CriteriaGroup;
 use geotime\models\Map;
-
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");

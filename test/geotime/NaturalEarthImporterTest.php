@@ -1,14 +1,12 @@
 <?php
 namespace geotime\Test;
 
-use geotime\models\Territory;
-
-use geotime\NaturalEarthImporter;
-use PHPUnit_Framework_TestCase;
-
+use geotime\Database;
 use geotime\Geotime;
 use geotime\Import;
-use geotime\Database;
+use geotime\models\Territory;
+use geotime\NaturalEarthImporter;
+use PHPUnit_Framework_TestCase;
 
 class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
 
