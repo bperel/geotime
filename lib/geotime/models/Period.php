@@ -2,11 +2,16 @@
 
 namespace geotime\models;
 
+use Logger;
 use Purekid\Mongodm\Model;
 
+Logger::configure("lib/geotime/logger.xml");
 
 class Period extends Model {
     static $collection = "periods";
+
+    /** @var \Logger */
+    static $log;
 
     protected static $attrs = array(
         'start' => array('type' => 'date'),
@@ -48,6 +53,13 @@ class Period extends Model {
     /**
      * @return string
      */
+    public function __toStringShort() {
+        return date('Y', $this->getStart()->sec).'-'.date('Y', $this->getEnd()->sec);
+    }
+
+    /**
+     * @return string
+     */
     public function __toString() {
         return 'Period '.date('Y', $this->getStart()->sec).' to '.date('Y', $this->getEnd()->sec);
     }
@@ -61,4 +73,6 @@ class Period extends Model {
     }
 
 
-} 
+}
+
+Period::$log = Logger::getLogger("main");

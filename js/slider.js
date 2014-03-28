@@ -1,10 +1,13 @@
 var margin = {top: 10, right: 50, bottom: 10, left: 50},
 	sliderWidth = 100 - margin.left - margin.right,
-	mapHeight = 500 - margin.bottom - margin.top;
+	mapHeight = sliderHeight = 500 - margin.bottom - margin.top,
+
+	minYear = 0;
+	maxYear = 2012;
 
 var y = d3.scale.linear()
-	.domain([2012, 0])
-	.range([0, mapHeight])
+	.domain([maxYear, minYear])
+	.range([0, sliderHeight])
 	.clamp(true);
 
 var brush = d3.svg.brush()
@@ -13,8 +16,8 @@ var brush = d3.svg.brush()
 	.on("brush", brushed);
 
 var sliderSvg = d3.select("body").append("svg")
-	.attr("width", sliderWidth + margin.left + margin.right)
-	.attr("height", mapHeight + margin.top + margin.bottom)
+	.attr("width",  sliderWidth  + margin.left + margin.right)
+	.attr("height", sliderHeight + margin.top  + margin.bottom)
 	.attr("id", "sliderContainer")
 	.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -48,8 +51,36 @@ var handle = slider.append("circle")
 	.attr("r", 9);
 
 slider
-	.call(brush.extent([2012, 2012]))
+	.call(brush.extent([maxYear, maxYear]))
 	.call(brush.event);
+
+var periodRegex = /([0-9]{4})\-([0-9]{4})/;
+var optimalCoverage;
+var colorInterpolator = d3.scale.linear()
+	.domain([0,1])
+	.interpolate(d3.interpolateRgb)
+	.range(["#ff0000", "#008000"]);
+
+d3.json("gateway.php?getCoverage", function(error, coverageInfo) {
+
+	optimalCoverage = coverageInfo.optimalCoverage;
+
+	slider.selectAll("rect.period")
+		.data(coverageInfo.periodsAndCoverage)
+		.enter()
+			.append("rect")
+			.classed("period", true)
+			.attr("x", -4)
+			.attr("y", function(d) {
+				var endDate = d.period.match(periodRegex)[1];
+				return sliderHeight*(1 - endDate / (maxYear - minYear));
+			})
+			.attr("width", 8)
+			.attr("height", 1)
+			.attr("fill", function(d) {
+				return colorInterpolator(d.coverage / optimalCoverage);
+			});
+});
 
 function brushed() {
 	var value = brush.extent()[0];

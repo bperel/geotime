@@ -17,6 +17,11 @@ class Geotime {
     static $log;
 
     /**
+     * @var int Natural Earth data coverage
+     */
+    static $optimalCoverage = 145389748;
+
+    /**
      * @return array
      */
     static function getPeriodsAndTerritoriesCount() {
@@ -40,7 +45,7 @@ class Geotime {
      *
      * @return array An associative (Period string) => (coverage integer) array
      */
-    static function getPeriodsAndCoverage() {
+    static function getCoverageInfo() {
 
         $periodsAndCoverage = Territory::aggregate(
             array(
@@ -60,10 +65,15 @@ class Geotime {
             /** @var Period $period */
             $period = Period::one(array('_id'=>new \MongoId($periodAndCoverage['_id']['$id'])));
 
-            $formattedPeriodsAndCoverage[$period->__toString()] = $periodAndCoverage['areaSum'];
+            $coverage = new \stdClass();
+            $coverage->period = $period->__toStringShort();
+            $coverage->coverage = $periodAndCoverage['areaSum'];
+
+            $formattedPeriodsAndCoverage[] = $coverage;
+
         }
 
-        return $formattedPeriodsAndCoverage;
+        return array('periodsAndCoverage' => $formattedPeriodsAndCoverage, 'optimalCoverage' => self::$optimalCoverage);
 
     }
 
