@@ -45,8 +45,8 @@ switched to db geotime
         ],
         "_id" : ObjectId("5333ff533102c9b9d51a62a3")
 }
-> use geotime
-switched to db geotime
+> use geotime_test
+switched to db geotime_test
 > db.addUser({user: "mydbusername", pwd: "mydbpassword", "roles": ["readWrite", "dbAdmin"]})
 {
         "user" : "mydbusername",
@@ -65,7 +65,7 @@ password=mydbpassword
 ```
 and specify its path in [lib/geotime/Database.php](lib/geotime/Database.php) : these credentials will be used for the DB connection.
 
-* Set up the admin section credentials : the [admin/.htaccess](admin/.htaccess) file references the .htpasswd file containing the admin credentials. Generate the latter : 
+* Set up the admin section credentials : the [admin/.htaccess](admin/.htaccess) file references the .htpasswd file containing the admin credentials. Generate the latter using the following command : 
 ```bash
 $ htpasswd -c /path/to/my/web/directory/passwords admin
 ```
