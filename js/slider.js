@@ -1,5 +1,5 @@
 var margin = {top: 10, right: 50, bottom: 10, left: 50},
-	sliderWidth = 100 - margin.left - margin.right,
+	sliderWidth = 200 - margin.left - margin.right,
 	mapHeight = sliderHeight = 500 - margin.bottom - margin.top,
 
 	minYear = 0;
@@ -43,7 +43,8 @@ slider.selectAll(".extent,.resize")
 	.remove();
 
 slider.select(".background")
-	.attr("sliderWidth", sliderWidth);
+	.attr("width", sliderWidth)
+	.attr("height", sliderHeight);
 
 var handle = slider.append("circle")
 	.attr("class", "handle")
@@ -70,7 +71,7 @@ d3.json("gateway.php?getCoverage", function(error, coverageInfo) {
 		.enter()
 			.append("rect")
 			.classed("period", true)
-			.attr("x", -4)
+			.attr("x", 46)
 			.attr("y", function(d) {
 				var endDate = d.period.match(periodRegex)[1];
 				return sliderHeight*(1 - endDate / (maxYear - minYear));
@@ -86,7 +87,7 @@ function brushed() {
 	var value = brush.extent()[0];
 
 	if (d3.event.sourceEvent) { // not a programmatic event
-		value = y.invert(d3.mouse(this)[0]);
+		value = y.invert(d3.mouse(this)[1]);
 		brush.extent([value, value]);
 	}
 
