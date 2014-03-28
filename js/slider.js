@@ -73,11 +73,14 @@ d3.json("gateway.php?getCoverage", function(error, coverageInfo) {
 			.classed("period", true)
 			.attr("x", 46)
 			.attr("y", function(d) {
-				var endDate = d.period.match(periodRegex)[1];
-				return sliderHeight*(1 - endDate / (maxYear - minYear));
+				var endDate = d.period.match(periodRegex)[2];
+				return sliderHeight*(1 - (endDate / (maxYear - minYear)));
 			})
 			.attr("width", 8)
-			.attr("height", 1)
+			.attr("height", function(d) {
+				var dates = d.period.match(periodRegex);
+				return sliderHeight*(dates[2] - dates[1] + 1) / (maxYear - minYear);
+			})
 			.attr("fill", function(d) {
 				return colorInterpolator(d.coverage / optimalCoverage);
 			});
