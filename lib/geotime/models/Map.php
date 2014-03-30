@@ -93,6 +93,14 @@ class Map extends Model {
             $territory->delete();
         }
     }
+
+    /**
+     * @return object
+     */
+    public function __toSimplifiedObject() {
+        $arr = $this->toArray(array('_type','_id'), true, 5);
+        return json_decode(json_encode($arr));
+    }
 }
 
 Map::$log = Logger::getLogger("main");

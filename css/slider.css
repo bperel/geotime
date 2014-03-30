@@ -32,3 +32,7 @@
     pointer-events: none;
     opacity: 0.5;
 }
+
+.externalSvg {
+    opacity: 0.5;
+}

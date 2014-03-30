@@ -107,6 +107,10 @@ class Geotime {
 
     }
 
+    /**
+     * @param $year
+     * @return object|null
+     */
     public static function getIncompleteMapInfo($year)
     {
         $year=new \MongoDate(strtotime($year.'-01-01'));
@@ -117,7 +121,9 @@ class Geotime {
             'period.end' => array('$gte' => $year)));
 
         if (!is_null($matchingTerritory)) {
-            return Map::one(array('territories.$id' => new \MongoId($matchingTerritory->getId())));
+            /** @var Map $incompleteMap */
+            $incompleteMap = Map::one(array('territories.$id' => new \MongoId($matchingTerritory->getId())));
+            return $incompleteMap->__toSimplifiedObject();
         }
 
         return null;

@@ -93,8 +93,15 @@ function brushed() {
 		handle.attr("cy", y(value));
 
 		var year = parseInt(value);
-		d3.json("gateway.php?getSvg&year="+year, function(error, coverageInfo) {
-
+		d3.json("gateway.php?getSvg&year="+year, function(error, incompleteMapInfo) {
+			if (incompleteMapInfo) {
+				d3.xml("cache/svg/"+incompleteMapInfo.fileName, "image/svg+xml", function(xml) {
+					var svgMap = d3.select(svg.node().appendChild(document.importNode(xml.documentElement, true)));
+					svgMap
+						.classed("externalSvg", true)
+						.data([incompleteMapInfo]);
+				});
+			}
 		});
 	}
 }
