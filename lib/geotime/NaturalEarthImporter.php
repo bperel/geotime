@@ -37,8 +37,6 @@ class NaturalEarthImporter {
         $p = new Period();
         $p->setStart(new \MongoDate(strtotime(self::$dataDate)));
         $p->setEnd(new \MongoDate(strtotime(self::$dataDate)));
-        $p->save();
-
 
         $countriesAndCoordinates = array();
 
@@ -66,7 +64,6 @@ class NaturalEarthImporter {
             $t = new Territory();
             $t->setName($countryName);
             $t->setPolygon($coordinates);
-            $t->setPeriod($p);
             $t->save();
 
             $territories[] = $t;

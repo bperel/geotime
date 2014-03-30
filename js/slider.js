@@ -87,12 +87,14 @@ d3.json("gateway.php?getCoverage", function(error, coverageInfo) {
 });
 
 function brushed() {
-	var value = brush.extent()[0];
-
-	if (d3.event.sourceEvent) { // not a programmatic event
-		value = y.invert(d3.mouse(this)[1]);
+	var value = y.invert(d3.mouse(this)[1]);
+	if (!isNaN(value)) {
 		brush.extent([value, value]);
-	}
+		handle.attr("cy", y(value));
 
-	handle.attr("cy", y(value));
+		var year = parseInt(value);
+		d3.json("gateway.php?getSvg&year="+year, function(error, coverageInfo) {
+
+		});
+	}
 }

@@ -17,7 +17,7 @@ class Territory extends Model {
         'name' => array('type' => 'string'),
         'polygon' => array('type' => 'object'),
         'area' => array('type' => 'int'),
-        'period' => array('model' => 'geotime\models\Period', 'type' => 'reference')
+        'period' => array('model' => 'geotime\models\Period', 'type' => 'embed')
     );
 
     static $equatorialRadius = 6378137;

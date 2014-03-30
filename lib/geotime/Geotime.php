@@ -22,22 +22,46 @@ class Geotime {
     static $optimalCoverage = 145389748;
 
     /**
+     * @return void
+     */
+    static function showStatus() {
+        $periodsAndTerritoriesCount = self::getMapsAndLocalizedTerritoriesCount();
+
+        self::$log->info(count($periodsAndTerritoriesCount).' periods found');
+        foreach($periodsAndTerritoriesCount as $periodStr=>$territoryCount) {
+            self::$log->info($periodStr.' : '.$territoryCount.' territories located');
+        }
+    }
+
+    /**
      * @return array
      */
-    static function getPeriodsAndTerritoriesCount() {
+    static function getMapsAndLocalizedTerritoriesCount() {
 
-        $periodsAndTerritoriesCount = array();
+        $mapsAndTerritoriesCount = array();
 
-        /** @var Period[] $periods */
-        $periods = Period::find(array(), array('start'=>1, 'end'=>1));
+        /** @var Territory[] $mapsWithLocalizedTerritories */
+        $mapsWithLocalizedTerritories = Map::aggregate(
+            array(
+                array(
+                    '$unwind' => '$territories'
+                ),
+                array(
+                    '$group'  => array(
+                        '_id' => '$fileName',
+                        'territoriesCount' => array(
+                            '$sum' => 1
+                        )
+                    )
+                )
+            )
+        );
 
-        foreach($periods as $period) {
-            $territoriesCount = Territory::countForPeriod($period);
-            $locatedTerritoriesCount = Territory::countForPeriod($period, true);
-            $periodsAndTerritoriesCount[$period->__toString()] = array('total'=>$territoriesCount, 'located'=>$locatedTerritoriesCount);
+        foreach($mapsWithLocalizedTerritories['result'] as $map) {
+            $mapsAndTerritoriesCount[$map['_id']] = $map['territoriesCount'];
         }
 
-        return $periodsAndTerritoriesCount;
+        return $mapsAndTerritoriesCount;
     }
 
     /**
@@ -62,31 +86,41 @@ class Geotime {
 
         $formattedPeriodsAndCoverage = array();
         foreach($periodsAndCoverage['result'] as $periodAndCoverage) {
-            /** @var Period $period */
-            $period = Period::one(array('_id'=>new \MongoId($periodAndCoverage['_id']['$id'])));
+            $periodArray = $periodAndCoverage['_id'];
 
+            if (is_null($periodArray)) { // No period specified <=> Natural earth data
+                $period = new Period();
+                $period->setStart(new \MongoDate(strtotime(NaturalEarthImporter::$dataDate)));
+                $period->setEnd(new \MongoDate(strtotime(NaturalEarthImporter::$dataDate)));
+            }
+            else {
+                $period = new Period($periodArray);
+            }
             $coverage = new \stdClass();
             $coverage->period = $period->__toStringShort();
             $coverage->coverage = $periodAndCoverage['areaSum'];
 
             $formattedPeriodsAndCoverage[] = $coverage;
-
         }
 
         return array('periodsAndCoverage' => $formattedPeriodsAndCoverage, 'optimalCoverage' => self::$optimalCoverage);
 
     }
 
-    /**
-     * @return void
-     */
-    static function showStatus() {
-        $periodsAndTerritoriesCount = self::getPeriodsAndTerritoriesCount();
+    public static function getIncompleteMapInfo($year)
+    {
+        $year=new \MongoDate(strtotime($year.'-01-01'));
+        /** @var Territory $matchingTerritories */
+        $matchingTerritory = Territory::one(array(
+            'polygon' => array('$exists' => false),
+            'period.start' => array('$lte' => $year),
+            'period.end' => array('$gte' => $year)));
 
-        self::$log->info(count($periodsAndTerritoriesCount).' periods found');
-        foreach($periodsAndTerritoriesCount as $periodStr=>$territoryCount) {
-            self::$log->info($periodStr.' : '.$territoryCount['total'].' territories referenced, '.$territoryCount['located'].' of them located');
+        if (!is_null($matchingTerritory)) {
+            return Map::one(array('territories.$id' => new \MongoId($matchingTerritory->getId())));
         }
+
+        return null;
     }
 
     static function clean($keepMaps=false) {

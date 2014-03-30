@@ -73,7 +73,6 @@ class Map extends Model {
         self::$log->debug('Generating references for map '.$imageMapFullName);
 
         $period = Period::generate($startDateStr, $endDateStr);
-        $period->save();
 
         $territory = new Territory();
         $territory->setPeriod($period);

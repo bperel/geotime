@@ -11,6 +11,9 @@ use PHPUnit_Framework_TestCase;
 
 class GeotimeTest extends \PHPUnit_Framework_TestCase {
 
+    static $neMapName = 'test/geotime/_data/countries.json';
+    static $customMapName = 'testImage.svg';
+
     static function setUpBeforeClass() {
         Geotime::$log->info(__CLASS__." tests started");
     }
@@ -25,9 +28,9 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         Geotime::clean();
 
         $neImport = new NaturalEarthImporter();
-        $neImport->import('test/geotime/_data/countries.json');
+        $neImport->import(self::$neMapName);
 
-        $map = Map::generateAndSaveReferences('testImage.svg', '1980-01-02', '1991-02-03');
+        $map = Map::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
         $map->save();
     }
 
@@ -36,26 +39,21 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetPeriodsAndTerritoriesCount() {
-        $svgDataPeriod = new Period(array('start'=>'1980-01-02', 'end'=>'1991-02-03'));
-        $neDataPeriod = new Period(array('start'=>NaturalEarthImporter::$dataDate, 'end'=>NaturalEarthImporter::$dataDate));
 
-        $periodsAndTerritoriesCount = Geotime::getPeriodsAndTerritoriesCount();
+        $periodsAndTerritoriesCount = Geotime::getMapsAndLocalizedTerritoriesCount();
 
         $this->assertEquals(2, count(array_keys($periodsAndTerritoriesCount)));
 
-        $territoriesCountSvgData = $periodsAndTerritoriesCount[$svgDataPeriod->__toString()];
-        $this->assertEquals(0, $territoriesCountSvgData['located']);
-        $this->assertEquals(1, $territoriesCountSvgData['total']);
+        $territoriesCountSvgData = $periodsAndTerritoriesCount[self::$customMapName];
+        $this->assertEquals(1, $territoriesCountSvgData);
 
-        $territoriesCountNEData = $periodsAndTerritoriesCount[$neDataPeriod->__toString()];
-        $this->assertEquals(3, $territoriesCountNEData['located']);
-        $this->assertEquals(3, $territoriesCountNEData['total']);
+        $territoriesCountNEData = $periodsAndTerritoriesCount[self::$neMapName];
+        $this->assertEquals(3, $territoriesCountNEData);
     }
 
     public function testClean() {
 
         Geotime::clean();
-        $this->assertEquals(0, Period::count());
         $this->assertEquals(0, Territory::count());
         $this->assertEquals(0, Map::count());
     }
@@ -64,17 +62,12 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
 
         Geotime::clean();
 
-        $p = new Period();
-        $p->save();
-        $this->assertEquals(1, Period::count());
-
         $t = new Territory();
         $t->save();
         $this->assertEquals(1, Territory::count());
 
         Geotime::clean();
 
-        $this->assertEquals(0, Period::count());
         $this->assertEquals(0, Territory::count());
     }
 
@@ -95,5 +88,20 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
            +  2412 /* Luxembourg */
            + 11578 /* French Southern and Antarctic Lands */,
             $periodsAndCoverage[1]->coverage);
+    }
+
+    function testGetIncompleteMapInfo() {
+        /** @var Map $incompleteMap */
+        $incompleteMap = Geotime::getIncompleteMapInfo(1985);
+        $this->assertNotNull($incompleteMap);
+        $this->assertEquals('testImage.svg', $incompleteMap->getFileName());
+
+        /** @var Map $incompleteMap */
+        $incompleteMap = Geotime::getIncompleteMapInfo(1970);
+        $this->assertNull($incompleteMap);
+
+        /** @var Map $incompleteMap */
+        $incompleteMap = Geotime::getIncompleteMapInfo(2012);
+        $this->assertNull($incompleteMap);
     }
 } 

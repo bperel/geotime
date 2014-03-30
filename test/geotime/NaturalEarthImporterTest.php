@@ -63,7 +63,7 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
         /** @var Territory $luxembourg */
         $luxembourg = Territory::one(array('name'=>'Luxembourg'));
 
-        $this->assertNotNull($luxembourg->getPeriod());
+        $this->assertNull($luxembourg->getPeriod());
         $this->assertNotNull($luxembourg->getArea());
         $this->assertGreaterThan(0, $luxembourg->getArea()); // The area should also exist (calculated in preSave method)
     }
