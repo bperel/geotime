@@ -11,6 +11,21 @@ var svg = d3.select("body").append("svg")
 
 showMap("background", "data/external/ne_110m_coastline.json");
 
+var svgmap_drag = d3.behavior.drag()
+	.origin(function(d) { return d; })
+	.on("dragstart", dragstarted)
+	.on("drag", dragmove);
+
+function dragstarted(d) {
+	d3.event.sourceEvent.stopPropagation();
+}
+
+function dragmove(d, a, b) {
+	d.x = (d.x || 0) + d3.event.dx;
+	d.y = (d.y || 0) + d3.event.dy;
+	d3.select(this).attr("style", "margin-left: "+ d.x+"px; margin-top: "+ d.y+"px");
+}
+
 function showMap(id, filePath) {
 	d3.json(filePath, function(error, world) {
 		var path = d3.geo.path()

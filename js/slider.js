@@ -87,14 +87,14 @@ d3.json("gateway.php?getCoverage", function(error, coverageInfo) {
 });
 
 var svgMap;
-var isLoadingSvg;
+var isLoading;
 
 initSvgMap();
 
 function initSvgMap() {
 	svgMap = d3.select("foo");
 	svgMap.remove();
-	isLoadingSvg = false;
+	isLoading = false;
 }
 
 function brushed() {
@@ -104,22 +104,25 @@ function brushed() {
 		handle.attr("cy", y(value));
 
 		var year = parseInt(value);
-		if (!isLoadingSvg) {
+		if (!isLoading) {
+			isLoading = true;
 			d3.json("gateway.php?getSvg&year="+year, function(error, incompleteMapInfo) {
 				if (incompleteMapInfo) {
 					var mapFileName = incompleteMapInfo.fileName;
 					if (svgMap.empty() || svgMap.filter(function(d) {
 						return d.fileName === mapFileName;
 					}).empty()) {
-						isLoadingSvg = true;
 						initSvgMap();
 
 						d3.xml("cache/svg/"+mapFileName, "image/svg+xml", function(xml) {
-							svgMap = d3.select(svg.node().appendChild(document.importNode(xml.documentElement, true)))
+							svgMap = d3.select(d3.select("body").node().appendChild(document.importNode(xml.documentElement, true)))
 								.attr("name", mapFileName)
+								.attr("id", "externalSvg")
 								.classed("externalSvg", true)
-								.datum(incompleteMapInfo);
-							isLoadingSvg = false;
+								.datum(incompleteMapInfo)
+								.call(svgmap_drag);
+
+							isLoading = false;
 						});
 					}
 				}

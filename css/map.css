@@ -12,3 +12,8 @@
     stroke-dasharray: 2,2;
     stroke-linejoin: round;
 }
+
+#map, #externalSvg {
+    position: absolute;
+    left: 200px;
+}
