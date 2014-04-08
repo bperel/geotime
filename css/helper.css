@@ -1,0 +1,18 @@
+#mapHelper {
+    position: absolute;
+    background: white;
+    border: 1px solid black;
+    cursor: move;
+    font-size: 12px;
+    padding: 5px;
+    text-align: left;
+    left: 500px;
+}
+
+#mapHelper a.active {
+    font-weight: bold;
+}
+
+#mapHelperDone {
+    text-align: center;
+}

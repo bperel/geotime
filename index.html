@@ -15,6 +15,7 @@
         <link rel="stylesheet" href="css/geotime.css">
         <link rel="stylesheet" href="css/map.css">
         <link rel="stylesheet" href="css/slider.css">
+        <link rel="stylesheet" href="css/helper.css">
 
         <script src="js/vendor/modernizr-2.6.2.min.js"></script>
 
@@ -23,12 +24,32 @@
 
     </head>
     <body>
+
+        <div id="mapArea"></div>
+
+        <div id="mapHelper" class="hidden">
+            <ul>
+                <li>
+                    <a id="helperStep1" class="active" href="javascript:void(0)">
+                        Select with your mouse a country whose name is written on the map
+                    </a>
+                </li>
+                <li>
+                    <a id="helperStep2" href="javascript:void(0)">
+                        <label for="territoryName">Type in its name :</label>
+                    </a>
+                    <input type="text" id="territoryName" />
+                </li>
+            </ul>
+            <button id="mapHelperDone">Done !</button>
+        </div>
+
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
 
         <script src="js/plugins.js"></script>
         <script src="js/main.js"></script>
         <script src="js/slider.js"></script>
         <script src="js/map.js"></script>
-
+        <script src="js/helper.js"></script>
     </body>
 </html>

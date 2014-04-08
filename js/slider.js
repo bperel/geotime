@@ -52,8 +52,7 @@ var handle = slider.append("circle")
 	.attr("r", 9);
 
 slider
-	.call(brush.extent([maxYear, maxYear]))
-	.call(brush.event);
+	.call(brush.extent([maxYear, maxYear]));
 
 var periodRegex = /([0-9]{4})\-([0-9]{4})/;
 var optimalCoverage;
@@ -86,15 +85,18 @@ d3.json("gateway.php?getCoverage", function(error, coverageInfo) {
 			});
 });
 
-var svgMap;
+var svgMap = null;
 var isLoading;
 
 initSvgMap();
 
 function initSvgMap() {
-	svgMap = d3.select("foo");
-	svgMap.remove();
+	$('#externalSvg').remove();
+	if (svgMap) {
+		svgMap = null;
+	}
 	isLoading = false;
+	d3.select("#mapHelper").classed("hidden", true);
 }
 
 function brushed() {
@@ -109,18 +111,24 @@ function brushed() {
 			d3.json("gateway.php?getSvg&year="+year, function(error, incompleteMapInfo) {
 				if (incompleteMapInfo) {
 					var mapFileName = incompleteMapInfo.fileName;
-					if (svgMap.empty() || svgMap.filter(function(d) {
-						return d.fileName === mapFileName;
-					}).empty()) {
+					if (!svgMap || svgMap.datum().fileName !== mapFileName) {
 						initSvgMap();
 
 						d3.xml("cache/svg/"+mapFileName, "image/svg+xml", function(xml) {
-							svgMap = d3.select(d3.select("body").node().appendChild(document.importNode(xml.documentElement, true)))
+							svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
 								.attr("name", mapFileName)
 								.attr("id", "externalSvg")
 								.classed("externalSvg", true)
-								.datum(incompleteMapInfo)
+								.datum({fileName: incompleteMapInfo.fileName})
 								.call(svgmap_drag);
+
+							d3.select("#mapHelper").classed("hidden", false);
+
+							svgMap.selectAll("path").each(function() {
+								d3.select(this)
+									.on("mouseover", onTerritoryMouseover)
+									.on("mouseout", onTerritoryMouseout);
+							});
 
 							isLoading = false;
 						});
@@ -132,4 +140,6 @@ function brushed() {
 			});
 		}
 	}
+
+	return false;
 }

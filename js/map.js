@@ -4,7 +4,7 @@ var projection = d3.geo.equirectangular()
 	.scale((width + 1) / 2 / Math.PI)
 	.precision(.01);
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#mapArea").append("svg")
 	.attr("width", width)
 	.attr("height", mapHeight)
 	.attr("id", "map");
@@ -40,19 +40,13 @@ function showMap(id, filePath) {
 				return "subunit-boundary subunit " + d.properties.adm0_a3;
 			})
 			.attr("d", path);
-	/*
-		svg.append("path")
-			.datum(world.features)
-			.attr("d", path)
-			.attr("class", "subunit-boundary");
-
-		svg.selectAll(".subunit-label")
-			.data(world.features)
-			.enter().append("text")
-			.attr("class", function(d) { return "subunit-label " + d.properties.adm0_a3; })
-			.attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
-			.attr("dy", ".35em")
-			.text(function(d) { return d.properties.adm0_a3; });*/
-
 	});
+}
+
+function onTerritoryMouseover() {
+	d3.select(this).classed("hovered", true);
+}
+
+function onTerritoryMouseout() {
+	d3.select(this).classed("hovered", false);
 }

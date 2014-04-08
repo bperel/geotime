@@ -17,3 +17,7 @@
     position: absolute;
     left: 200px;
 }
+
+.hovered {
+    fill: red !important;
+}
