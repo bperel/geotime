@@ -13,6 +13,10 @@
     stroke-linejoin: round;
 }
 
+#bg{
+    fill: white;
+}
+
 #map, #externalSvg, #resizeHandle {
     position: absolute;
     left: 200px;
