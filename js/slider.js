@@ -119,16 +119,39 @@ function brushed() {
 								.attr("name", mapFileName)
 								.attr("id", "externalSvg")
 								.classed("externalSvg", true)
-								.datum({fileName: incompleteMapInfo.fileName})
 								.call(svgmap_drag);
 
-							d3.select("#mapHelper").classed("hidden", false);
+							svgMap
+								.datum({
+									fileName: incompleteMapInfo.fileName,
+									x: 0,
+									y: 0,
+									width:  parseInt(svgMap.attr("width")),
+									height: parseInt(svgMap.attr("height"))
+								})
+								.selectAll("path").each(function() {
+									d3.select(this)
+										.on("mouseover", onTerritoryMouseover)
+										.on("mouseout", onTerritoryMouseout);
+								});
 
-							svgMap.selectAll("path").each(function() {
-								d3.select(this)
-									.on("mouseover", onTerritoryMouseover)
-									.on("mouseout", onTerritoryMouseout);
-							});
+							dragmove.call(svgMap.node(), svgMap.datum());
+
+							d3.select("#mapArea")
+								.append("svg")
+									.attr("id", "resizeHandle")
+									.style("left", 200 + svgMap.datum().width - 16)
+									.style("top", svgMap.datum().height - 16)
+									.attr("width",  16)
+									.attr("height", 16)
+									.append("rect")
+										.attr("x", 0)
+										.attr("y", 0)
+										.attr("width", 16)
+										.attr("height", 16)
+										.call(svgmap_resize);
+
+							d3.select("#mapHelper").classed("hidden", false);
 
 							isLoading = false;
 						});

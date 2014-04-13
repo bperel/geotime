@@ -13,11 +13,16 @@
     stroke-linejoin: round;
 }
 
-#map, #externalSvg {
+#map, #externalSvg, #resizeHandle {
     position: absolute;
     left: 200px;
 }
 
 .hovered {
     fill: red !important;
+}
+
+#resizeHandle rect {
+    cursor: se-resize;
+    fill:gray;
 }

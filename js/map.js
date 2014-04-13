@@ -16,14 +16,20 @@ var svgmap_drag = d3.behavior.drag()
 	.on("dragstart", dragstarted)
 	.on("drag", dragmove);
 
-function dragstarted(d) {
+var svgmap_resize = d3.behavior.drag()
+	.on("drag", dragresizestarted)
+	.on("drag", dragresize);
+
+function dragstarted() {
 	d3.event.sourceEvent.stopPropagation();
 }
 
-function dragmove(d, a, b) {
-	d.x = (d.x || 0) + d3.event.dx;
-	d.y = (d.y || 0) + d3.event.dy;
-	d3.select(this).attr("style", "margin-left: "+ d.x+"px; margin-top: "+ d.y+"px");
+function dragmove(d) {
+	d.x += d3.event ? d3.event.dx : 0;
+	d.y += d3.event ? d3.event.dy : 0;
+	d3.selectAll("#externalSvg, #resizeHandle")
+		.style("margin-left", d.x+"px")
+		.style("margin-top",+ d.y+"px");
 }
 
 function showMap(id, filePath) {
@@ -49,4 +55,22 @@ function onTerritoryMouseover() {
 
 function onTerritoryMouseout() {
 	d3.select(this).classed("hovered", false);
+}
+
+function dragresizestarted() {
+	d3.event.sourceEvent.stopPropagation();
+}
+
+function dragresize(){
+	var foo = new Date();
+	svgMap.datum().width += d3.event.dx;
+	svgMap.datum().height += d3.event.dy;
+
+	d3.select("#externalSvg")
+		.style("width", svgMap.datum().width+"px")
+		.style("height", svgMap.datum().height+"px");
+
+	d3.select("#resizeHandle")
+		.style("left", (200 + svgMap.datum().width - 16)+"px")
+		.style("top",  (svgMap.datum().height - 16 )+"px");
 }
