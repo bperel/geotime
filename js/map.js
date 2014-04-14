@@ -1,7 +1,7 @@
 var width = 960;
 var mapHeight= 480;
 
-var projection = d3.geo.equirectangular()
+var projection = d3.geo.mercator()
 	.scale((width + 1) / 2 / Math.PI)
 	.precision(.01);
 
@@ -35,7 +35,7 @@ var svgmap_drag = d3.behavior.drag()
 	.on("drag", dragmove);
 
 var svgmap_resize = d3.behavior.drag()
-	.on("drag", dragresizestarted)
+	.on("dragstart", dragresizestarted)
 	.on("drag", dragresize);
 
 function dragstarted() {

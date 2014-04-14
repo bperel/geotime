@@ -144,12 +144,12 @@ function brushed() {
 									.style("top", svgMap.datum().height - 16)
 									.attr("width",  16)
 									.attr("height", 16)
+									.call(svgmap_resize)
 									.append("rect")
 										.attr("x", 0)
 										.attr("y", 0)
 										.attr("width", 16)
-										.attr("height", 16)
-										.call(svgmap_resize);
+										.attr("height", 16);
 
 							d3.select("#mapHelper").classed("hidden", false);
 
