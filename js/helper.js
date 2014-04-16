@@ -11,6 +11,20 @@ var dragHelper = d3.behavior.drag()
 			.style("margin-top",  d.y+"px");
 	});
 
+function activateNextStep() {
+	var newStep = ++d3.select('#mapHelper').datum().activeStep;
+	d3.selectAll('#mapHelper .helperStep').each(function(step) {
+		d3.select(this).classed('active', step === newStep);
+	});
+}
+
 d3.select('#mapHelper')
-	.datum({x: 0, y: 0})
+	.datum({x: 0, y: 0, activeStep: 0})
 	.call(dragHelper);
+
+d3.selectAll('#mapHelper .helperStep')
+	.data([1, 2, 3])
+	.select('.helperStepDone')
+	.on("click", activateNextStep);
+
+activateNextStep();

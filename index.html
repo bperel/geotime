@@ -29,19 +29,20 @@
 
         <div id="mapHelper" class="hidden">
             <ul>
-                <li>
-                    <a id="helperStep1" class="active" href="javascript:void(0)">
-                        Select with your mouse a country whose name is written on the map or known by you
-                    </a>
+                <li class="helperStep">
+                    Move the superimposed map so that it corresponds to the background borders.
+                    <button class="helperStepDone">Done !</button>
                 </li>
-                <li>
-                    <a id="helperStep2" href="javascript:void(0)">
-                        <label for="territoryName">Type in its name :</label>
-                    </a>
+                <li class="helperStep">
+                    Select with your mouse a country whose name is written on the map or known by you
+                    <button class="helperStepDone">Done !</button>
+                </li>
+                <li class="helperStep">
+                    <label for="territoryName">Type in its name :</label>
                     <input type="text" id="territoryName" />
+                    <button class="helperStepDone">Done !</button>
                 </li>
             </ul>
-            <button id="mapHelperDone">Done !</button>
         </div>
 
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.1.min.js"><\/script>')</script>

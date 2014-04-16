@@ -16,3 +16,20 @@
 #mapHelperDone {
     text-align: center;
 }
+
+.helperStep {
+    color: gray;
+}
+
+.helperStep button {
+    display: none;
+}
+
+.helperStep.active {
+    color: black;
+    font-weight: bold;
+}
+
+.helperStep.active button {
+    display: block;
+}
