@@ -31,5 +31,5 @@
 }
 
 .helperStep.active button {
-    display: block;
+    display: inline;
 }

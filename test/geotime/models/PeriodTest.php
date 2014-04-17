@@ -19,6 +19,18 @@ class PeriodTest extends \PHPUnit_Framework_TestCase {
         Period::$log->info(__CLASS__." tests ended");
     }
 
+    public function testGetStartYear() {
+        $p = new Period();
+        $p->setStart(new \MongoDate(strtotime(self::$startDate)));
+        $this->assertEquals(2012, $p->getStartYear());
+    }
+
+    public function testGetEndYear() {
+        $p = new Period();
+        $p->setEnd(new \MongoDate(strtotime(self::$endDate)));
+        $this->assertEquals(2014, $p->getEndYear());
+    }
+
     public function testToStringShort() {
 
         $p = new Period();

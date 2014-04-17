@@ -65,20 +65,20 @@ d3.json("gateway.php?getCoverage", function(error, coverageInfo) {
 
 	optimalCoverage = coverageInfo.optimalCoverage;
 
-	slider.selectAll("rect.period")
+	slider
+		.datum({selectedPeriod: null})
+		.selectAll("rect.period")
 		.data(coverageInfo.periodsAndCoverage)
 		.enter()
 			.append("rect")
 			.classed("period", true)
 			.attr("x", 46)
 			.attr("y", function(d) {
-				var endDate = d.period.match(periodRegex)[2];
-				return sliderHeight*(1 - (endDate / (maxYear - minYear)));
+				return sliderHeight*(1 - (d.end / (maxYear - minYear)));
 			})
 			.attr("width", 8)
 			.attr("height", function(d) {
-				var dates = d.period.match(periodRegex);
-				return sliderHeight*(dates[2] - dates[1] + 1) / (maxYear - minYear);
+				return sliderHeight*(d.end - d.start + 1) / (maxYear - minYear);
 			})
 			.attr("fill", function(d) {
 				return colorInterpolator(d.coverage / optimalCoverage);

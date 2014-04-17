@@ -26,6 +26,10 @@ class Period extends Model {
         return $this->__getter('start');
     }
 
+    public function getStartYear() {
+        return date('Y', $this->getStart()->sec);
+    }
+
     /**
      * @param \MongoDate $start
      */
@@ -42,6 +46,10 @@ class Period extends Model {
         return $this->__getter('end');
     }
 
+    public function getEndYear() {
+        return date('Y', $this->getEnd()->sec);
+    }
+
     /**
      * @param \MongoDate $end
      */
@@ -54,14 +62,14 @@ class Period extends Model {
      * @return string
      */
     public function __toStringShort() {
-        return date('Y', $this->getStart()->sec).'-'.date('Y', $this->getEnd()->sec);
+        return $this->getStartYear().'-'.$this->getEndYear();
     }
 
     /**
      * @return string
      */
     public function __toString() {
-        return 'Period '.date('Y', $this->getStart()->sec).' to '.date('Y', $this->getEnd()->sec);
+        return 'Period '.$this->getStartYear().' to '.$this->getEndYear();
     }
 
     public static function generate($startDateStr, $endDateStr) {

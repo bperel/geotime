@@ -97,7 +97,8 @@ class Geotime {
                 $period = new Period($periodArray);
             }
             $coverage = new \stdClass();
-            $coverage->period = $period->__toStringShort();
+            $coverage->start = $period->getStartYear();
+            $coverage->end = $period->getEndYear();
             $coverage->coverage = $periodAndCoverage['areaSum'];
 
             $formattedPeriodsAndCoverage[] = $coverage;

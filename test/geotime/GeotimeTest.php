@@ -79,10 +79,12 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
 
         $periodsAndCoverage = $coverageInfo['periodsAndCoverage'];
 
-        $this->assertEquals('1980-1991', $periodsAndCoverage[0]->period);
+        $this->assertEquals('1980', $periodsAndCoverage[0]->start);
+        $this->assertEquals('1991', $periodsAndCoverage[0]->end);
         $this->assertEquals(0, $periodsAndCoverage[0]->coverage);
 
-        $this->assertEquals('2012-2012', $periodsAndCoverage[1]->period);
+        $this->assertEquals('2012', $periodsAndCoverage[1]->start);
+        $this->assertEquals('2012', $periodsAndCoverage[1]->end);
         $this->assertEquals(
             405267 /* Japan */
            +  2412 /* Luxembourg */
