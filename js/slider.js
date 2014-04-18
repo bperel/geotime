@@ -91,7 +91,7 @@ var isLoading;
 initSvgMap();
 
 function initSvgMap() {
-	$('#externalSvg').remove();
+	$('#externalSvg, #resizeHandle').remove();
 	if (svgMap) {
 		svgMap = null;
 	}
@@ -128,7 +128,7 @@ function brushed() {
 									y: 0,
 									width:  parseInt(svgMap.attr("width")),
 									height: parseInt(svgMap.attr("height"))
-								})
+								});
 
 							dragmove.call(svgMap.node(), svgMap.datum());
 
@@ -146,7 +146,13 @@ function brushed() {
 										.attr("width", 16)
 										.attr("height", 16);
 
-							d3.select("#mapHelper").classed("hidden", false);
+							d3.select("#mapHelper")
+								.datum(function(d) {
+									d.activeStep = 0;
+									return d;
+								})
+								.classed("hidden", false);
+							activateHelperNextStep();
 
 							isLoading = false;
 						});
