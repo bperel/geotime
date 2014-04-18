@@ -54,7 +54,6 @@ var handle = slider.append("circle")
 slider
 	.call(brush.extent([maxYear, maxYear]));
 
-var periodRegex = /([0-9]{4})\-([0-9]{4})/;
 var optimalCoverage;
 var colorInterpolator = d3.scale.linear()
 	.domain([0,1])
@@ -66,7 +65,7 @@ d3.json("gateway.php?getCoverage", function(error, coverageInfo) {
 	optimalCoverage = coverageInfo.optimalCoverage;
 
 	slider
-		.datum({selectedPeriod: null})
+		.datum({ignoredMaps: []})
 		.selectAll("rect.period")
 		.data(coverageInfo.periodsAndCoverage)
 		.enter()
@@ -108,9 +107,9 @@ function brushed() {
 		var year = parseInt(value);
 		if (!isLoading) {
 			isLoading = true;
-			d3.json("gateway.php?getSvg&year="+year, function(error, incompleteMapInfo) {
-				if (incompleteMapInfo) {
-					var mapFileName = incompleteMapInfo.fileName;
+			d3.json("gateway.php?getSvg&year="+year+"&ignored="+slider.datum().ignoredMaps.join(",")+"", function(error, incompleteMapInfo) {
+				var mapFileName = incompleteMapInfo.fileName;
+				if (mapFileName) {
 					if (!svgMap || svgMap.datum().fileName !== mapFileName) {
 						initSvgMap();
 
@@ -123,6 +122,7 @@ function brushed() {
 
 							svgMap
 								.datum({
+									id: incompleteMapInfo.id,
 									fileName: incompleteMapInfo.fileName,
 									x: 0,
 									y: 0,

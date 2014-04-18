@@ -25,6 +25,14 @@ function activateHelperNextStep() {
 	}
 }
 
+function ignoreCurrentMap() {
+	slider.datum(function(d) {
+		d.ignoredMaps.push(svgMap.datum().id);
+		return d;
+	});
+	initSvgMap();
+}
+
 d3.select('#mapHelper')
 	.datum({x: 0, y: 0})
 	.call(dragHelper);
@@ -35,3 +43,7 @@ var helperSteps = d3.selectAll('#mapHelper .helperStep')
 helperSteps
 	.select('.helperStepDone')
 		.on("click", activateHelperNextStep);
+
+helperSteps
+	.select('.helperStepCancel')
+		.on("click", ignoreCurrentMap);

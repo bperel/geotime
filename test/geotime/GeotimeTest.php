@@ -92,18 +92,25 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
             $periodsAndCoverage[1]->coverage);
     }
 
-    function testGetIncompleteMapInfo() {
-        /** @var object $incompleteMap */
+    function testGetIncompleteMapInfoFound() {
+        /** @var object|null $incompleteMap */
         $incompleteMap = Geotime::getIncompleteMapInfo(1985);
         $this->assertNotNull($incompleteMap);
         $this->assertEquals('testImage.svg', $incompleteMap->fileName);
+
+        // Try again ignoring this map
+        /** @var object|null $incompleteMap */
+        $incompleteMapIgnored = Geotime::getIncompleteMapInfo(1985, array($incompleteMap->id));
+        $this->assertNull($incompleteMapIgnored);
 
         $startDate = new \MongoDate(strtotime('1980-01-02'));
         $this->assertEquals($startDate->sec, $incompleteMap->territories[0]->period->start->sec);
 
         $endDate = new \MongoDate(strtotime('1991-02-03'));
         $this->assertEquals($endDate->sec, $incompleteMap->territories[0]->period->end->sec);
+    }
 
+    function testGetIncompleteMapInfoNotFound() {
         /** @var object $incompleteMap */
         $incompleteMap = Geotime::getIncompleteMapInfo(1970);
         $this->assertNull($incompleteMap);

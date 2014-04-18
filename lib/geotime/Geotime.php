@@ -109,11 +109,17 @@ class Geotime {
     }
 
     /**
-     * @param $year
+     * @param $year string
+     * @param $ignored array
      * @return object|null
      */
-    public static function getIncompleteMapInfo($year)
+    public static function getIncompleteMapInfo($year, $ignored = array())
     {
+        $ignoredIds = array();
+        foreach($ignored as $ignoredIdString) {
+            $ignoredIds[] = new \MongoId($ignoredIdString);
+        }
+
         $year=new \MongoDate(strtotime($year.'-01-01'));
         /** @var Territory $matchingTerritories */
         $matchingTerritory = Territory::one(array(
@@ -123,8 +129,13 @@ class Geotime {
 
         if (!is_null($matchingTerritory)) {
             /** @var Map $incompleteMap */
-            $incompleteMap = Map::one(array('territories.$id' => new \MongoId($matchingTerritory->getId())));
-            return $incompleteMap->__toSimplifiedObject();
+            $incompleteMap = Map::one(array(
+                'territories.$id' => new \MongoId($matchingTerritory->getId()),
+                '_id' => array('$nin' => $ignoredIds)
+            ));
+            if (!is_null($incompleteMap)) {
+                return $incompleteMap->__toSimplifiedObject();
+            }
         }
 
         return null;

@@ -12,7 +12,11 @@ if (isset($_GET['getCoverage'])) {
 }
 elseif (isset($_GET['getSvg'])) {
     $year = $_GET['year'];
-    $object = Geotime::getIncompleteMapInfo($year);
+    $ignored = empty($_GET['ignored']) ? array() : explode(',', $_GET['ignored']);
+    $object = Geotime::getIncompleteMapInfo($year, $ignored);
+    if (is_null($object)) {
+        $object = new \stdClass();
+    }
 }
 else {
     $object = new \stdClass();
