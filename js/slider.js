@@ -129,11 +129,6 @@ function brushed() {
 									width:  parseInt(svgMap.attr("width")),
 									height: parseInt(svgMap.attr("height"))
 								})
-								.selectAll("path").each(function() {
-									d3.select(this)
-										.on("mouseover", onTerritoryMouseover)
-										.on("mouseout", onTerritoryMouseout);
-								});
 
 							dragmove.call(svgMap.node(), svgMap.datum());
 

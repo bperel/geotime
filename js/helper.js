@@ -16,6 +16,13 @@ function activateNextStep() {
 	d3.selectAll('#mapHelper .helperStep').classed("active", function(step) {
 		return step === newStep;
 	});
+
+	if (svgMap) {
+		svgMap
+			.selectAll("path")
+				.on("mouseover", newStep === 2 ? onTerritoryMouseover : null)
+				.on("mouseout",  newStep === 2 ? onTerritoryMouseout  : null);
+	}
 }
 
 d3.select('#mapHelper')
