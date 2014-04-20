@@ -1,6 +1,6 @@
 [{
 	"name": "Test criteria group",
-	"criteriaList": [{
+	"criteria": [{
 		"key":  "criteria_test_1",
 		"value":"criteria_test-value_1"
 	},

@@ -10,7 +10,8 @@ class CriteriaGroup extends Model {
     static $collection = 'criteriaGroups';
 
     protected static $attrs = array(
-        'criteriaList' => array('model' => 'geotime\models\Criteria', 'type' => 'embeds'),
+        'criteria' => array('model' => 'geotime\models\Criteria', 'type' => 'embeds'),
+        'optional' => array('model' => 'geotime\models\Criteria', 'type' => 'embeds'),
         'sort' => array('type' => 'array'),
         'name' => array('type' => 'string')
     );
@@ -18,15 +19,29 @@ class CriteriaGroup extends Model {
     /**
      * @return Criteria[]
      */
-    public function getCriteriaList() {
-        return $this->__getter('criteriaList');
+    public function getCriteria() {
+        return $this->__getter('criteria');
     }
 
     /**
-     * @param array $criteriaList
+     * @param Criteria[] $criteria
      */
-    public function setCriteriaList(array $criteriaList) {
-        $this->__setter('criteriaList', $criteriaList);
+    public function setCriteria(array $criteria) {
+        $this->__setter('criteria', $criteria);
+    }
+
+    /**
+     * @return Criteria[]
+     */
+    public function getOptional() {
+        return $this->__getter('optional');
+    }
+
+    /**
+     * @param Criteria[] $optional
+     */
+    public function setOptional(array $optional) {
+        $this->__setter('optional', $optional);
     }
 
     /**

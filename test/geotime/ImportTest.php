@@ -7,6 +7,7 @@ use geotime\Import;
 use geotime\models\Criteria;
 use geotime\models\CriteriaGroup;
 use geotime\models\Map;
+use geotime\models\Territory;
 use geotime\Util;
 use PHPUnit_Framework_TestCase;
 
@@ -40,10 +41,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     protected function setUp() {
         $this->mock = $this->getMockBuilder('geotime\Import')
             ->setMethods(array('getCommonsImageXMLInfo', 'getSparqlQueryResults', 'getCommonsURLs'))
-            ->getMock();
-
-        $this->mockUtil = $this->getMockBuilder('geotime\Util')
-            ->setMethods(array('fetchImage'))
             ->getMock();
 
         $this->import = new Import();
@@ -93,18 +90,24 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     /* Util methods for tests */
 
     /**
+     * @param string $name
      * @return CriteriaGroup
      */
-    private function generateSampleCriteriaGroup() {
+    private function generateSampleCriteriaGroup($name='Former empires') {
         $criteria1 = new Criteria(array('key'=>'field1', 'value'=>'value1'));
         $criteria1->save();
 
         $criteria2 = new Criteria(array('key'=>'field2', 'value'=>'value2'));
         $criteria2->save();
 
+        $optionalCriteria = new Criteria(array('key'=>'field3', 'value'=>'value3'));
+        $optionalCriteria->save();
+
         $c = new CriteriaGroup();
-        $c->setSort(array("field1"));
-        $c->setCriteriaList(array($criteria1, $criteria2));
+        $c->setName($name);
+        $c->setSort(array("field1", "field2"));
+        $c->setCriteria(array($criteria1, $criteria2));
+        $c->setOptional(array($optionalCriteria));
         $c->save();
 
         return CriteriaGroup::one();
@@ -175,13 +178,16 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         CriteriaGroup::drop();
         $query = $this->import->buildSparqlQuery($this->generateSampleCriteriaGroup());
 
-        $this->assertEquals("SELECT * WHERE { ?e field1 value1 . ?e field2 value2} ORDER BY field1", $query);
+        $this->assertEquals("SELECT * WHERE { ?e field1 value1 . ?e field2 value2 . OPTIONAL { ?e field3 value3 } } ORDER BY field1 field2", $query);
     }
 
     public function testGetMapsFromCriteriaGroupCachedJson() {
-        $maps = $this->mock->getMapsFromCriteriaGroup(new CriteriaGroup(), Util::$cache_dir_json."Former Empires.json");
+        $maps = $this->mock->getMapsFromCriteriaGroup(
+            new CriteriaGroup(array('name'=>'Former empires')),
+            Util::$cache_dir_json."Former Empires.json"
+        );
 
-        $this->assertEquals(1, count($maps));
+        $this->assertEquals(2, count($maps));
     }
 
     public function testGetMapsFromCriteriaGroupInvalidJson() {
@@ -205,8 +211,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->generateAndSaveSampleMap('German Empire 1914.svg', new \MongoDate());
 
         $maps = $this->mock->getMapsFromCriteriaGroup($criteriaGroup);
-        $this->assertEquals(1, count($maps));
+        $this->assertEquals(2, count($maps));
 
+        //   The first map already exists, that's why its ID is not null
         $firstMap = $maps[key($maps)];
         $this->assertNotNull($firstMap->getId());
     }
@@ -219,17 +226,41 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->setFetchSvgUrlsFixture();
 
         $maps = $this->mock->getMapsFromCriteriaGroup($criteriaGroup);
-        $this->assertEquals(1, count($maps));
+        $this->assertEquals(2, count($maps));
 
-        $firstMap = $maps[key($maps)];
+        $firstMap = current($maps);
         $this->assertNull($firstMap->getId());
         $this->assertEquals('German Empire 1914.svg', $firstMap->getFileName());
         $this->assertEquals(1, count($firstMap->getTerritories()));
 
+        /** @var Territory[] $territories */
         $territories = $firstMap->getTerritories();
         $this->assertNotNull($territories[0]->getPeriod());
         $this->assertEquals(new \MongoDate(strtotime('1871-01-18')), $territories[0]->getPeriod()->getStart());
         $this->assertEquals(new \MongoDate(strtotime('1918-11-18')), $territories[0]->getPeriod()->getEnd());
+
+        $secondMap = next($maps);
+        $this->assertNull($secondMap->getId());
+        $this->assertEquals('Frankish Empire 481 to 814-en.svg', $secondMap->getFileName());
+        $this->assertEquals(1, count($secondMap->getTerritories()));
+
+        /** @var Territory[] $territories */
+        $territories = $secondMap->getTerritories();
+        $this->assertNotNull($territories[0]->getPeriod());
+        $this->assertEquals(new \MongoDate(strtotime('0002-12-31 23:00:00')), $territories[0]->getPeriod()->getStart());
+        $this->assertEquals(new \MongoDate(strtotime('0842-12-31 23:00:00')), $territories[0]->getPeriod()->getEnd());
+    }
+
+    function testGetDatesFromSparqlResultInvalidCriteriaGroup() {
+        CriteriaGroup::drop();
+        $criteriaGroup = $this->generateSampleCriteriaGroup('Invalid criteria group name');
+
+        $this->setSparqlJsonFixture('Former Empires.json');
+        $this->setFetchSvgUrlsFixture();
+
+        $maps = $this->mock->getMapsFromCriteriaGroup($criteriaGroup);
+
+        $this->assertEquals(0, count($maps));
     }
 
     public function testGetInaccessibleImageURL()

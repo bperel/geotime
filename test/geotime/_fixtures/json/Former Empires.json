@@ -1,7 +1,13 @@
-{ "head": {
-	"link": [],
-	"vars": ["e", "date1", "date2", "imageMap"]
-},
+{
+	"head": {
+		"link": [],
+		"vars": ["e",
+			"date1",
+			"date2",
+			"imageMap",
+			"date1_precise",
+			"date2_precise"]
+	},
 	"results": {
 		"distinct": false,
 		"ordered": true,
@@ -9,43 +15,53 @@
 			{
 				"e": {
 					"type": "uri",
-					"value": "http://dbpedia.org/resource/Axis_powers"
-				},
-				"date1": {
-					"type": "typed-literal",
-					"datatype": "http://www.w3.org/2001/XMLSchema#date",
-					"value": "1940-09-27"
-				},
-				"date2": {
-					"type": "typed-literal",
-					"datatype": "http://www.w3.org/2001/XMLSchema#date",
-					"value": "1945-09-02"
-				},
-				"imageMap": {
-					"type": "literal",
-					"xml:lang": "en",
-					"value": "WWII.png"
-				}
-			},
-			{
-				"e": {
-					"type": "uri",
 					"value": "http://dbpedia.org/resource/German_Empire"
 				},
 				"date1": {
 					"type": "typed-literal",
-					"datatype": "http://www.w3.org/2001/XMLSchema#date",
-					"value": "1871-01-18"
+					"datatype": "http://www.w3.org/2001/XMLSchema#gYear",
+					"value": "1871-01-01T00:00:00+02:00"
 				},
 				"date2": {
 					"type": "typed-literal",
-					"datatype": "http://www.w3.org/2001/XMLSchema#date",
-					"value": "1918-11-18"
+					"datatype": "http://www.w3.org/2001/XMLSchema#gYear",
+					"value": "1918-01-01T00:00:00+02:00"
 				},
 				"imageMap": {
 					"type": "literal",
 					"xml:lang": "en",
 					"value": "German Empire 1914.svg"
+				},
+				"date1_precise": {
+					"type": "typed-literal",
+					"datatype": "http://www.w3.org/2001/XMLSchema#date",
+					"value": "1871-01-18"
+				},
+				"date2_precise": {
+					"type": "typed-literal",
+					"datatype": "http://www.w3.org/2001/XMLSchema#date",
+					"value": "1918-11-18"
+				}
+			},
+			{
+				"e": {
+					"type": "uri",
+					"value": "http://dbpedia.org/resource/Francia"
+				},
+				"date1": {
+					"type": "typed-literal",
+					"datatype": "http://www.w3.org/2001/XMLSchema#gYear",
+					"value": "0003-01-01T00:00:00+02:00"
+				},
+				"date2": {
+					"type": "typed-literal",
+					"datatype": "http://www.w3.org/2001/XMLSchema#gYear",
+					"value": "0843-01-01T00:00:00+02:00"
+				},
+				"imageMap": {
+					"type": "literal",
+					"xml:lang": "en",
+					"value": "Frankish Empire 481 to 814-en.svg"
 				}
 			}
 		]

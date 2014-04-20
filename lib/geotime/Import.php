@@ -36,7 +36,7 @@ class Import {
         /** @var CriteriaGroup $criteriaGroup */
         foreach(self::$criteriaGroups as $criteriaGroup) {
             $criteriaGroupName = $criteriaGroup->getName();
-            $query_criteriaGroup_is_cached = array( "criteriaGroup" => $criteriaGroupName );
+            $query_criteriaGroup_is_cached = array( "criteria" => $criteriaGroupName );
             $cached_criteria_group = Criteria::find( $query_criteriaGroup_is_cached );
 
             $fileName = Util::$cache_dir_json . $criteriaGroupName . ".json";
@@ -89,18 +89,28 @@ class Import {
 
     function buildSparqlQuery(CriteriaGroup $criteriaGroup) {
         $criteriaStrings = array();
-        foreach($criteriaGroup->getCriteriaList() as $criteria) {
+        $criteriaOptionalStrings = array();
+
+        foreach($criteriaGroup->getCriteria() as $criteria) {
             $criteriaStrings[]= implode(" ", array("?e", $criteria->getKey(), $criteria->getValue()));
+        }
+        foreach($criteriaGroup->getOptional() as $criteria) {
+            $criteriaOptionalStrings[]= implode(" ", array("?e", $criteria->getKey(), $criteria->getValue()));
         }
 
         $query = "SELECT * WHERE "
                 ."{ "
-                .implode(" . ", $criteriaStrings)
-                ."} ";
+                .implode(" . ", $criteriaStrings);
+
+        if (count($criteriaOptionalStrings) > 0) {
+            $query.=" . OPTIONAL { ".implode(" . ", $criteriaOptionalStrings)." } ";
+        }
+
+        $query.="} ";
 
         $sort = $criteriaGroup->getSort();
         if (count($sort) > 0) {
-            $query.="ORDER BY ".implode(", ", $sort);
+            $query.="ORDER BY ".implode(" ", $sort);
         }
 
         return $query;
@@ -114,7 +124,6 @@ class Import {
      */
     public function getMapsFromCriteriaGroup(CriteriaGroup $criteriaGroup, $fileName = null)
     {
-
         if (!is_null($fileName) && file_exists($fileName)) {
             self::$log->info('Using cached JSON file '.$fileName);
             $pageAsJson = json_decode(file_get_contents($fileName));
@@ -134,15 +143,46 @@ class Import {
                 }
             }
         }
-        return $this->getMapsFromSparqlResults($pageAsJson);
+        return $this->getMapsFromSparqlResults($pageAsJson, $criteriaGroup);
+    }
+
+    /**
+     * @param \stdClass $result
+     * @param CriteriaGroup $criteriaGroup
+     * @return \stdClass Object with start and end dates
+     */
+    public function getDatesFromSparqlResult($result, $criteriaGroup) {
+        switch($criteriaGroup->getName()) {
+            case 'Former empires':
+                $objectWithDates = new \stdClass();
+                if (isset($result->date1_precise)) {
+                    $objectWithDates->startDate = $result->date1_precise->value;
+                }
+                else {
+                    $objectWithDates->startDate = $result->date1->value;
+                }
+                if (isset($result->date2_precise)) {
+                    $objectWithDates->endDate = $result->date2_precise->value;
+                }
+                else {
+                    $objectWithDates->endDate = $result->date2->value;
+                }
+                return $objectWithDates;
+            break;
+
+            default:
+                self::$log->error('Invalid criteria group : '.$criteriaGroup->getName());
+                return null;
+        }
     }
 
     /**
      * Create Map object instances from a JSON-formatted SPARQL page
      * @param object $pageAsJson
+     * @param CriteriaGroup $criteriaGroup
      * @return Map[]
      */
-    public function getMapsFromSparqlResults($pageAsJson)
+    public function getMapsFromSparqlResults($pageAsJson, $criteriaGroup)
     {
         $maps = array();
         foreach ($pageAsJson->results->bindings as $result) {
@@ -151,7 +191,13 @@ class Import {
             if (strtolower(Util::getImageExtension($imageMapFullName)) === ".svg") {
                 $existingMap = Map::one(array('fileName'=>$imageMapFullName));
                 if (is_null($existingMap)) {
-                    $map = Map::generateAndSaveReferences($imageMapFullName, $result->date1->value, $result->date2->value);
+                    $startAndEndDates = $this->getDatesFromSparqlResult($result, $criteriaGroup);
+                    if (is_null($startAndEndDates)) {
+                        continue;
+                    }
+                    else {
+                        $map = Map::generateAndSaveReferences($imageMapFullName, $startAndEndDates->startDate, $startAndEndDates->endDate);
+                    }
                 }
                 else {
                     $map = $existingMap;

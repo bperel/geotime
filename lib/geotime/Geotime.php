@@ -141,6 +141,10 @@ class Geotime {
         return null;
     }
 
+    /**
+     * Removes maps, territories and periods from the DB
+     * @param bool $keepMaps
+     */
     static function clean($keepMaps=false) {
         if (!$keepMaps) {
             Map::drop();
