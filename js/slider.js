@@ -117,8 +117,12 @@ function brushed() {
 							svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
 								.attr("name", mapFileName)
 								.attr("id", "externalSvg")
+								.attr("preserveAspectRatio", "xMaxYMax")
 								.classed("externalSvg", true)
 								.call(svgmap_drag);
+
+							var width = parseFloat(svgMap.attr("width"));
+							var height = parseFloat(svgMap.attr("height"));
 
 							svgMap
 								.datum({
@@ -126,9 +130,10 @@ function brushed() {
 									fileName: incompleteMapInfo.fileName,
 									x: 0,
 									y: 0,
-									width:  parseInt(svgMap.attr("width")),
-									height: parseInt(svgMap.attr("height"))
-								});
+									width:  width,
+									height: height
+								})
+								.attr("viewBox", "0 0 " + width +" " + height);
 
 							dragmove.call(svgMap.node(), svgMap.datum());
 
