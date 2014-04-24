@@ -31,9 +31,15 @@ function activateHelperNextStep() {
 	if (svgMap) {
 		if (newStep === 1) {
 			svgMap.call(svgmap_drag);
+			resizeHandle
+				.classed("hidden", false)
+				.call(svgmap_resize);
 		}
 		else {
 			svgMap.on('mousedown.drag', null);
+			resizeHandle
+				.classed("hidden", true)
+				.on('mousedown.drag', null);
 		}
 		svgMap
 			.selectAll("path")
