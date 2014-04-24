@@ -29,6 +29,12 @@ function activateHelperNextStep() {
 	});
 
 	if (svgMap) {
+		if (newStep === 1) {
+			svgMap.call(svgmap_drag);
+		}
+		else {
+			svgMap.on('mousedown.drag', null);
+		}
 		svgMap
 			.selectAll("path")
 				.on("mouseover", newStep === 2 ? onTerritoryMouseover : null)
@@ -41,7 +47,7 @@ function ignoreCurrentMap() {
 		d.ignoredMaps.push(svgMap.datum().id);
 		return d;
 	});
-	initSvgMap();
+	initExternalSvgMap();
 }
 
 helper

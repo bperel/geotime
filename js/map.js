@@ -51,7 +51,7 @@ function dragmove(d) {
 }
 
 function showBgMap(id, filePath) {
-		d3.json(filePath, function(error, world) {
+	d3.json(filePath, function(error, world) {
 
 		svg.append("g")
 			.attr("id", id)
@@ -63,15 +63,15 @@ function showBgMap(id, filePath) {
 					return "subunit-boundary subunit " + d.properties.adm0_a3;
 				})
 				.attr("d", path);
+
+		initExternalSvgMap();
 	});
 }
 
 var svgMap = null;
 var isLoading;
 
-initSvgMap();
-
-function initSvgMap() {
+function initExternalSvgMap() {
 	$('#externalSvg, #resizeHandle').remove();
 	if (svgMap) {
 		svgMap = null;
@@ -87,14 +87,13 @@ function loadExternalSvgForYear(year) {
 			var mapFileName = incompleteMapInfo.fileName;
 			if (mapFileName) {
 				if (!svgMap || svgMap.datum().fileName !== mapFileName) {
-					initSvgMap();
+					initExternalSvgMap();
 
 					d3.xml("cache/svg/"+mapFileName, "image/svg+xml", function(xml) {
 						svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
 							.attr("name", mapFileName)
 							.attr("id", "externalSvg")
-							.classed("externalSvg", true)
-							.call(svgmap_drag);
+							.classed("externalSvg", true);
 
 						svgMap
 							.datum({
@@ -130,7 +129,7 @@ function loadExternalSvgForYear(year) {
 				}
 			}
 			else {
-				initSvgMap();
+				initExternalSvgMap();
 			}
 		});
 	}
