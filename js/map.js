@@ -1,5 +1,6 @@
 var width = 960;
 var mapHeight= 480;
+var resizeHandleSize = 16;
 
 var projection = d3.geo.mercator()
 	.scale((width + 1) / 2 / Math.PI)
@@ -109,17 +110,17 @@ function loadExternalSvgForYear(year) {
 
 						d3.select("#mapArea")
 							.append("svg")
-							.attr("id", "resizeHandle")
-							.style("left", 200 + svgMap.datum().width  - 16)
-							.style("top",        svgMap.datum().height - 16)
-							.attr("width",  16)
-							.attr("height", 16)
-							.call(svgmap_resize)
-							.append("rect")
-								.attr("x", 0)
-								.attr("y", 0)
-								.attr("width", 16)
-								.attr("height", 16);
+								.attr("id", "resizeHandle")
+								.attr("width",  resizeHandleSize)
+								.attr("height", resizeHandleSize)
+								.call(svgmap_resize)
+								.append("rect")
+									.attr("x", 0)
+									.attr("y", 0)
+									.attr("width",  resizeHandleSize)
+									.attr("height", resizeHandleSize);
+
+						dragresize.call(d3.select('#resizeHandle').node());
 
 						initHelper();
 						activateHelperNextStep();
@@ -148,14 +149,14 @@ function dragresizestarted() {
 }
 
 function dragresize(){
-	svgMap.datum().width += d3.event.dx;
-	svgMap.datum().height += d3.event.dy;
+	svgMap.datum().width  += d3.event ? d3.event.dx : 0;
+	svgMap.datum().height += d3.event ? d3.event.dy : 0;
 
 	d3.select("#externalSvg")
-		.style("width", svgMap.datum().width+"px")
+		.style("width",  svgMap.datum().width +"px")
 		.style("height", svgMap.datum().height+"px");
 
-	d3.select("#resizeHandle")
-		.style("left", (200 + svgMap.datum().width - 16)+"px")
-		.style("top",  (svgMap.datum().height - 16 )+"px");
+	d3.select(this)
+		.style("left", (200 + svgMap.datum().width  - resizeHandleSize)+"px")
+		.style("top",  (      svgMap.datum().height - resizeHandleSize)+"px");
 }
