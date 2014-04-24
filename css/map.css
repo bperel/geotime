@@ -26,6 +26,10 @@
     fill: red !important;
 }
 
+.selected {
+    fill: black !important;
+}
+
 #resizeHandle rect {
     cursor: se-resize;
     fill:gray;

@@ -44,7 +44,8 @@ function activateHelperNextStep() {
 		svgMap
 			.selectAll("path")
 				.on("mouseover", newStep === 2 ? onTerritoryMouseover : null)
-				.on("mouseout",  newStep === 2 ? onTerritoryMouseout  : null);
+				.on("mouseout",  newStep === 2 ? onTerritoryMouseout  : null)
+				.on("click",     newStep === 2 ? onTerritoryClick     : null);
 	}
 }
 

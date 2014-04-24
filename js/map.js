@@ -175,6 +175,11 @@ function onTerritoryMouseout() {
 	d3.select(this).classed("hovered", false);
 }
 
+function onTerritoryClick() {
+	svgMap.selectAll("path.selected").classed("selected", false);
+	d3.select(this).classed("selected", true);
+}
+
 function dragresizestarted() {
 	d3.event.sourceEvent.stopPropagation();
 }
