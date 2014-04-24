@@ -72,7 +72,7 @@ function showBgMap(id, filePath) {
 
 var resizeHandle = d3.select('#resizeHandle');
 var svgMap = null;
-var isLoading;
+var isLoading = false;
 
 function initExternalSvgMap() {
 	$('#externalSvg').remove();

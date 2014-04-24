@@ -13,7 +13,7 @@ var y = d3.scale.linear()
 var brush = d3.svg.brush()
 	.y(y)
 	.extent([0, 0])
-	.on("brush", brushed);
+	.on("brushend", brushed);
 
 var sliderSvg = d3.select("body").append("svg")
 	.attr("width",  sliderWidth  + margin.left + margin.right)
