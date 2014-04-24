@@ -81,17 +81,17 @@ function initExternalSvgMap() {
 	}
 	isLoading = false;
 	helper.classed("hidden", true);
+	resizeHandle.classed("hidden", true);
 }
 
 function loadExternalSvgForYear(year) {
 	if (!isLoading) {
 		isLoading = true;
 		d3.json("gateway.php?getSvg&year="+year+"&ignored="+slider.datum().ignoredMaps.join(",")+"", function(error, incompleteMapInfo) {
+			initExternalSvgMap();
 			var mapFileName = incompleteMapInfo.fileName;
 			if (mapFileName) {
 				if (!svgMap || svgMap.datum().fileName !== mapFileName) {
-					initExternalSvgMap();
-
 					d3.xml("cache/svg/"+mapFileName, "image/svg+xml", function(xml) {
 						svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
 							.attr("name", mapFileName)
@@ -125,9 +125,6 @@ function loadExternalSvgForYear(year) {
 						isLoading = false;
 					});
 				}
-			}
-			else {
-				initExternalSvgMap();
 			}
 		});
 	}
