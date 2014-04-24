@@ -1,6 +1,7 @@
 var width = 960;
 var mapHeight= 480;
 var resizeHandleSize = 16;
+var maxExternalMapSizePercentage = 80;
 
 var projection = d3.geo.mercator()
 	.scale((width + 1) / 2 / Math.PI)
@@ -116,10 +117,10 @@ function loadExternalSvgForYear(year) {
 								.attr("width",  resizeHandleSize)
 								.attr("height", resizeHandleSize);
 
-						dragresize.call(resizeHandle.node());
-
 						initHelper();
 						activateHelperNextStep();
+
+						resizeExternalMap();
 
 						isLoading = false;
 					});
@@ -130,6 +131,43 @@ function loadExternalSvgForYear(year) {
 			}
 		});
 	}
+}
+
+function resizeExternalMap(width, height) {
+	if (!width) { // Auto fit
+		var bgMapWidth  = parseInt(svg.attr("width" ));
+		var bgMapHeight = parseInt(svg.attr("height"));
+		var externalMapWidth = svgMap.datum().width;
+		var externalMapHeight = svgMap.datum().height;
+		var widthRatio = bgMapWidth / externalMapWidth;
+		var heightRatio = bgMapHeight / externalMapHeight;
+		if (widthRatio < 1 || heightRatio < 1) {
+			if (widthRatio < heightRatio) {
+				width = bgMapWidth * (maxExternalMapSizePercentage / 100);
+				height = externalMapHeight / (externalMapWidth / width);
+			}
+			else {
+				height = bgMapHeight * (maxExternalMapSizePercentage / 100);
+				width = externalMapWidth / (externalMapHeight / height);
+			}
+		}
+		else {
+			width = svgMap.datum().width;
+			height = svgMap.datum().height;
+		}
+	}
+
+	svgMap
+		.style("width",  width +"px")
+		.style("height", height+"px")
+		.datum(function(d) {
+			d.width = width;d.height = height;
+			return d;
+		});
+
+	resizeHandle
+		.style("left", (200 + width  - resizeHandleSize)+"px")
+		.style("top",  (      height - resizeHandleSize)+"px");
 }
 
 function onTerritoryMouseover() {
@@ -145,14 +183,12 @@ function dragresizestarted() {
 }
 
 function dragresize(){
-	svgMap.datum().width  += d3.event ? d3.event.dx : 0;
-	svgMap.datum().height += d3.event ? d3.event.dy : 0;
+	var newWidth = svgMap.datum().width;
+	var newHeight = svgMap.datum().height;
+	if (d3.event) {
+		newWidth += d3.event.dx;
+		newHeight += d3.event.dy;
+	}
 
-	d3.select("#externalSvg")
-		.style("width",  svgMap.datum().width +"px")
-		.style("height", svgMap.datum().height+"px");
-
-	d3.select(this)
-		.style("left", (200 + svgMap.datum().width  - resizeHandleSize)+"px")
-		.style("top",  (      svgMap.datum().height - resizeHandleSize)+"px");
+	resizeExternalMap(newWidth, newHeight);
 }
