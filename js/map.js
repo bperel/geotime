@@ -108,6 +108,10 @@ function loadExternalSvgForYear(year) {
 								height: parseInt(svgMap.attr("height"))
 							});
 
+						if (!svgMap.attr("viewBox")) {
+							svgMap.attr("viewBox",  function(d) { return "0 0 "+ d.width+" "+ d.height; });
+						}
+
 						dragmove.call(svgMap.node(), svgMap.datum());
 
 						resizeHandle
