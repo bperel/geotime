@@ -1,3 +1,5 @@
+var helper = d3.select("#mapHelper");
+
 var dragHelper = d3.behavior.drag()
 	.origin(function(d) { return d; })
 	.on("dragstart", function() {
@@ -11,9 +13,18 @@ var dragHelper = d3.behavior.drag()
 			.style("margin-top",  d.y+"px");
 	});
 
+function initHelper() {
+	helper
+		.datum(function(d) {
+			d.activeStep = 0;
+			return d;
+		})
+		.classed("hidden", false);
+}
+
 function activateHelperNextStep() {
-	var newStep = ++d3.select('#mapHelper').datum().activeStep;
-	d3.selectAll('#mapHelper .helperStep').classed("active", function(step) {
+	var newStep = ++helper.datum().activeStep;
+	helper.selectAll('.helperStep').classed("active", function(step) {
 		return step === newStep;
 	});
 
@@ -33,11 +44,11 @@ function ignoreCurrentMap() {
 	initSvgMap();
 }
 
-d3.select('#mapHelper')
+helper
 	.datum({x: 0, y: 0})
 	.call(dragHelper);
 
-var helperSteps = d3.selectAll('#mapHelper .helperStep')
+var helperSteps = helper.selectAll('.helperStep')
 	.data([1, 2, 3]);
 
 helperSteps

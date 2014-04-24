@@ -66,6 +66,76 @@ function showBgMap(id, filePath) {
 	});
 }
 
+var svgMap = null;
+var isLoading;
+
+initSvgMap();
+
+function initSvgMap() {
+	$('#externalSvg, #resizeHandle').remove();
+	if (svgMap) {
+		svgMap = null;
+	}
+	isLoading = false;
+	helper.classed("hidden", true);
+}
+
+function loadExternalSvgForYear(year) {
+	if (!isLoading) {
+		isLoading = true;
+		d3.json("gateway.php?getSvg&year="+year+"&ignored="+slider.datum().ignoredMaps.join(",")+"", function(error, incompleteMapInfo) {
+			var mapFileName = incompleteMapInfo.fileName;
+			if (mapFileName) {
+				if (!svgMap || svgMap.datum().fileName !== mapFileName) {
+					initSvgMap();
+
+					d3.xml("cache/svg/"+mapFileName, "image/svg+xml", function(xml) {
+						svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
+							.attr("name", mapFileName)
+							.attr("id", "externalSvg")
+							.classed("externalSvg", true)
+							.call(svgmap_drag);
+
+						svgMap
+							.datum({
+								id: incompleteMapInfo.id,
+								fileName: incompleteMapInfo.fileName,
+								x: 0,
+								y: 0,
+								width:  parseInt(svgMap.attr("width")),
+								height: parseInt(svgMap.attr("height"))
+							});
+
+						dragmove.call(svgMap.node(), svgMap.datum());
+
+						d3.select("#mapArea")
+							.append("svg")
+							.attr("id", "resizeHandle")
+							.style("left", 200 + svgMap.datum().width  - 16)
+							.style("top",        svgMap.datum().height - 16)
+							.attr("width",  16)
+							.attr("height", 16)
+							.call(svgmap_resize)
+							.append("rect")
+								.attr("x", 0)
+								.attr("y", 0)
+								.attr("width", 16)
+								.attr("height", 16);
+
+						initHelper();
+						activateHelperNextStep();
+
+						isLoading = false;
+					});
+				}
+			}
+			else {
+				initSvgMap();
+			}
+		});
+	}
+}
+
 function onTerritoryMouseover() {
 	d3.select(this).classed("hovered", true);
 }
