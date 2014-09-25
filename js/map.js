@@ -182,6 +182,9 @@ function onTerritoryMouseout() {
 function onTerritoryClick() {
 	svgMap.selectAll("path.selected").classed("selected", false);
 	d3.select(this).classed("selected", true);
+	if (helper.datum().activeStep === 2) {
+		activateHelperNextStep();
+	}
 }
 
 function dragresizestarted() {
