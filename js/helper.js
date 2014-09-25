@@ -1,3 +1,5 @@
+var helper = d3.select("#mapHelper");
+
 var dragHelper = d3.behavior.drag()
 	.origin(function(d) { return d; })
 	.on("dragstart", function() {
@@ -11,17 +13,43 @@ var dragHelper = d3.behavior.drag()
 			.style("margin-top",  d.y+"px");
 	});
 
+function initHelper() {
+	helper
+		.datum(function(d) {
+			d.activeStep = 0;
+			return d;
+		})
+		.classed("hidden", false);
+}
+
 function activateHelperNextStep() {
-	var newStep = ++d3.select('#mapHelper').datum().activeStep;
-	d3.selectAll('#mapHelper .helperStep').classed("active", function(step) {
+	var newStep = ++helper.datum().activeStep;
+	helper.selectAll('.helperStep').classed("active", function(step) {
 		return step === newStep;
 	});
 
 	if (svgMap) {
+		if (newStep === 1) {
+			svgMap.call(svgmap_drag);
+			resizeHandle
+				.classed("hidden", false)
+				.call(svgmap_resize);
+		}
+		else {
+			svgMap.on('mousedown.drag', null);
+			resizeHandle
+				.classed("hidden", true)
+				.on('mousedown.drag', null);
+		}
 		svgMap
 			.selectAll("path")
 				.on("mouseover", newStep === 2 ? onTerritoryMouseover : null)
-				.on("mouseout",  newStep === 2 ? onTerritoryMouseout  : null);
+				.on("mouseout",  newStep === 2 ? onTerritoryMouseout  : null)
+				.on("click",     newStep === 2 ? onTerritoryClick     : null);
+
+		if (newStep === 3) {
+			d3.select('#territoryName').node().focus();
+		}
 	}
 }
 
@@ -30,14 +58,14 @@ function ignoreCurrentMap() {
 		d.ignoredMaps.push(svgMap.datum().id);
 		return d;
 	});
-	initSvgMap();
+	initExternalSvgMap();
 }
 
-d3.select('#mapHelper')
+helper
 	.datum({x: 0, y: 0})
 	.call(dragHelper);
 
-var helperSteps = d3.selectAll('#mapHelper .helperStep')
+var helperSteps = helper.selectAll('.helperStep')
 	.data([1, 2, 3]);
 
 helperSteps

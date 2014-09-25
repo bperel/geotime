@@ -1,5 +1,7 @@
 var width = 960;
 var mapHeight= 480;
+var resizeHandleSize = 16;
+var maxExternalMapSizePercentage = 80;
 
 var projection = d3.geo.mercator()
 	.scale((width + 1) / 2 / Math.PI)
@@ -51,7 +53,7 @@ function dragmove(d) {
 }
 
 function showBgMap(id, filePath) {
-		d3.json(filePath, function(error, world) {
+	d3.json(filePath, function(error, world) {
 
 		svg.append("g")
 			.attr("id", id)
@@ -63,7 +65,110 @@ function showBgMap(id, filePath) {
 					return "subunit-boundary subunit " + d.properties.adm0_a3;
 				})
 				.attr("d", path);
+
+		initExternalSvgMap();
 	});
+}
+
+var resizeHandle = d3.select('#resizeHandle');
+var svgMap = null;
+var isLoading = false;
+
+function initExternalSvgMap() {
+	$('#externalSvg').remove();
+	if (svgMap) {
+		svgMap = null;
+	}
+	isLoading = false;
+	helper.classed("hidden", true);
+	resizeHandle.classed("hidden", true);
+}
+
+function loadExternalSvgForYear(year) {
+	if (!isLoading) {
+		isLoading = true;
+		d3.json("gateway.php?getSvg&year="+year+"&ignored="+slider.datum().ignoredMaps.join(",")+"", function(error, incompleteMapInfo) {
+			initExternalSvgMap();
+			var mapFileName = incompleteMapInfo.fileName;
+			if (mapFileName) {
+				if (!svgMap || svgMap.datum().fileName !== mapFileName) {
+					d3.xml("cache/svg/"+mapFileName, "image/svg+xml", function(xml) {
+						svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
+							.attr("name", mapFileName)
+							.attr("id", "externalSvg")
+							.classed("externalSvg", true);
+
+						svgMap
+							.datum({
+								id: incompleteMapInfo.id,
+								fileName: incompleteMapInfo.fileName,
+								x: 0,
+								y: 0,
+								width:  parseInt(svgMap.attr("width")),
+								height: parseInt(svgMap.attr("height"))
+							});
+
+						if (!svgMap.attr("viewBox")) {
+							svgMap.attr("viewBox",  function(d) { return "0 0 "+ d.width+" "+ d.height; });
+						}
+
+						dragmove.call(svgMap.node(), svgMap.datum());
+
+						resizeHandle
+							.attr("width",  resizeHandleSize)
+							.attr("height", resizeHandleSize)
+							.select("rect")
+								.attr("width",  resizeHandleSize)
+								.attr("height", resizeHandleSize);
+
+						initHelper();
+						activateHelperNextStep();
+
+						resizeExternalMap();
+
+						isLoading = false;
+					});
+				}
+			}
+		});
+	}
+}
+
+function resizeExternalMap(width, height) {
+	if (!width) { // Auto fit
+		var bgMapWidth  = parseInt(svg.attr("width" ));
+		var bgMapHeight = parseInt(svg.attr("height"));
+		var externalMapWidth = svgMap.datum().width;
+		var externalMapHeight = svgMap.datum().height;
+		var widthRatio = bgMapWidth / externalMapWidth;
+		var heightRatio = bgMapHeight / externalMapHeight;
+		if (widthRatio < 1 || heightRatio < 1) {
+			if (widthRatio < heightRatio) {
+				width = bgMapWidth * (maxExternalMapSizePercentage / 100);
+				height = externalMapHeight / (externalMapWidth / width);
+			}
+			else {
+				height = bgMapHeight * (maxExternalMapSizePercentage / 100);
+				width = externalMapWidth / (externalMapHeight / height);
+			}
+		}
+		else {
+			width = svgMap.datum().width;
+			height = svgMap.datum().height;
+		}
+	}
+
+	svgMap
+		.style("width",  width +"px")
+		.style("height", height+"px")
+		.datum(function(d) {
+			d.width = width;d.height = height;
+			return d;
+		});
+
+	resizeHandle
+		.style("left", (200 + width  - resizeHandleSize)+"px")
+		.style("top",  (      height - resizeHandleSize)+"px");
 }
 
 function onTerritoryMouseover() {
@@ -74,19 +179,22 @@ function onTerritoryMouseout() {
 	d3.select(this).classed("hovered", false);
 }
 
+function onTerritoryClick() {
+	svgMap.selectAll("path.selected").classed("selected", false);
+	d3.select(this).classed("selected", true);
+}
+
 function dragresizestarted() {
 	d3.event.sourceEvent.stopPropagation();
 }
 
 function dragresize(){
-	svgMap.datum().width += d3.event.dx;
-	svgMap.datum().height += d3.event.dy;
+	var newWidth = svgMap.datum().width;
+	var newHeight = svgMap.datum().height;
+	if (d3.event) {
+		newWidth += d3.event.dx;
+		newHeight += d3.event.dy;
+	}
 
-	d3.select("#externalSvg")
-		.style("width", svgMap.datum().width+"px")
-		.style("height", svgMap.datum().height+"px");
-
-	d3.select("#resizeHandle")
-		.style("left", (200 + svgMap.datum().width - 16)+"px")
-		.style("top",  (svgMap.datum().height - 16 )+"px");
+	resizeExternalMap(newWidth, newHeight);
 }

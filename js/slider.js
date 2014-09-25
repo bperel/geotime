@@ -13,7 +13,7 @@ var y = d3.scale.linear()
 var brush = d3.svg.brush()
 	.y(y)
 	.extent([0, 0])
-	.on("brush", brushed);
+	.on("brushend", brushed);
 
 var sliderSvg = d3.select("body").append("svg")
 	.attr("width",  sliderWidth  + margin.left + margin.right)
@@ -84,20 +84,6 @@ d3.json("gateway.php?getCoverage", function(error, coverageInfo) {
 			});
 });
 
-var svgMap = null;
-var isLoading;
-
-initSvgMap();
-
-function initSvgMap() {
-	$('#externalSvg, #resizeHandle').remove();
-	if (svgMap) {
-		svgMap = null;
-	}
-	isLoading = false;
-	d3.select("#mapHelper").classed("hidden", true);
-}
-
 function brushed() {
 	var value = y.invert(d3.mouse(this)[1]);
 	if (!isNaN(value)) {
@@ -105,69 +91,7 @@ function brushed() {
 		handle.attr("cy", y(value));
 
 		var year = parseInt(value);
-		if (!isLoading) {
-			isLoading = true;
-			d3.json("gateway.php?getSvg&year="+year+"&ignored="+slider.datum().ignoredMaps.join(",")+"", function(error, incompleteMapInfo) {
-				var mapFileName = incompleteMapInfo.fileName;
-				if (mapFileName) {
-					if (!svgMap || svgMap.datum().fileName !== mapFileName) {
-						initSvgMap();
-
-						d3.xml("cache/svg/"+mapFileName, "image/svg+xml", function(xml) {
-							svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
-								.attr("name", mapFileName)
-								.attr("id", "externalSvg")
-								.attr("preserveAspectRatio", "xMaxYMax")
-								.classed("externalSvg", true)
-								.call(svgmap_drag);
-
-							var width = parseFloat(svgMap.attr("width"));
-							var height = parseFloat(svgMap.attr("height"));
-
-							svgMap
-								.datum({
-									id: incompleteMapInfo.id,
-									fileName: incompleteMapInfo.fileName,
-									x: 0,
-									y: 0,
-									width:  width,
-									height: height
-								})
-								.attr("viewBox", "0 0 " + width +" " + height);
-
-							dragmove.call(svgMap.node(), svgMap.datum());
-
-							d3.select("#mapArea")
-								.append("svg")
-									.attr("id", "resizeHandle")
-									.style("left", 200 + svgMap.datum().width - 16)
-									.style("top", svgMap.datum().height - 16)
-									.attr("width",  16)
-									.attr("height", 16)
-									.call(svgmap_resize)
-									.append("rect")
-										.attr("x", 0)
-										.attr("y", 0)
-										.attr("width", 16)
-										.attr("height", 16);
-
-							d3.select("#mapHelper")
-								.datum(function(d) {
-									d.activeStep = 0;
-									return d;
-								})
-								.classed("hidden", false);
-							activateHelperNextStep();
-
-							isLoading = false;
-						});
-					}
-				}
-				else {
-					initSvgMap();
-				}
-			});
-		}
+		loadExternalSvgForYear(year);
 	}
 
 	return false;
