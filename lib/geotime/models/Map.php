@@ -3,6 +3,7 @@
 namespace geotime\models;
 
 use Logger;
+use Purekid\Mongodm\Collection;
 use Purekid\Mongodm\Model;
 
 Logger::configure("lib/geotime/logger.xml");
@@ -49,7 +50,7 @@ class Map extends Model {
     }
 
     /**
-     * @return Territory[]
+     * @return Collection
      */
     public function getTerritories() {
         return $this->__getter('territories');

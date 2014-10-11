@@ -14,6 +14,11 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
     static $neMapName = 'test/geotime/_data/countries.json';
     static $customMapName = 'testImage.svg';
 
+    static $neAreas = array(
+        405267, /* Japan */
+          2412, /* Luxembourg */
+         11578 /* French Southern and Antarctic Lands */);
+
     static function setUpBeforeClass() {
         Geotime::$log->info(__CLASS__." tests started");
     }
@@ -38,17 +43,19 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         Geotime::clean();
     }
 
-    public function testGetPeriodsAndTerritoriesCount() {
+    public function testGetPeriodsAndTerritoriesData() {
 
         $periodsAndTerritoriesCount = Geotime::getMapsAndLocalizedTerritoriesCount();
 
         $this->assertEquals(2, count(array_keys($periodsAndTerritoriesCount)));
 
         $territoriesCountSvgData = $periodsAndTerritoriesCount[self::$customMapName];
-        $this->assertEquals(1, $territoriesCountSvgData);
+        $this->assertEquals(1, $territoriesCountSvgData['count']);
+        $this->assertEquals(0, $territoriesCountSvgData['area']);
 
         $territoriesCountNEData = $periodsAndTerritoriesCount[self::$neMapName];
-        $this->assertEquals(3, $territoriesCountNEData);
+        $this->assertEquals(array_sum(self::$neAreas), $territoriesCountNEData['area']);
+        $this->assertEquals(count(self::$neAreas), $territoriesCountNEData['count']);
     }
 
     public function testClean() {

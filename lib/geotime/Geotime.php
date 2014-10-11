@@ -2,6 +2,7 @@
 
 namespace geotime;
 
+use geotime\models\CriteriaGroup;
 use geotime\models\Map;
 use geotime\models\Period;
 use geotime\models\Territory;
@@ -27,9 +28,10 @@ class Geotime {
     static function showStatus() {
         $periodsAndTerritoriesCount = self::getMapsAndLocalizedTerritoriesCount();
 
+        self::$log->info(self::getCriteriaGroupsNumber().' criteria groups found');
         self::$log->info(count($periodsAndTerritoriesCount).' periods found');
-        foreach($periodsAndTerritoriesCount as $periodStr=>$territoryCount) {
-            self::$log->info($periodStr.' : '.$territoryCount.' territories located');
+        foreach($periodsAndTerritoriesCount as $periodStr=>$territoriesData) {
+            self::$log->info($periodStr.' : '.$territoriesData['count'].' territories located covering '.$territoriesData['area'].' sq. km');
         }
     }
 
@@ -38,30 +40,21 @@ class Geotime {
      */
     static function getMapsAndLocalizedTerritoriesCount() {
 
-        $mapsAndTerritoriesCount = array();
-
-        /** @var Territory[] $mapsWithLocalizedTerritories */
-        $mapsWithLocalizedTerritories = Map::aggregate(
-            array(
-                array(
-                    '$unwind' => '$territories'
-                ),
-                array(
-                    '$group'  => array(
-                        '_id' => '$fileName',
-                        'territoriesCount' => array(
-                            '$sum' => 1
-                        )
+        return array_reduce(
+            Map::find(array())->toArray(),
+            function($result, Map $map) {
+                $territories = $map->getTerritories()->toArray();
+                $result[$map->getFileName()] = array(
+                    'count' => count($territories),
+                    'area'  => array_sum(
+                        array_map(function (Territory $territory) {
+                            return $territory->getArea();
+                        }, $territories)
                     )
-                )
-            )
+                );
+                return $result;
+            }
         );
-
-        foreach($mapsWithLocalizedTerritories['result'] as $map) {
-            $mapsAndTerritoriesCount[$map['_id']] = $map['territoriesCount'];
-        }
-
-        return $mapsAndTerritoriesCount;
     }
 
     /**
@@ -139,6 +132,10 @@ class Geotime {
         }
 
         return null;
+    }
+
+    public static function getCriteriaGroupsNumber() {
+        return CriteriaGroup::count();
     }
 
     /**
