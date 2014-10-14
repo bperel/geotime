@@ -15,6 +15,7 @@ class CriteriaGroup extends Model {
         'name' => array('type' => 'string')
     );
 
+    // @codeCoverageIgnoreStart
     /**
      * @return Criteria[]
      */
@@ -70,5 +71,6 @@ class CriteriaGroup extends Model {
     public function setName($name) {
         $this->__setter('name', $name);
     }
+    // @codeCoverageIgnoreEnd
 
 } 

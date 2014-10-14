@@ -22,6 +22,7 @@ class Territory extends Model {
 
     static $equatorialRadius = 6378137;
 
+    // @codeCoverageIgnoreStart
     /**
      * @return string
      */
@@ -36,29 +37,6 @@ class Territory extends Model {
     public function setName($name)
     {
         $this->__setter('name', $name);
-    }
-
-    /**
-     * @return array
-     */
-    public function getPolygon()
-    {
-        $field = $this->__getter('polygon');
-        if (!is_null($field)) {
-            return $field->{'$geoWithin'}['$polygon'];
-        }
-        return null;
-    }
-
-    /**
-     * @param array $polygon
-     */
-    public function setPolygon($polygon)
-    {
-        if (!is_null($polygon)) {
-            $polygon = array('$geoWithin' => array('$polygon'=>$polygon));
-        }
-        $this->__setter('polygon', $polygon);
     }
 
     /**
@@ -91,6 +69,30 @@ class Territory extends Model {
     public function setPeriod($period)
     {
         $this->__setter('period', $period);
+    }
+    // @codeCoverageIgnoreEnd
+
+    /**
+     * @return array
+     */
+    public function getPolygon()
+    {
+        $field = $this->__getter('polygon');
+        if (!is_null($field)) {
+            return $field->{'$geoWithin'}['$polygon'];
+        }
+        return null;
+    }
+
+    /**
+     * @param array $polygon
+     */
+    public function setPolygon($polygon)
+    {
+        if (!is_null($polygon)) {
+            $polygon = array('$geoWithin' => array('$polygon'=>$polygon));
+        }
+        $this->__setter('polygon', $polygon);
     }
 
     protected function __preSave()

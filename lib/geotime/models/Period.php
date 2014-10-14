@@ -18,16 +18,13 @@ class Period extends Model {
         'end' => array('type' => 'date')
     );
 
+    // @codeCoverageIgnoreStart
     /**
      * @return \MongoDate
      */
     public function getStart()
     {
         return $this->__getter('start');
-    }
-
-    public function getStartYear() {
-        return date('Y', $this->getStart()->sec);
     }
 
     /**
@@ -46,16 +43,21 @@ class Period extends Model {
         return $this->__getter('end');
     }
 
-    public function getEndYear() {
-        return date('Y', $this->getEnd()->sec);
-    }
-
     /**
      * @param \MongoDate $end
      */
     public function setEnd($end)
     {
         $this->__setter('end', $end);
+    }
+    // @codeCoverageIgnoreEnd
+
+    public function getStartYear() {
+        return date('Y', $this->getStart()->sec);
+    }
+
+    public function getEndYear() {
+        return date('Y', $this->getEnd()->sec);
     }
 
     /**

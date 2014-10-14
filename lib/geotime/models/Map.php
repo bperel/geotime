@@ -21,6 +21,7 @@ class Map extends Model {
         'territories' => array('model' => 'geotime\models\Territory', 'type' => 'references')
     );
 
+    // @codeCoverageIgnoreStart
     /**
      * @return string
      */
@@ -62,6 +63,7 @@ class Map extends Model {
     public function setTerritories($territories) {
         $this->__setter('territories', $territories);
     }
+    // @codeCoverageIgnoreEnd
 
     /**
      * @param $imageMapFullName

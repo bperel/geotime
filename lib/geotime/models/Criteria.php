@@ -13,6 +13,7 @@ class Criteria extends Model {
         'value' => array('type' => 'string')
     );
 
+    // @codeCoverageIgnoreStart
     /**
      * @return string
      */
@@ -40,4 +41,5 @@ class Criteria extends Model {
     public function setValue($value) {
         $this->__setter('value', $value);
     }
+    // @codeCoverageIgnoreEnd
 } 

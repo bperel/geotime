@@ -16,6 +16,7 @@ class SparqlEndpoint extends Model {
         'parameters' => array('type' => 'array')
     );
 
+    // @codeCoverageIgnoreStart
     /**
      * @return string
      */
@@ -85,4 +86,5 @@ class SparqlEndpoint extends Model {
     public function setParameters($parameters) {
         $this->__setter('parameters', $parameters);
     }
+    // @codeCoverageIgnoreEnd
 } 
