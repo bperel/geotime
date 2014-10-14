@@ -15,7 +15,7 @@ $log = Logger::getLogger("main");
 Database::connect();
 
 CriteriaGroup::drop();
-$nbImportedObjects = CriteriaGroup::importFromJson("data/criteriaGroups.json");
+$nbImportedObjects = Database::importFromJson("data/criteriaGroups.json", CriteriaGroup::$collection);
 
 if (is_int($nbImportedObjects)) {
     $log->info("Successfully imported $nbImportedObjects criteria group(s)");

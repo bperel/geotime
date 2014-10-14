@@ -35,7 +35,7 @@ Geotime::showStatus();
 ?>
 
 <p style="margin: 10px">
-    <a href="initCriteriaGroups.php">Initialize database</a> (i.e. insert criteria groups)
+    <a href="init.php">Initialize database</a> (i.e. insert criteria groups)
     <br />
     <a href="import.php">Import</a> (download SVGs and other information)
     <br />

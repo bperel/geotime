@@ -51,7 +51,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
         Criteria::drop();
         CriteriaGroup::drop();
-        CriteriaGroup::importFromJson("test/geotime/_data/criteriaGroups.json");
+        Database::importFromJson("test/geotime/_data/criteriaGroups.json", CriteriaGroup::$collection);
     }
 
     protected function tearDown() {
@@ -134,14 +134,14 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         CriteriaGroup::drop();
 
         $this->assertEquals(0, CriteriaGroup::count());
-        $nbImportedObjects = CriteriaGroup::importFromJson('test/geotime/_data/criteriaGroups.json');
+        $nbImportedObjects = Database::importFromJson('test/geotime/_data/criteriaGroups.json', CriteriaGroup::$collection);
         $this->assertEquals(1, CriteriaGroup::count());
         $this->assertEquals(1, $nbImportedObjects);
     }
 
     public function testImportFromJsonInvalidFile() {
         try {
-            CriteriaGroup::importFromJson('test\geotime\data\criteriaGroups.json');
+            Database::importFromJson('test\geotime\data\criteriaGroups.json', CriteriaGroup::$collection);
             $this->fail();
         }
         catch (\InvalidArgumentException $e) {
