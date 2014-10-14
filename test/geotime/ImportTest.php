@@ -187,7 +187,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     public function testGetSparqlRequestUrlParts() {
         $parts = $this->import->getSparqlRequestUrlParts('Test endpoint', $this->generateSampleCriteriaGroup());
 
-        var_dump($parts);
         // Root URL
         $this->assertEquals('http://endPointTest/sparql', $parts[0]);
         // Method
