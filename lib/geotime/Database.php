@@ -47,7 +47,12 @@ class Database {
             $command = 'mongoimport --jsonArray -u ' . Database::$username . ' -p ' . Database::$password . ' -d ' . Database::$db . ' -c ' . $collectionName . ' ' . (getcwd()) . "/" . $fileName . ' 2>&1';
             $status = shell_exec($command);
             preg_match('#imported ([\d]+) objects$#', $status, $match);
-            return intval($match[1]);
+            if ($match) {
+                return intval($match[1]);
+            }
+            else {
+                throw new \InvalidArgumentException('Error on JSON import : ' . $fileName . "\n");
+            }
         }
     }
 }

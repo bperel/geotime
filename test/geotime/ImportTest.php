@@ -130,25 +130,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
     /* Tests */
 
-    public function testImportFromJson() {
-        CriteriaGroup::drop();
-
-        $this->assertEquals(0, CriteriaGroup::count());
-        $nbImportedObjects = Database::importFromJson('test/geotime/_data/criteriaGroups.json', CriteriaGroup::$collection);
-        $this->assertEquals(1, CriteriaGroup::count());
-        $this->assertEquals(1, $nbImportedObjects);
-    }
-
-    public function testImportFromJsonInvalidFile() {
-        try {
-            Database::importFromJson('test\geotime\data\criteriaGroups.json', CriteriaGroup::$collection);
-            $this->fail();
-        }
-        catch (\InvalidArgumentException $e) {
-            $this->assertStringStartsWith('Invalid file name for JSON import', $e->getMessage());
-        }
-    }
-
     public function testInitCriteriaGroups() {
         $this->assertEmpty(Import::$criteriaGroups);
         Import::initCriteriaGroups();
