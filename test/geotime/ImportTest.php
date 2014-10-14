@@ -7,6 +7,7 @@ use geotime\Import;
 use geotime\models\Criteria;
 use geotime\models\CriteriaGroup;
 use geotime\models\Map;
+use geotime\models\SparqlEndpoint;
 use geotime\models\Territory;
 use geotime\Util;
 use PHPUnit_Framework_TestCase;
@@ -52,6 +53,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         Criteria::drop();
         CriteriaGroup::drop();
         Database::importFromJson("test/geotime/_data/criteriaGroups.json", CriteriaGroup::$collection);
+        Database::importFromJson("test/geotime/_data/sparqlEndpoints.json", SparqlEndpoint::$collection);
     }
 
     protected function tearDown() {
@@ -160,6 +162,48 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $query = $this->import->buildSparqlQuery($this->generateSampleCriteriaGroup());
 
         $this->assertEquals("SELECT * WHERE { ?e field1 value1 . ?e field2 value2 . OPTIONAL { ?e field3 value3 } } ORDER BY field1 field2", $query);
+    }
+
+    public function testGetSparqlHttpParametersWithQuery() {
+        $parameters = array(
+            'test' => 'value',
+            'queryContainer' => 'The query should be there : <<query>>'
+        );
+        $parametersWithQuery = $this->import->getSparqlHttpParametersWithQuery($parameters, 'A query');
+
+        $expectedParametersWithQuery = array(
+            'test' => 'value',
+            'queryContainer' => 'The query should be there : A query'
+        );
+        $this->assertEquals($expectedParametersWithQuery, $parametersWithQuery);
+    }
+
+    public function testGetSparqlRequestUrlPartsInexistantEndpoint() {
+        $parts = $this->import->getSparqlRequestUrlParts('Inexisting endpoint', $this->generateSampleCriteriaGroup());
+
+        $this->assertEquals(0, count($parts));
+    }
+
+    public function testGetSparqlRequestUrlParts() {
+        $parts = $this->import->getSparqlRequestUrlParts('Test endpoint', $this->generateSampleCriteriaGroup());
+
+        var_dump($parts);
+        // Root URL
+        $this->assertEquals('http://endPointTest/sparql', $parts[0]);
+        // Method
+        $this->assertEquals('POST', $parts[1]);
+        // Parameters
+        $parameter1Key = key($parts[2][0]);
+        $this->assertEquals('default-graph-uri', $parameter1Key);
+        $this->assertEquals('http://endPointTest', $parts[2][0][$parameter1Key]);
+
+        $parameter2Key = key($parts[2][1]);
+        $this->assertEquals('query', $parameter2Key);
+        $this->assertNotEmpty($parts[2][1][$parameter2Key]);
+
+        $parameter3Key = key($parts[2][2]);
+        $this->assertEquals('output', $parameter3Key);
+        $this->assertEquals('json', $parts[2][2][$parameter3Key]);
     }
 
     public function testGetMapsFromCriteriaGroupCachedJson() {

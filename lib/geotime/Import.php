@@ -5,6 +5,7 @@ namespace geotime;
 use geotime\models\Criteria;
 use geotime\models\CriteriaGroup;
 use geotime\models\Map;
+use geotime\models\SparqlEndpoint;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
@@ -18,6 +19,12 @@ class Import {
 
     /** @var \Logger */
     static $log;
+
+    static $sparqlEndpoints = array(
+        'dbpedia' => array(
+            'rootUrl'  => 'http://dbpedia.org',
+            'endpoint' => 'sparql')
+    );
 
     static function initCriteriaGroups() {
         if (!isset(self::$criteriaGroups)) {
@@ -66,27 +73,61 @@ class Import {
         self::$log->info('SVG and JSON importation done in '.($importEndTime-$importStartTime).'s.');
     }
 
-    function getSparqlQueryResults($criteriaGroup) {
+    /**
+     * @param array $parameters
+     * @param string $query
+     * @return array
+     */
+    function getSparqlHttpParametersWithQuery($parameters, $query) {
+        $replacements = array('<<query>>' => $query);
 
-        $parameters = array(
-            "default-graph-uri" => "http://dbpedia.org",
-            "query" => "PREFIX owl: <http://www.w3.org/2002/07/owl#>
-                        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-                        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                        PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-                        PREFIX dc: <http://purl.org/dc/elements/1.1/>
-                        PREFIX : <http://dbpedia.org/resource/>
-                        PREFIX dbpedia2: <http://dbpedia.org/property/>
-                        PREFIX dbpedia: <http://dbpedia.org/>
-                        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-                      ".$this->buildSparqlQuery($criteriaGroup),
-            "output" => "json"
-        );
+        array_walk($parameters, function(&$parameter, $key, $replacements) {
+            $parameter = str_replace(array_keys($replacements), array_values($replacements), $parameter);
+        }, $replacements);
 
-        return Util::curl_get_contents("http://dbpedia.org/sparql", "POST", $parameters);
+        return $parameters;
     }
 
+    /**
+     * @param string $sparqlEndpointName
+     * @param CriteriaGroup $criteriaGroup
+     * @return string
+     */
+    function getSparqlQueryResults($sparqlEndpointName, CriteriaGroup $criteriaGroup) {
+        list($rootUrlWithEndpoint, $type, $parameters) = $this->getSparqlRequestUrlParts($sparqlEndpointName, $criteriaGroup);
+        return Util::curl_get_contents($rootUrlWithEndpoint, $type, $parameters);
+    }
+
+    /**
+     * @param string $sparqlEndpointName
+     * @param CriteriaGroup $criteriaGroup
+     * @return string
+     */
+    function getSparqlRequestUrlParts($sparqlEndpointName, CriteriaGroup $criteriaGroup) {
+
+        /** @var SparqlEndpoint $sparqlEndpoint */
+        $sparqlEndpoint = SparqlEndpoint::one(array('name' => $sparqlEndpointName));
+
+        if (is_null($sparqlEndpoint)) {
+            self::$log->error('Sparql endpoint '.$sparqlEndpointName.' not found');
+            return array();
+        }
+
+        $query = $this->buildSparqlQuery($criteriaGroup);
+
+        return array(
+            implode('/', array(
+                $sparqlEndpoint->getRootUrl(),
+                $sparqlEndpoint->getEndpoint())),
+            $sparqlEndpoint->getMethod(),
+            $this->getSparqlHttpParametersWithQuery($sparqlEndpoint->getParameters(), $query)
+        );
+    }
+
+    /**
+     * @param CriteriaGroup $criteriaGroup
+     * @return string
+     */
     function buildSparqlQuery(CriteriaGroup $criteriaGroup) {
         $criteriaStrings = array();
         $criteriaOptionalStrings = array();
@@ -129,7 +170,7 @@ class Import {
             $pageAsJson = json_decode(file_get_contents($fileName));
         }
         else {
-            $page = $this->getSparqlQueryResults($criteriaGroup);
+            $page = $this->getSparqlQueryResults('Dbpedia', $criteriaGroup);
             $pageAsJson = json_decode($page);
 
             if (is_null($pageAsJson)) {
