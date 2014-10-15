@@ -15,6 +15,8 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
      */
     var $neImport;
 
+    static $neSovereignties = array('Japan', 'Luxembourg', 'France');
+
     static function setUpBeforeClass() {
         Import::$log->info(__CLASS__." tests started");
     }
@@ -55,7 +57,7 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
         Geotime::clean();
 
         $nbCountriesImported = $this->neImport->import('test/geotime/_data/countries.json');
-        $this->assertEquals(3, $nbCountriesImported);
+        $this->assertEquals(count(self::$neSovereignties), $nbCountriesImported);
     }
 
     public function testImportFromJsonTwice() {
@@ -64,7 +66,7 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
 
         $this->neImport->import('test/geotime/_data/countries.json');
         $nbCountriesImported = $this->neImport->import('test/geotime/_data/countries.json');
-        $this->assertEquals(3, $nbCountriesImported);
+        $this->assertEquals(count(self::$neSovereignties), $nbCountriesImported);
     }
 
     public function testFullyImportedCountry() {

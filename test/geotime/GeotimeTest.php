@@ -17,7 +17,10 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
     static $neAreas = array(
         405267, /* Japan */
           2412, /* Luxembourg */
-         11578 /* French Southern and Antarctic Lands */);
+        633743, /* France */
+         11578  /* French Southern and Antarctic Lands */);
+
+    static $neSovereignties = array('Japan', 'Luxembourg', 'France');
 
     static function setUpBeforeClass() {
         Geotime::$log->info(__CLASS__." tests started");
@@ -55,7 +58,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
 
         $territoriesCountNEData = $periodsAndTerritoriesCount[self::$neMapName];
         $this->assertEquals(array_sum(self::$neAreas), $territoriesCountNEData['area']);
-        $this->assertEquals(count(self::$neAreas), $territoriesCountNEData['count']);
+        $this->assertEquals(count(self::$neSovereignties), $territoriesCountNEData['count']);
     }
 
     public function testClean() {
@@ -92,11 +95,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertEquals('2012', $periodsAndCoverage[1]->start);
         $this->assertEquals('2012', $periodsAndCoverage[1]->end);
-        $this->assertEquals(
-            405267 /* Japan */
-           +  2412 /* Luxembourg */
-           + 11578 /* French Southern and Antarctic Lands */,
-            $periodsAndCoverage[1]->coverage);
+        $this->assertEquals(array_sum(self::$neAreas), $periodsAndCoverage[1]->coverage);
     }
 
     function testGetIncompleteMapInfoFound() {
