@@ -46,22 +46,29 @@ class Util {
     }
 
     /**
-     * @param $imageMapUrl
+     * @param $url
      * @param $fileName
      * @return boolean
      */
-    static function fetchImage($imageMapUrl, $fileName = null)
+    static function fetchSvg($url, $fileName = null)
     {
-        if (!is_null($imageMapUrl)) {
-            $svg = self::curl_get_contents($imageMapUrl, "GET", array());
+        if (!is_null($url)) {
+            $svg = self::curl_get_contents($url, "GET", array());
             if (!empty($svg)) {
                 if (!is_null($fileName)) {
-                    if (false !== file_put_contents(self::$cache_dir_svg . $fileName, $svg)) {
-                        self::$log->info('Successfully stored SVG file '.$fileName);
-                    }
+                    self::storeSvg($svg, $fileName);
                 }
                 return true;
             }
+        }
+        return false;
+    }
+
+    static function storeSvg($svg, $fileName) {
+        $storageStatus = @file_put_contents(self::$cache_dir_svg . $fileName, $svg);
+        if ($storageStatus !== false) {
+            self::$log->info('Successfully stored SVG file '.$fileName);
+            return true;
         }
         return false;
     }

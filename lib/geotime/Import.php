@@ -327,7 +327,7 @@ class Import {
                 self::$log->info('SVG file is outdated and will be retrieved again : '.$map->getFileName());
             }
         }
-        if (is_null($imageMapUrl) || Util::fetchImage($imageMapUrl, $map->getFileName())) {
+        if (is_null($imageMapUrl) || Util::fetchSvg($imageMapUrl, $map->getFileName())) {
             $map->setUploadDate($imageMapUploadDate);
             $map->save();
         }
