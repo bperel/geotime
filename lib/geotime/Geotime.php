@@ -26,9 +26,9 @@ class Geotime {
      * @return void
      */
     static function showStatus() {
-        $periodsAndTerritoriesCount = self::getMapsAndLocalizedTerritoriesCount();
-
         self::$log->info(self::getCriteriaGroupsNumber().' criteria groups found');
+
+        $periodsAndTerritoriesCount = self::getMapsAndLocalizedTerritoriesCount();
         self::$log->info(count($periodsAndTerritoriesCount).' periods found');
         foreach($periodsAndTerritoriesCount as $periodStr=>$territoriesData) {
             self::$log->info($periodStr.' : '.$territoriesData['count'].' territories located covering '.$territoriesData['area'].' sq. km');

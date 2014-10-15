@@ -382,4 +382,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->assertTrue($hasCreatedMap);
         $this->assertEquals(1, Map::count());
     }
+
+    function testGetCriteriaGroupNumber() {
+        $this->assertEquals(1, Geotime::getCriteriaGroupsNumber());
+    }
 } 
