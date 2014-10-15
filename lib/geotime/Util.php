@@ -13,7 +13,7 @@ class Util {
     /** @var \Logger */
     static $log;
 
-    static function curl_get_contents($url, $type, $parameters = array()) {
+    static function getContents($url, $type, $parameters = array()) {
 
         $ch = curl_init();
         if ($type === "POST") {
@@ -53,7 +53,7 @@ class Util {
     static function fetchSvg($url, $fileName = null)
     {
         if (!is_null($url)) {
-            $svg = self::curl_get_contents($url, "GET", array());
+            $svg = self::getContents($url, "GET", array());
             if (!empty($svg)) {
                 if (!is_null($fileName)) {
                     self::storeSvg($svg, $fileName);

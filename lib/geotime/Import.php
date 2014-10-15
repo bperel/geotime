@@ -95,7 +95,7 @@ class Import {
      */
     function getSparqlQueryResults($sparqlEndpointName, CriteriaGroup $criteriaGroup) {
         list($rootUrlWithEndpoint, $type, $parameters) = $this->getSparqlRequestUrlParts($sparqlEndpointName, $criteriaGroup);
-        return Util::curl_get_contents($rootUrlWithEndpoint, $type, $parameters);
+        return Util::getContents($rootUrlWithEndpoint, $type, $parameters);
     }
 
     /**
@@ -192,7 +192,7 @@ class Import {
      * @param CriteriaGroup $criteriaGroup
      * @return \stdClass Object with start and end dates
      */
-    public function getDatesFromSparqlResult($result, $criteriaGroup) {
+    public function getDatesFromSparqlResult(\stdClass $result, CriteriaGroup $criteriaGroup) {
         switch($criteriaGroup->getName()) {
             case 'Former empires':
                 $objectWithDates = new \stdClass();
@@ -219,11 +219,11 @@ class Import {
 
     /**
      * Create Map object instances from a JSON-formatted SPARQL page
-     * @param object $pageAsJson
+     * @param \stdClass $pageAsJson
      * @param CriteriaGroup $criteriaGroup
      * @return Map[]
      */
-    public function getMapsFromSparqlResults($pageAsJson, $criteriaGroup)
+    public function getMapsFromSparqlResults(\stdClass $pageAsJson, $criteriaGroup)
     {
         $maps = array();
         foreach ($pageAsJson->results->bindings as $result) {
@@ -298,7 +298,7 @@ class Import {
      */
     function getCommonsImageXMLInfo($imageMapFullName) {
         $url = "http://tools.wmflabs.org/magnus-toolserver/commonsapi.php";
-        $contents = Util::curl_get_contents($url, "GET", array("image" => $imageMapFullName));
+        $contents = Util::getContents($url, "GET", array("image" => $imageMapFullName));
         if ($contents === false) {
             return null;
         }
@@ -314,7 +314,7 @@ class Import {
      * @param string $imageMapUrl NULL if we want the Map object to be stored but not the file to be retrieved
      * @return boolean TRUE if a new map has been stored, FALSE if we keep the existing one
      */
-    function fetchAndStoreImage($map, $imageMapUploadDate, $imageMapUrl = null) {
+    function fetchAndStoreImage(Map $map, \MongoDate $imageMapUploadDate, $imageMapUrl = null) {
         // Check if map exists in DB
         // If the retrieved image upload date is the same as the stored map, we keep the map in DB
         if (!is_null($map->getId())) {

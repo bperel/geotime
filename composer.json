@@ -2,7 +2,7 @@
 	"name": "bperel/geotime",
 	"description": "Kingdoms though time.",
 	"minimum-stability": "stable",
-	"license": "cc-by-sa",
+	"license": "CC-BY-SA-2.0",
 	"authors": [
 		{
 			"name": "Bruno Perel",
