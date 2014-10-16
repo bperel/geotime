@@ -23,12 +23,22 @@ Database::connect();
 
     <link rel="stylesheet" href="../css/normalize.min.css">
     <link rel="stylesheet" href="../css/main.css">
+    <link type="text/css" rel="stylesheet" href="../js/vendor/light-gallery/css/lightGallery.css" />
 
     <script src="../js/vendor/modernizr-2.6.2.min.js"></script>
 </head>
 <body>
 
 <h1>Geotime admin area</h1>
+
+<div id="status">
+    <div class="loading">Loading...</div>
+    <ul id="lightGallery">
+        <li data-src data-html="filename" class="template">
+            <img />
+        </li>
+    </ul>
+</div>
 
 <?php
 Geotime::showStatus();
@@ -44,7 +54,12 @@ Geotime::showStatus();
 
 
 <script>window.jQuery || document.write('<script src="../js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
-
 <script src="../js/plugins.js"></script>
+<script src="../js/vendor/light-gallery/js/lightGallery.min.js"></script>
+<script src="../js/map.js"></script>
+
+<script type="text/javascript">
+    showMapData();
+</script>
 </body>
 </html>
