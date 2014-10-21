@@ -28,8 +28,8 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
 
     static function tearDownAfterClass()
     {
-//        @unlink(Util::$cache_dir_svg . self::$cachedFileName);
-//        @unlink(Util::$cache_dir_thumbnails . self::$cachedFileName . ".png");
+        @unlink(Util::$cache_dir_svg . self::$cachedFileName);
+        @unlink(Util::$cache_dir_thumbnails . self::$cachedFileName . ".png");
 
         Util::$log->info(__CLASS__ . " tests ended");
     }
