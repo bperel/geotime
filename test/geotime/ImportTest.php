@@ -347,8 +347,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testFetchAndStoreImageNewMap() {
+        $mapFileName = 'testImage.svg';
         $map = Map::generateAndSaveReferences('testImage.svg', '1980-01-02', '1991-02-03');
-        $hasCreatedMap = $this->import->fetchAndStoreImage($map, new \MongoDate(strtotime('2013-07-25T17:33:40Z')));
+        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $mapFileName, new \MongoDate(strtotime('2013-07-25T17:33:40Z')));
 
         $this->assertTrue($hasCreatedMap);
         $this->assertEquals(1, Map::count());
@@ -363,9 +364,10 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     public function testFetchAndStoreImageExistingMap() {
         $uploadDate = new \MongoDate(strtotime('2013-01-02T03:04:05Z'));
 
-        $map = $this->generateAndSaveSampleMap('testImage.svg', $uploadDate);
+        $mapFileName = 'testImage.svg';
+        $map = $this->generateAndSaveSampleMap($mapFileName, $uploadDate);
 
-        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $uploadDate);
+        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $mapFileName, $uploadDate);
 
         $this->assertFalse($hasCreatedMap);
         $this->assertEquals(1, Map::count());
@@ -375,9 +377,10 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $storedMapUploadDate = new \MongoDate(strtotime('2012-01-02T03:04:05Z'));
         $uploadDate = new \MongoDate(strtotime('2013-01-02T03:04:05Z'));
 
-        $map = $this->generateAndSaveSampleMap('testImage.svg', $storedMapUploadDate);
+        $mapFileName = 'testImage.svg';
+        $map = $this->generateAndSaveSampleMap($mapFileName, $storedMapUploadDate);
 
-        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $uploadDate);
+        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $mapFileName, $uploadDate);
 
         $this->assertTrue($hasCreatedMap);
         $this->assertEquals(1, Map::count());

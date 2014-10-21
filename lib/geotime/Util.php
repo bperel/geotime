@@ -8,12 +8,20 @@ Logger::configure("lib/geotime/logger.xml");
 
 class Util {
     public static $cache_dir_svg = "cache/svg/";
+    public static $cache_dir_thumbnails = "cache/thumbnails/";
     public static $cache_dir_json = "cache/json/";
+    public static $phantomjs_path = "bin/phantomjs";
+    public static $rasterize_script_path = "js/rasterize.js";
+    public static $rasterize_script_success_output = "thumbnail created";
+    public static $thumbnailSize = 400;
+
+    public static $thumbnail_url_template = "https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/<<svg>>";
+    public static $thumbnail_extension = "png";
 
     /** @var \Logger */
     static $log;
 
-    static function curl_get_contents($url, $type, $parameters = array()) {
+    static function curl_get_contents($url, $type = "GET", $parameters = array(), $headersOnly = false) {
 
         $ch = curl_init();
         if ($type === "POST") {
@@ -25,6 +33,9 @@ class Util {
         }
         curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/525.13 (KHTML, like Gecko) Chrome/0.A.B.C Safari/525.13');
         curl_setopt($ch, CURLOPT_URL, $url);
+        if ($headersOnly) {
+            curl_setopt($ch, CURLOPT_HEADER, TRUE);
+        }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($ch, CURLOPT_ENCODING, "gzip");
 
@@ -35,42 +46,118 @@ class Util {
         return $page;
     }
 
-    static function getImageExtension($imageMapFullName) {
-        return substr($imageMapFullName, strrpos($imageMapFullName, "."));
+    static function getImageExtension($imageFullName) {
+        return substr($imageFullName, strrpos($imageFullName, "."));
     }
 
-    static function cleanupImageName($imageMapFullName) {
-        $imageMapExtension = self::getImageExtension($imageMapFullName);
-        $imageMapName = substr($imageMapFullName, 0, strlen($imageMapFullName) - strlen($imageMapExtension));
-        return trim($imageMapName).$imageMapExtension;
+    static function cleanupImageName($imageFullName) {
+        $imageExtension = self::getImageExtension($imageFullName);
+        $imageName = substr($imageFullName, 0, strlen($imageFullName) - strlen($imageExtension));
+        return trim($imageName).$imageExtension;
+    }
+
+    static function getSvgThumbnail($svgFullName) {
+        $svgThumbnailUrl = str_replace("<<svg>>", $svgFullName, self::$thumbnail_url_template);
+        $pageWithLocationHeaders = explode("\n", self::curl_get_contents($svgThumbnailUrl, "GET", array("width"=>300), true));
+        self::$log->info($svgThumbnailUrl);
+        foreach($pageWithLocationHeaders as $header) {
+            if (strpos($header, "Location:") !== false) {
+                $svgThumbnailRedirection = trim(str_replace("Location:", "", $header));
+                self::$log->info("Fetching thumbnail URL $svgThumbnailRedirection");
+                return self::curl_get_contents($svgThumbnailRedirection);
+            }
+            self::$log->info("Header $header");
+        }
+        return null;
     }
 
     /**
      * @param $url
-     * @param $fileName
+     * @param $svgFullName
+     * @param $newFileName
      * @return boolean
      */
-    static function fetchSvg($url, $fileName = null)
+    static function fetchSvgWithThumbnail($url, $svgFullName, $newFileName = null)
     {
         if (!is_null($url)) {
-            $svg = self::curl_get_contents($url, "GET", array());
+            $svg = self::curl_get_contents($url);
             if (!empty($svg)) {
-                if (!is_null($fileName)) {
-                    self::storeSvg($svg, $fileName);
+                if (!is_null($newFileName)) {
+                    return self::storeSvgWithThumbnail($svg, $svgFullName);
                 }
-                return true;
+                else {
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    static function storeSvg($svg, $fileName) {
-        $storageStatus = @file_put_contents(self::$cache_dir_svg . $fileName, $svg);
-        if ($storageStatus !== false) {
+    static function storeSvgWithThumbnail($svg, $fileName) {
+        if (false !== @file_put_contents(self::$cache_dir_svg . $fileName, $svg)) {
             self::$log->info('Successfully stored SVG file '.$fileName);
-            return true;
+            return self::generateThumbnailFromSvg($fileName);
         }
-        return false;
+        else {
+            self::$log->error('Failed to store SVG file '.$fileName);
+            return false;
+        }
+    }
+
+    static function generateThumbnailFromSvg($svgName) {
+        $thumbnailOutput = self::$cache_dir_thumbnails . $svgName . '.png';
+        $command = implode(' ', array(self::$phantomjs_path, self::$rasterize_script_path, '"' . self::$cache_dir_svg . $svgName . '"', '"' . $thumbnailOutput . '"', '2>&1'));
+        $output = shell_exec($command);
+        if (trim($output) === self::$rasterize_script_success_output) {
+            if (self::resizeImage($thumbnailOutput, self::$thumbnailSize)) {
+                self::$log->info('Successfully stored thumbnail for SVG file ' . $svgName);
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            self::$log->error('Failed to store thumbnail for SVG file '.$svgName);
+            self::$log->debug($command);
+            return false;
+        }
+    }
+
+    static function resizeImage($thumbnailPath, $size) {
+        list($origWidth, $origHeight, $type, $attr) = getimagesize($thumbnailPath);
+        if ($origWidth > $origHeight) {
+            $ratio = $size / $origWidth;
+            $height = $origHeight * $ratio;
+            $width = $size;
+        }
+        else {
+            $ratio = $size / $origHeight;
+            $width = $origWidth * $ratio;
+            $height = $size;
+        }
+
+        $oldImage = imagecreatefrompng($thumbnailPath);
+        $newImage = imagecreatetruecolor($width, $height);
+
+        // Retain transparency
+        $current_transparent = imagecolortransparent($oldImage);
+        if($current_transparent != -1) {
+            $transparent_color = imagecolorsforindex($oldImage, $current_transparent);
+            $current_transparent = imagecolorallocate($newImage, $transparent_color['red'], $transparent_color['green'], $transparent_color['blue']);
+            imagefill($newImage, 0, 0, $current_transparent);
+            imagecolortransparent($newImage, $current_transparent);
+        }
+        else {
+            imagealphablending($newImage, false);
+            $color = imagecolorallocatealpha($newImage, 0, 0, 0, 127);
+            imagefill($newImage, 0, 0, $color);
+            imagesavealpha($newImage, true);
+        }
+        // Retain transparency - END
+
+        imagecopyresampled($newImage, $oldImage, 0, 0, 0, 0, $width, $height, $origWidth, $origHeight);
+        return imagepng($newImage, $thumbnailPath);
     }
 }
 

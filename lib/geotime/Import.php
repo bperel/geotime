@@ -63,7 +63,7 @@ class Import {
                     else {
                         $imageMapUrl = $imageMapUrlAndUploadDate['url'];
                         $imageMapUploadDate = $imageMapUrlAndUploadDate['uploadDate'];
-                        $this->fetchAndStoreImage($currentMap, $imageMapUploadDate, $imageMapUrl);
+                        $this->fetchAndStoreImage($currentMap, $imageMapFullName, $imageMapUploadDate, $imageMapUrl);
                     }
                 }
             }
@@ -310,11 +310,12 @@ class Import {
 
     /**
      * @param Map $map
+     * @param string $imageMapFullName
      * @param \MongoDate $imageMapUploadDate
      * @param string $imageMapUrl NULL if we want the Map object to be stored but not the file to be retrieved
      * @return boolean TRUE if a new map has been stored, FALSE if we keep the existing one
      */
-    function fetchAndStoreImage($map, $imageMapUploadDate, $imageMapUrl = null) {
+    function fetchAndStoreImage($map, $imageMapFullName, $imageMapUploadDate, $imageMapUrl = null) {
         // Check if map exists in DB
         // If the retrieved image upload date is the same as the stored map, we keep the map in DB
         if (!is_null($map->getId())) {
@@ -327,7 +328,7 @@ class Import {
                 self::$log->info('SVG file is outdated and will be retrieved again : '.$map->getFileName());
             }
         }
-        if (is_null($imageMapUrl) || Util::fetchSvg($imageMapUrl, $map->getFileName())) {
+        if (is_null($imageMapUrl) || Util::fetchSvgWithThumbnail($imageMapUrl, $imageMapFullName, $map->getFileName())) {
             $map->setUploadDate($imageMapUploadDate);
             $map->save();
         }

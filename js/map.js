@@ -201,22 +201,3 @@ function dragresize(){
 
 	resizeExternalMap(newWidth, newHeight);
 }
-
-function showMapData() {
-	$.ajax('../gateway.php', {
-		dataType: 'json',
-		data: { getMaps: true },
-		success: function(data) {
-			var gallery = $('#lightGallery');
-			var thumbTemplate = gallery.find('li.template');
-			$.each(data, function(mapFileName, territoriesData) {
-				thumbTemplate
-					.after(thumbTemplate.clone(true).removeClass('template')
-						.attr({dataSrc: '../cache/svg/'+mapFileName, dataHtml: mapFileName})
-						.find('img').attr({src: '../cache/svg/'+mapFileName})
-				);
-			});
-			gallery.lightGallery();
-		}
-	})
-}

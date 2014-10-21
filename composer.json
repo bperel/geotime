@@ -14,11 +14,23 @@
 		"phpunit/phpunit": "3.7.*",
 		"purekid/mongodm": "1.4.2",
 		"psr/log": "1.0.0",
-		"apache/log4php": "2.3.0"
+		"apache/log4php": "2.3.0",
+		"jakoch/phantomjs-installer": "1.9.*"
 	},
 	"autoload": {
 		"psr-0": {
 			"geotime": "lib/"
 		}
+	},
+	"config": {
+	  "bin-dir": "bin"
+	},
+	"scripts": {
+	  "post-install-cmd": [
+		"PhantomInstaller\\Installer::installPhantomJS"
+	  ],
+	  "post-update-cmd": [
+		"PhantomInstaller\\Installer::installPhantomJS"
+	  ]
 	}
 }
