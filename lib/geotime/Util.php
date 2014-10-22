@@ -26,7 +26,7 @@ class Util {
         $ch = curl_init();
         if ($type === "POST") {
             curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
         }
         else {
             $url .= '?' . http_build_query($parameters);

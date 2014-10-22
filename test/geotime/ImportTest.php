@@ -52,11 +52,15 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
         Criteria::drop();
         CriteriaGroup::drop();
-        Database::importFromJson("test/geotime/_data/criteriaGroups.json", CriteriaGroup::$collection);
-        Database::importFromJson("test/geotime/_data/sparqlEndpoints.json", SparqlEndpoint::$collection);
+        SparqlEndpoint::drop();
+
+        CriteriaGroup::importFromJson("test/geotime/_data/criteriaGroups.json");
+        SparqlEndpoint::importFromJson("test/geotime/_data/sparqlEndpoints.json");
     }
 
     protected function tearDown() {
+        SparqlEndpoint::drop();
+
         CriteriaGroup::drop();
         Criteria::drop();
 
@@ -166,8 +170,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
     public function testGetSparqlHttpParametersWithQuery() {
         $parameters = array(
-            'test' => 'value',
-            'queryContainer' => 'The query should be there : <<query>>'
+            array('test' => 'value'),
+            array('queryContainer' => 'The query should be there : <<query>>')
         );
         $parametersWithQuery = $this->import->getSparqlHttpParametersWithQuery($parameters, 'A query');
 
@@ -192,17 +196,17 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         // Method
         $this->assertEquals('POST', $parts[1]);
         // Parameters
-        $parameter1Key = key($parts[2][0]);
-        $this->assertEquals('default-graph-uri', $parameter1Key);
-        $this->assertEquals('http://endPointTest', $parts[2][0][$parameter1Key]);
+        $parameter1Key = 'default-graph-uri';
+        $this->assertArrayHasKey($parameter1Key, $parts[2]);
+        $this->assertEquals('http://endPointTest', $parts[2][$parameter1Key]);
 
-        $parameter2Key = key($parts[2][1]);
-        $this->assertEquals('query', $parameter2Key);
-        $this->assertNotEmpty($parts[2][1][$parameter2Key]);
+        $parameter2Key = 'query';
+        $this->assertArrayHasKey($parameter2Key, $parts[2]);
+        $this->assertNotEmpty($parts[2][$parameter2Key]);
 
-        $parameter3Key = key($parts[2][2]);
-        $this->assertEquals('output', $parameter3Key);
-        $this->assertEquals('json', $parts[2][2][$parameter3Key]);
+        $parameter3Key = 'output';
+        $this->assertArrayHasKey($parameter3Key, $parts[2]);
+        $this->assertEquals('json', $parts[2][$parameter3Key]);
     }
 
     public function testGetMapsFromCriteriaGroupCachedJson() {
@@ -222,7 +226,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $echoOutput = ob_get_clean();
 
         $this->assertEmpty($maps);
-        $this->assertStringStartsWith('ERROR - ', $echoOutput);
+        $this->assertRegExp('# - ERROR - #', $echoOutput);
     }
 
     public function testGetMapsFromCriteriaGroupExistingMap() {
@@ -296,7 +300,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $echoOutput = ob_get_clean();
 
         $this->assertNull($imageInfos);
-        $this->assertStringStartsWith('ERROR - ', $echoOutput);
+        $this->assertRegExp('# - ERROR - #', $echoOutput);
     }
 
     public function testGetNonexistantImageURL()
@@ -308,7 +312,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $echoOutput = ob_get_clean();
 
         $this->assertNull($imageInfos);
-        $this->assertStringStartsWith('WARN - ', $echoOutput);
+        $this->assertRegExp('# - WARN - #', $echoOutput);
     }
 
     public function testGetImageInfo()

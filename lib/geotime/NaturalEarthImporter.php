@@ -24,6 +24,7 @@ class NaturalEarthImporter {
      */
     function import($fileName) {
 
+        $start = microtime(true);
         /** @var Map $naturalDataMap */
         $naturalDataMap = Map::one(array('fileName'=>$fileName));
         if (!is_null($naturalDataMap)) {
@@ -76,9 +77,10 @@ class NaturalEarthImporter {
 
         $nbImportedCountries = count($countriesAndCoordinates);
 
-        if (is_int($nbImportedCountries)) {
-            self::$log->info($nbImportedCountries.' country positions have been imported from Natural Earth data');
-        }
+        $end = microtime(true);
+        $timeSpent = (intval($end-$start))/1000;
+
+        self::$log->info($nbImportedCountries.' country positions have been imported from Natural Earth data in '.$timeSpent.'s');
 
         return $nbImportedCountries;
     }

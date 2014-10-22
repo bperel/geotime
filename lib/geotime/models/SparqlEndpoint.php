@@ -3,10 +3,12 @@
 namespace geotime\models;
 
 use Purekid\Mongodm\Model;
+use geotime\Database;
 
 
 class SparqlEndpoint extends Model {
     static $collection = 'sparqlEndpoints';
+    static $cachePath = 'data/sparqlEndpoints.json';
 
     protected static $attrs = array(
         'name' => array('type' => 'string'),
@@ -15,6 +17,13 @@ class SparqlEndpoint extends Model {
         'method' => array('type' => 'string'),
         'parameters' => array('type' => 'array')
     );
+
+    public static function importFromJson($fileName=null) {
+        if (is_null($fileName)) {
+            $fileName = self::$cachePath;
+        }
+        return Database::importFromJson($fileName, self::$collection);
+    }
 
     // @codeCoverageIgnoreStart
     /**

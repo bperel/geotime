@@ -11,7 +11,9 @@ chdir("..");
 require_once("vendor/autoload.php");
 Database::connect();
 
-if (isset($_GET['clean'])) {
+$clean = isset($_GET['clean']);
+
+if ($clean) {
     Geotime::clean();
 }
 
@@ -19,6 +21,6 @@ $naturalEarthImporter = new NaturalEarthImporter();
 $naturalEarthImporter->import('data/external/ne_110m_admin_0_countries.json');
 
 $import = new Import();
-$import->execute();
+$import->execute(!$clean);
 
-?><br /><a href="index.php">Back to admin home</a>
+?><br /><a href="index.html">Back to admin home</a>

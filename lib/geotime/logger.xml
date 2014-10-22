@@ -1,6 +1,9 @@
 <configuration xmlns="http://logging.apache.org/log4php/">
 
     <appender name="myEchoAppender" class="LoggerAppenderEcho" threshold="INFO">
+        <layout class="LoggerLayoutPattern">
+            <param name="conversionPattern" value="%date{Y-m-d H:i:s,u} - %level - %message%newline" />
+        </layout>
         <param name="htmlLineBreaks" value="true" />
     </appender>
 

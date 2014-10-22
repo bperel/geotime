@@ -3,10 +3,12 @@
 namespace geotime\models;
 
 use Purekid\Mongodm\Model;
+use geotime\Database;
 
 
 class CriteriaGroup extends Model {
     static $collection = 'criteriaGroups';
+    static $cachePath = 'data/criteriaGroups.json';
 
     protected static $attrs = array(
         'criteria' => array('model' => 'geotime\models\Criteria', 'type' => 'embeds'),
@@ -14,6 +16,13 @@ class CriteriaGroup extends Model {
         'sort' => array('type' => 'array'),
         'name' => array('type' => 'string')
     );
+
+    public static function importFromJson($fileName=null) {
+        if (is_null($fileName)) {
+            $fileName = self::$cachePath;
+        }
+        return Database::importFromJson($fileName, self::$collection);
+    }
 
     // @codeCoverageIgnoreStart
     /**
