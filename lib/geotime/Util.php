@@ -56,21 +56,6 @@ class Util {
         return trim($imageName).$imageExtension;
     }
 
-    static function getSvgThumbnail($svgFullName) {
-        $svgThumbnailUrl = str_replace("<<svg>>", $svgFullName, self::$thumbnail_url_template);
-        $pageWithLocationHeaders = explode("\n", self::curl_get_contents($svgThumbnailUrl, "GET", array("width"=>300), true));
-        self::$log->info($svgThumbnailUrl);
-        foreach($pageWithLocationHeaders as $header) {
-            if (strpos($header, "Location:") !== false) {
-                $svgThumbnailRedirection = trim(str_replace("Location:", "", $header));
-                self::$log->info("Fetching thumbnail URL $svgThumbnailRedirection");
-                return self::curl_get_contents($svgThumbnailRedirection);
-            }
-            self::$log->info("Header $header");
-        }
-        return null;
-    }
-
     /**
      * @param $url
      * @param $svgFullName
