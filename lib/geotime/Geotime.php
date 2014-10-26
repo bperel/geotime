@@ -23,25 +23,15 @@ class Geotime {
     static $optimalCoverage = 145389748;
 
     /**
-     * @return void
-     */
-    static function showStatus() {
-        self::$log->info(self::getCriteriaGroupsNumber().' criteria groups found');
-
-        $mapsAndTerritoriesCount = self::getMapsAndLocalizedTerritoriesCount();
-        self::$log->info(count($mapsAndTerritoriesCount).' periods found');
-        foreach($mapsAndTerritoriesCount as $mapFilename=>$territoriesData) {
-            self::$log->info($mapFilename.' : '.$territoriesData['count'].' territories located covering '.$territoriesData['area'].' sq. km');
-        }
-    }
-
-    /**
+     * @param $svgOnly boolean
      * @return array
      */
-    static function getMapsAndLocalizedTerritoriesCount() {
+    static function getMapsAndLocalizedTerritoriesCount($svgOnly) {
+
+        $filters = $svgOnly ? array('fileName' => array('$regex' => '.svg$')) : array();
 
         return array_reduce(
-            Map::find(array())->toArray(),
+            Map::find($filters)->toArray(),
             function($result, Map $map) {
                 $territories = $map->getTerritories()->toArray();
                 $result[$map->getFileName()] = array(

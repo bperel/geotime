@@ -13,7 +13,7 @@ if (isset($_GET['getCoverage'])) {
     $object = Geotime::getCoverageInfo();
 }
 elseif (isset($_GET['getMaps'])) {
-    $object = Geotime::getMapsAndLocalizedTerritoriesCount();
+    $object = Geotime::getMapsAndLocalizedTerritoriesCount(true);
 }
 elseif (isset($_GET['getSvg'])) {
     $year = $_GET['year'];

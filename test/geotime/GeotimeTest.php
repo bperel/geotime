@@ -47,7 +47,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
 
     public function testGetPeriodsAndTerritoriesData() {
 
-        $periodsAndTerritoriesCount = Geotime::getMapsAndLocalizedTerritoriesCount();
+        $periodsAndTerritoriesCount = Geotime::getMapsAndLocalizedTerritoriesCount(false);
 
         $this->assertEquals(2, count(array_keys($periodsAndTerritoriesCount)));
 
@@ -58,6 +58,17 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $territoriesCountNEData = $periodsAndTerritoriesCount[self::$neMapName];
         $this->assertEquals(array_sum(self::$neAreas), $territoriesCountNEData['area']);
         $this->assertEquals(count(self::$neSovereignties), $territoriesCountNEData['count']);
+    }
+
+    public function testGetPeriodsAndTerritoriesDataSvgOnly() {
+
+        $periodsAndTerritoriesCount = Geotime::getMapsAndLocalizedTerritoriesCount(true);
+
+        $this->assertEquals(1, count(array_keys($periodsAndTerritoriesCount)));
+
+        $territoriesCountSvgData = $periodsAndTerritoriesCount[self::$customMapName];
+        $this->assertEquals(1, $territoriesCountSvgData['count']);
+        $this->assertEquals(0, $territoriesCountSvgData['area']);
     }
 
     public function testClean() {

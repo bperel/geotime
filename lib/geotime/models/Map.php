@@ -50,7 +50,7 @@ class Map extends Model {
     }
 
     /**
-     * @return Territory[]
+     * @return \Purekid\Mongodm\Collection
      */
     public function getTerritories() {
         return $this->__getter('territories');
