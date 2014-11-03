@@ -3,8 +3,14 @@
 namespace geotime;
 
 use Purekid\Mongodm\MongoDB;
+use Logger;
+
+Logger::configure("lib/geotime/logger.xml");
 
 class Database {
+
+    /** @var \Logger */
+    static $log;
 
     static $username;
     static $password;
@@ -17,8 +23,8 @@ class Database {
 
     static function connect($dbName = null) {
         $conf = parse_ini_file('/home/geotime/config.ini');
-        Database::$username = $conf['username'];
-        Database::$password = $conf['password'];
+        self::$username = $conf['username'];
+        self::$password = $conf['password'];
 
         self::$db = is_null($dbName) ? Database::$dbName : $dbName;
 
@@ -37,7 +43,7 @@ class Database {
     /**
      * @param $fileName string : JSON file to import
      * @param $collectionName string : Name of the collection to create
-     * @return int|null Number of imported object, or NULL on error
+     * @return int|null Number of imported objects, or NULL on error
      */
     public static function importFromJson($fileName, $collectionName)
     {
@@ -48,11 +54,16 @@ class Database {
             $status = shell_exec($command);
             preg_match('#imported ([\d]+) objects$#', $status, $match);
             if ($match) {
-                return intval($match[1]);
+                $nbImportedObjects = intval($match[1]);
+                self::$log->info("Successfully imported $nbImportedObjects objects into $collectionName");
+                return $nbImportedObjects;
             }
             else {
+                self::$log->error("An error occured while importing data into $collectionName");
                 throw new \InvalidArgumentException('Error on JSON import : ' . $fileName . "\n");
             }
         }
     }
 }
+
+Database::$log = Logger::getLogger("main");

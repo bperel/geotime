@@ -52,11 +52,15 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
         Criteria::drop();
         CriteriaGroup::drop();
-        Database::importFromJson("test/geotime/_data/criteriaGroups.json", CriteriaGroup::$collection);
-        Database::importFromJson("test/geotime/_data/sparqlEndpoints.json", SparqlEndpoint::$collection);
+        SparqlEndpoint::drop();
+
+        CriteriaGroup::importFromJson("test/geotime/_data/criteriaGroups.json");
+        SparqlEndpoint::importFromJson("test/geotime/_data/sparqlEndpoints.json");
     }
 
     protected function tearDown() {
+        SparqlEndpoint::drop();
+
         CriteriaGroup::drop();
         Criteria::drop();
 
@@ -166,8 +170,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
     public function testGetSparqlHttpParametersWithQuery() {
         $parameters = array(
-            'test' => 'value',
-            'queryContainer' => 'The query should be there : <<query>>'
+            array('test' => 'value'),
+            array('queryContainer' => 'The query should be there : <<query>>')
         );
         $parametersWithQuery = $this->import->getSparqlHttpParametersWithQuery($parameters, 'A query');
 
@@ -192,17 +196,17 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         // Method
         $this->assertEquals('POST', $parts[1]);
         // Parameters
-        $parameter1Key = key($parts[2][0]);
-        $this->assertEquals('default-graph-uri', $parameter1Key);
-        $this->assertEquals('http://endPointTest', $parts[2][0][$parameter1Key]);
+        $parameter1Key = 'default-graph-uri';
+        $this->assertArrayHasKey($parameter1Key, $parts[2]);
+        $this->assertEquals('http://endPointTest', $parts[2][$parameter1Key]);
 
-        $parameter2Key = key($parts[2][1]);
-        $this->assertEquals('query', $parameter2Key);
-        $this->assertNotEmpty($parts[2][1][$parameter2Key]);
+        $parameter2Key = 'query';
+        $this->assertArrayHasKey($parameter2Key, $parts[2]);
+        $this->assertNotEmpty($parts[2][$parameter2Key]);
 
-        $parameter3Key = key($parts[2][2]);
-        $this->assertEquals('output', $parameter3Key);
-        $this->assertEquals('json', $parts[2][2][$parameter3Key]);
+        $parameter3Key = 'output';
+        $this->assertArrayHasKey($parameter3Key, $parts[2]);
+        $this->assertEquals('json', $parts[2][$parameter3Key]);
     }
 
     public function testGetMapsFromCriteriaGroupCachedJson() {
@@ -222,7 +226,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $echoOutput = ob_get_clean();
 
         $this->assertEmpty($maps);
-        $this->assertStringStartsWith('ERROR - ', $echoOutput);
+        $this->assertRegExp('# - ERROR - #', $echoOutput);
     }
 
     public function testGetMapsFromCriteriaGroupExistingMap() {
@@ -296,7 +300,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $echoOutput = ob_get_clean();
 
         $this->assertNull($imageInfos);
-        $this->assertStringStartsWith('ERROR - ', $echoOutput);
+        $this->assertRegExp('# - ERROR - #', $echoOutput);
     }
 
     public function testGetNonexistantImageURL()
@@ -308,7 +312,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $echoOutput = ob_get_clean();
 
         $this->assertNull($imageInfos);
-        $this->assertStringStartsWith('WARN - ', $echoOutput);
+        $this->assertRegExp('# - WARN - #', $echoOutput);
     }
 
     public function testGetImageInfo()
@@ -347,8 +351,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testFetchAndStoreImageNewMap() {
+        $mapFileName = 'testImage.svg';
         $map = Map::generateAndSaveReferences('testImage.svg', '1980-01-02', '1991-02-03');
-        $hasCreatedMap = $this->import->fetchAndStoreImage($map, new \MongoDate(strtotime('2013-07-25T17:33:40Z')));
+        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $mapFileName, new \MongoDate(strtotime('2013-07-25T17:33:40Z')));
 
         $this->assertTrue($hasCreatedMap);
         $this->assertEquals(1, Map::count());
@@ -363,9 +368,10 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     public function testFetchAndStoreImageExistingMap() {
         $uploadDate = new \MongoDate(strtotime('2013-01-02T03:04:05Z'));
 
-        $map = $this->generateAndSaveSampleMap('testImage.svg', $uploadDate);
+        $mapFileName = 'testImage.svg';
+        $map = $this->generateAndSaveSampleMap($mapFileName, $uploadDate);
 
-        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $uploadDate);
+        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $mapFileName, $uploadDate);
 
         $this->assertFalse($hasCreatedMap);
         $this->assertEquals(1, Map::count());
@@ -375,9 +381,10 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $storedMapUploadDate = new \MongoDate(strtotime('2012-01-02T03:04:05Z'));
         $uploadDate = new \MongoDate(strtotime('2013-01-02T03:04:05Z'));
 
-        $map = $this->generateAndSaveSampleMap('testImage.svg', $storedMapUploadDate);
+        $mapFileName = 'testImage.svg';
+        $map = $this->generateAndSaveSampleMap($mapFileName, $storedMapUploadDate);
 
-        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $uploadDate);
+        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $mapFileName, $uploadDate);
 
         $this->assertTrue($hasCreatedMap);
         $this->assertEquals(1, Map::count());

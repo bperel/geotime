@@ -9,46 +9,70 @@ use PHPUnit_Framework_TestCase;
 class UtilTest extends \PHPUnit_Framework_TestCase {
 
     static $fixtures_dir_svg = "test/geotime/_fixtures/svg/";
-    static $cachedFileName = "logo.svg";
+    static $fixtures_dir_thumbnails = "test/geotime/_fixtures/thumbnails/";
+
     static $wikimediaLogoLocation = "http://upload.wikimedia.org/wikipedia/commons/8/81/Wikimedia-logo.svg";
+    static $wikimediaLogoFileName = "logo.svg";
+
+    static $simpleSvgFileName = "simple.svg";
 
     static function setUpBeforeClass() {
         Util::$log->info(__CLASS__." tests started");
 
         Util::$cache_dir_svg = "test/geotime/cache/svg/";
+        Util::$cache_dir_thumbnails = "test/geotime/cache/thumbnails/";
         Util::$cache_dir_json = "test/geotime/cache/json/";
 
-        @unlink(Util::$cache_dir_svg . self::$cachedFileName);
+        self::cleanGeneratedFiles();
     }
 
     static function tearDownAfterClass()
     {
-        @unlink(Util::$cache_dir_svg . self::$cachedFileName);
+        self::cleanGeneratedFiles();
         Util::$log->info(__CLASS__ . " tests ended");
     }
 
+    static function cleanGeneratedFiles() {
+        @unlink(Util::$cache_dir_svg . self::$wikimediaLogoFileName);
+        @unlink(Util::$cache_dir_thumbnails . self::$wikimediaLogoFileName . ".png");
+        @unlink(Util::$cache_dir_svg . self::$simpleSvgFileName);
+        @unlink(Util::$cache_dir_thumbnails . self::$simpleSvgFileName . ".png");
+    }
+
     public function testFetchSvg() {
-        $success = Util::fetchSvg(self::$wikimediaLogoLocation);
+        $success = Util::fetchSvgWithThumbnail(self::$wikimediaLogoLocation, self::$wikimediaLogoFileName);
         $this->assertTrue($success);
     }
 
     public function testFetchSvgNullUrl() {
-        $sucesss = Util::fetchSvg(null);
+        $sucesss = Util::fetchSvgWithThumbnail(null, '');
         $this->assertFalse($sucesss);
     }
 
-    public function testFetchAndStoreSvg() {
-        $this->assertFileNotExists(Util::$cache_dir_svg . self::$cachedFileName);
+    public function testStoreThumbnailSvgSimple() {
+        $this->assertFileNotExists(Util::$cache_dir_thumbnails . self::$simpleSvgFileName . ".png");
 
-        $success = Util::fetchSvg(self::$wikimediaLogoLocation, self::$cachedFileName);
+        file_put_contents(Util::$cache_dir_svg . self::$simpleSvgFileName, file_get_contents(self::$fixtures_dir_svg . self::$simpleSvgFileName));
+        $success = Util::generateThumbnailFromSvg(self::$simpleSvgFileName);
 
         $this->assertTrue($success);
-        $this->assertFileExists(Util::$cache_dir_svg . self::$cachedFileName);
+        $this->assertFileEquals(self::$fixtures_dir_thumbnails . self::$simpleSvgFileName . ".png", Util::$cache_dir_thumbnails . self::$simpleSvgFileName . ".png");
+    }
+
+    public function testFetchAndStoreSvgWikiLogo() {
+        $this->assertFileNotExists(Util::$cache_dir_svg . self::$wikimediaLogoFileName);
+
+        $success = Util::fetchSvgWithThumbnail(self::$wikimediaLogoLocation, self::$wikimediaLogoFileName, self::$wikimediaLogoFileName);
+
+        $this->assertTrue($success);
+        $this->assertFileEquals(self::$fixtures_dir_svg. self::$wikimediaLogoFileName, Util::$cache_dir_svg . self::$wikimediaLogoFileName);
+        $this->assertFileEquals(self::$fixtures_dir_thumbnails . self::$wikimediaLogoFileName . ".png", Util::$cache_dir_thumbnails . self::$wikimediaLogoFileName . ".png");
     }
 
     public function testStoreSvgInvalidPath() {
         $svg = file_get_contents(self::$fixtures_dir_svg.'simple.svg');
-        $success = Util::storeSvg($svg, 'lo/go.svg');
+        $thumbnail = file_get_contents(self::$fixtures_dir_thumbnails.'simple.svg.png');
+        $success = Util::storeSvgWithThumbnail($svg, $thumbnail, 'lo/go.svg');
 
         $this->assertFalse($success);
     }

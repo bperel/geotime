@@ -22,14 +22,14 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase {
         CriteriaGroup::drop();
 
         $this->assertEquals(0, CriteriaGroup::count());
-        $nbImportedObjects = Database::importFromJson(self::$jsonSourceDir.'/criteriaGroups.json', CriteriaGroup::$collection);
+        $nbImportedObjects = CriteriaGroup::importFromJson(self::$jsonSourceDir.'/criteriaGroups.json');
         $this->assertEquals(1, CriteriaGroup::count());
         $this->assertEquals(1, $nbImportedObjects);
     }
 
     public function testImportFromJsonInvalidFileName() {
         try {
-            Database::importFromJson(self::$jsonSourceDir.'/criteriaGroups-1-.json', CriteriaGroup::$collection);
+            CriteriaGroup::importFromJson(self::$jsonSourceDir.'/criteriaGroups-1-.json');
             $this->fail();
         }
         catch (\InvalidArgumentException $e) {
@@ -39,7 +39,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase {
 
     public function testImportFromJsonInexistentFile() {
         try {
-            Database::importFromJson(self::$jsonSourceDir . '/criteriaGroups2.json', CriteriaGroup::$collection);
+            CriteriaGroup::importFromJson(self::$jsonSourceDir . '/criteriaGroups2.json');
             $this->fail();
         }
         catch (\InvalidArgumentException $e) {

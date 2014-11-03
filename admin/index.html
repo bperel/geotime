@@ -1,14 +1,3 @@
-<?php
-namespace geotime\admin;
-
-use geotime\Database;
-use geotime\Geotime;
-
-chdir("..");
-require_once("vendor/autoload.php");
-Database::connect();
-?>
-
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -23,6 +12,7 @@ Database::connect();
 
     <link rel="stylesheet" href="../css/normalize.min.css">
     <link rel="stylesheet" href="../css/main.css">
+    <link type="text/css" rel="stylesheet" href="../js/vendor/light-gallery/css/lightGallery.css" />
 
     <script src="../js/vendor/modernizr-2.6.2.min.js"></script>
 </head>
@@ -30,11 +20,18 @@ Database::connect();
 
 <h1>Geotime admin area</h1>
 
-<?php
-Geotime::showStatus();
-?>
+<div id="status">
+    <div class="loading">Loading...</div>
+    <ul id="lightGallery" class="gallery list-unstyled home">
+        <li data-src data-html="filename" class="template">
+            <a href="#">
+                <img />
+            </a>
+        </li>
+    </ul>
+</div>
 
-<p style="margin: 10px">
+<p style="margin: 10px; clear: both;">
     <a href="init.php">Initialize database</a> (i.e. insert criteria groups)
     <br />
     <a href="import.php">Import</a> (download SVGs and other information)
@@ -44,7 +41,12 @@ Geotime::showStatus();
 
 
 <script>window.jQuery || document.write('<script src="../js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
-
 <script src="../js/plugins.js"></script>
+<script src="../js/vendor/light-gallery/js/lightGallery.min.js"></script>
+<script src="../js/backend.js"></script>
+
+<script type="text/javascript">
+    showMapData();
+</script>
 </body>
 </html>

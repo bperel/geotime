@@ -2,7 +2,6 @@
 
 namespace geotime;
 
-use geotime\models\Criteria;
 use geotime\models\CriteriaGroup;
 use geotime\models\Map;
 use geotime\models\SparqlEndpoint;
@@ -33,7 +32,7 @@ class Import {
         }
     }
 
-    function execute() {
+    function execute($useCachedJson = true) {
 
         $importStartTime = time();
         self::$log->info('Starting SVG and JSON importation.');
@@ -43,28 +42,22 @@ class Import {
         /** @var CriteriaGroup $criteriaGroup */
         foreach(self::$criteriaGroups as $criteriaGroup) {
             $criteriaGroupName = $criteriaGroup->getName();
-            $query_criteriaGroup_is_cached = array( "criteria" => $criteriaGroupName );
-            $cached_criteria_group = Criteria::find( $query_criteriaGroup_is_cached );
-
             $fileName = Util::$cache_dir_json . $criteriaGroupName . ".json";
 
-            if ($cached_criteria_group->count() === 0 || !file_exists($fileName)) {
+            $maps = $this->getMapsFromCriteriaGroup($criteriaGroup, $fileName, $useCachedJson);
+            $svgInfos = $this->getCommonsInfos($maps);
 
-                $maps = $this->getMapsFromCriteriaGroup($criteriaGroup, $fileName);
-                $svgInfos = $this->getCommonsInfos($maps);
+            foreach ($svgInfos as $imageMapFullName => $imageMapUrlAndUploadDate) {
+                $currentMap = $maps[$imageMapFullName];
 
-                foreach ($svgInfos as $imageMapFullName => $imageMapUrlAndUploadDate) {
-                    $currentMap = $maps[$imageMapFullName];
-
-                    // The map image couldn't be retrieved => the Map object that we started to fill and its references are deleted
-                    if (is_null($imageMapUrlAndUploadDate)) {
-                        $currentMap->deleteReferences();
-                    }
-                    else {
-                        $imageMapUrl = $imageMapUrlAndUploadDate['url'];
-                        $imageMapUploadDate = $imageMapUrlAndUploadDate['uploadDate'];
-                        $this->fetchAndStoreImage($currentMap, $imageMapUploadDate, $imageMapUrl);
-                    }
+                // The map image couldn't be retrieved => the Map object that we started to fill and its references are deleted
+                if (is_null($imageMapUrlAndUploadDate)) {
+                    $currentMap->deleteReferences();
+                }
+                else {
+                    $imageMapUrl = $imageMapUrlAndUploadDate['url'];
+                    $imageMapUploadDate = $imageMapUrlAndUploadDate['uploadDate'];
+                    $this->fetchAndStoreImage($currentMap, $imageMapFullName, $imageMapUploadDate, $imageMapUrl);
                 }
             }
         }
@@ -85,7 +78,14 @@ class Import {
             $parameter = str_replace(array_keys($replacements), array_values($replacements), $parameter);
         }, $replacements);
 
-        return $parameters;
+        $parametersFlattened = array();
+        foreach($parameters as $parameterSubArray) {
+            foreach($parameterSubArray as $key=>$value) {
+                $parametersFlattened[$key] = $value;
+            }
+        }
+
+        return $parametersFlattened;
     }
 
     /**
@@ -95,7 +95,7 @@ class Import {
      */
     function getSparqlQueryResults($sparqlEndpointName, CriteriaGroup $criteriaGroup) {
         list($rootUrlWithEndpoint, $type, $parameters) = $this->getSparqlRequestUrlParts($sparqlEndpointName, $criteriaGroup);
-        return Util::getContents($rootUrlWithEndpoint, $type, $parameters);
+        return Util::curl_get_contents($rootUrlWithEndpoint, $type, $parameters);
     }
 
     /**
@@ -160,16 +160,23 @@ class Import {
     /**
      * Create Map object instances from the results of a criteria group
      * @param CriteriaGroup $criteriaGroup
-     * @param string $fileName
+     * @param string $fileName|null Cache file name to put the results into
+     * @param boolean $getFromCachedJson If FALSE, the results will be queried online
      * @return Map[]
      */
-    public function getMapsFromCriteriaGroup(CriteriaGroup $criteriaGroup, $fileName = null)
+    public function getMapsFromCriteriaGroup(CriteriaGroup $criteriaGroup, $fileName = null, $getFromCachedJson = true)
     {
-        if (!is_null($fileName) && file_exists($fileName)) {
+        $cacheFileExists = file_exists($fileName);
+        if ($getFromCachedJson && $cacheFileExists) {
             self::$log->info('Using cached JSON file '.$fileName);
             $pageAsJson = json_decode(file_get_contents($fileName));
         }
         else {
+            if ($getFromCachedJson && !$cacheFileExists) {
+                self::$log->warn('Requested cached JSON file '.$fileName.' doesn\'t exist, retrieving Sparql results online');
+            }
+            $start = microtime();
+
             $page = $this->getSparqlQueryResults('Dbpedia', $criteriaGroup);
             $pageAsJson = json_decode($page);
 
@@ -178,11 +185,13 @@ class Import {
                 return array();
             }
 
-            if (!is_null($fileName)) {
-                if (false !== file_put_contents($fileName, $page)) {
-                    self::$log->info('Successfully stored JSON file '.$fileName);
-                }
+            if (!is_null($fileName) && false !== file_put_contents($fileName, $page)) {
+                self::$log->info('Successfully stored JSON file '.$fileName);
             }
+
+            $end = microtime();
+            $timeSpent = (intval($end-$start))/1000;
+            self::$log->info('Retrieved Sparql results in '.$timeSpent.'s.');
         }
         return $this->getMapsFromSparqlResults($pageAsJson, $criteriaGroup);
     }
@@ -192,7 +201,7 @@ class Import {
      * @param CriteriaGroup $criteriaGroup
      * @return \stdClass Object with start and end dates
      */
-    public function getDatesFromSparqlResult(\stdClass $result, CriteriaGroup $criteriaGroup) {
+    public function getDatesFromSparqlResult($result, $criteriaGroup) {
         switch($criteriaGroup->getName()) {
             case 'Former empires':
                 $objectWithDates = new \stdClass();
@@ -219,11 +228,11 @@ class Import {
 
     /**
      * Create Map object instances from a JSON-formatted SPARQL page
-     * @param \stdClass $pageAsJson
+     * @param object $pageAsJson
      * @param CriteriaGroup $criteriaGroup
      * @return Map[]
      */
-    public function getMapsFromSparqlResults(\stdClass $pageAsJson, $criteriaGroup)
+    public function getMapsFromSparqlResults($pageAsJson, $criteriaGroup)
     {
         $maps = array();
         foreach ($pageAsJson->results->bindings as $result) {
@@ -298,7 +307,7 @@ class Import {
      */
     function getCommonsImageXMLInfo($imageMapFullName) {
         $url = "http://tools.wmflabs.org/magnus-toolserver/commonsapi.php";
-        $contents = Util::getContents($url, "GET", array("image" => $imageMapFullName));
+        $contents = Util::curl_get_contents($url, "GET", array("image" => $imageMapFullName));
         if ($contents === false) {
             return null;
         }
@@ -310,11 +319,12 @@ class Import {
 
     /**
      * @param Map $map
+     * @param string $imageMapFullName
      * @param \MongoDate $imageMapUploadDate
      * @param string $imageMapUrl NULL if we want the Map object to be stored but not the file to be retrieved
      * @return boolean TRUE if a new map has been stored, FALSE if we keep the existing one
      */
-    function fetchAndStoreImage(Map $map, \MongoDate $imageMapUploadDate, $imageMapUrl = null) {
+    function fetchAndStoreImage($map, $imageMapFullName, $imageMapUploadDate, $imageMapUrl = null) {
         // Check if map exists in DB
         // If the retrieved image upload date is the same as the stored map, we keep the map in DB
         if (!is_null($map->getId())) {
@@ -327,7 +337,7 @@ class Import {
                 self::$log->info('SVG file is outdated and will be retrieved again : '.$map->getFileName());
             }
         }
-        if (is_null($imageMapUrl) || Util::fetchSvg($imageMapUrl, $map->getFileName())) {
+        if (is_null($imageMapUrl) || Util::fetchSvgWithThumbnail($imageMapUrl, $imageMapFullName, $map->getFileName())) {
             $map->setUploadDate($imageMapUploadDate);
             $map->save();
         }
