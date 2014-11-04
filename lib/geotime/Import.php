@@ -3,6 +3,7 @@
 namespace geotime;
 
 use geotime\models\CriteriaGroup;
+use geotime\models\CriteriaGroupsType;
 use geotime\models\Map;
 use geotime\models\SparqlEndpoint;
 use Logger;
@@ -13,7 +14,7 @@ include_once('Util.php');
 
 class Import {
 
-    /** @var \Purekid\Mongodm\Collection */
+    /** @var \Purekid\Mongodm\Collection[] */
     static $criteriaGroups;
 
     /** @var \Logger */
@@ -27,12 +28,20 @@ class Import {
 
     static function initCriteriaGroups() {
         if (!isset(self::$criteriaGroups)) {
-            self::$criteriaGroups = CriteriaGroup::find();
-            self::$log->info(self::$criteriaGroups->count()." criteria groups found");
+            self::$criteriaGroups = array(
+                CriteriaGroupsType::Maps        => CriteriaGroup::find(array('type' => CriteriaGroupsType::Maps)),
+                CriteriaGroupsType::Territories => CriteriaGroup::find(array('type' => CriteriaGroupsType::Territories))
+            );
+            self::$log->info(self::$criteriaGroups[CriteriaGroupsType::Maps]->count()       ." map criteria groups found");
+            self::$log->info(self::$criteriaGroups[CriteriaGroupsType::Territories]->count()." territory criteria groups found");
         }
     }
 
-    function execute($useCachedJson = true) {
+    function importReferencedTerritories() {
+
+    }
+
+    function importMaps($useCachedJson = true) {
 
         $importStartTime = time();
         self::$log->info('Starting SVG and JSON importation.');
@@ -40,7 +49,7 @@ class Import {
         self::initCriteriaGroups();
 
         /** @var CriteriaGroup $criteriaGroup */
-        foreach(self::$criteriaGroups as $criteriaGroup) {
+        foreach(self::$criteriaGroups['maps'] as $criteriaGroup) {
             $criteriaGroupName = $criteriaGroup->getName();
             $fileName = Util::$cache_dir_json . $criteriaGroupName . ".json";
 

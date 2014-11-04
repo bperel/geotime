@@ -6,6 +6,7 @@ use geotime\Geotime;
 use geotime\Import;
 use geotime\models\Criteria;
 use geotime\models\CriteriaGroup;
+use geotime\models\CriteriaGroupsType;
 use geotime\models\Map;
 use geotime\models\SparqlEndpoint;
 use geotime\models\Territory;
@@ -139,8 +140,13 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     public function testInitCriteriaGroups() {
         $this->assertEmpty(Import::$criteriaGroups);
         Import::initCriteriaGroups();
-        $this->assertEquals(1, CriteriaGroup::count());
+        $this->assertEquals(2, CriteriaGroup::count());
 
+        $this->assertArrayHasKey(CriteriaGroupsType::Maps, Import::$criteriaGroups);
+        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupsType::Maps]));
+
+        $this->assertArrayHasKey(CriteriaGroupsType::Territories, Import::$criteriaGroups);
+        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupsType::Territories]));
     }
 
     /* This test uses the live Dbpedia results */
@@ -391,6 +397,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     function testGetCriteriaGroupNumber() {
-        $this->assertEquals(1, Geotime::getCriteriaGroupsNumber());
+        $this->assertEquals(2, Geotime::getCriteriaGroupsNumber());
     }
 } 

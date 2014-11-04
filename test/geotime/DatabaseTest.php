@@ -23,8 +23,8 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertEquals(0, CriteriaGroup::count());
         $nbImportedObjects = CriteriaGroup::importFromJson(self::$jsonSourceDir.'/criteriaGroups.json');
-        $this->assertEquals(1, CriteriaGroup::count());
-        $this->assertEquals(1, $nbImportedObjects);
+        $this->assertEquals(2, CriteriaGroup::count());
+        $this->assertEquals(2, $nbImportedObjects);
     }
 
     public function testImportFromJsonInvalidFileName() {

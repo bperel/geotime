@@ -5,12 +5,17 @@ namespace geotime\models;
 use Purekid\Mongodm\Model;
 use geotime\Database;
 
+abstract class CriteriaGroupsType {
+    const Maps = 'maps';
+    const Territories = 'territories';
+}
 
 class CriteriaGroup extends Model {
     static $collection = 'criteriaGroups';
     static $cachePath = 'data/criteriaGroups.json';
 
     protected static $attrs = array(
+        'type' => array('type' => 'string'),
         'criteria' => array('model' => 'geotime\models\Criteria', 'type' => 'embeds'),
         'optional' => array('model' => 'geotime\models\Criteria', 'type' => 'embeds'),
         'sort' => array('type' => 'array'),
@@ -25,6 +30,21 @@ class CriteriaGroup extends Model {
     }
 
     // @codeCoverageIgnoreStart
+
+    /**
+     * @return CriteriaGroupsType
+     */
+    public function getType() {
+        return $this->__getter('type');
+    }
+
+    /**
+     * @param CriteriaGroupsType $type
+     */
+    public function setType(CriteriaGroupsType $type) {
+        $this->__setter('type', $type);
+    }
+
     /**
      * @return Criteria[]
      */
