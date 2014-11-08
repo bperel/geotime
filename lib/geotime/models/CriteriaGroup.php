@@ -32,16 +32,16 @@ class CriteriaGroup extends Model {
     // @codeCoverageIgnoreStart
 
     /**
-     * @return CriteriaGroupsType
+     * @return string
      */
     public function getType() {
         return $this->__getter('type');
     }
 
     /**
-     * @param CriteriaGroupsType $type
+     * @param string $type
      */
-    public function setType(CriteriaGroupsType $type) {
+    public function setType($type) {
         $this->__setter('type', $type);
     }
 

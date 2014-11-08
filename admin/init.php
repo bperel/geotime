@@ -3,6 +3,7 @@
 namespace geotime\admin;
 
 use geotime\Database;
+use geotime\Import;
 use geotime\models\CriteriaGroup;
 use geotime\models\SparqlEndpoint;
 
@@ -16,6 +17,8 @@ CriteriaGroup::importFromJson();
 
 SparqlEndpoint::drop();
 SparqlEndpoint::importFromJson();
+
+Import::importReferencedTerritories(false);
 
 ?><br /><a href="index.html">Back to admin home</a>
 
