@@ -48,6 +48,22 @@ class Geotime {
     }
 
     /**
+     * @param $startingWith
+     * @return array|string
+     */
+    static function getTerritories($startingWith) {
+        if (is_null($startingWith) || strlen($startingWith) === 0) {
+            return 'At least the first letter of the territory name must me given.';
+        }
+        return array_map(
+            function(Territory $territory) {
+                return array('name' => $territory->getName());
+            },
+            Territory::find(array('name' => array('$regex' => '^'.$startingWith)), array('name' => 1), array('name'=> 1, '_id'=> -1))->toArray()
+        );
+    }
+
+    /**
      * Get the land coverage stored for each period
      *
      * @return array An associative (Period string) => (coverage integer) array

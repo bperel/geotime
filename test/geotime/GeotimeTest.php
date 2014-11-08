@@ -135,4 +135,18 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $incompleteMap = Geotime::getIncompleteMapInfo(2012);
         $this->assertNull($incompleteMap);
     }
+
+    function testGetTerritories() {
+        $this->assertEquals(1, count(Geotime::getTerritories('Fr')));
+        $this->assertEquals(0, count(Geotime::getTerritories('fr')));
+
+        $this->assertEquals(1, count(Geotime::getTerritories('J')));
+        $this->assertEquals(0, count(Geotime::getTerritories('K')));
+    }
+
+    function testGetTerritoriesEmptyParameter()
+    {
+        $this->assertTrue(is_string(Geotime::getTerritories(null)));
+        $this->assertTrue(is_string(Geotime::getTerritories('')));
+    }
 } 
