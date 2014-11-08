@@ -66,6 +66,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         Criteria::drop();
 
         Geotime::clean();
+
+        Import::$criteriaGroups = null;
     }
 
     /* Fixtures */
