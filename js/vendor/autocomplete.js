@@ -30,7 +30,6 @@ function autocomplete(parent) {
         _margin = {top: 30, right: 10, bottom: 50, left: 80},
         __width = 420,
         __height = 420,
-        _placeHolder = "Search",
         _width,
         _height,
         _searchTerm,
@@ -45,7 +44,7 @@ function autocomplete(parent) {
     _selection=d3.select(parent);
 
     function component() {
-        _selection.each(function (data) {
+        _selection.each(function () {
 
             // Select the svg element, if it exists.
             var container = d3.select(this.parentNode)
@@ -64,7 +63,6 @@ function autocomplete(parent) {
 
             var input = d3.select(this)
                 .attr("class", "form-control")
-                .attr("placeholder",_placeHolder)
                 .attr("type","text")
                 .on("keyup",onKeyUp);
 
@@ -238,12 +236,6 @@ function autocomplete(parent) {
     component.keys = function(_) {
         if (!arguments.length) return _keys;
         _keys = _;
-        return component;
-    };
-
-    component.placeHolder = function(_) {
-        if (!arguments.length) return _placeHolder;
-        _placeHolder = _;
         return component;
     };
 

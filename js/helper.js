@@ -47,6 +47,9 @@ function activateHelperNextStep() {
 				.on("mouseout",  newStep === 2 ? onTerritoryMouseout  : null)
 				.on("click",     newStep === 2 ? onTerritoryClick     : null);
 
+		d3.select('#territoryName')
+			.classed("hidden", newStep !== 3);
+
 		if (newStep === 3) {
 			d3.select('#territoryName').node().focus();
 		}
