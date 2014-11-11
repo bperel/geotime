@@ -71,8 +71,7 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
 
     public function testStoreSvgInvalidPath() {
         $svg = file_get_contents(self::$fixtures_dir_svg.'simple.svg');
-        $thumbnail = file_get_contents(self::$fixtures_dir_thumbnails.'simple.svg.png');
-        $success = Util::storeSvgWithThumbnail($svg, $thumbnail, 'lo/go.svg');
+        $success = Util::storeSvgWithThumbnail($svg, 'lo/go.svg');
 
         $this->assertFalse($success);
     }
