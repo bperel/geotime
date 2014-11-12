@@ -11,7 +11,7 @@
 	],
 
 	"require": {
-		"phpunit/phpunit": "3.7.*",
+		"phpunit/phpunit": "4.3.*",
 		"purekid/mongodm": "1.4.2",
 		"psr/log": "1.0.0",
 		"apache/log4php": "2.3.0",

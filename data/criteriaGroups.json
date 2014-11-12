@@ -1,4 +1,5 @@
 [{
+  	"type": "maps",
 	"name": "Former empires",
 	"criteria": [
 		{
@@ -32,4 +33,21 @@
 		"?date1_precise",
 		"?date1"
 	]
-}]
+},
+ {
+   "type": "territories",
+   "name": "Former countries in Europe",
+   "criteria": [
+	 	{
+		  	"key": "<http://purl.org/dc/terms/subject>",
+		  	"value": "<http://dbpedia.org/resource/Category:Former_countries_in_Europe>"
+	   	},
+	   	{
+		  	"key": "<http://www.w3.org/2000/01/rdf-schema#label>",
+		  	"value": "?name"
+	   }
+   ],
+   "sort": [
+	 	"?date1_precise"
+   ]
+ }]

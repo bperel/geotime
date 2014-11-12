@@ -1,0 +1,26 @@
+{
+    "head": {
+        "link": [],
+        "vars": [
+            "e",
+            "name"
+        ]
+    },
+    "results": {
+        "distinct": false,
+        "ordered": true,
+        "bindings": [
+            {
+                "e": {
+                    "type": "uri",
+                    "value": "http://dbpedia.org/resource/Corsican_Republic"
+                },
+                "name": {
+                    "type": "literal",
+                    "xml:lang": "en",
+                    "value": "Corsican Republic"
+                }
+            }
+        ]
+    }
+}

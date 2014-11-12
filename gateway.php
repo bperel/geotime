@@ -15,6 +15,9 @@ if (isset($_GET['getCoverage'])) {
 elseif (isset($_GET['getMaps'])) {
     $object = Geotime::getMapsAndLocalizedTerritoriesCount(true);
 }
+elseif (isset($_GET['getTerritories'])) {
+    $object = Geotime::getTerritories(isset($_GET['startingWith']) ? $_GET['startingWith'] : null);
+}
 elseif (isset($_GET['getSvg'])) {
     $year = $_GET['year'];
     $ignored = empty($_GET['ignored']) ? array() : explode(',', $_GET['ignored']);

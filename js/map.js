@@ -40,6 +40,8 @@ var svgmap_resize = d3.behavior.drag()
 	.on("dragstart", dragresizestarted)
 	.on("drag", dragresize);
 
+initAutocomplete();
+
 function dragstarted() {
 	d3.event.sourceEvent.stopPropagation();
 }
@@ -132,6 +134,20 @@ function loadExternalSvgForYear(year) {
 			}
 		});
 	}
+}
+
+//Call back for when user selects an option
+function onSelect(d) {
+	alert(d.name);
+}
+
+function initAutocomplete() {
+	autocomplete(d3.select('#territoryName')[0][0])
+		.dataField("name")
+		.width(960)
+		.height(500)
+		.onSelected(onSelect)
+		.render();
 }
 
 function resizeExternalMap(width, height) {
