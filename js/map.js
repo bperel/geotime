@@ -73,6 +73,7 @@ function showBgMap(id, filePath) {
 }
 
 var resizeHandle = d3.select('#resizeHandle');
+var territoryName = d3.select('#territoryName');
 var svgMap = null;
 var isLoading = false;
 
@@ -136,17 +137,11 @@ function loadExternalSvgForYear(year) {
 	}
 }
 
-//Call back for when user selects an option
-function onSelect(d) {
-	alert(d.name);
-}
-
 function initAutocomplete() {
 	autocomplete(d3.select('#territoryName')[0][0])
 		.dataField("name")
 		.width(960)
 		.height(500)
-		.onSelected(onSelect)
 		.render();
 }
 
