@@ -29,17 +29,21 @@ function activateHelperNextStep() {
 	});
 
 	if (svgMap) {
-		if (newStep === 1) {
-			svgMap.call(svgmap_drag);
-			resizeHandle.call(svgmap_resize);
-		}
-		else {
-			svgMap.on('mousedown.drag', null);
-			resizeHandle.on('mousedown.drag', null);
+		switch(newStep) {
+			case 1:
+				svgMap.call(svgmap_drag);
+				resizeHandle.call(svgmap_resize);
+				break;
+			case 4:
+				validateTerritory(svgMap.datum().id, territoryName.node().value, svgMap.select('path.selected').xpath());
+				break;
+			default:
+				svgMap.on('mousedown.drag', null);
+				resizeHandle.on('mousedown.drag', null);
 
-			if (newStep === 3) {
-				territoryName.node().focus();
-			}
+				if (newStep === 3) {
+					territoryName.node().focus();
+				}
 		}
 
 		resizeHandle.classed("hidden", newStep !== 1);
@@ -59,6 +63,16 @@ function ignoreCurrentMap() {
 		return d;
 	});
 	initExternalSvgMap();
+}
+
+function validateTerritory(mapId, territoryName, territoryXpath) {
+	$.ajax('gateway.php', {
+		dataType: 'json',
+		data: {addTerritory: 1, mapId: mapId, territoryName: territoryName, territoryXpath: territoryXpath},
+		success: function() {
+
+		}
+	});
 }
 
 helper

@@ -23,6 +23,11 @@ elseif (isset($_GET['getSvg'])) {
     $ignored = empty($_GET['ignored']) ? array() : explode(',', $_GET['ignored']);
     $object = Geotime::getIncompleteMapInfo($year, $ignored);
 }
+elseif (isset($_GET['addTerritory'])) {
+    $mapId = $_GET['mapId'];
+    $territoryName = $_GET['territoryName'];
+    $territoryXpath = $_GET['territoryXpath'];
+}
 
 echo json_encode($object);
 
