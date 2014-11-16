@@ -60,29 +60,30 @@ var colorInterpolator = d3.scale.linear()
 	.interpolate(d3.interpolateRgb)
 	.range(["#ff0000", "#008000"]);
 
-d3.json("gateway.php?getCoverage", function(error, coverageInfo) {
-
-	optimalCoverage = coverageInfo.optimalCoverage;
-
-	slider
-		.datum({ignoredMaps: []})
-		.selectAll("rect.period")
-		.data(coverageInfo.periodsAndCoverage)
-		.enter()
-			.append("rect")
-			.classed("period", true)
-			.attr("x", 46)
-			.attr("y", function(d) {
-				return sliderHeight*(1 - (d.end / (maxYear - minYear)));
-			})
-			.attr("width", 8)
-			.attr("height", function(d) {
-				return sliderHeight*(d.end - d.start + 1) / (maxYear - minYear);
-			})
-			.attr("fill", function(d) {
-				return colorInterpolator(d.coverage / optimalCoverage);
-			});
-});
+ajaxPost(
+	{getCoverage: true},
+	function(error, coverageInfo) {
+		optimalCoverage = coverageInfo.optimalCoverage;
+		slider
+			.datum({ignoredMaps: []})
+			.selectAll("rect.period")
+			.data(coverageInfo.periodsAndCoverage)
+			.enter()
+				.append("rect")
+				.classed("period", true)
+				.attr("x", 46)
+				.attr("y", function(d) {
+					return sliderHeight*(1 - (d.end / (maxYear - minYear)));
+				})
+				.attr("width", 8)
+				.attr("height", function(d) {
+					return sliderHeight*(d.end - d.start + 1) / (maxYear - minYear);
+				})
+				.attr("fill", function(d) {
+					return colorInterpolator(d.coverage / optimalCoverage);
+				});
+	}
+);
 
 function brushed() {
 	var value = y.invert(d3.mouse(this)[1]);

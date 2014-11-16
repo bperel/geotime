@@ -1,8 +1,7 @@
 function showMapData() {
-    $.ajax('../gateway.php', {
-        dataType: 'json',
-        data: { getMaps: true },
-        success: function(data) {
+    ajaxPost(
+        {getMaps: true},
+        function(error, data) {
             var gallery = $('#lightGallery');
             var thumbTemplate = gallery.find('li.template');
             $.each(data, function(mapFileName, territoriesData) {
@@ -14,5 +13,5 @@ function showMapData() {
             gallery.lightGallery();
             $('.loading').addClass('hidden');
         }
-    })
+    );
 }
