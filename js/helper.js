@@ -35,7 +35,8 @@ function activateHelperNextStep() {
 				resizeHandle.call(svgmap_resize);
 				break;
 			case 4:
-				validateTerritory(svgMap.datum().id, territoryName.node().value, svgMap.select('path.selected').xpath());
+				var coordinates = pathToCoordinates(svgMap.select('path.selected').node());
+				validateTerritory(svgMap.datum().id, territoryName.node().value, coordinates, svgMap.select('path.selected').xpath());
 				break;
 			default:
 				svgMap.on('mousedown.drag', null);
@@ -65,14 +66,13 @@ function ignoreCurrentMap() {
 	initExternalSvgMap();
 }
 
-function validateTerritory(mapId, territoryName, territoryXpath) {
-	$.ajax('gateway.php', {
-		dataType: 'json',
-		data: {addTerritory: 1, mapId: mapId, territoryName: territoryName, territoryXpath: territoryXpath},
-		success: function() {
+function validateTerritory(mapId, territoryName, coordinates, xpath) {
+	ajaxPost(
+		{ addTerritory: 1, mapId: mapId, territoryName: territoryName, xpath: xpath, coordinates: coordinates },
+		function(error, data) {
 
 		}
-	});
+	);
 }
 
 helper

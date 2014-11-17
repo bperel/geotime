@@ -23,10 +23,11 @@ elseif (isset($_POST['getSvg'])) {
     $ignored = empty($_POST['ignored']) ? array() : explode(',', $_POST['ignored']);
     $object = Geotime::getIncompleteMapInfo($year, $ignored);
 }
-elseif (isset($_GET['addTerritory'])) {
-    $mapId = $_GET['mapId'];
-    $territoryName = $_GET['territoryName'];
-    $territoryXpath = $_GET['territoryXpath'];
+elseif (isset($_POST['addTerritory'])) {
+    $territoryName = $_POST['territoryName'];
+    $xpath = $_POST['xpath'];
+    $coordinates = $_POST['coordinates'];
+    $object->coord = Geotime::addLocatedTerritory($territoryName, $coordinates, $xpath);
 }
 
 echo json_encode($object);

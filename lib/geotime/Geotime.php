@@ -140,6 +140,17 @@ class Geotime {
         return null;
     }
 
+    public static function addLocatedTerritory($territoryName, $coordinates, $xpath)
+    {
+        $territory = new Territory();
+        $territory->setName($territoryName);
+        $territory->setPolygon($coordinates);
+        $territory->setXpath($xpath);
+        $territory->save();
+
+        return $coordinates;
+    }
+
     public static function getCriteriaGroupsNumber() {
         return CriteriaGroup::count();
     }
@@ -148,7 +159,7 @@ class Geotime {
      * Removes maps, territories and periods from the DB
      * @param bool $keepMaps
      */
-    static function clean($keepMaps=false) {
+    public static function clean($keepMaps=false) {
         if (!$keepMaps) {
             Map::drop();
         }
