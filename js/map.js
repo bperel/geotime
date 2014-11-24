@@ -29,8 +29,6 @@ svg.append("rect")
 	.attr("width", width)
 	.attr("height", mapHeight);
 
-showBgMap("backgroundMap", "data/external/ne_110m_coastline.json");
-
 var svgmap_drag = d3.behavior.drag()
 	.origin(function(d) { return d; })
 	.on("dragstart", dragstarted)
@@ -39,8 +37,6 @@ var svgmap_drag = d3.behavior.drag()
 var svgmap_resize = d3.behavior.drag()
 	.on("dragstart", dragresizestarted)
 	.on("drag", dragresize);
-
-initAutocomplete();
 
 function dragstarted() {
 	d3.event.sourceEvent.stopPropagation();
@@ -93,46 +89,50 @@ function loadExternalSvgForYear(year) {
 		ajaxPost(
 			{ getSvg: 1, year: year, ignored: slider.datum().ignoredMaps.join(",")+"" },
 			function(error, incompleteMapInfo) {
-				initExternalSvgMap();
-				var mapFileName = incompleteMapInfo.fileName;
-				if (mapFileName) {
-					if (!svgMap || svgMap.datum().fileName !== mapFileName) {
-						d3.xml("cache/svg/"+mapFileName, "image/svg+xml", function(xml) {
-							svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
-								.attr("name", mapFileName)
-								.attr("id", "externalSvg")
-								.classed("externalSvg", true);
+				if (!!incompleteMapInfo) {
+					initExternalSvgMap();
+					var mapFileName = incompleteMapInfo.fileName;
+					if (mapFileName) {
+						if (!svgMap || svgMap.datum().fileName !== mapFileName) {
+							d3.xml("cache/svg/" + mapFileName, "image/svg+xml", function (xml) {
+								svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
+									.attr("name", mapFileName)
+									.attr("id", "externalSvg")
+									.classed("externalSvg", true);
 
-							svgMap
-								.datum({
-									id: incompleteMapInfo.id,
-									fileName: incompleteMapInfo.fileName,
-									x: 0,
-									y: 0,
-									width:  parseInt(svgMap.attr("width")),
-									height: parseInt(svgMap.attr("height"))
-								});
+								svgMap
+									.datum({
+										id: incompleteMapInfo.id,
+										fileName: incompleteMapInfo.fileName,
+										x: 0,
+										y: 0,
+										width: parseInt(svgMap.attr("width")),
+										height: parseInt(svgMap.attr("height"))
+									});
 
-							if (!svgMap.attr("viewBox")) {
-								svgMap.attr("viewBox",  function(d) { return "0 0 "+ d.width+" "+ d.height; });
-							}
+								if (!svgMap.attr("viewBox")) {
+									svgMap.attr("viewBox", function (d) {
+										return "0 0 " + d.width + " " + d.height;
+									});
+								}
 
-							dragmove.call(svgMap.node(), svgMap.datum());
+								dragmove.call(svgMap.node(), svgMap.datum());
 
-							resizeHandle
-								.attr("width",  resizeHandleSize)
-								.attr("height", resizeHandleSize)
-								.select("rect")
-									.attr("width",  resizeHandleSize)
-									.attr("height", resizeHandleSize);
+								resizeHandle
+									.attr("width", resizeHandleSize)
+									.attr("height", resizeHandleSize)
+									.select("rect")
+										.attr("width", resizeHandleSize)
+										.attr("height", resizeHandleSize);
 
-							initHelper();
-							activateHelperNextStep();
+								initHelper();
+								activateHelperNextStep();
 
-							resizeExternalMap();
+								resizeExternalMap();
 
-							isLoading = false;
-						});
+								isLoading = false;
+							});
+						}
 					}
 				}
 			}
@@ -193,12 +193,9 @@ function onTerritoryMouseout() {
 	d3.select(this).classed("hovered", false);
 }
 
-function onTerritoryClick() {
+function onHoveredTerritoryClick() {
 	svgMap.selectAll("path.selected").classed("selected", false);
 	d3.select(this).classed("selected", true);
-	if (helper.datum().activeStep === 2) {
-		activateHelperNextStep();
-	}
 }
 
 function dragresizestarted() {

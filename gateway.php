@@ -24,6 +24,11 @@ elseif (isset($_POST['getSvg'])) {
     $object = Geotime::getIncompleteMapInfo($year, $ignored);
 }
 elseif (isset($_POST['addTerritory'])) {
+    $mapId = $_POST['mapId'];
+    $mapProjection = $_POST['mapProjection'];
+    $mapPosition = $_POST['mapPosition'];
+    Geotime::updateMap($mapId, $mapProjection, $mapPosition);
+
     $territoryName = $_POST['territoryName'];
     $xpath = $_POST['xpath'];
     $coordinates = $_POST['coordinates'];

@@ -140,6 +140,20 @@ class Geotime {
         return null;
     }
 
+    public static function updateMap($mapId, $mapProjection, $mapPosition) {
+        /** @var Map $map */
+        $map = Map::one(array('_id' => new \MongoId($mapId)));
+        if (is_null($map)) {
+            return null;
+        }
+        else {
+            $map->setProjection($mapProjection);
+            $map->setPosition($mapPosition);
+            $map->save();
+            return $map;
+        }
+    }
+
     public static function addLocatedTerritory($territoryName, $coordinates, $xpath)
     {
         $territory = new Territory();

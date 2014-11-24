@@ -25,3 +25,18 @@ function pathToCoordinates(path) {
     }
     return coordinates;
 }
+
+function flattenArrayOfObjects(array) {
+    var obj = {};
+    array.forEach(function(arrayVal) {
+        d3.entries(arrayVal).forEach(function(keyAndVal) {
+            obj[keyAndVal.key] = $.extend({}, obj[keyAndVal.key] || {}, keyAndVal.value);
+        });
+    });
+    return obj;
+}
+
+d3.selection.prototype.styleIntWithoutPx = function(property) {
+    var value = this.style(property);
+    return value && parseInt(value.replace(/px$/,''));
+};

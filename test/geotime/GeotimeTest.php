@@ -149,4 +149,28 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $this->assertTrue(is_string(Geotime::getTerritories(null)));
         $this->assertTrue(is_string(Geotime::getTerritories('')));
     }
+
+    function testUpdateMapInexisting() {
+        $map = new Map();
+        $map->save();
+        $mapId = $map->getIdAsString();
+        $map->delete();
+
+        $updatedMap = Geotime::updateMap($mapId, 'mercator', array(array(0, 0), array(10, 10)));
+        $this->assertNull($updatedMap);
+    }
+
+    function testUpdateMap() {
+        $map = new Map();
+        $map->setFileName(self::$customMapName);
+        $map->setProjection('mercator');
+        $map->save();
+        $mapId = $map->getIdAsString();
+
+        $updatedMap = Geotime::updateMap($mapId, 'mercator2', array(array(0, 0), array(10, 10)));
+        $this->assertNotNull($updatedMap);
+        $this->assertEquals($updatedMap->getFileName(), $map->getFileName());
+        $this->assertEquals($updatedMap->getProjection(), 'mercator2');
+        $this->assertEquals($updatedMap->getPosition(), array(array(0, 0), array(10, 10)));
+    }
 } 
