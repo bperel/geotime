@@ -9,18 +9,18 @@ header('Content-Type: application/json');
 
 $object = new \stdClass();
 
-if (isset($_GET['getCoverage'])) {
+if (isset($_POST['getCoverage'])) {
     $object = Geotime::getCoverageInfo();
 }
-elseif (isset($_GET['getMaps'])) {
+elseif (isset($_POST['getMaps'])) {
     $object = Geotime::getMapsAndLocalizedTerritoriesCount(true);
 }
-elseif (isset($_GET['getTerritories'])) {
-    $object = Geotime::getTerritories(isset($_GET['startingWith']) ? $_GET['startingWith'] : null);
+elseif (isset($_POST['getTerritories'])) {
+    $object = Geotime::getTerritories(isset($_POST['startingWith']) ? $_POST['startingWith'] : null);
 }
-elseif (isset($_GET['getSvg'])) {
-    $year = $_GET['year'];
-    $ignored = empty($_GET['ignored']) ? array() : explode(',', $_GET['ignored']);
+elseif (isset($_POST['getSvg'])) {
+    $year = $_POST['year'];
+    $ignored = empty($_POST['ignored']) ? array() : explode(',', $_POST['ignored']);
     $object = Geotime::getIncompleteMapInfo($year, $ignored);
 }
 

@@ -31,28 +31,25 @@ function activateHelperNextStep() {
 	if (svgMap) {
 		if (newStep === 1) {
 			svgMap.call(svgmap_drag);
-			resizeHandle
-				.classed("hidden", false)
-				.call(svgmap_resize);
+			resizeHandle.call(svgmap_resize);
 		}
 		else {
 			svgMap.on('mousedown.drag', null);
-			resizeHandle
-				.classed("hidden", true)
-				.on('mousedown.drag', null);
+			resizeHandle.on('mousedown.drag', null);
+
+			if (newStep === 3) {
+				territoryName.node().focus();
+			}
 		}
+
+		resizeHandle.classed("hidden", newStep !== 1);
+		territoryName.classed("hidden", newStep !== 3);
+
 		svgMap
 			.selectAll("path")
 				.on("mouseover", newStep === 2 ? onTerritoryMouseover : null)
 				.on("mouseout",  newStep === 2 ? onTerritoryMouseout  : null)
 				.on("click",     newStep === 2 ? onTerritoryClick     : null);
-
-		d3.select('#territoryName')
-			.classed("hidden", newStep !== 3);
-
-		if (newStep === 3) {
-			d3.select('#territoryName').node().focus();
-		}
 	}
 }
 

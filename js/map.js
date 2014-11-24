@@ -73,6 +73,7 @@ function showBgMap(id, filePath) {
 }
 
 var resizeHandle = d3.select('#resizeHandle');
+var territoryName = d3.select('#territoryName');
 var svgMap = null;
 var isLoading = false;
 
@@ -89,56 +90,54 @@ function initExternalSvgMap() {
 function loadExternalSvgForYear(year) {
 	if (!isLoading) {
 		isLoading = true;
-		d3.json("gateway.php?getSvg&year="+year+"&ignored="+slider.datum().ignoredMaps.join(",")+"", function(error, incompleteMapInfo) {
-			initExternalSvgMap();
-			var mapFileName = incompleteMapInfo.fileName;
-			if (mapFileName) {
-				if (!svgMap || svgMap.datum().fileName !== mapFileName) {
-					d3.xml("cache/svg/"+mapFileName, "image/svg+xml", function(xml) {
-						svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
-							.attr("name", mapFileName)
-							.attr("id", "externalSvg")
-							.classed("externalSvg", true);
+		ajaxPost(
+			{ getSvg: 1, year: year, ignored: slider.datum().ignoredMaps.join(",")+"" },
+			function(error, incompleteMapInfo) {
+				initExternalSvgMap();
+				var mapFileName = incompleteMapInfo.fileName;
+				if (mapFileName) {
+					if (!svgMap || svgMap.datum().fileName !== mapFileName) {
+						d3.xml("cache/svg/"+mapFileName, "image/svg+xml", function(xml) {
+							svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
+								.attr("name", mapFileName)
+								.attr("id", "externalSvg")
+								.classed("externalSvg", true);
 
-						svgMap
-							.datum({
-								id: incompleteMapInfo.id,
-								fileName: incompleteMapInfo.fileName,
-								x: 0,
-								y: 0,
-								width:  parseInt(svgMap.attr("width")),
-								height: parseInt(svgMap.attr("height"))
-							});
+							svgMap
+								.datum({
+									id: incompleteMapInfo.id,
+									fileName: incompleteMapInfo.fileName,
+									x: 0,
+									y: 0,
+									width:  parseInt(svgMap.attr("width")),
+									height: parseInt(svgMap.attr("height"))
+								});
 
-						if (!svgMap.attr("viewBox")) {
-							svgMap.attr("viewBox",  function(d) { return "0 0 "+ d.width+" "+ d.height; });
-						}
+							if (!svgMap.attr("viewBox")) {
+								svgMap.attr("viewBox",  function(d) { return "0 0 "+ d.width+" "+ d.height; });
+							}
 
-						dragmove.call(svgMap.node(), svgMap.datum());
+							dragmove.call(svgMap.node(), svgMap.datum());
 
-						resizeHandle
-							.attr("width",  resizeHandleSize)
-							.attr("height", resizeHandleSize)
-							.select("rect")
+							resizeHandle
 								.attr("width",  resizeHandleSize)
-								.attr("height", resizeHandleSize);
+								.attr("height", resizeHandleSize)
+								.select("rect")
+									.attr("width",  resizeHandleSize)
+									.attr("height", resizeHandleSize);
 
-						initHelper();
-						activateHelperNextStep();
+							initHelper();
+							activateHelperNextStep();
 
-						resizeExternalMap();
+							resizeExternalMap();
 
-						isLoading = false;
-					});
+							isLoading = false;
+						});
+					}
 				}
 			}
-		});
+		);
 	}
-}
-
-//Call back for when user selects an option
-function onSelect(d) {
-	alert(d.name);
 }
 
 function initAutocomplete() {
@@ -146,7 +145,6 @@ function initAutocomplete() {
 		.dataField("name")
 		.width(960)
 		.height(500)
-		.onSelected(onSelect)
 		.render();
 }
 

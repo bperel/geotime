@@ -87,7 +87,7 @@ function autocomplete(parent) {
                         _currentIndex=-1;
                         _results=[];
                         showSearching();
-                        search(function(_matches) {
+                        search(function(error, _matches) {
                             processResults(_matches);
                             if (_matches.length == 0) {
                                 showSearching("No results");
@@ -134,11 +134,10 @@ function autocomplete(parent) {
             }
 
             function search(callback) {
-                $.ajax('gateway.php', {
-                    dataType: 'json',
-                    data: {getTerritories: 1, startingWith: _searchTerm},
-                    success: callback
-                });
+                ajaxPost(
+                    {getTerritories: 1, startingWith: _searchTerm},
+                    callback
+                );
             }
 
             function row_onClick(d) {
