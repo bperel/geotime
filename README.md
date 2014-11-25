@@ -7,6 +7,7 @@ Kingdoms though time.
 
 * *nix
 * MongoDB
+* NodeJS and NPM
 * Apache+PHP 5 with MongoDB extension
 
 
@@ -21,6 +22,13 @@ $ curl -sS https://getcomposer.org/installer | php
 ```bash
 $ php composer.phar install
 ```
+
+* Install Bower project dependencies :
+```bash
+npm install -g bower
+bower install
+```
+
 * Set up some rights : 
 ```bash
 $ chmod -R +w test/geotime/cache
