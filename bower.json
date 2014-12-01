@@ -20,9 +20,18 @@
     ],
     "dependencies": {
         "d3": "~3.4.3",
-        "jquery": "~1.10.1",
+        "jquery": "~2.1.1",
         "lightgallery": "~1.1.4",
         "modernizr": "~2.6.2",
         "topojson": "~1.5.1"
+    },
+    "devDependencies": {
+        "requirejs": "~2.1.15",
+        "karma": "~0.3.0",
+        "karma-jasmine": "~0.3.2",
+        "socket.io-client-fixed": "~1.2.1",
+        "jasmine": "~2.1.2",
+        "jasmine-matchers": "~0.2.2",
+        "jasmine-jquery": "~2.0.5"
     }
 }

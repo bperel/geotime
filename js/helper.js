@@ -56,7 +56,7 @@ function activateHelperNextStep() {
 }
 
 function ignoreCurrentMap() {
-	slider.datum(function(d) {
+	timeSlider.datum(function(d) {
 		d.ignoredMaps.push(svgMap.datum().id);
 		return d;
 	});

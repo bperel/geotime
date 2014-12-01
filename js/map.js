@@ -2,6 +2,7 @@ var width = 960;
 var mapHeight= 480;
 var resizeHandleSize = 16;
 var maxExternalMapSizePercentage = 80;
+var svg;
 
 var projection = d3.geo.mercator()
 	.scale((width + 1) / 2 / Math.PI)
@@ -17,17 +18,6 @@ var zoom = d3.behavior.zoom()
 		projection.translate(d3.event.translate).scale(d3.event.scale);
 		svg.selectAll("path").attr("d", path);
 	});
-
-var svg = d3.select("#mapArea").append("svg")
-	.attr("width", width)
-	.attr("height", mapHeight)
-	.attr("id", "map")
-	.call(zoom);
-
-svg.append("rect")
-	.attr("id", "bg")
-	.attr("width", width)
-	.attr("height", mapHeight);
 
 var svgmap_drag = d3.behavior.drag()
 	.origin(function(d) { return d; })
@@ -50,21 +40,45 @@ function dragmove(d) {
 		.style("margin-top",+ d.y+"px");
 }
 
-function showBgMap(id, filePath) {
-	d3.json(filePath, function(error, world) {
+function initMapPlaceHolders(callback) {
+	$('#map-placeholders').load('map-placeholders.html', {}, callback);
+}
 
+function initMapArea() {
+	svg = d3.select("#mapArea").append("svg")
+		.attr("width", width)
+		.attr("height", mapHeight)
+		.attr("id", "map")
+		.call(zoom);
+
+	svg.append("rect")
+		.attr("id", "bg")
+		.attr("width", width)
+		.attr("height", mapHeight);
+}
+
+function showBgMap(id, data, error) {
+	if (error) {
+		console.error(error);
+	}
+	else {
 		svg.append("g")
 			.attr("id", id)
-				.selectAll(".subunit")
-			.data(world.features)
+			.selectAll(".subunit")
+			.data(data.features)
 			.enter()
 				.append("path")
-				.attr("class", function(d) {
+				.attr("class", function (d) {
 					return "subunit-boundary subunit " + d.properties.adm0_a3;
 				})
 				.attr("d", path);
-
 		initExternalSvgMap();
+	}
+}
+
+function getAndShowBgMap(id, filePath) {
+	d3.json(filePath, function(error, world) {
+		showBgMap(id, world);
 	});
 }
 
@@ -87,7 +101,7 @@ function loadExternalSvgForYear(year) {
 	if (!isLoading) {
 		isLoading = true;
 		ajaxPost(
-			{ getSvg: 1, year: year, ignored: slider.datum().ignoredMaps.join(",")+"" },
+			{ getSvg: 1, year: year, ignored: timeSlider.datum().ignoredMaps.join(",")+"" },
 			function(error, incompleteMapInfo) {
 				if (!!incompleteMapInfo) {
 					initExternalSvgMap();

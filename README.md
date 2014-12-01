@@ -29,6 +29,11 @@ npm install -g bower
 bower install
 ```
 
+* (Optional) If you want to test the application, install the karma packages as well :
+```bash
+npm install karma karma-jasmine-jquery karma-jasmine-matchers karma-phantomjs-launcher karma-coverage
+```
+
 * Set up some rights : 
 ```bash
 $ chmod -R +w test/geotime/cache
