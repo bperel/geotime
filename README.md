@@ -25,13 +25,13 @@ $ php composer.phar install
 
 * Install Bower project dependencies :
 ```bash
-npm install -g bower
-bower install
+$ npm install -g bower
+$ bower install
 ```
 
 * (Optional) If you want to test the application, install the karma packages as well :
 ```bash
-npm install karma karma-jasmine-jquery karma-jasmine-matchers karma-phantomjs-launcher karma-coverage
+$ npm install karma karma-cli karma-jasmine karma-jasmine-jquery karma-jasmine-matchers karma-phantomjs-launcher karma-coverage karma-junit-reporter
 ```
 
 * Set up some rights : 
@@ -86,7 +86,7 @@ $ htpasswd -c /path/to/my/web/directory/passwords admin
 ###Running tests
 
 ```bash
-$ ./vendor/bin/phpunit
+$ ./vendor/phpunit/phpunit/phpunit
 ```
 
 An HTML coverage report will be generated in the coverage/ folder.
