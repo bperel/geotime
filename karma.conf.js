@@ -47,6 +47,16 @@ module.exports = function(config) {
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
         reporters: ['progress', 'junit', 'coverage'],
 
+        junitReporter: {
+	    outputFile: 'build/js/test-results.xml',
+            suite: ''
+        },
+
+        coverageReporter: {
+            type: 'html',
+            dir: 'build/js/coverage/',
+            subdir: '.'
+        },
 
         // web server port
         port: 9876,
@@ -72,6 +82,6 @@ module.exports = function(config) {
 
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
-        singleRun: false
+        singleRun: true
     });
 };
