@@ -1,15 +1,45 @@
+var helperButtons = [
+	{name: 'done', cssClass: 'helperStepDone', text: 'Done !', dataUpdate: {1: saveMapPosition, 2: saveTerritoryPosition, 3: saveTerritoryName}, click: activateHelperNextStep},
+	{name: 'skip', cssClass: 'helperStepSkip', text: 'Skip this step', dataUpdate: {1: empty, 2: empty}, click: activateHelperNextStep},
+	{name: 'cancel', cssClass: 'helperStepCancel', text: 'Switch to another map', dataUpdate: {1: empty, 2: empty, 3: empty}, click: ignoreCurrentMap}
+];
+
+var helper;
+var helperSteps;
+var resizeHandle;
+var territoryName;
+
 function initHelper() {
+
+	resizeHandle = d3.select('#resizeHandle');
+	resizeHandle
+		.classed("hidden", true)
+		.attr("width", resizeHandleSize)
+		.attr("height", resizeHandleSize)
+		.select("rect")
+			.attr("width", resizeHandleSize)
+			.attr("height", resizeHandleSize);
+
+	territoryName = d3.select('#territoryName');
+
+	helper = d3.select("#mapHelper")
+		.datum({x: 0, y: 0})
+		.call(dragHelper);
+
+	helperSteps = helper.selectAll('.helperStep')
+		.data(d3.range(1,4).map(function(d) { return {step: d}; }));
+
 	helper
 		.datum(function(d) {
 			d.activeStep = 0;
 			return d;
-		})
-		.classed("hidden", false);
+		});
 }
 
 function activateHelperNextStep() {
 	var newStep = ++helper.datum().activeStep;
 
+	helper.classed("hidden", false);
 	helperSteps
 		.classed("active", isActiveStepFilter)
 		.filter(isActiveStepFilter)
@@ -126,12 +156,6 @@ function isActiveStepFilter(d) {
 
 function empty() { return {}; }
 
-var helperButtons = [
-	{name: 'done', cssClass: 'helperStepDone', text: 'Done !', dataUpdate: {1: saveMapPosition, 2: saveTerritoryPosition, 3: saveTerritoryName}, click: activateHelperNextStep},
-	{name: 'skip', cssClass: 'helperStepSkip', text: 'Skip this step', dataUpdate: {1: empty, 2: empty}, click: activateHelperNextStep},
-	{name: 'cancel', cssClass: 'helperStepCancel', text: 'Switch to another map', dataUpdate: {1: empty, 2: empty, 3: empty}, click: ignoreCurrentMap}
-];
-
 var dragHelper = d3.behavior.drag()
 	.origin(function(d) { return d; })
 	.on("dragstart", function() {
@@ -144,10 +168,3 @@ var dragHelper = d3.behavior.drag()
 			.style("margin-left", d.x+"px")
 			.style("margin-top",  d.y+"px");
 	});
-
-var helper = d3.select("#mapHelper")
-	.datum({x: 0, y: 0})
-	.call(dragHelper);
-
-var helperSteps = helper.selectAll('.helperStep')
-	.data(d3.range(1,4).map(function(d) { return {step: d}; }));

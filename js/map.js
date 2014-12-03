@@ -82,8 +82,6 @@ function getAndShowBgMap(id, filePath) {
 	});
 }
 
-var resizeHandle = d3.select('#resizeHandle');
-var territoryName = d3.select('#territoryName');
 var svgMap = null;
 var isLoading = false;
 
@@ -93,8 +91,8 @@ function initExternalSvgMap() {
 		svgMap = null;
 	}
 	isLoading = false;
-	helper.classed("hidden", true);
-	resizeHandle.classed("hidden", true);
+
+	initHelper();
 }
 
 function loadExternalSvgForYear(year) {
@@ -132,14 +130,6 @@ function loadExternalSvgForYear(year) {
 
 								dragmove.call(svgMap.node(), svgMap.datum());
 
-								resizeHandle
-									.attr("width", resizeHandleSize)
-									.attr("height", resizeHandleSize)
-									.select("rect")
-										.attr("width", resizeHandleSize)
-										.attr("height", resizeHandleSize);
-
-								initHelper();
 								activateHelperNextStep();
 
 								resizeExternalMap();
