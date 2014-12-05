@@ -55,7 +55,10 @@ module.exports = function(config) {
         coverageReporter: {
             type: 'html',
             dir: 'build/js/coverage/',
-            subdir: '.'
+            subdir: '.',
+            reporters: [
+                { type: 'cobertura', subdir: '..', file: 'coverage.xml' }
+            ]
         },
 
         // web server port
