@@ -11,7 +11,7 @@ class Util {
     public static $cache_dir_thumbnails = "cache/thumbnails/";
     public static $cache_dir_json = "cache/json/";
     public static $phantomjs_path = "bin/phantomjs";
-    public static $rasterize_script_path = "js/rasterize.js";
+    public static $rasterize_script_path = "js/headless/rasterize.js";
     public static $rasterize_script_success_output = "thumbnail created";
     public static $thumbnailSize = 400;
 
@@ -99,6 +99,7 @@ class Util {
                 return true;
             }
             else {
+                self::$log->error('Failed to resize thumbnail for SVG file '.$svgName);
                 return false;
             }
         }
