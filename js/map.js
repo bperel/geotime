@@ -1,5 +1,6 @@
 var width = 960;
 var mapHeight= 480;
+var mapPadding = 200;
 var resizeHandleSize = 16;
 var maxExternalMapSizePercentage = 80;
 var svg;
@@ -35,9 +36,7 @@ function dragstarted() {
 function dragmove(d) {
 	d.x += d3.event ? d3.event.dx : 0;
 	d.y += d3.event ? d3.event.dy : 0;
-	d3.selectAll("#externalSvg, #resizeHandle")
-		.style("margin-left", d.x+"px")
-		.style("margin-top",+ d.y+"px");
+	positionExternalMap(d.x, d.y);
 }
 
 function initMapPlaceHolders(callback) {
@@ -132,7 +131,15 @@ function loadExternalSvgForYear(year) {
 
 								activateHelperNextStep();
 
-								resizeExternalMap();
+								if (incompleteMapInfo.position) {
+									var projectedTopLeft = projection(incompleteMapInfo.position[0]);
+									var projectedBottomRight = projection(incompleteMapInfo.position[1]);
+									positionExternalMap(projectedTopLeft[0], projectedTopLeft[1]);
+									resizeExternalMap(projectedBottomRight[0]-projectedTopLeft[0], projectedBottomRight[1]-projectedTopLeft[1]);
+								}
+								else {
+									resizeExternalMap();
+								}
 
 								isLoading = false;
 							});
@@ -150,6 +157,12 @@ function initAutocomplete() {
 		.width(960)
 		.height(500)
 		.render();
+}
+
+function positionExternalMap(left, top) {
+	d3.selectAll("#externalSvg, #resizeHandle")
+		.style("margin-left", left+"px")
+		.style("margin-top",+ top +"px");
 }
 
 function resizeExternalMap(width, height) {
@@ -185,8 +198,8 @@ function resizeExternalMap(width, height) {
 		});
 
 	resizeHandle
-		.style("left", (200 + width  - resizeHandleSize)+"px")
-		.style("top",  (      height - resizeHandleSize)+"px");
+		.style("left", (mapPadding + width  - resizeHandleSize)+"px")
+		.style("top",  (             height - resizeHandleSize)+"px");
 }
 
 function onTerritoryMouseover() {

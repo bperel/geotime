@@ -140,6 +140,12 @@ class Geotime {
         return null;
     }
 
+    /**
+     * @param $mapId
+     * @param $mapProjection string
+     * @param $mapPosition string[]
+     * @return Map|null
+     */
     public static function updateMap($mapId, $mapProjection, $mapPosition) {
         /** @var Map $map */
         $map = Map::one(array('_id' => new \MongoId($mapId)));
@@ -148,6 +154,9 @@ class Geotime {
         }
         else {
             $map->setProjection($mapProjection);
+            array_walk_recursive($mapPosition, function(&$item) {
+                $item = floatval($item);
+            });
             $map->setPosition($mapPosition);
             $map->save();
             return $map;

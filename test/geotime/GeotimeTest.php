@@ -156,7 +156,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $mapId = $map->getIdAsString();
         $map->delete();
 
-        $updatedMap = Geotime::updateMap($mapId, 'mercator', array(array(0, 0), array(10, 10)));
+        $updatedMap = Geotime::updateMap($mapId, 'mercator', array(array('0', '0'), array('10', '10')));
         $this->assertNull($updatedMap);
     }
 
@@ -167,7 +167,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $map->save();
         $mapId = $map->getIdAsString();
 
-        $updatedMap = Geotime::updateMap($mapId, 'mercator2', array(array(0, 0), array(10, 10)));
+        $updatedMap = Geotime::updateMap($mapId, 'mercator2', array(array('0', '0'), array('10', '10')));
         $this->assertNotNull($updatedMap);
         $this->assertEquals($updatedMap->getFileName(), $map->getFileName());
         $this->assertEquals($updatedMap->getProjection(), 'mercator2');

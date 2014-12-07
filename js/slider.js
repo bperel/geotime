@@ -1,6 +1,6 @@
 
 var margin = {top: 10, right: 50, bottom: 10, left: 50},
-	sliderWidth = 200 - margin.left - margin.right,
+	sliderWidth = mapPadding - margin.left - margin.right,
 	mapHeight = sliderHeight = 500 - margin.bottom - margin.top;
 
 
