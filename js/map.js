@@ -36,7 +36,7 @@ function dragstarted() {
 function dragmove(d) {
 	d.x += d3.event ? d3.event.dx : 0;
 	d.y += d3.event ? d3.event.dy : 0;
-	positionExternalMap(d.x, d.y);
+	loadMapPosition([d.x, d.y]);
 }
 
 function initMapPlaceHolders(callback) {
@@ -132,10 +132,10 @@ function loadExternalSvgForYear(year) {
 								activateHelperNextStep();
 
 								if (incompleteMapInfo.position) {
-									var projectedTopLeft = projection(incompleteMapInfo.position[0]);
-									var projectedBottomRight = projection(incompleteMapInfo.position[1]);
-									positionExternalMap(projectedTopLeft[0], projectedTopLeft[1]);
-									resizeExternalMap(projectedBottomRight[0]-projectedTopLeft[0], projectedBottomRight[1]-projectedTopLeft[1]);
+									var projectedLeftTop = projection(incompleteMapInfo.position[0]);
+									var projectedRightBottom = projection(incompleteMapInfo.position[1]);
+									loadMapPosition(projectedLeftTop);
+									resizeExternalMap(projectedRightBottom[0]-projectedLeftTop[0], projectedRightBottom[1]-projectedLeftTop[1]);
 								}
 								else {
 									resizeExternalMap();
@@ -159,10 +159,35 @@ function initAutocomplete() {
 		.render();
 }
 
-function positionExternalMap(left, top) {
+function loadMapPosition(projectedLeftTop) {
+	svgMap.datum(function(d) {
+		d.x = projectedLeftTop[0];
+		d.y = projectedLeftTop[1];
+		return d;
+	});
 	d3.selectAll("#externalSvg, #resizeHandle")
-		.style("margin-left", left+"px")
-		.style("margin-top",+ top +"px");
+		.style("margin-left", projectedLeftTop[0]+"px")
+		.style("margin-top",+ projectedLeftTop[1] +"px");
+}
+
+function saveMapPosition() {
+	var left   = svgMap.styleIntWithoutPx("margin-left"),
+		top    = svgMap.styleIntWithoutPx("margin-top"),
+		width  = svgMap.styleIntWithoutPx("width"),
+		height = svgMap.styleIntWithoutPx("height");
+	var pos = [
+		projection.invert([left,        top]),
+		projection.invert([left+width,  top+height])
+	];
+
+	return function(d) {
+		d.map = {
+			id: svgMap.datum().id,
+			position: pos,
+			projection: "mercator"
+		};
+		return d;
+	};
 }
 
 function resizeExternalMap(width, height) {
