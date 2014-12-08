@@ -140,12 +140,11 @@ function loadExternalSvgForYear(year) {
 								else {
 									resizeExternalMap();
 								}
-
-								isLoading = false;
 							});
 						}
 					}
 				}
+				isLoading = false;
 			}
 		);
 	}
