@@ -1,7 +1,20 @@
 var helperButtons = [
-	{name: 'done', cssClass: 'helperStepDone', text: 'Done !', dataUpdate: {1: saveMapPosition, 2: saveTerritoryPosition, 3: saveTerritoryName}, click: activateHelperNextStep},
-	{name: 'skip', cssClass: 'helperStepSkip', text: 'Skip this step', dataUpdate: {1: empty, 2: empty}, click: activateHelperNextStep},
-	{name: 'cancel', cssClass: 'helperStepCancel', text: 'Switch to another map', dataUpdate: {1: empty, 2: empty, 3: empty}, click: ignoreCurrentMap}
+	{
+		name: 'done', cssClass: 'helperStepDone', text: 'Done !',
+		validate: {2: checkSelectedTerritory},
+		dataUpdate: {1: saveMapPosition, 2: saveTerritoryPosition, 3: saveTerritoryName},
+		click: activateHelperNextStep
+	},
+	{
+		name: 'skip', cssClass: 'helperStepSkip', text: 'Skip this step',
+		dataUpdate: {1: empty, 2: empty},
+		click: activateHelperNextStep
+	},
+	{
+		name: 'cancel', cssClass: 'helperStepCancel', text: 'Switch to another map',
+		dataUpdate: {1: empty, 2: empty, 3: empty},
+		click: ignoreCurrentMap
+	}
 ];
 
 var helper;
@@ -46,10 +59,12 @@ function activateHelperNextStep() {
 		.selectAll('button').data(helperButtons).enter().append('button')
 			.each(function() {
 				d3.select(this).on('click', function(d) {
-					var stepElement = helperSteps
-						.filter(isActiveStepFilter)
-						.datum(d.dataUpdate[newStep]());
-					d.click(stepElement);
+					if (!d.validate[newStep] || d.validate[newStep]()) {
+						var stepElement = helperSteps
+							.filter(isActiveStepFilter)
+							.datum(d.dataUpdate[newStep]());
+						d.click(stepElement);
+					}
 				});
 			})
 			.attr('class', function(d) { return d.cssClass; })
@@ -93,24 +108,12 @@ function ignoreCurrentMap() {
 	initExternalSvgMap();
 }
 
-function saveMapPosition() {
-	var left   = svgMap.styleIntWithoutPx("margin-left"),
-		top    = svgMap.styleIntWithoutPx("margin-top"),
-		width  = svgMap.styleIntWithoutPx("width"),
-		height = svgMap.styleIntWithoutPx("height");
-	var pos = [
-		projection.invert([left,        top]),
-		projection.invert([left+width,  top+height])
-	];
-
-	return function(d) {
-		d.map = {
-			id: svgMap.datum().id,
-			position: pos,
-			projection: "mercator"
-		};
-		return d;
-	};
+function checkSelectedTerritory() {
+	var isSelectedTerritory = !svgMap.select('path.selected').empty();
+	if (!isSelectedTerritory) {
+		alert('No territory has been selected');
+	}
+	return isSelectedTerritory;
 }
 
 function saveTerritoryPosition() {
