@@ -20,7 +20,8 @@
     color: gray;
 }
 
-.helperStep button {
+.helperStep button,
+.helperStep .if-active {
     display: none;
 }
 
@@ -32,4 +33,8 @@
 .helperStep.active button {
     display: inline;
     margin: 0 5px;
+}
+
+.helperStep.active .if-active {
+    display: block;
 }
