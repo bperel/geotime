@@ -18,8 +18,7 @@ function initHelper() {
 	territoryName = d3.select('#territoryName');
 
 	helper = d3.select("#mapHelper")
-		.datum({x: 0, y: 0})
-		.call(dragHelper);
+		.datum({ activeStep: 0});
 
 	helperSteps = helper.select('ul').selectAll('.helperStep');
 	helperSteps.data([
@@ -29,12 +28,6 @@ function initHelper() {
 		]).enter().append('li')
 			.classed('helperStep', true)
 			.html(function(d) { return '<div>'+d.content+'</div>'; });
-
-	helper
-		.datum(function(d) {
-			d.activeStep = 0;
-			return d;
-		});
 
 	helperButtons = [
 		{
@@ -150,16 +143,3 @@ function isActiveStepFilter(d) {
 }
 
 function empty() { return {}; }
-
-var dragHelper = d3.behavior.drag()
-	.origin(function(d) { return d; })
-	.on("dragstart", function() {
-		d3.event.sourceEvent.stopPropagation();
-	})
-	.on("drag", function(d) {
-		d.x += d3.event.dx;
-		d.y += d3.event.dy;
-		d3.select(this)
-			.style("margin-left", d.x+"px")
-			.style("margin-top",  d.y+"px");
-	});
