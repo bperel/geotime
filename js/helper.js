@@ -1,23 +1,5 @@
-var helperButtons = [
-	{
-		name: 'done', cssClass: 'helperStepDone', text: 'Done !',
-		validate: {2: checkSelectedTerritory},
-		dataUpdate: {1: saveMapPosition, 2: saveTerritoryPosition, 3: saveTerritoryName},
-		click: activateHelperNextStep
-	},
-	{
-		name: 'skip', cssClass: 'helperStepSkip', text: 'Skip this step',
-		dataUpdate: {1: empty, 2: empty},
-		click: activateHelperNextStep
-	},
-	{
-		name: 'cancel', cssClass: 'helperStepCancel', text: 'Switch to another map',
-		dataUpdate: {1: empty, 2: empty, 3: empty},
-		click: ignoreCurrentMap
-	}
-];
-
 var helper;
+var helperButtons;
 var helperSteps;
 var resizeHandle;
 var territoryName;
@@ -39,14 +21,41 @@ function initHelper() {
 		.datum({x: 0, y: 0})
 		.call(dragHelper);
 
-	helperSteps = helper.selectAll('.helperStep')
-		.data(d3.range(1,4).map(function(d) { return {step: d}; }));
+	helperSteps = helper.select('ul').selectAll('.helperStep');
+	helperSteps.data([
+			{ step: 1, content: 'Move the superimposed map so that it corresponds to the background borders.' },
+			{ step: 2, content: 'Select with your mouse a country whose name is written on the map or known by you.' },
+			{ step: 3, content: '<label for="territoryName">Type in its name :</label><input type="text" id="territoryName" />' }
+		]).enter().append('li')
+			.classed('helperStep', true)
+			.html(function(d) { return '<div>'+d.content+'</div>'; });
 
 	helper
 		.datum(function(d) {
 			d.activeStep = 0;
 			return d;
 		});
+
+	helperButtons = [
+		{
+			name: 'done', cssClass: 'helperStepDone', text: 'Done !',
+			validate: {2: checkSelectedTerritory},
+			dataUpdate: {1: saveMapPosition, 2: saveTerritoryPosition, 3: saveTerritoryName},
+			click: activateHelperNextStep
+		},
+		{
+			name: 'skip', cssClass: 'helperStepSkip', text: 'Skip this step',
+			dataUpdate: {1: empty, 2: empty},
+			click: activateHelperNextStep
+		},
+		{
+			name: 'cancel', cssClass: 'helperStepCancel', text: 'Switch to another map',
+			dataUpdate: {1: empty, 2: empty, 3: empty},
+			click: ignoreCurrentMap
+		}
+	];
+
+	initTerritoryAutocomplete();
 }
 
 function activateHelperNextStep() {
@@ -134,23 +143,6 @@ function saveTerritoryName() {
 		};
 		return d;
 	};
-}
-
-function validateTerritory(data) {
-	ajaxPost(
-		{
-			addTerritory: 1,
-			mapId: data.map.id,
-			mapProjection: data.map.projection,
-			mapPosition: data.map.position,
-			territoryName: data.territory.name,
-			xpath: data.territory.xpath,
-			coordinates: data.territory.coordinates
-		},
-		function(error, data) {
-
-		}
-	);
 }
 
 function isActiveStepFilter(d) {

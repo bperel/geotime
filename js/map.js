@@ -150,8 +150,30 @@ function loadExternalSvgForYear(year) {
 	}
 }
 
-function initAutocomplete() {
-	autocomplete(d3.select('#territoryName')[0][0])
+function validateTerritory(data) {
+	ajaxPost(
+		{
+			addTerritory: 1,
+			mapId: data.map.id,
+			mapProjection: data.map.projection,
+			mapPosition: data.map.position,
+			territoryName: data.territory.name,
+			xpath: data.territory.xpath,
+			coordinates: data.territory.coordinates
+		},
+		function(error, data) {
+			if (error) {
+				alert(error);
+			}
+			else {
+				location.reload();
+			}
+		}
+	);
+}
+
+function initTerritoryAutocomplete() {
+	autocomplete(d3.select('#territoryName').node())
 		.dataField("name")
 		.width(960)
 		.height(500)
