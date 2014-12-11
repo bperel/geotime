@@ -24,5 +24,10 @@ d3.selection.prototype.xpath = function(ignoreAncestorsFrom) {
             path = tpath;
         }
     }
+    if (ignoreAncestorsFrom) {
+        if (path.match(ignoreAncestorsFrom.xpath())) {
+            path = '/'+path.replace(ignoreAncestorsFrom.xpath(), '');
+        }
+    }
     return path;
 };
