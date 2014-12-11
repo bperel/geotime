@@ -14,10 +14,11 @@ class Territory extends Model {
     static $log;
 
     protected static $attrs = array(
-        'name' => array('type' => 'string'),
+        'name'    => array('type' => 'string'),
         'polygon' => array('type' => 'object'),
-        'area' => array('type' => 'int'),
-        'period' => array('model' => 'geotime\models\Period', 'type' => 'embed')
+        'area'    => array('type' => 'int'),
+        'xpath'   => array('type' => 'string'),
+        'period'  => array('type' => 'embed', 'model' => 'geotime\models\Period')
     );
 
     static $equatorialRadius = 6378137;
@@ -69,6 +70,22 @@ class Territory extends Model {
     public function setPeriod($period)
     {
         $this->__setter('period', $period);
+    }
+
+    /**
+     * @return string
+     */
+    public function getXpath()
+    {
+        return $this->__getter('xpath');
+    }
+
+    /**
+     * @param string $xpath
+     */
+    public function setXpath($xpath)
+    {
+        $this->__setter('xpath', $xpath);
     }
     // @codeCoverageIgnoreEnd
 

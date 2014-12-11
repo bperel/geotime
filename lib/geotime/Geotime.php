@@ -140,6 +140,40 @@ class Geotime {
         return null;
     }
 
+    /**
+     * @param $mapId
+     * @param $mapProjection string
+     * @param $mapPosition string[]
+     * @return Map|null
+     */
+    public static function updateMap($mapId, $mapProjection, $mapPosition) {
+        /** @var Map $map */
+        $map = Map::one(array('_id' => new \MongoId($mapId)));
+        if (is_null($map)) {
+            return null;
+        }
+        else {
+            $map->setProjection($mapProjection);
+            array_walk_recursive($mapPosition, function(&$item) {
+                $item = floatval($item);
+            });
+            $map->setPosition($mapPosition);
+            $map->save();
+            return $map;
+        }
+    }
+
+    public static function addLocatedTerritory($territoryName, $coordinates, $xpath)
+    {
+        $territory = new Territory();
+        $territory->setName($territoryName);
+        $territory->setPolygon($coordinates);
+        $territory->setXpath($xpath);
+        $territory->save();
+
+        return $coordinates;
+    }
+
     public static function getCriteriaGroupsNumber() {
         return CriteriaGroup::count();
     }
@@ -148,7 +182,7 @@ class Geotime {
      * Removes maps, territories and periods from the DB
      * @param bool $keepMaps
      */
-    static function clean($keepMaps=false) {
+    public static function clean($keepMaps=false) {
         if (!$keepMaps) {
             Map::drop();
         }

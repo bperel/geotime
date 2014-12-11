@@ -7,6 +7,7 @@ Kingdoms though time.
 
 * *nix
 * MongoDB
+* NodeJS and NPM
 * Apache+PHP 5 with MongoDB extension
 
 
@@ -21,6 +22,18 @@ $ curl -sS https://getcomposer.org/installer | php
 ```bash
 $ php composer.phar install
 ```
+
+* Install Bower project dependencies :
+```bash
+$ npm install -g bower
+$ bower install
+```
+
+* (Optional) If you want to test the application, install the karma packages as well :
+```bash
+$ npm install karma karma-cli karma-jasmine karma-jasmine-jquery karma-jasmine-matchers karma-phantomjs-launcher karma-coverage karma-junit-reporter
+```
+
 * Set up some rights : 
 ```bash
 $ chmod -R +w test/geotime/cache
@@ -73,7 +86,7 @@ $ htpasswd -c /path/to/my/web/directory/passwords admin
 ###Running tests
 
 ```bash
-$ ./vendor/bin/phpunit
+$ ./vendor/phpunit/phpunit/phpunit
 ```
 
 An HTML coverage report will be generated in the coverage/ folder.

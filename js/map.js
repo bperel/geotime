@@ -1,7 +1,9 @@
 var width = 960;
 var mapHeight= 480;
+var mapPadding = 200;
 var resizeHandleSize = 16;
 var maxExternalMapSizePercentage = 80;
+var svg;
 
 var projection = d3.geo.mercator()
 	.scale((width + 1) / 2 / Math.PI)
@@ -18,19 +20,6 @@ var zoom = d3.behavior.zoom()
 		svg.selectAll("path").attr("d", path);
 	});
 
-var svg = d3.select("#mapArea").append("svg")
-	.attr("width", width)
-	.attr("height", mapHeight)
-	.attr("id", "map")
-	.call(zoom);
-
-svg.append("rect")
-	.attr("id", "bg")
-	.attr("width", width)
-	.attr("height", mapHeight);
-
-showBgMap("backgroundMap", "data/external/ne_110m_coastline.json");
-
 var svgmap_drag = d3.behavior.drag()
 	.origin(function(d) { return d; })
 	.on("dragstart", dragstarted)
@@ -40,8 +29,6 @@ var svgmap_resize = d3.behavior.drag()
 	.on("dragstart", dragresizestarted)
 	.on("drag", dragresize);
 
-initAutocomplete();
-
 function dragstarted() {
 	d3.event.sourceEvent.stopPropagation();
 }
@@ -49,31 +36,51 @@ function dragstarted() {
 function dragmove(d) {
 	d.x += d3.event ? d3.event.dx : 0;
 	d.y += d3.event ? d3.event.dy : 0;
-	d3.selectAll("#externalSvg, #resizeHandle")
-		.style("margin-left", d.x+"px")
-		.style("margin-top",+ d.y+"px");
+	loadMapPosition([d.x, d.y]);
 }
 
-function showBgMap(id, filePath) {
-	d3.json(filePath, function(error, world) {
+function initMapPlaceHolders(callback) {
+	$('#map-placeholders').load('map-placeholders.html', {}, callback);
+}
 
+function initMapArea() {
+	svg = d3.select("#mapArea").append("svg")
+		.attr("width", width)
+		.attr("height", mapHeight)
+		.attr("id", "map")
+		.call(zoom);
+
+	svg.append("rect")
+		.attr("id", "bg")
+		.attr("width", width)
+		.attr("height", mapHeight);
+}
+
+function showBgMap(id, data, error) {
+	if (error) {
+		console.error(error);
+	}
+	else {
 		svg.append("g")
 			.attr("id", id)
-				.selectAll(".subunit")
-			.data(world.features)
+			.selectAll(".subunit")
+			.data(data.features)
 			.enter()
 				.append("path")
-				.attr("class", function(d) {
+				.attr("class", function (d) {
 					return "subunit-boundary subunit " + d.properties.adm0_a3;
 				})
 				.attr("d", path);
-
 		initExternalSvgMap();
+	}
+}
+
+function getAndShowBgMap(id, filePath) {
+	d3.json(filePath, function(error, world) {
+		showBgMap(id, world);
 	});
 }
 
-var resizeHandle = d3.select('#resizeHandle');
-var territoryName = d3.select('#territoryName');
 var svgMap = null;
 var isLoading = false;
 
@@ -83,69 +90,125 @@ function initExternalSvgMap() {
 		svgMap = null;
 	}
 	isLoading = false;
-	helper.classed("hidden", true);
-	resizeHandle.classed("hidden", true);
+
+	initHelper();
 }
 
 function loadExternalSvgForYear(year) {
 	if (!isLoading) {
 		isLoading = true;
 		ajaxPost(
-			{ getSvg: 1, year: year, ignored: slider.datum().ignoredMaps.join(",")+"" },
+			{ getSvg: 1, year: year, ignored: timeSlider.datum().ignoredMaps.join(",")+"" },
 			function(error, incompleteMapInfo) {
-				initExternalSvgMap();
-				var mapFileName = incompleteMapInfo.fileName;
-				if (mapFileName) {
-					if (!svgMap || svgMap.datum().fileName !== mapFileName) {
-						d3.xml("cache/svg/"+mapFileName, "image/svg+xml", function(xml) {
-							svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
-								.attr("name", mapFileName)
-								.attr("id", "externalSvg")
-								.classed("externalSvg", true);
+				if (!!incompleteMapInfo) {
+					initExternalSvgMap();
+					var mapFileName = incompleteMapInfo.fileName;
+					if (mapFileName) {
+						if (!svgMap || svgMap.datum().fileName !== mapFileName) {
+							d3.xml("cache/svg/" + mapFileName, "image/svg+xml", function (xml) {
+								svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
+									.attr("name", mapFileName)
+									.attr("id", "externalSvg")
+									.classed("externalSvg", true);
 
-							svgMap
-								.datum({
-									id: incompleteMapInfo.id,
-									fileName: incompleteMapInfo.fileName,
-									x: 0,
-									y: 0,
-									width:  parseInt(svgMap.attr("width")),
-									height: parseInt(svgMap.attr("height"))
-								});
+								svgMap
+									.datum({
+										id: incompleteMapInfo.id,
+										fileName: incompleteMapInfo.fileName,
+										x: 0,
+										y: 0,
+										width: parseInt(svgMap.attr("width")),
+										height: parseInt(svgMap.attr("height"))
+									});
 
-							if (!svgMap.attr("viewBox")) {
-								svgMap.attr("viewBox",  function(d) { return "0 0 "+ d.width+" "+ d.height; });
-							}
+								if (!svgMap.attr("viewBox")) {
+									svgMap.attr("viewBox", function (d) {
+										return "0 0 " + d.width + " " + d.height;
+									});
+								}
 
-							dragmove.call(svgMap.node(), svgMap.datum());
+								dragmove.call(svgMap.node(), svgMap.datum());
 
-							resizeHandle
-								.attr("width",  resizeHandleSize)
-								.attr("height", resizeHandleSize)
-								.select("rect")
-									.attr("width",  resizeHandleSize)
-									.attr("height", resizeHandleSize);
+								activateHelperNextStep();
 
-							initHelper();
-							activateHelperNextStep();
-
-							resizeExternalMap();
-
-							isLoading = false;
-						});
+								if (incompleteMapInfo.position) {
+									var projectedLeftTop = projection(incompleteMapInfo.position[0]);
+									var projectedRightBottom = projection(incompleteMapInfo.position[1]);
+									loadMapPosition(projectedLeftTop);
+									resizeExternalMap(projectedRightBottom[0]-projectedLeftTop[0], projectedRightBottom[1]-projectedLeftTop[1]);
+								}
+								else {
+									resizeExternalMap();
+								}
+							});
+						}
 					}
 				}
+				isLoading = false;
 			}
 		);
 	}
 }
 
-function initAutocomplete() {
-	autocomplete(d3.select('#territoryName')[0][0])
+function validateTerritory(data) {
+	ajaxPost(
+		{
+			addTerritory: 1,
+			mapId: data.map.id,
+			mapProjection: data.map.projection,
+			mapPosition: data.map.position,
+			territoryName: data.territory.name,
+			xpath: data.territory.xpath,
+			coordinates: data.territory.coordinates
+		},
+		function(error, data) {
+			if (error) {
+				alert(error);
+			}
+			else {
+				location.reload();
+			}
+		}
+	);
+}
+
+function initTerritoryAutocomplete() {
+	autocomplete(d3.select('#territoryName').node())
 		.dataField("name")
 		.width(960)
 		.height(500)
 		.render();
+}
+
+function loadMapPosition(projectedLeftTop) {
+	svgMap.datum(function(d) {
+		d.x = projectedLeftTop[0];
+		d.y = projectedLeftTop[1];
+		return d;
+	});
+	d3.selectAll("#externalSvg, #resizeHandle")
+		.style("margin-left", projectedLeftTop[0]+"px")
+		.style("margin-top",+ projectedLeftTop[1] +"px");
+}
+
+function saveMapPosition() {
+	var left   = svgMap.styleIntWithoutPx("margin-left"),
+		top    = svgMap.styleIntWithoutPx("margin-top"),
+		width  = svgMap.styleIntWithoutPx("width"),
+		height = svgMap.styleIntWithoutPx("height");
+	var pos = [
+		projection.invert([left,        top]),
+		projection.invert([left+width,  top+height])
+	];
+
+	return function(d) {
+		d.map = {
+			id: svgMap.datum().id,
+			position: pos,
+			projection: "mercator"
+		};
+		return d;
+	};
 }
 
 function resizeExternalMap(width, height) {
@@ -181,8 +244,8 @@ function resizeExternalMap(width, height) {
 		});
 
 	resizeHandle
-		.style("left", (200 + width  - resizeHandleSize)+"px")
-		.style("top",  (      height - resizeHandleSize)+"px");
+		.style("left", (mapPadding + width  - resizeHandleSize)+"px")
+		.style("top",  (             height - resizeHandleSize)+"px");
 }
 
 function onTerritoryMouseover() {
@@ -193,12 +256,9 @@ function onTerritoryMouseout() {
 	d3.select(this).classed("hovered", false);
 }
 
-function onTerritoryClick() {
+function onHoveredTerritoryClick() {
 	svgMap.selectAll("path.selected").classed("selected", false);
 	d3.select(this).classed("selected", true);
-	if (helper.datum().activeStep === 2) {
-		activateHelperNextStep();
-	}
 }
 
 function dragresizestarted() {

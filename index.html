@@ -17,51 +17,32 @@
         <link rel="stylesheet" href="css/slider.css">
         <link rel="stylesheet" href="css/helper.css">
 
-        <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+        <script src="js/vendor/modernizr/modernizr.js"></script>
+        <script src="js/vendor/d3/d3.min.js"></script>
+        <script src="js/vendor/topojson/topojson.js"></script>
 
-        <script src="js/vendor/d3.v3.min.js"></script>
-        <script src="js/vendor/topojson.v1.min.js"></script>
         <script src="js/autocomplete.js"></script>
 
     </head>
     <body>
 
-        <div id="mapArea">
-        </div>
+        <div id="map-placeholders"></div>
 
-        <div id="mapHelper" class="hidden">
-            <ul>
-                <li class="helperStep">
-                    Move the superimposed map so that it corresponds to the background borders.
-                    <br />
-                    <button class="helperStepDone">Done !</button>
-                    <button class="helperStepCancel">Switch to another map</button>
-                </li>
-                <li class="helperStep">
-                    Select with your mouse a country whose name is written on the map or known by you
-                    <br />
-                    <button class="helperStepDone">Done !</button>
-                </li>
-                <li class="helperStep">
-                    <label for="territoryName">Type in its name :</label>
-                    <input type="text" id="territoryName" />
-                    <br />
-                    <button class="helperStepDone">Done !</button>
-                </li>
-            </ul>
-        </div>
+        <script src="js/vendor/jquery/dist/jquery.min.js"></script>
 
-        <svg id="resizeHandle">
-            <rect width="1" height="1" x="0" y="0"></rect>
-        </svg>
-
-        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
-
+        <script src="js/d3.xpath.js"></script>
         <script src="js/plugins.js"></script>
         <script src="js/util.js"></script>
         <script src="js/main.js"></script>
-        <script src="js/slider.js"></script>
         <script src="js/map.js"></script>
+        <script src="js/slider.js"></script>
         <script src="js/helper.js"></script>
+
+        <script type="text/javascript">
+            initMapPlaceHolders(function() {
+                initMapArea();
+                getAndShowBgMap("backgroundMap", "data/external/ne_110m_coastline.json");
+            });
+        </script>
     </body>
 </html>
