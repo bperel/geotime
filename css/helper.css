@@ -8,6 +8,13 @@
     text-align: left;
 }
 
+#mapHelper #mapTitle {
+    text-align: center;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    margin: 0;
+}
+
 #mapHelper a.active {
     font-weight: bold;
 }

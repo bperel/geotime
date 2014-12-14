@@ -4,7 +4,7 @@ var helperSteps;
 var resizeHandle;
 var territoryName;
 
-function initHelper() {
+function initHelper(mapFileName) {
 
 	resizeHandle = d3.select('#resizeHandle');
 	resizeHandle
@@ -16,6 +16,8 @@ function initHelper() {
 			.attr("height", resizeHandleSize);
 
 	territoryName = d3.select('#territoryName');
+
+	d3.select('#mapTitle').text(mapFileName);
 
 	helper = d3.select("#mapHelper")
 		.datum({ activeStep: 0});
@@ -31,7 +33,8 @@ function initHelper() {
 				dataUpdate: saveTerritoryPosition, validate: checkSelectedTerritory,
 				buttons: ['done', 'skip', 'cancel']
 			}, {
-				step: 3, content: ['<label for="territoryName">Type in its name</label><input type="text" id="territoryName" />'],
+				step: 3, content: ['<label for="territoryName">Type in its name</label>',
+								   '<input type="text" id="territoryName" />'],
 				dataUpdate: saveTerritoryName,
 				buttons: ['done', 'skip', 'cancel']
 			}, {
@@ -44,6 +47,9 @@ function initHelper() {
 		]).enter().append('li')
 			.classed('helperStep', true)
 			.html(function(d) { return '<div>'+d.content[0]+'</div><div class="if-active">'+ d.content.slice(1)+'</div>'; });
+
+	// Refresh with the created elements
+	helperSteps = helper.select('ul').selectAll('.helperStep');
 
 	helperButtons = [
 		{

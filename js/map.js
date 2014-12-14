@@ -71,7 +71,6 @@ function showBgMap(id, data, error) {
 					return "subunit-boundary subunit " + d.properties.adm0_a3;
 				})
 				.attr("d", path);
-		initExternalSvgMap();
 	}
 }
 
@@ -84,14 +83,14 @@ function getAndShowBgMap(id, filePath) {
 var svgMap = null;
 var isLoading = false;
 
-function initExternalSvgMap() {
+function initExternalSvgMap(mapFileName) {
 	$('#externalSvg').remove();
 	if (svgMap) {
 		svgMap = null;
 	}
 	isLoading = false;
 
-	initHelper();
+	initHelper(mapFileName);
 }
 
 function loadExternalSvgForYear(year) {
@@ -101,10 +100,10 @@ function loadExternalSvgForYear(year) {
 			{ getSvg: 1, year: year, ignored: timeSlider.datum().ignoredMaps.join(",")+"" },
 			function(error, incompleteMapInfo) {
 				if (!!incompleteMapInfo) {
-					initExternalSvgMap();
 					var mapFileName = incompleteMapInfo.fileName;
 					if (mapFileName) {
 						if (!svgMap || svgMap.datum().fileName !== mapFileName) {
+							initExternalSvgMap(mapFileName);
 							d3.xml("cache/svg/" + mapFileName, "image/svg+xml", function (xml) {
 								svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
 									.attr("name", mapFileName)
