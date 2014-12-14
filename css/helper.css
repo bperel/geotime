@@ -45,3 +45,11 @@
 .helperStep.active .if-active {
     display: block;
 }
+
+.helperStep #territoryId {
+    color: gray;
+}
+
+.helperStep #territoryId.clicked {
+    color: black;
+}

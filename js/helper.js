@@ -2,6 +2,7 @@ var helper;
 var helperButtons;
 var helperSteps;
 var resizeHandle;
+var territoryId;
 var territoryName;
 
 function initHelper(mapFileName) {
@@ -15,8 +16,6 @@ function initHelper(mapFileName) {
 			.attr("width", resizeHandleSize)
 			.attr("height", resizeHandleSize);
 
-	territoryName = d3.select('#territoryName');
-
 	d3.select('#mapTitle').text(mapFileName);
 
 	helper = d3.select("#mapHelper")
@@ -29,7 +28,8 @@ function initHelper(mapFileName) {
 				dataUpdate: saveMapPosition,
 				buttons: ['done', 'skip', 'cancel']
 			}, {
-				step: 2, content: ['Select with your mouse a country whose name is written on the map or known by you.'],
+				step: 2, content: ['Select with your mouse a country whose name is written on the map or known by you.',
+								   'Chosen territory : <span id="territoryId">None</span>'],
 				dataUpdate: saveTerritoryPosition, validate: checkSelectedTerritory,
 				buttons: ['done', 'skip', 'cancel']
 			}, {
@@ -66,6 +66,11 @@ function initHelper(mapFileName) {
 		}
 	];
 
+	// Step 2
+	territoryId = d3.select('#territoryId');
+
+	// Step 3
+	territoryName = d3.select('#territoryName');
 	initTerritoryAutocomplete();
 }
 
@@ -142,6 +147,23 @@ function ignoreCurrentMap() {
 	initExternalSvgMap();
 }
 
+// Step 2
+function updateTerritoryId() {
+	var id;
+	if (hoveredTerritory) {
+		id = hoveredTerritory.attr('id');
+	}
+	else if (selectedTerritory) {
+		id = selectedTerritory.attr('id');
+	}
+	else {
+		id = 'None';
+	}
+	territoryId
+		.classed('clicked', !!selectedTerritory && (!hoveredTerritory || hoveredTerritory.node() === selectedTerritory.node()))
+		.text(id);
+}
+
 function checkSelectedTerritory() {
 	var isSelectedTerritory = !svgMap.select('path.selected').empty();
 	if (!isSelectedTerritory) {
@@ -161,6 +183,7 @@ function saveTerritoryPosition() {
 	};
 }
 
+// Step 3
 function saveTerritoryName() {
 	return function(d) {
 		d.territory = {
@@ -170,6 +193,7 @@ function saveTerritoryName() {
 	};
 }
 
+// Step 4
 function saveTerritoryPeriod() {
 	return function(d) {
 		d.territory = {

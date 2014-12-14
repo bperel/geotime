@@ -4,6 +4,8 @@ var mapPadding = 200;
 var resizeHandleSize = 16;
 var maxExternalMapSizePercentage = 80;
 var svg;
+var hoveredTerritory;
+var selectedTerritory;
 
 var projection = d3.geo.mercator()
 	.scale((width + 1) / 2 / Math.PI)
@@ -250,16 +252,34 @@ function resizeExternalMap(width, height) {
 }
 
 function onTerritoryMouseover() {
-	d3.select(this).classed("hovered", true);
+	hoveredTerritory = d3.select(this);
+	hoveredTerritory.classed("hovered", true);
+	updateTerritoryId();
 }
 
 function onTerritoryMouseout() {
-	d3.select(this).classed("hovered", false);
+	hoveredTerritory.classed("hovered", false);
+	hoveredTerritory = null;
+	updateTerritoryId();
 }
 
 function onHoveredTerritoryClick() {
-	svgMap.selectAll("path.selected").classed("selected", false);
-	d3.select(this).classed("selected", true);
+	var hoveredTerritoryIsSelected =
+		hoveredTerritory && selectedTerritory
+	 && hoveredTerritory.node() === selectedTerritory.node();
+
+	if (selectedTerritory) {
+		selectedTerritory.classed("selected", false);
+	}
+
+	if (hoveredTerritoryIsSelected) {
+		selectedTerritory = null;
+	}
+	else {
+		selectedTerritory = hoveredTerritory;
+		selectedTerritory.classed("selected", true);
+	}
+	updateTerritoryId();
 }
 
 function dragresizestarted() {
