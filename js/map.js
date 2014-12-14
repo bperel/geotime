@@ -158,6 +158,8 @@ function validateTerritory(data) {
 			mapProjection: data.map.projection,
 			mapPosition: data.map.position,
 			territoryName: data.territory.name,
+			territoryPeriodStart: data.territory.period.start,
+			territoryPeriodEnd: data.territory.period.end,
 			xpath: data.territory.xpath,
 			coordinates: data.territory.coordinates
 		},

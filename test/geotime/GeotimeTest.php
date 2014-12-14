@@ -173,4 +173,29 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($updatedMap->getProjection(), 'mercator2');
         $this->assertEquals($updatedMap->getPosition(), array(array(0, 0), array(10, 10)));
     }
+
+    function testAddLocatedTerritory() {
+        $territoryName = 'myTerritory';
+        $this->assertNull(Territory::one(array('name' => $territoryName)));
+
+        $coordinates = array(
+            array(-76.73647242455775, 19.589864044838837),
+            array(-76.67084026038955, 19.24637514426756),
+            array(-76.51475666216831, 18.926012649077077)
+        );
+
+        $xpath = '//path[id="My territory"]';
+        $territoryPeriodStart = '1980-01-02';
+        $territoryPeriodEnd = '1991-04-06';
+
+        Geotime::addLocatedTerritory($territoryName, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
+
+        /** @var Territory $createdTerritory */
+        $createdTerritory = Territory::one(array('name' => $territoryName));
+        $this->assertNotEmpty($createdTerritory);
+        $this->assertEquals($xpath, $createdTerritory->getXpath());
+        $this->assertEquals($coordinates, $createdTerritory->getPolygon());
+        $this->assertEquals(new \MongoDate(strtotime($territoryPeriodStart)), $createdTerritory->getPeriod()->getStart());
+        $this->assertEquals(new \MongoDate(strtotime($territoryPeriodEnd)), $createdTerritory->getPeriod()->getEnd());
+    }
 } 

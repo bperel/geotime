@@ -30,9 +30,11 @@ elseif (isset($_POST['addTerritory'])) {
     Geotime::updateMap($mapId, $mapProjection, $mapPosition);
 
     $territoryName = $_POST['territoryName'];
+    $territoryPeriodStart = $_POST['territoryPeriodStart'];
+    $territoryPeriodEnd = $_POST['territoryPeriodEnd'];
     $xpath = $_POST['xpath'];
     $coordinates = $_POST['coordinates'];
-    $object->coord = Geotime::addLocatedTerritory($territoryName, $coordinates, $xpath);
+    $object->coord = Geotime::addLocatedTerritory($territoryName, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
 }
 
 echo json_encode($object);

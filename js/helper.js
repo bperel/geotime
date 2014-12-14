@@ -38,6 +38,7 @@ function initHelper() {
 				step: 4, content: ['During what period did this territory have these borders ?<br />',
 							       '<label for="territoryPeriodStart">From </label><input type="number" id="territoryPeriodStart" />'
 							     + '<label for="territoryPeriodEnd"> to </label><input type="number" id="territoryPeriodEnd" />'],
+				dataUpdate: saveTerritoryPeriod,
 				buttons: ['done', 'cancel']
 			}
 		]).enter().append('li')
@@ -65,16 +66,19 @@ function initHelper() {
 function activateHelperNextStep() {
 	var newStep = ++helper.datum().activeStep;
 
-	helper.classed("hidden", false);
-	helperSteps
-		.classed("active", isActiveStepFilter)
-		.filter(isActiveStepFilter)
-		.selectAll('button').data(helperButtons).enter().append('button')
-			.each(function() {
-				d3.select(this).on('click', function(btnData) {
+	if (newStep <= helperSteps.data().length) {
+		helper.classed("hidden", false);
+		helperSteps
+			.classed("active", isActiveStepFilter)
+			.filter(isActiveStepFilter)
+			.selectAll('button').data(helperButtons).enter().append('button')
+			.each(function () {
+				d3.select(this).on('click', function (btnData) {
 					var stepElement = helperSteps
 						.filter(isActiveStepFilter)
-						.filter(function(d) { return btnData.name !== 'done' || isValidStepFilter(d); });
+						.filter(function (d) {
+							return btnData.name !== 'done' || isValidStepFilter(d);
+						});
 					if (!stepElement.empty()) {
 						if (btnData.name === 'done' && stepElement.datum().dataUpdate) {
 							stepElement.datum(stepElement.datum().dataUpdate());
@@ -83,39 +87,44 @@ function activateHelperNextStep() {
 					}
 				});
 			})
-			.attr('class', function(d) { return d.cssClass; })
-			.text(function(d) { return d.text; })
-			.classed('hidden', function(d) {
+			.attr('class', function (d) {
+				return d.cssClass;
+			})
+			.text(function (d) {
+				return d.text;
+			})
+			.classed('hidden', function (d) {
 				var stepNumber = helperSteps.data().length;
 				return d.name === 'skip' && newStep === stepNumber;
 			});
 
-	if (svgMap) {
-		switch(newStep) {
-			case 1:
-				svgMap.call(svgmap_drag);
-				resizeHandle.call(svgmap_resize);
-				break;
-			case 4:
-				validateTerritory(flattenArrayOfObjects(helperSteps.data()));
-				break;
-			default:
-				svgMap.on('mousedown.drag', null);
-				resizeHandle.on('mousedown.drag', null);
+		if (svgMap) {
+			switch (newStep) {
+				case 1:
+					svgMap.call(svgmap_drag);
+					resizeHandle.call(svgmap_resize);
+					break;
+				default:
+					svgMap.on('mousedown.drag', null);
+					resizeHandle.on('mousedown.drag', null);
 
-				if (newStep === 3) {
-					territoryName.node().focus();
-				}
+					if (newStep === 3) {
+						territoryName.node().focus();
+					}
+			}
+
+			resizeHandle.classed("hidden", newStep !== 1);
+			territoryName.classed("hidden", newStep !== 3);
+
+			svgMap
+				.selectAll("path")
+				.on("mouseover", newStep === 2 ? onTerritoryMouseover : null)
+				.on("mouseout", newStep === 2 ? onTerritoryMouseout : null)
+				.on("click", newStep === 2 ? onHoveredTerritoryClick : null);
 		}
-
-		resizeHandle.classed("hidden", newStep !== 1);
-		territoryName.classed("hidden", newStep !== 3);
-
-		svgMap
-			.selectAll("path")
-				.on("mouseover", newStep === 2 ? onTerritoryMouseover    : null)
-				.on("mouseout",  newStep === 2 ? onTerritoryMouseout     : null)
-				.on("click",     newStep === 2 ? onHoveredTerritoryClick : null);
+	}
+	else {
+		validateTerritory(flattenArrayOfObjects(helperSteps.data()));
 	}
 }
 
@@ -150,6 +159,18 @@ function saveTerritoryName() {
 	return function(d) {
 		d.territory = {
 			name: territoryName.node().value
+		};
+		return d;
+	};
+}
+
+function saveTerritoryPeriod() {
+	return function(d) {
+		d.territory = {
+			period: {
+				start: d3.select('#territoryPeriodStart').node().value,
+				end: d3.select('#territoryPeriodEnd').node().value
+			}
 		};
 		return d;
 	};

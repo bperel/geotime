@@ -163,12 +163,23 @@ class Geotime {
         }
     }
 
-    public static function addLocatedTerritory($territoryName, $coordinates, $xpath)
+    /**
+     * @param $territoryName string
+     * @param $coordinates string
+     * @param $xpath string
+     * @param $territoryPeriodStart string
+     * @param $territoryPeriodEnd string
+     * @return mixed
+     */
+    public static function addLocatedTerritory($territoryName, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
     {
         $territory = new Territory();
         $territory->setName($territoryName);
         $territory->setPolygon($coordinates);
         $territory->setXpath($xpath);
+
+        $period = Period::generate($territoryPeriodStart, $territoryPeriodEnd);
+        $territory->setPeriod($period);
         $territory->save();
 
         return $coordinates;
