@@ -49,15 +49,17 @@ class Import {
         }
     }
 
-    static function importReferencedTerritories($useCachedJson = true) {
+    function importReferencedTerritories($contentName, $useCachedJson = true) {
+        $this->importReferencedTerritoriesFromQuery(
+            file_get_contents(Util::$cache_dir_sparql . $contentName . '.sparql'),
+            $contentName.'.json',
+            $useCachedJson
+        );
+    }
 
-        self::initCriteriaGroups();
-        /** @var CriteriaGroup $criteriaGroup */
-        foreach(self::$criteriaGroups[CriteriaGroupsType::Territories] as $criteriaGroup) {
-            $criteriaGroupName = $criteriaGroup->getName();
-            $fileName = Util::$cache_dir_json . $criteriaGroupName . ".json";
-            self::instance()->storeTerritoriesFromCriteriaGroup($criteriaGroup, $fileName, $useCachedJson);
-        }
+    function importReferencedTerritoriesFromQuery($sparqlQuery, $fileName, $useCachedJson) {
+        $fileNameWithPath = Util::$cache_dir_json . $fileName;
+        $this->storeTerritoriesFromSparqlQuery($sparqlQuery, $fileNameWithPath, $useCachedJson);
     }
 
     static function importMaps($useCachedJson = true) {
@@ -87,9 +89,6 @@ class Import {
                 }
             }
         }
-
-        self::importMapsFromSparqlQuery();
-
         $importEndTime = time();
         self::$log->info('SVG and JSON importation done in '.($importEndTime-$importStartTime).'s.');
     }
@@ -467,14 +466,6 @@ class Import {
             $map->save();
         }
         return true;
-    }
-
-    function importMapsFromSparqlQuery() {
-        $sparqlQueries = array('formerTerritories.sparql');
-        foreach($sparqlQueries as $sparqlQueryName) {
-            $sparqlQuery = file_get_contents(Util::$cache_dir_sparql.$sparqlQueryName);
-            $json = $this->storeTerritoriesFromSparqlQuery($sparqlQuery);
-        }
     }
 }
 

@@ -18,7 +18,7 @@ CriteriaGroup::importFromJson();
 SparqlEndpoint::drop();
 SparqlEndpoint::importFromJson();
 
-Import::importReferencedTerritories(false);
+Import::instance()->importReferencedTerritories('formerTerritories', false);
 
 ?><br /><a href="index.html">Back to admin home</a>
 

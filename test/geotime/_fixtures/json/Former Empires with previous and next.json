@@ -1,0 +1,68 @@
+{
+    "head": {
+        "link": [],
+        "vars": [
+            "name",
+            "date1",
+            "date2",
+            "previous",
+            "next"
+        ]
+    },
+    "results": {
+        "distinct": false,
+        "ordered": true,
+        "bindings": [
+            {
+                "name": {
+                    "type": "literal",
+                    "xml:lang": "en",
+                    "value": "Abbasid Caliphate"
+                },
+                "date1": {
+                    "type": "typed-literal",
+                    "datatype": "http://www.w3.org/2001/XMLSchema#gYear",
+                    "value": "0750-01-01+02:00"
+                },
+                "date2": {
+                    "type": "typed-literal",
+                    "datatype": "http://www.w3.org/2001/XMLSchema#gYear",
+                    "value": "1258-01-01+02:00"
+                },
+                "previous": {
+                    "type": "literal",
+                    "value": "Dabuyid dynasty|Principality of Chaghaniyan|Principality of Khuttal|Umayyad Caliphate"
+                },
+                "next": {
+                    "type": "literal",
+                    "value": "Aghlabids|Emirate of Cordoba|Fatimid Caliphate|Mongol Empire|Tahirid dynasty"
+                }
+            },
+            {
+                "name": {
+                    "type": "literal",
+                    "xml:lang": "en",
+                    "value": "Alania"
+                },
+                "date1": {
+                    "type": "typed-literal",
+                    "datatype": "http://www.w3.org/2001/XMLSchema#gYear",
+                    "value": "0008-01-01+02:00"
+                },
+                "date2": {
+                    "type": "typed-literal",
+                    "datatype": "http://www.w3.org/2001/XMLSchema#gYear",
+                    "value": "1238-01-01+02:00"
+                },
+                "previous": {
+                    "type": "literal",
+                    "value": ""
+                },
+                "next": {
+                    "type": "literal",
+                    "value": "Mongol Empire"
+                }
+            }
+        ]
+    }
+}

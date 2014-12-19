@@ -455,8 +455,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testImportTerritoriesFromSparqlQuery() {
-        $this->setSparqlJsonFixture('Former Empires with previous and next.json');
-        $this->mock->importMapsFromSparqlQuery();
+        $resultFile = 'Former Empires with previous and next.json';
+        $this->setSparqlJsonFixture($resultFile);
+        $this->mock->importReferencedTerritoriesFromQuery($resultFile.'.sparql', $resultFile, true);
 
         $this->assertEquals(11, Territory::count(array()));
 
