@@ -39,5 +39,20 @@ class MapTest extends \PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('MongoDate', $territories[0]->getPeriod()->getStart());
         $this->assertInstanceOf('MongoDate', $territories[0]->getPeriod()->getEnd());
     }
+
+    public function testDeleteReferences() {
+        $date1Str = '2011-01-02';
+        $date2Str = '2013-07-15';
+        $imageFileName = 'testImage.svg';
+
+        $map = Map::generateAndSaveReferences($imageFileName, $date1Str, $date2Str);
+        $map->save();
+        $map->deleteReferences();
+
+        /** @var Map $map */
+        $map = Map::one(array());
+        $this->assertEquals(0, count($map->getTerritories()));
+
+    }
 }
  
