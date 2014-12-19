@@ -95,11 +95,11 @@ function initExternalSvgMap(mapFileName) {
 	initHelper(mapFileName);
 }
 
-function loadExternalSvgForYear(year) {
+function loadTerritoryMap() {
 	if (!isLoading) {
 		isLoading = true;
 		ajaxPost(
-			{ getSvg: 1, year: year, ignored: timeSlider.datum().ignoredMaps.join(",")+"" },
+			{ getSvg: 1 },
 			function(error, incompleteMapInfo) {
 				if (!!incompleteMapInfo) {
 					var mapFileName = incompleteMapInfo.fileName;

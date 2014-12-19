@@ -1,6 +1,7 @@
 #mapHelper {
     position: fixed;
     right: 0;
+    top: 50px;
     padding: 5px;
     background: white;
     border: 1px solid black;

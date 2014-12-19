@@ -27,6 +27,7 @@
     <body>
 
         <div id="map-placeholders"></div>
+        <a href="javascript:void(0)" id="loadTerritoryMap">Load a random territory</a>
 
         <script src="js/vendor/jquery/dist/jquery.min.js"></script>
 
@@ -35,7 +36,6 @@
         <script src="js/util.js"></script>
         <script src="js/main.js"></script>
         <script src="js/map.js"></script>
-        <script src="js/slider.js"></script>
         <script src="js/helper.js"></script>
 
         <script type="text/javascript">
@@ -43,6 +43,7 @@
                 initMapArea();
                 getAndShowBgMap("backgroundMap", "data/external/ne_110m_coastline.json");
             });
+            d3.select('#loadTerritoryMap').on('click', loadTerritoryMap);
         </script>
     </body>
 </html>

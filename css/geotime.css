@@ -4,8 +4,20 @@ body {
     line-height: 30px;
 }
 
+a {
+    text-decoration: none;
+}
+
 .template, .hidden {
     display: none;
+}
+
+#loadTerritoryMap {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 5px;
+    font-size: 12px;
 }
 
 .form-control {

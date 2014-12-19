@@ -109,15 +109,10 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
     }
 
     function testGetIncompleteMapInfoFound() {
-        /** @var object|null $incompleteMap */
-        $incompleteMap = Geotime::getIncompleteMapInfo(1985);
+        /** @var object $incompleteMap */
+        $incompleteMap = Geotime::getIncompleteMapInfo();
         $this->assertNotNull($incompleteMap);
         $this->assertEquals('testImage.svg', $incompleteMap->fileName);
-
-        // Try again ignoring this map
-        /** @var object|null $incompleteMap */
-        $incompleteMapIgnored = Geotime::getIncompleteMapInfo(1985, array($incompleteMap->id));
-        $this->assertNull($incompleteMapIgnored);
 
         $startDate = new \MongoDate(strtotime('1980-01-02'));
         $this->assertEquals($startDate->sec, $incompleteMap->territories[0]->period->start->sec);
@@ -127,12 +122,11 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
     }
 
     function testGetIncompleteMapInfoNotFound() {
-        /** @var object $incompleteMap */
-        $incompleteMap = Geotime::getIncompleteMapInfo(1970);
-        $this->assertNull($incompleteMap);
+
+        Geotime::clean();
 
         /** @var object $incompleteMap */
-        $incompleteMap = Geotime::getIncompleteMapInfo(2012);
+        $incompleteMap = Geotime::getIncompleteMapInfo();
         $this->assertNull($incompleteMap);
     }
 

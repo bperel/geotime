@@ -19,9 +19,7 @@ elseif (isset($_POST['getTerritories'])) {
     $object = Geotime::getTerritories(isset($_POST['startingWith']) ? $_POST['startingWith'] : null);
 }
 elseif (isset($_POST['getSvg'])) {
-    $year = $_POST['year'];
-    $ignored = empty($_POST['ignored']) ? array() : explode(',', $_POST['ignored']);
-    $object = Geotime::getIncompleteMapInfo($year, $ignored);
+    $object = Geotime::getIncompleteMapInfo();
 }
 elseif (isset($_POST['addTerritory'])) {
     $mapId = $_POST['mapId'];

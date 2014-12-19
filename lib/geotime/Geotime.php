@@ -108,29 +108,18 @@ class Geotime {
     }
 
     /**
-     * @param $year string
-     * @param $ignored array
      * @return object|null
      */
-    public static function getIncompleteMapInfo($year, $ignored = array())
+    public static function getIncompleteMapInfo()
     {
-        $ignoredIds = array();
-        foreach($ignored as $ignoredIdString) {
-            $ignoredIds[] = new \MongoId($ignoredIdString);
-        }
-
-        $year=new \MongoDate(strtotime($year.'-01-01'));
         /** @var Territory $matchingTerritories */
         $matchingTerritory = Territory::one(array(
-            'polygon' => array('$exists' => false),
-            'period.start' => array('$lte' => $year),
-            'period.end' => array('$gte' => $year)));
+            'polygon' => array('$exists' => false)));
 
         if (!is_null($matchingTerritory)) {
             /** @var Map $incompleteMap */
             $incompleteMap = Map::one(array(
                 'territories.$id' => new \MongoId($matchingTerritory->getId()),
-                '_id' => array('$nin' => $ignoredIds)
             ));
             if (!is_null($incompleteMap)) {
                 return $incompleteMap->__toSimplifiedObject();
