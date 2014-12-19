@@ -30,7 +30,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
         Util::$cache_dir_svg = "test/geotime/cache/svg/";
         Util::$cache_dir_json = "test/geotime/cache/json/";
-        Util::$cache_dir_sparql = "test/geotime/cache/sparql/";
 
         copy("test/geotime/_fixtures/json/Former Empires.json", Util::$cache_dir_json."Former Empires.json");
     }

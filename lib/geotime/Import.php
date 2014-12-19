@@ -51,7 +51,7 @@ class Import {
 
     function importReferencedTerritories($contentName, $useCachedJson = true) {
         $this->importReferencedTerritoriesFromQuery(
-            file_get_contents(Util::$cache_dir_sparql . $contentName . '.sparql'),
+            file_get_contents(Util::$data_dir_sparql . $contentName . '.sparql'),
             $contentName.'.json',
             $useCachedJson
         );
