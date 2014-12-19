@@ -8,7 +8,7 @@ var hoveredTerritory;
 var selectedTerritory;
 
 var projection = d3.geo.mercator()
-	.scale((width + 1) / 2 / Math.PI)
+	.scale(width / 2 / Math.PI)
 	.precision(.01);
 
 var path = d3.geo.path()

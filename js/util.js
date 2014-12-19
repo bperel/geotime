@@ -8,23 +8,18 @@ function ajaxPost(options, callback) {
 
 /**
  *
- * @param path SVGPathElement
  * @returns Array
  */
-function pathToCoordinates(path) {
+d3.selection.prototype.getPathCoordinates = function() {
+    var path = this.node();
     var len = path.getTotalLength();
     var coordinates = [];
     for(var i=0; i<len; i++){
         var p=path.getPointAtLength(i);
-        var currentCoordinates = projection.invert([p.x, p.y]);
-        if (!currentCoordinates) {
-            console.error("Projection inversion produced an error");
-            return null;
-        }
-        coordinates.push(currentCoordinates);
+        coordinates.push(projection.invert([p.x, p.y]));
     }
     return coordinates;
-}
+};
 
 function flattenArrayOfObjects(array) {
     var obj = {};
@@ -37,6 +32,9 @@ function flattenArrayOfObjects(array) {
 }
 
 d3.selection.prototype.styleIntWithoutPx = function(property) {
+    if (!property) {
+        return null;
+    }
     var value = this.style(property);
     return value && parseInt(value.replace(/px$/,''));
 };

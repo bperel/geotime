@@ -176,7 +176,7 @@ function saveTerritoryPosition() {
 	var selectedTerritory = svgMap.select('path.selected');
 	return function(d) {
 		d.territory = {
-			coordinates: pathToCoordinates(selectedTerritory.node()),
+			coordinates: selectedTerritory.getPathCoordinates(),
 			xpath: selectedTerritory.xpath()
 		};
 		return d;
