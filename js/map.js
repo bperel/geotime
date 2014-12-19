@@ -7,20 +7,11 @@ var svg;
 var hoveredTerritory;
 var selectedTerritory;
 
-var projection = d3.geo.mercator()
-	.scale(width / 2 / Math.PI)
-	.precision(.01);
+var projection,
+	path,
+	zoom;
 
-var path = d3.geo.path()
-	.projection(projection);
-
-var zoom = d3.behavior.zoom()
-	.translate(projection.translate())
-	.scale(projection.scale())
-	.on("zoom", function() {
-		projection.translate(d3.event.translate).scale(d3.event.scale);
-		svg.selectAll("path").attr("d", path);
-	});
+applyProjection('mercator');
 
 var svgmap_drag = d3.behavior.drag()
 	.origin(function(d) { return d; })
@@ -30,6 +21,27 @@ var svgmap_drag = d3.behavior.drag()
 var svgmap_resize = d3.behavior.drag()
 	.on("dragstart", dragresizestarted)
 	.on("drag", dragresize);
+
+function applyProjection(name) {
+	projection = d3.geo[name]()
+		.scale(width / 2 / Math.PI)
+		.precision(.01);
+
+	path = d3.geo.path()
+		.projection(projection);
+
+	zoom = d3.behavior.zoom()
+		.translate(projection.translate())
+		.scale(projection.scale())
+		.on("zoom", function() {
+			projection.translate(d3.event.translate).scale(d3.event.scale);
+			svg.selectAll("path").attr("d", path);
+		});
+
+	if (svg) {
+		svg.selectAll('path.subunit').attr("d", path)
+	}
+}
 
 function dragstarted() {
 	d3.event.sourceEvent.stopPropagation();
@@ -56,6 +68,20 @@ function initMapArea() {
 		.attr("id", "bg")
 		.attr("width", width)
 		.attr("height", mapHeight);
+
+	var projectionSelection = d3.select('#projectionSelection')
+		.on('change', function(d) {
+			var selectedOption = this.options[this.selectedIndex];
+			applyProjection(d3.select(selectedOption).datum().name);
+		});
+
+	projectionSelection.selectAll('option')
+		.data([
+			{ name: 'mercator' },
+			{ name: 'equirectangular' }
+		])
+		.enter().append('option')
+		.text(function(d) { return d.name; });
 }
 
 function showBgMap(id, data, error) {

@@ -1,5 +1,4 @@
 body {
-    text-align: center;
     font-family: Verdana, sans-serif;
     line-height: 30px;
 }
@@ -10,6 +9,11 @@ a {
 
 .template, .hidden {
     display: none;
+}
+
+#projectionSelectionContainer {
+    margin: 10px;
+    position: absolute;
 }
 
 #loadTerritoryMap {
