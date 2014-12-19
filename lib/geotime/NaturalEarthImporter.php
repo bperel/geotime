@@ -61,12 +61,7 @@ class NaturalEarthImporter {
 
         $territories = array();
         foreach($countriesAndCoordinates as $countryName=>$coordinates) {
-
-            $t = new Territory();
-            $t->setName($countryName);
-            $t->setPolygon($coordinates);
-            $t->save();
-
+            $t = Territory::buildAndSave(false, $countryName, null, null, $coordinates);
             $territories[] = $t;
         }
 

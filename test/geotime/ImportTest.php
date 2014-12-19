@@ -465,6 +465,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $initialTerritories = Territory::find(array('period' => array('$exists' => true)));
         $this->assertEquals(2, count($initialTerritories));
 
+        $this->assertEquals($initialTerritories[0]->getUserMade(), false);
         $firstTerritoryPreviousTerritories = $initialTerritories[0]->getPrevious();
         $this->assertEquals(4, count($firstTerritoryPreviousTerritories));
         $this->assertEquals('Dabuyid dynasty', $firstTerritoryPreviousTerritories[0]->getName());

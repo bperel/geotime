@@ -191,8 +191,9 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         Geotime::addLocatedTerritory($territoryName, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
 
         /** @var Territory $createdTerritory */
-        $createdTerritory = Territory::one(array('name' => $territoryName));
+        $createdTerritory = Territory::one(array('name' => $territoryName));;
         $this->assertNotEmpty($createdTerritory);
+        $this->assertEquals($createdTerritory->getUserMade(), true);
         $this->assertEquals($xpath, $createdTerritory->getXpath());
         $this->assertEquals($coordinates, $createdTerritory->getPolygon());
         $this->assertEquals(new \MongoDate(strtotime($territoryPeriodStart)), $createdTerritory->getPeriod()->getStart());

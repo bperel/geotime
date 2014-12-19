@@ -20,7 +20,8 @@ class Territory extends Model {
         'xpath'   => array('type' => 'string'),
         'period'  => array('type' => 'embed', 'model' => 'geotime\models\Period'),
         'previous'=> array('type' => 'references', 'model' => 'geotime\models\Territory'),
-        'next'    => array('type' => 'references', 'model' => 'geotime\models\Territory')
+        'next'    => array('type' => 'references', 'model' => 'geotime\models\Territory'),
+        'userMade'=> array('type' => 'boolean')
     );
 
     static $equatorialRadius = 6378137;
@@ -30,19 +31,61 @@ class Territory extends Model {
      * @return Territory
      */
     public static function buildandSaveFromObject($object) {
-        $territory = new Territory();
-        $territory->setName($object->name->value);
-        if (isset($object->date1->value) && isset($object->date2->value)) {
-            $territory->setPeriod(Period::generate($object->date1->value, $object->date2->value));
-        }
-        if (isset($object->previous)) {
-            $territory->setPrevious(self::referencedTerritoriesStringToTerritoryArray($object->previous->value));
-        }
-        if (isset($object->next)) {
-            $territory->setNext(self::referencedTerritoriesStringToTerritoryArray($object->next->value));
+        $fields = array(
+            'name' => 'name',
+            'startDate' => 'date1',
+            'endDate' => 'date2',
+            'previous' => 'previous',
+            'next' => 'next'
+        );
+        $fieldValues = array();
+        foreach($fields as $mappedField => $optionalField) {
+            if (isset($object->$optionalField)) {
+                $fieldValues[$mappedField] = $object->$optionalField->value;
+            }
+            else {
+                $fieldValues[$mappedField] = '';
+            }
         }
 
+        return self::buildAndSave(
+            false, $fieldValues['name'], $fieldValues['startDate'], $fieldValues['endDate'], null, null, $fieldValues['previous'], $fieldValues['next']
+        );
+    }
+
+    /**
+     * @param $userMade boolean
+     * @param $name string
+     * @param $startDate string
+     * @param $endDate string
+     * @param $polygon string
+     * @param $xpath string
+     * @param $previous string
+     * @param $next string
+     * @return Territory
+     */
+    public static function buildAndSave($userMade, $name, $startDate = '', $endDate = '',
+                                        $polygon = '', $xpath = '', $previous = '', $next = '') {
+        $territory = new Territory();
+        $territory->setName($name);
+        if (!empty($startDate) && !empty($endDate)) {
+            $territory->setPeriod(Period::generate($startDate, $endDate));
+        }
+        if (!empty($polygon)) {
+            $territory->setPolygon($polygon);
+        }
+        if (!empty($xpath)) {
+            $territory->setXpath($xpath);
+        }
+        if (!empty($previous)) {
+            $territory->setPrevious(self::referencedTerritoriesStringToTerritoryArray($previous));
+        }
+        if (!empty($next)) {
+            $territory->setNext(self::referencedTerritoriesStringToTerritoryArray($next));
+        }
+        $territory->setUserMade($userMade);
         $territory->save();
+
         return $territory;
     }
 
@@ -55,9 +98,7 @@ class Territory extends Model {
             function($referencedTerritoryName) {
                 $referencedTerritory = Territory::one(array('name' => $referencedTerritoryName));
                 if (is_null($referencedTerritory) && !empty($referencedTerritoryName)) {
-                    $referencedTerritory = new Territory();
-                    $referencedTerritory->setName($referencedTerritoryName);
-                    $referencedTerritory->save();
+                    $referencedTerritory = Territory::buildAndSave(false, $referencedTerritoryName);
                 }
                 return $referencedTerritory;
             },
@@ -160,6 +201,22 @@ class Territory extends Model {
     public function setNext($next)
     {
         $this->__setter('next', $next);
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getUserMade()
+    {
+        return $this->__getter('userMade');
+    }
+
+    /**
+     * @param boolean $userMade
+     */
+    public function setUserMade($userMade)
+    {
+        $this->__setter('userMade', $userMade);
     }
 
     // @codeCoverageIgnoreEnd

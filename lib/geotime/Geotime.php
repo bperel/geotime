@@ -173,15 +173,7 @@ class Geotime {
      */
     public static function addLocatedTerritory($territoryName, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
     {
-        $territory = new Territory();
-        $territory->setName($territoryName);
-        $territory->setPolygon($coordinates);
-        $territory->setXpath($xpath);
-
-        $period = Period::generate($territoryPeriodStart, $territoryPeriodEnd);
-        $territory->setPeriod($period);
-        $territory->save();
-
+        Territory::buildAndSave(true, $territoryName, $territoryPeriodStart, $territoryPeriodEnd, $coordinates, $xpath);
         return $coordinates;
     }
 
