@@ -52,7 +52,7 @@ class Map extends Model {
     }
 
     /**
-     * @return \Purekid\Mongodm\Collection
+     * @return \Purekid\Mongodm\Collection|Territory[]
      */
     public function getTerritories() {
         return $this->__getter('territories');

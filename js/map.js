@@ -164,7 +164,7 @@ function validateTerritory(data) {
 			xpath: data.territory.xpath,
 			coordinates: data.territory.coordinates
 		},
-		function(error, data) {
+		function(error) {
 			if (error) {
 				alert(error);
 			}
