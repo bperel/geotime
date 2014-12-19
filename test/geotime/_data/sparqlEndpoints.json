@@ -1,6 +1,6 @@
 [
   {
-	"name": "Test endpoint",
+	"name": "Dbpedia",
 	"rootUrl": "http://endPointTest",
 	"endPoint": "sparql",
 	"method": "POST",

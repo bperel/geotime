@@ -88,6 +88,8 @@ class Import {
             }
         }
 
+        self::importMapsFromSparqlQuery();
+
         $importEndTime = time();
         self::$log->info('SVG and JSON importation done in '.($importEndTime-$importStartTime).'s.');
     }
@@ -116,11 +118,11 @@ class Import {
 
     /**
      * @param string $sparqlEndpointName
-     * @param CriteriaGroup $criteriaGroup
+     * @param string $sparqlQuery
      * @return string|null
      */
-    function getSparqlQueryResults($sparqlEndpointName, CriteriaGroup $criteriaGroup) {
-        $urlParts = self::getSparqlRequestUrlParts($sparqlEndpointName, $criteriaGroup);
+    function getSparqlQueryResultsFromQuery($sparqlEndpointName, $sparqlQuery) {
+        $urlParts = $this->getSparqlRequestUrlPartsFromQuery($sparqlEndpointName, $sparqlQuery);
         if (is_null($urlParts)) {
             return null;
         }
@@ -132,10 +134,10 @@ class Import {
 
     /**
      * @param string $sparqlEndpointName
-     * @param CriteriaGroup $criteriaGroup
+     * @param string $sparqlQuery
      * @return array|null
      */
-    function getSparqlRequestUrlParts($sparqlEndpointName, CriteriaGroup $criteriaGroup) {
+    function getSparqlRequestUrlPartsFromQuery($sparqlEndpointName, $sparqlQuery) {
 
         /** @var SparqlEndpoint $sparqlEndpoint */
         $sparqlEndpoint = SparqlEndpoint::one(array('name' => $sparqlEndpointName));
@@ -145,15 +147,22 @@ class Import {
             return null;
         }
 
-        $query = self::buildSparqlQuery($criteriaGroup);
-
         return array(
             implode('/', array(
                 $sparqlEndpoint->getRootUrl(),
                 $sparqlEndpoint->getEndpoint())),
             $sparqlEndpoint->getMethod(),
-            self::getSparqlHttpParametersWithQuery($sparqlEndpoint->getParameters(), $query)
+            self::getSparqlHttpParametersWithQuery($sparqlEndpoint->getParameters(), $sparqlQuery)
         );
+    }
+
+    /**
+     * @param string $sparqlEndpointName
+     * @param CriteriaGroup $criteriaGroup
+     * @return array|null
+     */
+    function getSparqlRequestUrlParts($sparqlEndpointName, CriteriaGroup $criteriaGroup) {
+        return $this->getSparqlRequestUrlPartsFromQuery($sparqlEndpointName, self::buildSparqlQuery($criteriaGroup));
     }
 
     /**
@@ -197,7 +206,11 @@ class Import {
      * @return Map[]|null
      */
     public function storeMapsFromCriteriaGroup(CriteriaGroup $criteriaGroup, $fileName = null, $getFromCachedJson = true) {
-        $pageAsJson = $this->getJsonDataFromCriteriaGroup($criteriaGroup, $fileName, $getFromCachedJson);
+        $pageAsJson = $this->getJsonDataFromSparqlQuery(
+            $this->buildSparqlQuery($criteriaGroup),
+            $fileName,
+            $getFromCachedJson
+        );
         if (is_null($pageAsJson)) {
             return null;
         }
@@ -212,7 +225,30 @@ class Import {
      * @return Territory[]|null
      */
     public function storeTerritoriesFromCriteriaGroup(CriteriaGroup $criteriaGroup, $fileName = null, $getFromCachedJson = true) {
-        $pageAsJson = $this->getJsonDataFromCriteriaGroup($criteriaGroup, $fileName, $getFromCachedJson);
+        $pageAsJson = $this->getJsonDataFromSparqlQuery(
+            $this->buildSparqlQuery($criteriaGroup),
+            $fileName,
+            $getFromCachedJson
+        );
+        if (is_null($pageAsJson)) {
+            return null;
+        }
+        return self::storeTerritoriesFromSparqlResults($pageAsJson);
+    }
+
+    /**
+     * Create Territory object instances from the results of a criteria group
+     * @param string $sparqlQuery
+     * @param string $fileName|null Cache file name to put the results into
+     * @param boolean $getFromCachedJson If FALSE, the results will be queried online
+     * @return Territory[]|null
+     */
+    public function storeTerritoriesFromSparqlQuery($sparqlQuery, $fileName = null, $getFromCachedJson = true) {
+        $pageAsJson = $this->getJsonDataFromSparqlQuery(
+            $sparqlQuery,
+            $fileName,
+            $getFromCachedJson
+        );
         if (is_null($pageAsJson)) {
             return null;
         }
@@ -221,12 +257,12 @@ class Import {
 
     /**
      * Create Map object instances from the results of a criteria group
-     * @param CriteriaGroup $criteriaGroup
+     * @param string $sparqlQuery
      * @param string $fileName|null Cache file name to put the results into
      * @param boolean $getFromCachedJson If FALSE, the results will be queried online
      * @return object|null
      */
-    public function getJsonDataFromCriteriaGroup(CriteriaGroup $criteriaGroup, $fileName = null, $getFromCachedJson = true)
+    public function getJsonDataFromSparqlQuery($sparqlQuery, $fileName = null, $getFromCachedJson = true)
     {
         $cacheFileExists = file_exists($fileName);
         if ($getFromCachedJson && $cacheFileExists) {
@@ -239,21 +275,16 @@ class Import {
             }
             $start = microtime(true);
 
-            $page = $this->getSparqlQueryResults('Dbpedia', $criteriaGroup);
-            $pageAsJson = json_decode($page);
+            $pageAsJson = Util::getStringAsJson(
+                $this->getSparqlQueryResultsFromQuery('Dbpedia', $sparqlQuery),
+                $fileName
+            );
 
-            if (is_null($pageAsJson)) {
-                self::$log->error('Cannot decode JSON file '.$fileName);
-                return null;
+            if (!is_null($pageAsJson)) {
+                $end = microtime(true);
+                $timeSpent = (intval($end - $start)) / 1000;
+                self::$log->info('Retrieved Sparql results in ' . $timeSpent . 's.');
             }
-
-            if (!is_null($fileName) && false !== file_put_contents($fileName, $page)) {
-                self::$log->info('Successfully stored JSON file '.$fileName);
-            }
-
-            $end = microtime(true);
-            $timeSpent = (intval($end-$start))/1000;
-            self::$log->info('Retrieved Sparql results in '.$timeSpent.'s.');
         }
         return $pageAsJson;
     }
@@ -333,9 +364,7 @@ class Import {
             $territoryName = $result->name->value;
 
             if (Territory::count(array('name' => $territoryName)) === 0) {
-                $territory = new Territory();
-                $territory->setName($territoryName);
-                $territory->save();
+                $territory = Territory::buildandSaveFromObject($result);
                 $territories[$territoryName]=$territory;
             }
             else {
@@ -438,6 +467,14 @@ class Import {
             $map->save();
         }
         return true;
+    }
+
+    function importMapsFromSparqlQuery() {
+        $sparqlQueries = array('formerTerritories.sparql');
+        foreach($sparqlQueries as $sparqlQueryName) {
+            $sparqlQuery = file_get_contents(Util::$cache_dir_sparql.$sparqlQueryName);
+            $json = $this->storeTerritoriesFromSparqlQuery($sparqlQuery);
+        }
     }
 }
 

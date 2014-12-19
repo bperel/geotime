@@ -30,19 +30,20 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
         Util::$cache_dir_svg = "test/geotime/cache/svg/";
         Util::$cache_dir_json = "test/geotime/cache/json/";
+        Util::$cache_dir_sparql = "test/geotime/cache/sparql/";
 
         copy("test/geotime/_fixtures/json/Former Empires.json", Util::$cache_dir_json."Former Empires.json");
     }
 
     static function tearDownAfterClass() {
-        Import::$log->info(__CLASS__." tests ended");
+        Import::$log->info(__CLASS__." tests ended !");
 
         unlink(Util::$cache_dir_json."Former Empires.json");
     }
 
     protected function setUp() {
         $this->mock = $this->getMockBuilder('geotime\Import')
-            ->setMethods(array('getCommonsImageXMLInfo', 'getSparqlQueryResults'))
+            ->setMethods(array('getCommonsImageXMLInfo', 'getSparqlQueryResultsFromQuery'))
             ->getMock();
 
         $this->import = new Import();
@@ -92,7 +93,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $response = file_get_contents('test/geotime/_fixtures/json/'.$fixtureFilename);
 
         $this->mock->expects($this->any())
-            ->method('getSparqlQueryResults')
+            ->method('getSparqlQueryResultsFromQuery')
             ->will($this->returnValue($response));
     }
 
@@ -218,7 +219,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetSparqlRequestUrlParts() {
-        $parts = $this->import->getSparqlRequestUrlParts('Test endpoint', $this->generateSampleCriteriaGroup());
+        $parts = $this->import->getSparqlRequestUrlParts('Dbpedia', $this->generateSampleCriteriaGroup());
 
         // Root URL
         $this->assertEquals('http://endPointTest/sparql', $parts[0]);
@@ -439,7 +440,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(1, Map::count());
     }
 
-    public function testFetchAndStoreImageOutdatedMap() {
+    public function testFetchAndStoreImageOutdatedMap()
+    {
         $storedMapUploadDate = new \MongoDate(strtotime('2012-01-02T03:04:05Z'));
         $uploadDate = new \MongoDate(strtotime('2013-01-02T03:04:05Z'));
 
@@ -452,7 +454,27 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(1, Map::count());
     }
 
-    function testGetCriteriaGroupNumber() {
-        $this->assertEquals(2, Geotime::getCriteriaGroupsNumber());
+    public function testImportTerritoriesFromSparqlQuery() {
+        $this->setSparqlJsonFixture('Former Empires with previous and next.json');
+        $this->mock->importMapsFromSparqlQuery();
+
+        $this->assertEquals(11, Territory::count(array()));
+
+        /** @var Territory[] $initialTerritories */
+        $initialTerritories = Territory::find(array('period' => array('$exists' => true)));
+        $this->assertEquals(2, count($initialTerritories));
+
+        $firstTerritoryPreviousTerritories = $initialTerritories[0]->getPrevious();
+        $this->assertEquals(4, count($firstTerritoryPreviousTerritories));
+        $this->assertEquals('Dabuyid dynasty', $firstTerritoryPreviousTerritories[0]->getName());
+        $this->assertEmpty($firstTerritoryPreviousTerritories[0]->getPeriod());
+
+        $firstTerritoryNextTerritories = $initialTerritories[0]->getNext();
+        $this->assertEquals(5, count($firstTerritoryNextTerritories));
+        $this->assertEquals('Aghlabids', $firstTerritoryNextTerritories[0]->getName());
+        $this->assertEmpty($firstTerritoryNextTerritories[0]->getPeriod());
+
+        $secondTerritoryPreviousTerritories = $initialTerritories[1]->getPrevious();
+        $this->assertEquals(0, count($secondTerritoryPreviousTerritories));
     }
 } 

@@ -9,6 +9,7 @@ Logger::configure("lib/geotime/logger.xml");
 class Util {
     public static $cache_dir_svg = "cache/svg/";
     public static $cache_dir_thumbnails = "cache/thumbnails/";
+    public static $cache_dir_sparql = "cache/sparql/";
     public static $cache_dir_json = "cache/json/";
     public static $phantomjs_path = "bin/phantomjs";
     public static $rasterize_script_path = "js/headless/rasterize.js";
@@ -144,6 +145,25 @@ class Util {
 
         imagecopyresampled($newImage, $oldImage, 0, 0, 0, 0, $width, $height, $origWidth, $origHeight);
         return imagepng($newImage, $thumbnailPath);
+    }
+
+    /**
+     * @param $page string
+     * @param $fileName string
+     * @return \stdClass|null
+     */
+    public static function getStringAsJson($page, $fileName = null) {
+        $pageAsJson = json_decode($page);
+
+        if (is_null($pageAsJson)) {
+            self::$log->error('Cannot decode JSON '.substr($page, 0, 50).'...');
+            return null;
+        }
+
+        if (!is_null($fileName) && false !== file_put_contents($fileName, $page)) {
+            self::$log->info('Successfully stored JSON file '.$fileName);
+        }
+        return $pageAsJson;
     }
 }
 

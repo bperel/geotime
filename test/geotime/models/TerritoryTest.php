@@ -43,5 +43,19 @@ class TerritoryTest extends \PHPUnit_Framework_TestCase {
         $luxembourg = Territory::one(array('name'=>'Luxembourg'));
         $this->assertEquals(2412, $luxembourg->getArea());
     }
+
+    public function testReferencedTerritoriesStringToTerritoryArray() {
+        $this->assertEquals(3, Territory::count(array()));
+
+        $alreadyImportedTerritory = new Territory(array('name' => 'A territory'));
+        $alreadyImportedTerritory->save();
+
+        $this->assertEquals(4, Territory::count(array()));
+
+        $territoriesAsString = 'A territory|A new territory';
+        Territory::referencedTerritoriesStringToTerritoryArray($territoriesAsString);
+
+        $this->assertEquals(5, Territory::count(array()));
+    }
 }
  

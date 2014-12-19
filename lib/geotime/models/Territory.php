@@ -18,10 +18,52 @@ class Territory extends Model {
         'polygon' => array('type' => 'object'),
         'area'    => array('type' => 'int'),
         'xpath'   => array('type' => 'string'),
-        'period'  => array('type' => 'embed', 'model' => 'geotime\models\Period')
+        'period'  => array('type' => 'embed', 'model' => 'geotime\models\Period'),
+        'previous'=> array('type' => 'references', 'model' => 'geotime\models\Territory'),
+        'next'    => array('type' => 'references', 'model' => 'geotime\models\Territory')
     );
 
     static $equatorialRadius = 6378137;
+
+    /**
+     * @param $object \stdClass
+     * @return Territory
+     */
+    public static function buildandSaveFromObject($object) {
+        $territory = new Territory();
+        $territory->setName($object->name->value);
+        if (isset($object->date1->value) && isset($object->date2->value)) {
+            $territory->setPeriod(Period::generate($object->date1->value, $object->date2->value));
+        }
+        if (isset($object->previous)) {
+            $territory->setPrevious(self::referencedTerritoriesStringToTerritoryArray($object->previous->value));
+        }
+        if (isset($object->next)) {
+            $territory->setNext(self::referencedTerritoriesStringToTerritoryArray($object->next->value));
+        }
+
+        $territory->save();
+        return $territory;
+    }
+
+    /**
+     * @param $territoriesString string
+     * @return Territory[]
+     */
+    public static function referencedTerritoriesStringToTerritoryArray($territoriesString) {
+        return array_map(
+            function($referencedTerritoryName) {
+                $referencedTerritory = Territory::one(array('name' => $referencedTerritoryName));
+                if (is_null($referencedTerritory) && !empty($referencedTerritoryName)) {
+                    $referencedTerritory = new Territory();
+                    $referencedTerritory->setName($referencedTerritoryName);
+                    $referencedTerritory->save();
+                }
+                return $referencedTerritory;
+            },
+            explode('|', $territoriesString)
+        );
+    }
 
     // @codeCoverageIgnoreStart
     /**
@@ -87,6 +129,39 @@ class Territory extends Model {
     {
         $this->__setter('xpath', $xpath);
     }
+
+    /**
+     * @return Territory[]
+     */
+    public function getPrevious()
+    {
+        return $this->__getter('previous');
+    }
+
+    /**
+     * @param Territory[] $previous
+     */
+    public function setPrevious($previous)
+    {
+        $this->__setter('previous', $previous);
+    }
+
+    /**
+     * @return Territory[]
+     */
+    public function getNext()
+    {
+        return $this->__getter('next');
+    }
+
+    /**
+     * @param Territory[] $next
+     */
+    public function setNext($next)
+    {
+        $this->__setter('next', $next);
+    }
+
     // @codeCoverageIgnoreEnd
 
     /**
