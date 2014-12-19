@@ -25,7 +25,6 @@
 
 function autocomplete(parent) {
     var _results=null,
-        _delay= 0,
         _selection,
         _margin = {top: 30, right: 10, bottom: 50, left: 80},
         __width = 420,
@@ -35,11 +34,9 @@ function autocomplete(parent) {
         _searchTerm,
         _lastSearchTerm,
         _currentIndex,
-        _keys,
         _selectedFunction=defaultSelected,
         _minLength = 1,
-        _dataField = "dataField",
-        _labelField = "labelField";
+        _dataField = "dataField";
 
     _selection=d3.select(parent);
 
@@ -78,7 +75,7 @@ function autocomplete(parent) {
                 _searchTerm=input.node().value;
                 var e=d3.event;
 
-                if (!(e.which == 38 || e.which == 40 || e.which == 13)) {
+                if (!e || !(e.which == 38 || e.which == 40 || e.which == 13)) {
                     if (!_searchTerm || _searchTerm == "") {
                         showSearching("No results");
                     }
@@ -100,7 +97,7 @@ function autocomplete(parent) {
                     }
 
                 }
-                else {
+                else if (e) {
                     e.preventDefault();
                 }
             }
@@ -187,28 +184,9 @@ function autocomplete(parent) {
         return component;
     };
 
-    component.keys = function (_) {
-        if (!arguments.length) return _keys;
-        _keys = _;
-        return component;
-    };
-
     component.dataField = function (_) {
         if (!arguments.length) return _dataField;
         _dataField = _;
-        return component;
-    };
-
-    component.labelField = function (_) {
-        if (!arguments.length) return _labelField;
-        _labelField = _;
-        return component;
-    };
-
-    component.margin = function(_) {
-        if (!arguments.length) return _margin;
-        _margin = _;
-        measure();
         return component;
     };
 
@@ -223,24 +201,6 @@ function autocomplete(parent) {
         if (!arguments.length) return __height;
         __height = _;
         measure();
-        return component;
-    };
-
-    component.delay = function(_) {
-        if (!arguments.length) return _delay;
-        _delay = _;
-        return component;
-    };
-
-    component.keys = function(_) {
-        if (!arguments.length) return _keys;
-        _keys = _;
-        return component;
-    };
-
-    component.onSelected = function(_) {
-        if (!arguments.length) return _selectedFunction;
-        _selectedFunction = _;
         return component;
     };
 
