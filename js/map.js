@@ -11,12 +11,16 @@ var projection,
 	path,
 	zoom;
 
-applyProjection('mercator');
-
 var svgmap_drag = d3.behavior.drag()
 	.origin(function(d) { return d; })
 	.on("dragstart", dragstarted)
 	.on("drag", dragmove);
+
+var bgSvgmap_drag = d3.behavior.drag()
+	.origin(function(d) { return d; })
+	.on("dragstart", dragstarted)
+	.on("drag", bgMapDragMove);
+
 
 var svgmap_resize = d3.behavior.drag()
 	.on("dragstart", dragresizestarted)
@@ -34,23 +38,40 @@ function applyProjection(name) {
 		.translate(projection.translate())
 		.scale(projection.scale())
 		.on("zoom", function() {
-			projection.translate(d3.event.translate).scale(d3.event.scale);
+			projection.scale(d3.event.scale);
 			svg.selectAll("path").attr("d", path);
 		});
 
-	if (svg) {
-		svg.selectAll('path.subunit').attr("d", path)
-	}
+	svg
+		.call(bgSvgmap_drag)
+		.call(zoom)
+		.selectAll('path.subunit').attr("d", path)
+
 }
 
 function dragstarted() {
 	d3.event.sourceEvent.stopPropagation();
 }
 
+var lambda = d3.scale.linear()
+	.domain([0, width])
+	.range([-180, 180]);
+
+var phi = d3.scale.linear()
+	.domain([0, mapHeight])
+	.range([90, -90]);
+
+function bgMapDragMove(d) {
+	d.x = (d.x || d3.event.sourceEvent.pageX) + (d3.event ? d3.event.dx : 0);
+	d.y = (d.y || d3.event.sourceEvent.pageY) + (d3.event ? d3.event.dy : 0);
+	projection.rotate([lambda(d.x), phi(d.y)]);
+	svg.selectAll("path").attr("d", path);
+}
+
 function dragmove(d) {
 	d.x += d3.event ? d3.event.dx : 0;
 	d.y += d3.event ? d3.event.dy : 0;
-	loadMapPosition([d.x, d.y]);
+	loadExternalMapPosition([d.x, d.y]);
 }
 
 function initMapPlaceHolders(callback) {
@@ -62,7 +83,7 @@ function initMapArea() {
 		.attr("width", width)
 		.attr("height", mapHeight)
 		.attr("id", "map")
-		.call(zoom);
+		.datum({x: 0, y: 0});
 
 	svg.append("rect")
 		.attr("id", "bg")
@@ -78,7 +99,8 @@ function initMapArea() {
 	projectionSelection.selectAll('option')
 		.data([
 			{ name: 'mercator' },
-			{ name: 'equirectangular' }
+			{ name: 'equirectangular' },
+			{ name: 'orthographic' }
 		])
 		.enter().append('option')
 		.text(function(d) { return d.name; });
@@ -97,8 +119,8 @@ function showBgMap(id, data, error) {
 				.append("path")
 				.attr("class", function (d) {
 					return "subunit-boundary subunit " + d.properties.adm0_a3;
-				})
-				.attr("d", path);
+				});
+		applyProjection('mercator');
 	}
 }
 
@@ -136,7 +158,8 @@ function loadTerritoryMap() {
 								svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
 									.attr("name", mapFileName)
 									.attr("id", "externalSvg")
-									.classed("externalSvg", true);
+									.classed("externalSvg", true)
+									.attr("preserveAspectRatio", "xMaxYMax meet");;
 
 								svgMap
 									.datum({
@@ -161,7 +184,7 @@ function loadTerritoryMap() {
 								if (incompleteMapInfo.position) {
 									var projectedLeftTop = projection(incompleteMapInfo.position[0]);
 									var projectedRightBottom = projection(incompleteMapInfo.position[1]);
-									loadMapPosition(projectedLeftTop);
+									loadExternalMapPosition(projectedLeftTop);
 									resizeExternalMap(projectedRightBottom[0]-projectedLeftTop[0], projectedRightBottom[1]-projectedLeftTop[1]);
 								}
 								else {
@@ -209,7 +232,7 @@ function initTerritoryAutocomplete() {
 		.render();
 }
 
-function loadMapPosition(projectedLeftTop) {
+function loadExternalMapPosition(projectedLeftTop) {
 	svgMap.datum(function(d) {
 		d.x = projectedLeftTop[0];
 		d.y = projectedLeftTop[1];
