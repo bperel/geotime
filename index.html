@@ -36,11 +36,13 @@
         <script src="js/util.js"></script>
         <script src="js/main.js"></script>
         <script src="js/map.js"></script>
+        <script src="js/helper.config.js"></script>
         <script src="js/helper.js"></script>
 
         <script type="text/javascript">
             initMapPlaceHolders(function() {
                 initMapArea();
+                loadHelperConfig();
                 getAndShowBgMap("backgroundMap", "data/external/ne_110m_coastline.json");
             });
             d3.select('#loadTerritoryMap').on('click', loadTerritoryMap);

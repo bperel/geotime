@@ -140,7 +140,7 @@ function initExternalSvgMap(mapFileName) {
 	}
 	isLoading = false;
 
-	initHelper(mapFileName);
+	initHelper(mapFileName, helperStepsData);
 }
 
 function loadTerritoryMap() {

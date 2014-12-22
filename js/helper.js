@@ -1,11 +1,12 @@
 var helper;
-var helperButtons;
+var helperButtonsData = [];
 var helperSteps;
+var helperStepsData = [];
 var resizeHandle;
 var territoryId;
 var territoryName;
 
-function initHelper(mapFileName) {
+function initHelper(mapFileName, helperStepsData) {
 
 	resizeHandle = d3.select('#resizeHandle');
 	resizeHandle
@@ -22,49 +23,12 @@ function initHelper(mapFileName) {
 		.datum({ activeStep: 0});
 
 	helperSteps = helper.select('ul').selectAll('.helperStep');
-	helperSteps.data([
-			{
-				step: 1, content: ['Move the superimposed map so that it corresponds to the background borders.'],
-				dataUpdate: saveMapPosition,
-				buttons: ['done', 'skip', 'cancel']
-			}, {
-				step: 2, content: ['Select with your mouse a country whose name is written on the map or known by you.',
-								   'Chosen territory : <span id="territoryId">None</span>'],
-				dataUpdate: saveTerritoryPosition, validate: checkSelectedTerritory,
-				buttons: ['done', 'skip', 'cancel']
-			}, {
-				step: 3, content: ['<label for="territoryName">Type in its name</label>',
-								   '<input type="text" id="territoryName" />'],
-				dataUpdate: saveTerritoryName,
-				buttons: ['done', 'skip', 'cancel']
-			}, {
-				step: 4, content: ['During what period did this territory have these borders ?<br />',
-							       '<label for="territoryPeriodStart">From </label><input type="number" id="territoryPeriodStart" />'
-							     + '<label for="territoryPeriodEnd"> to </label><input type="number" id="territoryPeriodEnd" />'],
-				dataUpdate: saveTerritoryPeriod,
-				buttons: ['done', 'cancel']
-			}
-		]).enter().append('li')
-			.classed('helperStep', true)
-			.html(function(d) { return '<div>'+d.content[0]+'</div><div class="if-active">'+ d.content.slice(1)+'</div>'; });
+	helperSteps.data(helperStepsData).enter().append('li')
+		.classed('helperStep', true)
+		.html(function(d) { return '<div>'+d.content[0]+'</div><div class="if-active">'+ d.content.slice(1)+'</div>'; });
 
 	// Refresh with the created elements
 	helperSteps = helper.select('ul').selectAll('.helperStep');
-
-	helperButtons = [
-		{
-			name: 'done', cssClass: 'helperStepDone', text: 'Done !',
-			click: activateHelperNextStep
-		},
-		{
-			name: 'skip', cssClass: 'helperStepSkip', text: 'Skip this step',
-			click: activateHelperNextStep
-		},
-		{
-			name: 'cancel', cssClass: 'helperStepCancel', text: 'Switch to another map',
-			click: ignoreCurrentMap
-		}
-	];
 
 	// Step 2
 	territoryId = d3.select('#territoryId');
@@ -82,32 +46,32 @@ function activateHelperNextStep() {
 		helperSteps
 			.classed("active", isActiveStepFilter)
 			.filter(isActiveStepFilter)
-			.selectAll('button').data(helperButtons).enter().append('button')
-			.each(function () {
-				d3.select(this).on('click', function (btnData) {
-					var stepElement = helperSteps
-						.filter(isActiveStepFilter)
-						.filter(function (d) {
-							return btnData.name !== 'done' || isValidStepFilter(d);
-						});
-					if (!stepElement.empty()) {
-						if (btnData.name === 'done' && stepElement.datum().dataUpdate) {
-							stepElement.datum(stepElement.datum().dataUpdate());
+			.selectAll('button').data(helperButtonsData).enter().append('button')
+				.each(function () {
+					d3.select(this).on('click', function (btnData) {
+						var stepElement = helperSteps
+							.filter(isActiveStepFilter)
+							.filter(function (d) {
+								return btnData.name !== 'done' || isValidStepFilter(d);
+							});
+						if (!stepElement.empty()) {
+							if (btnData.name === 'done' && stepElement.datum().dataUpdate) {
+								stepElement.datum(stepElement.datum().dataUpdate());
+							}
+							btnData.click(stepElement);
 						}
-						btnData.click(stepElement);
-					}
+					});
+				})
+				.attr('class', function (d) {
+					return d.cssClass;
+				})
+				.text(function (d) {
+					return d.text;
+				})
+				.classed('hidden', function (d) {
+					var stepNumber = helperSteps.data().length;
+					return d.name === 'skip' && newStep === stepNumber;
 				});
-			})
-			.attr('class', function (d) {
-				return d.cssClass;
-			})
-			.text(function (d) {
-				return d.text;
-			})
-			.classed('hidden', function (d) {
-				var stepNumber = helperSteps.data().length;
-				return d.name === 'skip' && newStep === stepNumber;
-			});
 
 		if (svgMap) {
 			switch (newStep) {
