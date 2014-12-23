@@ -111,6 +111,27 @@ function ignoreCurrentMap() {
 	initExternalSvgMap();
 }
 
+// Step 1
+function saveMapPosition() {
+	var left   = svgMap.styleIntWithoutPx("margin-left"),
+		top    = svgMap.styleIntWithoutPx("margin-top"),
+		width  = svgMap.styleIntWithoutPx("width"),
+		height = svgMap.styleIntWithoutPx("height");
+	var pos = [
+		projection.invert([left,        top]),
+		projection.invert([left+width,  top+height])
+	];
+
+	return function(d) {
+		d.map = {
+			id: svgMap.datum().id,
+			position: pos,
+			projection: "mercator"
+		};
+		return d;
+	};
+}
+
 // Step 2
 function updateTerritoryId() {
 	var id;

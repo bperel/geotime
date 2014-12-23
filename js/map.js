@@ -159,7 +159,7 @@ function loadTerritoryMap() {
 									.attr("name", mapFileName)
 									.attr("id", "externalSvg")
 									.classed("externalSvg", true)
-									.attr("preserveAspectRatio", "xMaxYMax meet");;
+									.attr("preserveAspectRatio", "xMaxYMax meet");
 
 								svgMap
 									.datum({
@@ -241,26 +241,6 @@ function loadExternalMapPosition(projectedLeftTop) {
 	d3.selectAll("#externalSvg, #resizeHandle")
 		.style("margin-left", projectedLeftTop[0]+"px")
 		.style("margin-top",+ projectedLeftTop[1] +"px");
-}
-
-function saveMapPosition() {
-	var left   = svgMap.styleIntWithoutPx("margin-left"),
-		top    = svgMap.styleIntWithoutPx("margin-top"),
-		width  = svgMap.styleIntWithoutPx("width"),
-		height = svgMap.styleIntWithoutPx("height");
-	var pos = [
-		projection.invert([left,        top]),
-		projection.invert([left+width,  top+height])
-	];
-
-	return function(d) {
-		d.map = {
-			id: svgMap.datum().id,
-			position: pos,
-			projection: "mercator"
-		};
-		return d;
-	};
 }
 
 function resizeExternalMap(width, height) {

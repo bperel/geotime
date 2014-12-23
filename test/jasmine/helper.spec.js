@@ -2,25 +2,26 @@ var testHelperSteps;
 var testButtonData;
 
 describe('Helper tests', function() {
-    function testDataUpdate() {
-
-    }
-
-    function clickOnSkipTest() {
-
-    }
-
-    function clickOnDoneTest() {
-
-    }
+    var callbacks = null;
 
     beforeEach(function(){
         jasmine.getFixtures().fixturesPath = 'base';
         loadFixtures("map-placeholders.html");
 
+        callbacks = {
+            dataUpdate: function () {
+                return function (d) {
+                    d.newData = 'myValue';
+                    return d;
+                };
+            },
+            clickOnSkipTest: function () { },
+            clickOnDoneTest: function () { }
+        };
+
         testHelperSteps = [{
             step: 1, content: ['Step 1 description', 'This is shown when the step is active'],
-            dataUpdate: testDataUpdate,
+            dataUpdate: callbacks.dataUpdate,
             buttons: ['done', 'skip']
         },{
             step: 2, content: ['Step 2 description'],
@@ -28,14 +29,14 @@ describe('Helper tests', function() {
         }];
 
         testButtonData = [
-            { name: 'done',   cssClass: 'helperStepDone', text: 'Done !', click: clickOnDoneTest },
-            { name: 'skip',   cssClass: 'helperStepSkip', text: 'Skip', click: clickOnSkipTest }
+            { name: 'done',   cssClass: 'helperStepDone', text: 'Done !', click: callbacks.clickOnDoneTest },
+            { name: 'skip',   cssClass: 'helperStepSkip', text: 'Skip', click: callbacks.clickOnSkipTest }
         ];
 
         helperButtonsData = testButtonData;
     });
 
-    describe('Helper init', function() {
+    describe('Helper behaviour', function() {
         it('should load the helper', function() {
             initHelper('myMap.svg', testHelperSteps);
 
@@ -76,6 +77,32 @@ describe('Helper tests', function() {
 
             expect(secondStep.classed('active')).toBeTruthy();
             expect(secondStep.selectAll('button:not(.hidden)').size()).toEqual(1);
+        });
+
+        it('should execute an action on a button click', function() {
+            initHelper('myMap.svg', testHelperSteps);
+            activateHelperNextStep();
+
+            var firstStep = helperSteps.filter(function(d) { return d.step === 1; });
+
+            // Click on the 'done' button
+            var doneButton = firstStep.selectAll('button').filter(function(d) { return d.name === 'done'; });
+
+            spyOn(doneButton.datum(), 'click');
+            doneButton.on('click')(doneButton.datum());
+
+            expect(firstStep.datum().newData).toEqual('myValue');
+            expect(doneButton.datum().click).toHaveBeenCalled();
+
+            // Click on the 'skip' button. No data is updated
+            var skipButton = firstStep.selectAll('button').filter(function(d) { return d.name === 'skip'; });
+
+            spyOn(firstStep.datum(), 'dataUpdate');
+            spyOn(skipButton.datum(), 'click');
+            skipButton.on('click')(skipButton.datum());
+
+            expect(firstStep.datum().dataUpdate).not.toHaveBeenCalled();
+            expect(skipButton.datum().click).toHaveBeenCalled();
         });
     });
 });
