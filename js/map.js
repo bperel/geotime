@@ -117,9 +117,7 @@ function showBgMap(id, data, error) {
 			.data(data.features)
 			.enter()
 				.append("path")
-				.attr("class", function (d) {
-					return "subunit-boundary subunit " + d.properties.adm0_a3;
-				});
+				.attr("class", "subunit-boundary subunit");
 		applyProjection('mercator');
 	}
 }
