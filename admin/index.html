@@ -23,8 +23,11 @@
 
 <h1>Geotime admin area</h1>
 
-<div id="status">
-    <div class="loading">Loading...</div>
+<div class="loading loading-maps">Loading...</div>
+<div id="mapInfo" class="clearfix hidden">
+    <div>
+        <span id="mapNumber"></span> maps are imported.
+    </div>
     <ul id="lightGallery" class="gallery list-unstyled home">
         <li data-src data-html="filename" class="template">
             <a href="#">
@@ -34,10 +37,17 @@
     </ul>
 </div>
 
+<div class="loading loading-territories">Loading...</div>
+<div id="territoryInfo" class="clearfix hidden">
+    <div>
+        <span id="importedTerritoriesNumber"></span> territories are imported.
+    </div>
+</div>
+
 <p style="margin: 10px; clear: both;">
-    <a href="init.php">Initialize database</a> (i.e. insert criteria groups)
+    <a href="init.php">Initialize database</a> (i.e. insert criteria groups and reference territories)
     <br />
-    <a href="import.php">Import</a> (download SVGs and other information)
+    <a href="import.php">Import SVGs</a>
     <br />
     <a href="import.php?clean">Cleanup and import</a>
 </p>
@@ -49,6 +59,7 @@
 <script type="text/javascript">
     var gatewayUrl = '../gateway.php';
     showMapData();
+    showTerritoryData();
 </script>
 </body>
 </html>

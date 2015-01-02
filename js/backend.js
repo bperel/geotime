@@ -11,7 +11,20 @@ function showMapData() {
                 thumbTemplate.after(thumb);
             });
             gallery.lightGallery();
-            $('.loading').addClass('hidden');
+            $('#mapNumber').text(Object.keys(data).length);
+            $('#mapInfo').removeClass('hidden');
+            $('.loading-maps').addClass('hidden');
+        }
+    );
+}
+
+function showTerritoryData() {
+    ajaxPost(
+        {getImportedTerritories: true},
+        function(error, data) {
+            $('#importedTerritoriesNumber').text(data.count);
+            $('#territoryInfo').removeClass('hidden');
+            $('.loading-territories').addClass('hidden');
         }
     );
 }

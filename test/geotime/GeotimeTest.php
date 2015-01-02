@@ -130,6 +130,10 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $this->assertNull($incompleteMap);
     }
 
+    function testGetImportedTerritoriesCount() {
+        $this->assertEquals(Geotime::getImportedTerritoriesCount(), 3);
+    }
+
     function testGetTerritories() {
         $this->assertEquals(1, count(Geotime::getTerritories('Fr')));
         $this->assertEquals(0, count(Geotime::getTerritories('fr')));
@@ -185,12 +189,14 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         Geotime::addLocatedTerritory($territoryName, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
 
         /** @var Territory $createdTerritory */
-        $createdTerritory = Territory::one(array('name' => $territoryName));;
+        $createdTerritory = Territory::one(array('name' => $territoryName));
         $this->assertNotEmpty($createdTerritory);
         $this->assertEquals($createdTerritory->getUserMade(), true);
         $this->assertEquals($xpath, $createdTerritory->getXpath());
         $this->assertEquals($coordinates, $createdTerritory->getPolygon());
         $this->assertEquals(new \MongoDate(strtotime($territoryPeriodStart)), $createdTerritory->getPeriod()->getStart());
         $this->assertEquals(new \MongoDate(strtotime($territoryPeriodEnd)), $createdTerritory->getPeriod()->getEnd());
+
+        $this->assertEquals(Geotime::getImportedTerritoriesCount(), 3);
     }
 } 

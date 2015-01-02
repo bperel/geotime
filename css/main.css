@@ -64,7 +64,8 @@ ul{
     list-style: none outside none;
     padding-left: 0;
 }
-.gallery li {
+
+#mapInfo .gallery li {
     display: block;
     float: left;
     height: 400px;
@@ -72,15 +73,15 @@ ul{
     margin-right: 6px;
     width: 400px;
 }
-.gallery li a {
+#mapInfo .gallery li a {
     height: 400px;
     width: 400px;
 }
-.gallery li a img {
+#mapInfo .gallery li a img {
     max-width: 400px;
 }
 
-.template {
+#mapInfo .template {
     display: none !important;
 }
 

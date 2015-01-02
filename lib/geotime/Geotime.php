@@ -63,6 +63,14 @@ class Geotime {
         );
     }
 
+
+    /**
+     * @return int
+     */
+    static function getImportedTerritoriesCount() {
+        return Territory::count(array('userMade' => false));
+    }
+
     /**
      * Get the land coverage stored for each period
      *

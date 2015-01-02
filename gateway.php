@@ -15,6 +15,9 @@ if (isset($_POST['getCoverage'])) {
 elseif (isset($_POST['getMaps'])) {
     $object = Geotime::getMapsAndLocalizedTerritoriesCount(true);
 }
+elseif (isset($_POST['getImportedTerritories'])) {
+    $object->count = Geotime::getImportedTerritoriesCount();
+}
 elseif (isset($_POST['getTerritories'])) {
     $object = Geotime::getTerritories(isset($_POST['startingWith']) ? $_POST['startingWith'] : null);
 }
