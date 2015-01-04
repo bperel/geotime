@@ -5,11 +5,6 @@ namespace geotime\models;
 use Purekid\Mongodm\Model;
 use geotime\Database;
 
-abstract class CriteriaGroupsType {
-    const Maps = 'maps';
-    const Territories = 'territories';
-}
-
 class CriteriaGroup extends Model {
     static $collection = 'criteriaGroups';
     static $cachePath = 'data/criteriaGroups.json';

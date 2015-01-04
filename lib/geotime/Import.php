@@ -73,7 +73,7 @@ class Import {
             $fileName = Util::$cache_dir_json . $criteriaGroupName . ".json";
 
             $maps = self::instance()->storeMapsFromCriteriaGroup($criteriaGroup, $fileName, $useCachedJson);
-            $svgInfos = self::getCommonsInfos($maps);
+            $svgInfos = self::instance()->getCommonsInfos($maps);
 
             foreach ($svgInfos as $imageMapFullName => $imageMapUrlAndUploadDate) {
                 $currentMap = $maps[$imageMapFullName];
