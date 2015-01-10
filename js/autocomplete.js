@@ -137,10 +137,12 @@ function autocomplete(parent) {
                 );
             }
 
-            function row_onClick(d) {
+            function row_onClick(rowData) {
                 hideDropDown();
-                input.node().value= d[_dataField];
-                _selectedFunction(d);
+                input
+                    .datum(function(d) { return {territoryId: rowData.id}; })
+                    .node().value= rowData[_dataField];
+                _selectedFunction(rowData);
             }
 
             function isNewSearchNeeded(newTerm, oldTerm) {

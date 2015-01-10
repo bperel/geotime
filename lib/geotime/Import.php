@@ -5,6 +5,7 @@ namespace geotime;
 use geotime\models\CriteriaGroup;
 use geotime\models\CriteriaGroupsType;
 use geotime\models\Map;
+use geotime\models\ReferencedTerritory;
 use geotime\models\SparqlEndpoint;
 use geotime\models\Territory;
 use Logger;
@@ -362,12 +363,13 @@ class Import {
         foreach ($pageAsJson->results->bindings as $result) {
             $territoryName = $result->name->value;
 
-            if (Territory::count(array('name' => $territoryName)) === 0) {
-                $territory = Territory::buildandSaveFromObject($result);
+            if (is_null(ReferencedTerritory::one(array('name' => $territoryName)))) {
+                $referencedTerritory = ReferencedTerritory::buildAndSaveFromObject($result);
+                $territory = Territory::buildAndSaveFromObjectAndReferencedTerritory($referencedTerritory, $result);
                 $territories[$territoryName]=$territory;
             }
             else {
-                self::$log->debug('Territory '.$territoryName.' already exists, skipping');
+                self::$log->debug('Referenced territory '.$territoryName.' already exists, skipping');
                 $skippedTerritoriesCount++;
             }
         }

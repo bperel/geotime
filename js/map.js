@@ -205,7 +205,7 @@ function validateTerritory(data) {
 			mapId: data.map.id,
 			mapProjection: data.map.projection,
 			mapPosition: data.map.position,
-			territoryName: data.territory.name,
+			territoryId: data.territory.id,
 			territoryPeriodStart: data.territory.period.start,
 			territoryPeriodEnd: data.territory.period.end,
 			xpath: data.territory.xpath,
@@ -220,14 +220,6 @@ function validateTerritory(data) {
 			}
 		}
 	);
-}
-
-function initTerritoryAutocomplete() {
-	autocomplete(d3.select('#territoryName').node())
-		.dataField("name")
-		.width(960)
-		.height(500)
-		.render();
 }
 
 function loadExternalMapPosition(projectedLeftTop) {

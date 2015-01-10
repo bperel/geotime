@@ -5,6 +5,7 @@ namespace geotime;
 use geotime\models\CriteriaGroup;
 use geotime\models\Map;
 use geotime\models\Period;
+use geotime\models\ReferencedTerritory;
 use geotime\models\Territory;
 use Logger;
 
@@ -51,15 +52,15 @@ class Geotime {
      * @param $startingWith
      * @return array|string
      */
-    static function getTerritories($startingWith) {
+    static function getReferencedTerritories($startingWith) {
         if (is_null($startingWith) || strlen($startingWith) === 0) {
             return 'At least the first letter of the territory name must me given.';
         }
         return array_map(
-            function(Territory $territory) {
-                return array('name' => $territory->getName());
+            function(ReferencedTerritory $referencedTerritory) {
+                return array('id' => $referencedTerritory->getId()->__toString(), 'name' => $referencedTerritory->getName());
             },
-            Territory::find(array('name' => array('$regex' => '^'.$startingWith)), array('name' => 1), array('name'=> 1, '_id'=> -1))->toArray()
+            ReferencedTerritory::find(array('name' => array('$regex' => '^'.$startingWith)), array('name' => 1), array('name'=> 1))->toArray()
         );
     }
 
@@ -143,34 +144,45 @@ class Geotime {
      * @param $mapPosition string[]
      * @return Map|null
      */
-    public static function updateMap($mapId, $mapProjection, $mapPosition) {
+    public static function updateMap($mapId, $mapProjection = null, $mapPosition = null) {
         /** @var Map $map */
         $map = Map::one(array('_id' => new \MongoId($mapId)));
         if (is_null($map)) {
             return null;
         }
         else {
-            $map->setProjection($mapProjection);
-            array_walk_recursive($mapPosition, function(&$item) {
-                $item = floatval($item);
-            });
-            $map->setPosition($mapPosition);
-            $map->save();
+            if (!empty($mapProjection)) {
+                $map->setProjection($mapProjection);
+            }
+            if (!empty($mapPosition)) {
+                array_walk_recursive($mapPosition, function (&$item) {
+                    $item = floatval($item);
+                });
+                $map->setPosition($mapPosition);
+            }
+            if (!empty($mapProjection) && !empty($mapPosition)) {
+                $map->save();
+            }
             return $map;
         }
     }
 
     /**
-     * @param $territoryName string
+     * @param $territoryId string
      * @param $coordinates string
      * @param $xpath string
      * @param $territoryPeriodStart string
      * @param $territoryPeriodEnd string
-     * @return mixed
+     * @return mixed|null
      */
-    public static function addLocatedTerritory($territoryName, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
+    public static function saveLocatedTerritory($territoryId, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
     {
-        Territory::buildAndSave(true, $territoryName, $territoryPeriodStart, $territoryPeriodEnd, $coordinates, $xpath);
+        /** @var ReferencedTerritory $referencedTerritory */
+        $referencedTerritory = ReferencedTerritory::one(array('_id' => new \MongoId($territoryId)));
+        if (is_null($referencedTerritory)) {
+            return null;
+        }
+        Territory::buildAndCreateWithReferencedTerritory($referencedTerritory, true, $territoryPeriodStart, $territoryPeriodEnd, $coordinates, $xpath);
         return $coordinates;
     }
 
@@ -187,6 +199,7 @@ class Geotime {
             Map::drop();
         }
         Territory::drop();
+        ReferencedTerritory::drop();
         Period::drop();
     }
 }

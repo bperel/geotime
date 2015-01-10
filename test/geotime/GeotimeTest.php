@@ -4,6 +4,7 @@ namespace geotime\Test;
 use geotime\Database;
 use geotime\Geotime;
 use geotime\models\Map;
+use geotime\models\ReferencedTerritory;
 use geotime\models\Territory;
 use geotime\NaturalEarthImporter;
 use PHPUnit_Framework_TestCase;
@@ -135,17 +136,17 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
     }
 
     function testGetTerritories() {
-        $this->assertEquals(1, count(Geotime::getTerritories('Fr')));
-        $this->assertEquals(0, count(Geotime::getTerritories('fr')));
+        $this->assertEquals(1, count(Geotime::getReferencedTerritories('Fr')));
+        $this->assertEquals(0, count(Geotime::getReferencedTerritories('fr')));
 
-        $this->assertEquals(1, count(Geotime::getTerritories('J')));
-        $this->assertEquals(0, count(Geotime::getTerritories('K')));
+        $this->assertEquals(1, count(Geotime::getReferencedTerritories('J')));
+        $this->assertEquals(0, count(Geotime::getReferencedTerritories('K')));
     }
 
     function testGetTerritoriesEmptyParameter()
     {
-        $this->assertTrue(is_string(Geotime::getTerritories(null)));
-        $this->assertTrue(is_string(Geotime::getTerritories('')));
+        $this->assertTrue(is_string(Geotime::getReferencedTerritories(null)));
+        $this->assertTrue(is_string(Geotime::getReferencedTerritories('')));
     }
 
     function testUpdateMapInexisting() {
@@ -172,9 +173,21 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($updatedMap->getPosition(), array(array(0, 0), array(10, 10)));
     }
 
+    function testUpdateMapMissingData() {
+        $map = new Map();
+        $map->setFileName(self::$customMapName);
+        $map->setProjection('mercator');
+        $map->save();
+        $mapId = $map->getIdAsString();
+
+        $updatedMap = Geotime::updateMap($mapId);
+        $this->assertNotNull($updatedMap);
+        $this->assertEquals($updatedMap->getFileName(), $map->getFileName());
+        $this->assertEquals($updatedMap->getProjection(), $map->getProjection());
+    }
+
     function testAddLocatedTerritory() {
-        $territoryName = 'myTerritory';
-        $this->assertNull(Territory::one(array('name' => $territoryName)));
+        $referencedTerritory = ReferencedTerritory::one(array('name' => 'France'));
 
         $coordinates = array(
             array(-76.73647242455775, 19.589864044838837),
@@ -186,10 +199,10 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $territoryPeriodStart = '1980-01-02';
         $territoryPeriodEnd = '1991-04-06';
 
-        Geotime::addLocatedTerritory($territoryName, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
+        Geotime::saveLocatedTerritory($referencedTerritory->getId(), $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
 
         /** @var Territory $createdTerritory */
-        $createdTerritory = Territory::one(array('name' => $territoryName));
+        $createdTerritory = Territory::one(array('xpath' => $xpath));
         $this->assertNotEmpty($createdTerritory);
         $this->assertEquals($createdTerritory->getUserMade(), true);
         $this->assertEquals($xpath, $createdTerritory->getXpath());
@@ -198,5 +211,34 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(new \MongoDate(strtotime($territoryPeriodEnd)), $createdTerritory->getPeriod()->getEnd());
 
         $this->assertEquals(Geotime::getImportedTerritoriesCount(), 3);
+    }
+
+    function testUpdateLocatedTerritory() {
+        $referencedTerritory = ReferencedTerritory::one(array('name' => 'France'));
+
+        $coordinates = array(
+            array(-76.73647242455775, 19.589864044838837),
+            array(-76.67084026038955, 19.24637514426756),
+            array(-76.51475666216831, 18.926012649077077)
+        );
+
+        $xpath = '//path[id="My territory"]';
+        $territoryPeriodStart = '1980-01-02';
+        $territoryPeriodEnd = '1991-04-06';
+
+        Geotime::saveLocatedTerritory(
+            $referencedTerritory->getId()->__toString(), $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd
+        );
+
+        /** @var Territory $territoryWithReference */
+        $territoryWithReference = Territory::one(array('xpath' => $xpath));
+        $this->assertNotEmpty($territoryWithReference);
+        $this->assertEquals($territoryWithReference->getReferencedTerritory(), $referencedTerritory);
+        $this->assertEquals($territoryWithReference->getUserMade(), true);
+        $this->assertEquals($xpath, $territoryWithReference->getXpath());
+        $this->assertEquals($coordinates, $territoryWithReference->getPolygon());
+        $this->assertEquals(new \MongoDate(strtotime($territoryPeriodStart)), $territoryWithReference->getPeriod()->getStart());
+        $this->assertEquals(new \MongoDate(strtotime($territoryPeriodEnd)), $territoryWithReference->getPeriod()->getEnd());
+
     }
 } 

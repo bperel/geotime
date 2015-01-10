@@ -19,7 +19,7 @@ elseif (isset($_POST['getImportedTerritories'])) {
     $object->count = Geotime::getImportedTerritoriesCount();
 }
 elseif (isset($_POST['getTerritories'])) {
-    $object = Geotime::getTerritories(isset($_POST['startingWith']) ? $_POST['startingWith'] : null);
+    $object = Geotime::getReferencedTerritories(isset($_POST['startingWith']) ? $_POST['startingWith'] : null);
 }
 elseif (isset($_POST['getSvg'])) {
     $object = Geotime::getIncompleteMapInfo();
@@ -30,12 +30,12 @@ elseif (isset($_POST['addTerritory'])) {
     $mapPosition = $_POST['mapPosition'];
     Geotime::updateMap($mapId, $mapProjection, $mapPosition);
 
-    $territoryName = $_POST['territoryName'];
+    $referencedTerritoryId = $_POST['territoryId'];
     $territoryPeriodStart = $_POST['territoryPeriodStart'];
     $territoryPeriodEnd = $_POST['territoryPeriodEnd'];
     $xpath = $_POST['xpath'];
     $coordinates = $_POST['coordinates'];
-    $object->coord = Geotime::addLocatedTerritory($territoryName, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
+    $object->coord = Geotime::saveLocatedTerritory($referencedTerritoryId, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
 }
 
 echo json_encode($object);

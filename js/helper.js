@@ -29,16 +29,19 @@ function initHelper(mapFileName, helperStepsData) {
 
 	// Refresh with the created elements
 	helperSteps = helper.select('ul').selectAll('.helperStep');
-
-	// Step 2
-	territoryId = d3.select('#territoryId');
-
-	// Step 3
-	territoryName = d3.select('#territoryName');
-	initTerritoryAutocomplete();
 }
 
 function activateHelperNextStep() {
+	if (helper.datum().activeStep > 0) {
+		helperSteps
+			.filter(isActiveStepFilter)
+			.call(function () {
+				(this.datum().onUnload || []).forEach(function (onUnloadAction) {
+					onUnloadAction();
+				});
+			});
+	}
+
 	var newStep = ++helper.datum().activeStep;
 
 	if (newStep <= helperSteps.data().length) {
@@ -46,6 +49,12 @@ function activateHelperNextStep() {
 		helperSteps
 			.classed("active", isActiveStepFilter)
 			.filter(isActiveStepFilter)
+			.call(function() {
+				(this.datum().onLoad || []).forEach(function(onLoadAction) {
+					onLoadAction();
+				});
+				this.datum().dataInit && this.datum(this.datum().dataInit());
+			})
 			.selectAll('button').data(helperButtonsData).enter().append('button')
 				.each(function () {
 					d3.select(this).on('click', function (btnData) {
@@ -72,31 +81,6 @@ function activateHelperNextStep() {
 					var stepNumber = helperSteps.data().length;
 					return d.name === 'skip' && newStep === stepNumber;
 				});
-
-		if (svgMap) {
-			switch (newStep) {
-				case 1:
-					svgMap.call(svgmap_drag);
-					resizeHandle.call(svgmap_resize);
-					break;
-				default:
-					svgMap.on('mousedown.drag', null);
-					resizeHandle.on('mousedown.drag', null);
-
-					if (newStep === 3) {
-						territoryName.node().focus();
-					}
-			}
-
-			resizeHandle.classed("hidden", newStep !== 1);
-			territoryName.classed("hidden", newStep !== 3);
-
-			svgMap
-				.selectAll("path")
-				.on("mouseover", newStep === 2 ? onTerritoryMouseover : null)
-				.on("mouseout", newStep === 2 ? onTerritoryMouseout : null)
-				.on("click", newStep === 2 ? onHoveredTerritoryClick : null);
-		}
 	}
 	else {
 		validateTerritory(flattenArrayOfObjects(helperSteps.data()));
@@ -112,6 +96,29 @@ function ignoreCurrentMap() {
 }
 
 // Step 1
+function enableMapDragResize() {
+	svgMap.call(svgmap_drag);
+	resizeHandle
+		.call(svgmap_resize)
+		.classed("hidden", false);
+}
+
+function disableMapDragResize() {
+	svgMap.on('mousedown.drag', null);
+	resizeHandle
+		.on('mousedown.drag', null)
+		.classed("hidden", true);
+}
+
+function initMapData() {
+	return function(d) {
+		d.map = {
+			id: svgMap.datum().id
+		};
+		return d;
+	};
+}
+
 function saveMapPosition() {
 	var left   = svgMap.styleIntWithoutPx("margin-left"),
 		top    = svgMap.styleIntWithoutPx("margin-top"),
@@ -123,16 +130,31 @@ function saveMapPosition() {
 	];
 
 	return function(d) {
-		d.map = {
-			id: svgMap.datum().id,
-			position: pos,
-			projection: "mercator"
-		};
+		d.map.position = pos;
+		d.map.projection = "mercator";
 		return d;
 	};
 }
 
 // Step 2
+function enableTerritorySelection() {
+	territoryId = d3.select('#territoryId');
+
+	svgMap
+		.selectAll("path")
+			.on("mouseover", onTerritoryMouseover)
+			.on("mouseout",  onTerritoryMouseout)
+			.on("click",     onHoveredTerritoryClick);
+}
+
+function disableTerritorySelection() {
+	svgMap
+		.selectAll("path")
+			.on("mouseover", null)
+			.on("mouseout",  null)
+			.on("click",     null);
+}
+
 function updateTerritoryId() {
 	var id;
 	if (hoveredTerritory) {
@@ -169,10 +191,21 @@ function saveTerritoryPosition() {
 }
 
 // Step 3
+function initTerritoryAutocomplete() {
+	territoryName = d3.select('#territoryName');
+	territoryName.node().focus();
+
+	autocomplete(d3.select('#territoryName').node())
+		.dataField("name")
+		.width(960)
+		.height(500)
+		.render();
+}
+
 function saveTerritoryName() {
 	return function(d) {
 		d.territory = {
-			name: territoryName.node().value
+			id: territoryName.datum().territoryId
 		};
 		return d;
 	};

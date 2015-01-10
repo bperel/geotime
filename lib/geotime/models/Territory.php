@@ -14,29 +14,25 @@ class Territory extends Model {
     static $log;
 
     protected static $attrs = array(
-        'name'    => array('type' => 'string'),
-        'polygon' => array('type' => 'object'),
-        'area'    => array('type' => 'int'),
-        'xpath'   => array('type' => 'string'),
-        'period'  => array('type' => 'embed', 'model' => 'geotime\models\Period'),
-        'previous'=> array('type' => 'references', 'model' => 'geotime\models\Territory'),
-        'next'    => array('type' => 'references', 'model' => 'geotime\models\Territory'),
-        'userMade'=> array('type' => 'boolean')
+        'referencedTerritory' => array('type' => 'reference', 'model' => 'geotime\models\ReferencedTerritory'),
+        'polygon'             => array('type' => 'object'),
+        'area'                => array('type' => 'int'),
+        'xpath'               => array('type' => 'string'),
+        'period'              => array('type' => 'embed', 'model' => 'geotime\models\Period'),
+        'userMade'            => array('type' => 'boolean')
     );
 
     static $equatorialRadius = 6378137;
 
     /**
+     * @param ReferencedTerritory $referencedTerritory
      * @param $object \stdClass
      * @return Territory
      */
-    public static function buildandSaveFromObject($object) {
+    public static function buildAndSaveFromObjectAndReferencedTerritory($referencedTerritory, $object) {
         $fields = array(
-            'name' => 'name',
             'startDate' => 'date1',
-            'endDate' => 'date2',
-            'previous' => 'previous',
-            'next' => 'next'
+            'endDate' => 'date2'
         );
         $fieldValues = array();
         foreach($fields as $mappedField => $optionalField) {
@@ -48,79 +44,104 @@ class Territory extends Model {
             }
         }
 
-        return self::buildAndSave(
-            false, $fieldValues['name'], $fieldValues['startDate'], $fieldValues['endDate'], null, null, $fieldValues['previous'], $fieldValues['next']
+        return self::buildAndCreateWithReferencedTerritory($referencedTerritory,
+            false, $fieldValues['startDate'], $fieldValues['endDate']
         );
     }
 
     /**
+     * @param string $startDate
+     * @param string $endDate
+     * @param string $polygon
+     * @param string $previous
+     * @param string $next
+     * @internal param string $name
+     * @return Territory
+     */
+    public static function buildAndCreateReferencedTerritory($startDate = '', $endDate = '', $polygon = '', $previous = '', $next = '') {
+        return self::buildAndCreate(false, $startDate, $endDate, $polygon, null, $previous, $next);
+    }
+
+    /**
+     * @param boolean $userMade
+     * @param string $startDate
+     * @param string $endDate
+     * @param string $polygon
+     * @param string $xpath
+     * @internal param string $name
+     * @return Territory
+     */
+    private static function buildAndCreate($userMade, $startDate = '', $endDate = '', $polygon = '', $xpath = '') {
+        $territory = new Territory();
+        return $territory->buildAndSave(null, $userMade, $startDate, $endDate, $polygon, $xpath);
+    }
+
+    /**
+     * @param ReferencedTerritory $referencedTerritory
+     * @param $usermade
+     * @param string $startDate
+     * @param string $endDate
+     * @param string $polygon
+     * @param string $xpath
+     * @return Territory
+     */
+    public static function buildAndCreateWithReferencedTerritory($referencedTerritory, $usermade, $startDate = '', $endDate = '',
+                                                                 $polygon = '', $xpath = '') {
+        $territory = new Territory();
+        return $territory->buildAndSave($referencedTerritory, $usermade, $startDate, $endDate, $polygon, $xpath);
+    }
+
+    /**
+     * @param $referencedTerritory ReferencedTerritory
      * @param $userMade boolean
-     * @param $name string
      * @param $startDate string
      * @param $endDate string
      * @param $polygon string
      * @param $xpath string
-     * @param $previous string
-     * @param $next string
+     * @internal param string $name
      * @return Territory
      */
-    public static function buildAndSave($userMade, $name, $startDate = '', $endDate = '',
-                                        $polygon = '', $xpath = '', $previous = '', $next = '') {
-        $territory = new Territory();
-        $territory->setName($name);
+    private function buildAndSave($referencedTerritory, $userMade, $startDate = '', $endDate = '', $polygon = '', $xpath = null) {
+        $this->setReferencedTerritory($referencedTerritory);
         if (!empty($startDate) && !empty($endDate)) {
-            $territory->setPeriod(Period::generate($startDate, $endDate));
+            $this->setPeriod(Period::generate($startDate, $endDate));
         }
         if (!empty($polygon)) {
-            $territory->setPolygon($polygon);
+            $this->setPolygon($polygon);
         }
         if (!empty($xpath)) {
-            $territory->setXpath($xpath);
+            $this->setXpath($xpath);
         }
-        if (!empty($previous)) {
-            $territory->setPrevious(self::referencedTerritoriesStringToTerritoryArray($previous));
-        }
-        if (!empty($next)) {
-            $territory->setNext(self::referencedTerritoriesStringToTerritoryArray($next));
-        }
-        $territory->setUserMade($userMade);
-        $territory->save();
+        $this->setUserMade($userMade);
+        $this->save();
 
-        return $territory;
+        return $this;
     }
 
     /**
-     * @param $territoriesString string
-     * @return Territory[]
+     * @param ReferencedTerritory $referencedTerritory
+     * @return array
      */
-    public static function referencedTerritoriesStringToTerritoryArray($territoriesString) {
-        return array_map(
-            function($referencedTerritoryName) {
-                $referencedTerritory = Territory::one(array('name' => $referencedTerritoryName));
-                if (is_null($referencedTerritory) && !empty($referencedTerritoryName)) {
-                    $referencedTerritory = Territory::buildAndSave(false, $referencedTerritoryName);
-                }
-                return $referencedTerritory;
-            },
-            explode('|', $territoriesString)
-        );
+    public static function getReferencedTerritoryFilter($referencedTerritory) {
+        return array('referencedTerritory.$id' => new \MongoId($referencedTerritory->getId()));
     }
 
     // @codeCoverageIgnoreStart
+
     /**
-     * @return string
+     * @return ReferencedTerritory
      */
-    public function getName()
+    public function getReferencedTerritory()
     {
-        return $this->__getter('name');
+        return $this->__getter('referencedTerritory');
     }
 
     /**
-     * @param string $name
+     * @param ReferencedTerritory $referencedTerritory
      */
-    public function setName($name)
+    public function setReferencedTerritory($referencedTerritory)
     {
-        $this->__setter('name', $name);
+        $this->__setter('referencedTerritory', $referencedTerritory);
     }
 
     /**
@@ -172,38 +193,6 @@ class Territory extends Model {
     }
 
     /**
-     * @return Territory[]
-     */
-    public function getPrevious()
-    {
-        return $this->__getter('previous');
-    }
-
-    /**
-     * @param Territory[] $previous
-     */
-    public function setPrevious($previous)
-    {
-        $this->__setter('previous', $previous);
-    }
-
-    /**
-     * @return Territory[]
-     */
-    public function getNext()
-    {
-        return $this->__getter('next');
-    }
-
-    /**
-     * @param Territory[] $next
-     */
-    public function setNext($next)
-    {
-        $this->__setter('next', $next);
-    }
-
-    /**
      * @return boolean
      */
     public function getUserMade()
@@ -226,11 +215,7 @@ class Territory extends Model {
      */
     public function getPolygon()
     {
-        $field = $this->__getter('polygon');
-        if (!is_null($field)) {
-            return $field->{'$geoWithin'}['$polygon'];
-        }
-        return null;
+        return (array) $this->__getter('polygon');
     }
 
     /**
@@ -238,9 +223,6 @@ class Territory extends Model {
      */
     public function setPolygon($polygon)
     {
-        if (!is_null($polygon)) {
-            $polygon = array('$geoWithin' => array('$polygon'=>$polygon));
-        }
         $this->__setter('polygon', $polygon);
     }
 

@@ -4,6 +4,7 @@ namespace geotime\Test;
 use geotime\Database;
 use geotime\Geotime;
 use geotime\Import;
+use geotime\models\ReferencedTerritory;
 use geotime\models\Territory;
 use geotime\NaturalEarthImporter;
 use PHPUnit_Framework_TestCase;
@@ -71,22 +72,33 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
 
     public function testFullyImportedCountry() {
 
-        /** @var Territory $luxembourg */
-        $luxembourg = Territory::one(array('name'=>'Luxembourg'));
+        /** @var ReferencedTerritory $referencedTerritory */
+        $referencedTerritory = ReferencedTerritory::one(array('name'=>'Luxembourg'));
+        $this->assertNotNull($referencedTerritory);
 
-        $this->assertNull($luxembourg->getPeriod());
-        $this->assertNotNull($luxembourg->getArea());
-        $this->assertGreaterThan(0, $luxembourg->getArea()); // The area should also exist (calculated in preSave method)
+        /** @var Territory $territory */
+        $territory = Territory::one(Territory::getReferencedTerritoryFilter($referencedTerritory));
+        $this->assertNotNull($territory);
+
+        $this->assertNull($territory->getPeriod());
+        $this->assertNotNull($territory->getArea());
+        $this->assertGreaterThan(0, $territory->getArea()); // The area should also exist (calculated in preSave method)
     }
 
     public function testCountImportedCountries() {
 
+        /** @var ReferencedTerritory $referencedTerritory */
+        $referencedTerritory = ReferencedTerritory::one(array('name'=>'Luxembourg'));
+
         /** @var Territory $luxembourg */
-        $luxembourg = Territory::one(array('name'=>'Luxembourg'));
+        $luxembourg = Territory::one(Territory::getReferencedTerritoryFilter($referencedTerritory));
         $this->assertEquals(7, $this->getCoordinatesCount($luxembourg));
 
+        /** @var ReferencedTerritory $referencedTerritoryJapan */
+        $referencedTerritoryJapan = ReferencedTerritory::one(array('name'=>'Japan'));
+
         /** @var Territory $japan */
-        $japan = Territory::one(array('name'=>'Japan'));
+        $japan = Territory::one(Territory::getReferencedTerritoryFilter($referencedTerritoryJapan));
         $this->assertEquals(12 + 37 + 16, $this->getCoordinatesCount($japan)); // Japan is made up, in the map, of 3 islands => 12 + 37 + 16 coordinates.
     }
 } 

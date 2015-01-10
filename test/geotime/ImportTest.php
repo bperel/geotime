@@ -8,6 +8,7 @@ use geotime\models\Criteria;
 use geotime\models\CriteriaGroup;
 use geotime\models\CriteriaGroupsType;
 use geotime\models\Map;
+use geotime\models\ReferencedTerritory;
 use geotime\models\SparqlEndpoint;
 use geotime\models\Territory;
 use geotime\Util;
@@ -458,24 +459,28 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->setSparqlJsonFixture($resultFile);
         $this->mock->importReferencedTerritoriesFromQuery($resultFile.'.sparql', $resultFile, true);
 
-        $this->assertEquals(11, Territory::count(array()));
+        $this->assertEquals(11, ReferencedTerritory::count(array()));
 
         /** @var Territory[] $initialTerritories */
         $initialTerritories = Territory::find(array('period' => array('$exists' => true)));
-        $this->assertEquals(2, count($initialTerritories));
+        $referencedTerritoryNames = array_map(function(Territory $value) {
+            return $value->getReferencedTerritory()->getName();
+        }, $initialTerritories->toArray());
+        $this->assertEquals(array('Abbasid Caliphate', 'Alania'), $referencedTerritoryNames);
 
-        $this->assertEquals($initialTerritories[0]->getUserMade(), false);
-        $firstTerritoryPreviousTerritories = $initialTerritories[0]->getPrevious();
+        /** @var ReferencedTerritory $firstTerritory */
+        $firstTerritory = ReferencedTerritory::one(array('name' => 'Abbasid Caliphate'));
+        $firstTerritoryPreviousTerritories = $firstTerritory->getPrevious();
         $this->assertEquals(4, count($firstTerritoryPreviousTerritories));
         $this->assertEquals('Dabuyid dynasty', $firstTerritoryPreviousTerritories[0]->getName());
-        $this->assertEmpty($firstTerritoryPreviousTerritories[0]->getPeriod());
 
-        $firstTerritoryNextTerritories = $initialTerritories[0]->getNext();
+        $firstTerritoryNextTerritories = $firstTerritory->getNext();
         $this->assertEquals(5, count($firstTerritoryNextTerritories));
         $this->assertEquals('Aghlabids', $firstTerritoryNextTerritories[0]->getName());
-        $this->assertEmpty($firstTerritoryNextTerritories[0]->getPeriod());
 
-        $secondTerritoryPreviousTerritories = $initialTerritories[1]->getPrevious();
+        /** @var ReferencedTerritory $secondTerritory */
+        $secondTerritory = ReferencedTerritory::one(array('name' => 'Alania'));
+        $secondTerritoryPreviousTerritories = $secondTerritory->getPrevious();
         $this->assertEquals(0, count($secondTerritoryPreviousTerritories));
     }
-} 
+}

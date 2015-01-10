@@ -4,6 +4,7 @@ namespace geotime;
 
 use geotime\models\Map;
 use geotime\models\Period;
+use geotime\models\ReferencedTerritory;
 use geotime\models\Territory;
 use Logger;
 
@@ -61,7 +62,8 @@ class NaturalEarthImporter {
 
         $territories = array();
         foreach($countriesAndCoordinates as $countryName=>$coordinates) {
-            $t = Territory::buildAndSave(false, $countryName, null, null, $coordinates);
+            $referencedTerritory = ReferencedTerritory::buildAndCreate($countryName);
+            $t = Territory::buildAndCreateWithReferencedTerritory($referencedTerritory, false, null, null, $coordinates);
             $territories[] = $t;
         }
 
