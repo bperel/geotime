@@ -4,6 +4,7 @@ namespace geotime\Test;
 
 use geotime\Database;
 use geotime\Geotime;
+use geotime\models\ReferencedTerritory;
 use geotime\models\Territory;
 use geotime\NaturalEarthImporter;
 use PHPUnit_Framework_TestCase;
@@ -35,27 +36,19 @@ class TerritoryTest extends \PHPUnit_Framework_TestCase {
 
     public function testGetTerritoryArea() {
 
+        /** @var ReferencedTerritory $japanReferencedTerritory */
+        $japanReferencedTerritory = ReferencedTerritory::one(array('name'=>'Japan'));
+
         /** @var Territory $japan */
-        $japan = Territory::one(array('name'=>'Japan'));
+        $japan = Territory::one(Territory::getReferencedTerritoryFilter($japanReferencedTerritory));
         $this->assertEquals(405267, $japan->getArea());
 
+        /** @var ReferencedTerritory $luxembourgReferencedTerritory */
+        $luxembourgReferencedTerritory = ReferencedTerritory::one(array('name'=>'Luxembourg'));
+
         /** @var Territory $luxembourg */
-        $luxembourg = Territory::one(array('name'=>'Luxembourg'));
+        $luxembourg = Territory::one(Territory::getReferencedTerritoryFilter($luxembourgReferencedTerritory));
         $this->assertEquals(2412, $luxembourg->getArea());
-    }
-
-    public function testReferencedTerritoriesStringToTerritoryArray() {
-        $this->assertEquals(3, Territory::count(array()));
-
-        $alreadyImportedTerritory = new Territory(array('name' => 'A territory'));
-        $alreadyImportedTerritory->save();
-
-        $this->assertEquals(4, Territory::count(array()));
-
-        $territoriesAsString = 'A territory|A new territory';
-        Territory::referencedTerritoriesStringToTerritoryArray($territoriesAsString);
-
-        $this->assertEquals(5, Territory::count(array()));
     }
 }
  
