@@ -9,7 +9,7 @@ use PHPUnit_Framework_TestCase;
 
 class DatabaseTest extends \PHPUnit_Framework_TestCase {
 
-    static $jsonSourceDir = 'test/geotime/_data';
+    static $jsonSourceDir = 'test/phpunit/_data';
 
     public function testConnect() {
         Database::connect(Database::$testDbName);

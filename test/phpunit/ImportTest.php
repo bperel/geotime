@@ -29,10 +29,10 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     static function setUpBeforeClass() {
         Import::$log->info(__CLASS__." tests started");
 
-        Util::$cache_dir_svg = "test/geotime/cache/svg/";
-        Util::$cache_dir_json = "test/geotime/cache/json/";
+        Util::$cache_dir_svg = "test/phpunit/cache/svg/";
+        Util::$cache_dir_json = "test/phpunit/cache/json/";
 
-        copy("test/geotime/_fixtures/json/Former Empires.json", Util::$cache_dir_json."Former Empires.json");
+        copy("test/phpunit/_fixtures/json/Former Empires.json", Util::$cache_dir_json."Former Empires.json");
     }
 
     static function tearDownAfterClass() {
@@ -56,8 +56,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         CriteriaGroup::drop();
         SparqlEndpoint::drop();
 
-        CriteriaGroup::importFromJson("test/geotime/_data/criteriaGroups.json");
-        SparqlEndpoint::importFromJson("test/geotime/_data/sparqlEndpoints.json");
+        CriteriaGroup::importFromJson("test/phpunit/_data/criteriaGroups.json");
+        SparqlEndpoint::importFromJson("test/phpunit/_data/sparqlEndpoints.json");
     }
 
     protected function tearDown() {
@@ -74,7 +74,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     /* Fixtures */
 
     private function setCommonsXMLFixture($fixtureFilename) {
-        $response = new \SimpleXMLElement(file_get_contents('test/geotime/_fixtures/xml/'.$fixtureFilename));
+        $response = new \SimpleXMLElement(file_get_contents('test/phpunit/_fixtures/xml/'.$fixtureFilename));
 
         $this->mock->expects($this->any())
             ->method('getCommonsImageXMLInfo')
@@ -82,7 +82,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     private function setFetchSvgUrlsFixture() {
-        $urls = json_decode(file_get_contents('test/geotime/_fixtures/urls.json'));
+        $urls = json_decode(file_get_contents('test/phpunit/_fixtures/urls.json'));
 
         $this->mock->expects($this->any())
             ->method('getCommonsURLs')
@@ -90,7 +90,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     private function setSparqlJsonFixture($fixtureFilename) {
-        $response = file_get_contents('test/geotime/_fixtures/json/'.$fixtureFilename);
+        $response = file_get_contents('test/phpunit/_fixtures/json/'.$fixtureFilename);
 
         $this->mock->expects($this->any())
             ->method('getSparqlQueryResultsFromQuery')
@@ -394,7 +394,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     /* This test uses the live toolserver */
     public function testGetCommonsImageInfos() {
         $xmlInfo = $this->import->getCommonsImageXMLInfo('Wiki-commons.png');
-        $fixtureXML = new \SimpleXMLElement(file_get_contents('test/geotime/_fixtures/xml/Wiki-commons.png.xml'));
+        $fixtureXML = new \SimpleXMLElement(file_get_contents('test/phpunit/_fixtures/xml/Wiki-commons.png.xml'));
         $this->assertEquals(trim($fixtureXML->file->urls->file), trim($xmlInfo->file->urls->file));
     }
 

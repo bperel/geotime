@@ -26,7 +26,7 @@ class TerritoryTest extends \PHPUnit_Framework_TestCase {
         Geotime::clean();
 
         $neImport = new NaturalEarthImporter();
-        $neImport->import('test/geotime/_data/countries.json');
+        $neImport->import('test/phpunit/_data/countries.json');
     }
 
 
