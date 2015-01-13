@@ -16,7 +16,7 @@ module.exports = function(config) {
         // list of files / patterns to load in the browser
         files: [
             { pattern: 'map-placeholders.html', watched: false, included: false },
-            { pattern: 'test/geotime/_data/*', watched: false, included: false },
+            { pattern: 'test/phpunit/_data/*', watched: false, included: false },
             { pattern: 'js/vendor/modernizr/modernizr.js', watched: false },
             { pattern: 'js/vendor/d3/d3.min.js', watched: false },
             { pattern: 'js/vendor/topojson/topojson.js', watched: false },
