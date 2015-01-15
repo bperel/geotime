@@ -176,7 +176,6 @@ function autocomplete(parent) {
     }
 
     function defaultSelected(d) {
-        console.log(d[_dataField] + " selected");
     }
 
 
