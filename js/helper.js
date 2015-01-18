@@ -81,7 +81,7 @@ function activateHelperNextStep() {
 					var stepNumber = helperSteps.data().length;
 					return d.name === 'skip' && newStep === stepNumber;
 				});
-	}
+							}
 	else {
 		validateTerritory(flattenArrayOfObjects(helperSteps.data()));
 	}
@@ -96,6 +96,100 @@ function ignoreCurrentMap() {
 }
 
 // Step 1
+function enableCalibrationPointSelection() {
+	svg.on('click', function() {
+		if (bgMapDragState === 'inactive') {
+			var mapOffsetLeft = svg.styleIntWithoutPx("margin-left") + mapPadding;
+			var mapOffsetTop = svg.styleIntWithoutPx("margin-top");
+			var coordinates = projection.invert([d3.event.x - mapOffsetLeft, d3.event.y - mapOffsetTop]);
+			saveCalibrationPoint('bgMap', {lng: coordinates[0], lat: coordinates[1]});
+		}
+	});
+
+	svgMap
+		.on('click', function() {
+			if (!d3.event.defaultPrevented) {
+				var mapOffsetLeft = svgMap.styleIntWithoutPx("margin-left") + mapPadding;
+				var mapOffsetTop = svgMap.styleIntWithoutPx("margin-top");
+				saveCalibrationPoint('fgMap', {x: d3.event.x - mapOffsetLeft, y: d3.event.y - mapOffsetTop});
+			}
+		})
+		.call(svgmap_drag);
+}
+
+function disableCalibrationPointSelection() {
+	svg.on('click', null);
+	svgMap.on('click', null);
+}
+
+function saveCalibrationPoint(mapType, point) {
+	var index = 0;
+	while (calibrationPoints[index] && calibrationPoints[index][mapType]) {
+		index++;
+	}
+	calibrationPoints[index] = calibrationPoints[index] || {};
+	calibrationPoints[index][mapType] = point;
+	var pointsInfo = '';
+	for (var i = 0; i <calibrationPoints.length; i++) {
+		pointsInfo += '<br />Point '+i+' : ';
+		if (calibrationPoints[i].bgMap) {
+			pointsInfo += 'bg : '+JSON.stringify(calibrationPoints[i].bgMap);
+		}
+		if (calibrationPoints[i].fgMap) {
+			pointsInfo += 'fg : '+JSON.stringify(calibrationPoints[i].fgMap);
+		}
+	}
+	d3.select('#selectedPoints').html(pointsInfo);
+	d3.select('#selectedPointsLength').text(calibrationPoints.length);
+}
+
+
+function saveMapProjection() {
+
+	var closestPointIndex = getClosestPointToCenter();
+	var centerCoords = [-calibrationPoints[closestPointIndex].bgMap.lng, -calibrationPoints[closestPointIndex].bgMap.lat];
+
+	applyProjection(getSelectedProjection(), 85*getProjectedFgBgRatio(), centerCoords);
+	loadExternalMapPosition([
+		(svg.styleIntWithoutPx("width") - svgMap.styleIntWithoutPx("width")) / 2,
+		(svg.styleIntWithoutPx("height")- svgMap.styleIntWithoutPx("height"))/ 2
+	]);
+
+	return function(d) {
+		d.map = {
+			id: svgMap.datum().id,
+			position: centerCoords,
+			projection: getSelectedProjection()
+		};
+		return d;
+	};
+}
+
+function getProjectedFgBgRatio() {
+	return Math.abs(calibrationPoints[0].fgMap.x - calibrationPoints[1].fgMap.x) / Math.abs(calibrationPoints[0].bgMap.lng - calibrationPoints[1].bgMap.lng) ;
+}
+
+function getClosestPointToCenter() {
+	var width  = svgMap.styleIntWithoutPx("width"),
+		height = svgMap.styleIntWithoutPx("height"),
+		minDistance = null,
+		minDistancePointIndex = null;
+
+	var center = {x: width/2, y: height/2};
+
+	for (var i = 0; i <calibrationPoints.length; i++) {
+		var distance = Math.sqrt(Math.pow(calibrationPoints[i].fgMap.x - center.x, 2) + Math.pow(calibrationPoints[i].fgMap.y - center.y, 2));
+		if (minDistance === null || distance < minDistance) {
+			minDistance = distance;
+			minDistancePointIndex = i;
+		}
+	}
+
+	return minDistancePointIndex;
+}
+
+
+// Step 2
 function enableMapDragResize() {
 	svgMap.call(svgmap_drag);
 	resizeHandle
@@ -130,13 +224,12 @@ function saveMapPosition() {
 	];
 
 	return function(d) {
-		d.map.position = pos;
-		d.map.projection = "mercator";
+		d.map = { position: pos };
 		return d;
 	};
 }
 
-// Step 2
+// Step 3
 function enableTerritorySelection() {
 	territoryId = d3.select('#territoryId');
 
@@ -190,7 +283,7 @@ function saveTerritoryPosition() {
 	};
 }
 
-// Step 3
+// Step 4
 function initTerritoryAutocomplete() {
 	territoryName = d3.select('#territoryName');
 	territoryName.node().focus();
@@ -211,7 +304,7 @@ function saveTerritoryName() {
 	};
 }
 
-// Step 4
+// Step 5
 function saveTerritoryPeriod() {
 	return function(d) {
 		d.territory = {

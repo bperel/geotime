@@ -6,6 +6,11 @@ var maxExternalMapSizePercentage = 80;
 var svg;
 var hoveredTerritory;
 var selectedTerritory;
+var projectionSelection;
+
+var bgMapDragState;
+
+var calibrationPoints = [];/*{"fgMap":{"x":25,"y":32},"bgMap":{"lng":-5.176431760366858,"lat":47.99176350757324}},{"fgMap":{"x":71,"y":76},"bgMap":{"lng":11.186467446210473,"lat":38.19655249725234}},{"fgMap":{"x":101,"y":97},"bgMap":{"lng":20.278775575717304,"lat":32.60745024227653}},{"fgMap":{"x":149,"y":72},"bgMap":{"lng":35.473863339572624,"lat":36.552093656036504}},{"fgMap":{"x":94,"y":58},"bgMap":{"lng":19.061180648179203,"lat":41.96196456097777}}];*/
 
 var projection,
 	path,
@@ -18,7 +23,7 @@ var svgmap_drag = d3.behavior.drag()
 
 var bgSvgmap_drag = d3.behavior.drag()
 	.origin(function(d) { return d; })
-	.on("dragstart", dragstarted)
+	.on("dragstart", bgMapDragStarted)
 	.on("drag", bgMapDragMove);
 
 
@@ -26,10 +31,11 @@ var svgmap_resize = d3.behavior.drag()
 	.on("dragstart", dragresizestarted)
 	.on("drag", dragresize);
 
-function applyProjection(name) {
+function applyProjection(name, scale, rotation) {
 	projection = d3.geo[name]()
-		.scale(width / 2 / Math.PI)
-		.precision(.01);
+		.scale(scale || width / 2 / Math.PI)
+		.precision(.01)
+		.rotate(rotation || (projection ? projection.rotate() : [0, 0, 0]));
 
 	path = d3.geo.path()
 		.projection(projection);
@@ -53,6 +59,10 @@ function dragstarted() {
 	d3.event.sourceEvent.stopPropagation();
 }
 
+function bgMapDragStarted() {
+	bgMapDragState = 'inactive';
+}
+
 var lambda = d3.scale.linear()
 	.domain([0, width])
 	.range([-180, 180]);
@@ -62,6 +72,9 @@ var phi = d3.scale.linear()
 	.range([90, -90]);
 
 function bgMapDragMove(d) {
+	if (d3.event && d3.event.dx && d3.event.dy) {
+		bgMapDragState = 'drag';
+	}
 	d.x = (d.x || d3.event.sourceEvent.pageX) + (d3.event ? d3.event.dx : 0);
 	d.y = (d.y || d3.event.sourceEvent.pageY) + (d3.event ? d3.event.dy : 0);
 	projection.rotate([lambda(d.x), phi(d.y)]);
@@ -90,10 +103,9 @@ function initMapArea() {
 		.attr("width", width)
 		.attr("height", mapHeight);
 
-	var projectionSelection = d3.select('#projectionSelection')
-		.on('change', function(d) {
-			var selectedOption = this.options[this.selectedIndex];
-			applyProjection(d3.select(selectedOption).datum().name);
+	projectionSelection = d3.select('#projectionSelection')
+		.on('change', function() {
+			applyProjection(getSelectedProjection());
 		});
 
 	projectionSelection.selectAll('option')
@@ -104,6 +116,10 @@ function initMapArea() {
 		])
 		.enter().append('option')
 		.text(function(d) { return d.name; });
+}
+
+function getSelectedProjection() {
+	return d3.select(projectionSelection.node().options[projectionSelection.node().selectedIndex]).datum().name;
 }
 
 function showBgMap(id, data, error) {
@@ -118,7 +134,8 @@ function showBgMap(id, data, error) {
 			.enter()
 				.append("path")
 				.attr("class", "subunit-boundary subunit");
-		applyProjection('mercator');
+
+		applyProjection(getSelectedProjection());
 	}
 }
 
