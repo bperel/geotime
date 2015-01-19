@@ -10,7 +10,7 @@ function loadHelperConfig() {
 		},
 		{
 			name: 'cancel', cssClass: 'helperStepCancel', text: 'Switch to another map',
-			click: ignoreCurrentMap
+			click: empty
 		}
 	];
 
