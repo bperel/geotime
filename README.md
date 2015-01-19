@@ -36,7 +36,7 @@ $ npm install karma karma-cli karma-jasmine karma-jasmine-jquery karma-jasmine-m
 
 * Set up some rights : 
 ```bash
-$ chmod -R +w test/geotime/cache
+$ chmod -R +w test/phpunit/cache
 $ chmod -R +w cache
 ```
 * Set up the rights for the normal and test DBs, using the admin user : 

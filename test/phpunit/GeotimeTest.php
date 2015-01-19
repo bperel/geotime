@@ -11,7 +11,7 @@ use PHPUnit_Framework_TestCase;
 
 class GeotimeTest extends \PHPUnit_Framework_TestCase {
 
-    static $neMapName = 'test/geotime/_data/countries.json';
+    static $neMapName = 'test/phpunit/_data/countries.json';
     static $customMapName = 'testImage.svg';
 
     static $neAreas = array(

@@ -1,6 +1,8 @@
 var testHelperSteps;
 var testButtonData;
 
+var testValue;
+
 describe('Helper tests', function() {
     var callbacks = null;
 
@@ -9,6 +11,12 @@ describe('Helper tests', function() {
         loadFixtures("map-placeholders.html");
 
         callbacks = {
+            myOnLoad: function() {
+                testValue = 'loaded';
+            },
+            myOnUnload: function() {
+                testValue+= 'unloaded';
+            },
             dataUpdate: function () {
                 return function (d) {
                     d.newData = 'myValue';
@@ -21,6 +29,8 @@ describe('Helper tests', function() {
 
         testHelperSteps = [{
             step: 1, content: ['Step 1 description', 'This is shown when the step is active'],
+            onLoad: [callbacks.myOnLoad],
+            onUnload: [callbacks.myOnUnload],
             dataUpdate: callbacks.dataUpdate,
             buttons: ['done', 'skip']
         },{
@@ -34,6 +44,7 @@ describe('Helper tests', function() {
         ];
 
         helperButtonsData = testButtonData;
+        testValue = null;
     });
 
     describe('Helper behaviour', function() {
@@ -54,11 +65,16 @@ describe('Helper tests', function() {
             expect(secondStep.size()).toEqual(1);
             expect(secondStep.text()).toEqual('Step 2 description');
             expect(secondStep.select('.if-active').text()).toEqual('');
+
+            expect(testValue).toEqual(null);
         });
 
         it('should load a helper step', function() {
             initHelper('myMap.svg', testHelperSteps);
+
+            expect(testValue).toEqual(null);
             activateHelperNextStep();
+            expect(testValue).toEqual('loaded');
 
             var firstStep = helperSteps.filter(function(d) { return d.step === 1; });
             var secondStep = helperSteps.filter(function(d) { return d.step === 2; });
@@ -72,6 +88,7 @@ describe('Helper tests', function() {
             expect(secondStep.classed('active')).toBeFalsy();
 
             activateHelperNextStep();
+            expect(testValue).toContain('unloaded');
 
             expect(firstStep.classed('active')).toBeFalsy();
 

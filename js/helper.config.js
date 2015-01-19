@@ -26,16 +26,16 @@ function loadHelperConfig() {
 		}, {
 			step: 2, content: ['Move the superimposed map so that it corresponds to the background borders.'],
 			onLoad: [enableMapDragResize],
-			onUnload: [disableMapDragResize],
 			dataInit: initMapData,
 			dataUpdate: saveMapPosition,
+			onUnload: [disableMapDragResize],
 			buttons: ['done', 'skip', 'cancel']
 		}, {
 			step: 3, content: ['Select with your mouse a country whose name is written on the map or known by you.',
 							   'Chosen territory : <span id="territoryId">None</span>'],
 			onLoad: [enableTerritorySelection],
-			onUnload: [disableTerritorySelection],
 			dataUpdate: saveTerritoryPosition, validate: checkSelectedTerritory,
+			onUnload: [disableTerritorySelection],
 			buttons: ['done', 'skip', 'cancel']
 		}, {
 			step: 4, content: ['<label for="territoryName">Type in its name</label>',
@@ -48,10 +48,13 @@ function loadHelperConfig() {
 							   '<label for="territoryPeriodStart">From </label><input type="number" id="territoryPeriodStart" />'
 							 + '<label for="territoryPeriodEnd"  > to  </label><input type="number" id="territoryPeriodEnd" />'],
 			dataUpdate: saveTerritoryPeriod,
+			onUnload: saveHelperData,
 			buttons: ['done', 'cancel']
 		}
 	];
-}// Step 1
+}
+
+// Step 1
 function enableCalibrationPointSelection() {
 	svg.on('click', function() {
 		if (bgMapDragState === 'inactive') {
@@ -271,4 +274,8 @@ function saveTerritoryPeriod() {
 		};
 		return d;
 	};
+}
+
+function saveHelperData() {
+	validateTerritory(flattenArrayOfObjects(helperSteps.data()));
 }

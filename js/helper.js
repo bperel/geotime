@@ -82,9 +82,6 @@ function activateHelperNextStep() {
 					return d.name === 'skip' && newStep === stepNumber;
 				});
 	}
-	else {
-		validateTerritory(flattenArrayOfObjects(helperSteps.data()));
-	}
 }
 
 function isActiveStepFilter(d) {

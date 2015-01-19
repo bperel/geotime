@@ -8,8 +8,8 @@ use PHPUnit_Framework_TestCase;
 
 class UtilTest extends \PHPUnit_Framework_TestCase {
 
-    static $fixtures_dir_svg = "test/geotime/_fixtures/svg/";
-    static $fixtures_dir_thumbnails = "test/geotime/_fixtures/thumbnails/";
+    static $fixtures_dir_svg = "test/phpunit/_fixtures/svg/";
+    static $fixtures_dir_thumbnails = "test/phpunit/_fixtures/thumbnails/";
 
     static $wikimediaLogoLocation = "http://upload.wikimedia.org/wikipedia/commons/8/81/Wikimedia-logo.svg";
     static $wikimediaLogoFileName = "logo.svg";
@@ -19,9 +19,9 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
     static function setUpBeforeClass() {
         Util::$log->info(__CLASS__." tests started");
 
-        Util::$cache_dir_svg = "test/geotime/cache/svg/";
-        Util::$cache_dir_thumbnails = "test/geotime/cache/thumbnails/";
-        Util::$cache_dir_json = "test/geotime/cache/json/";
+        Util::$cache_dir_svg = "test/phpunit/cache/svg/";
+        Util::$cache_dir_thumbnails = "test/phpunit/cache/thumbnails/";
+        Util::$cache_dir_json = "test/phpunit/cache/json/";
 
         self::cleanGeneratedFiles();
     }

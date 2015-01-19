@@ -3,7 +3,7 @@ describe('Map tests', function() {
         gatewayUrl = '../../gateway.php';
 
         jasmine.getJSONFixtures().fixturesPath = 'base';
-        loadJSONFixtures("test/geotime/_data/countries.json");
+        loadJSONFixtures("test/phpunit/_data/countries.json");
 
         jasmine.getFixtures().fixturesPath = 'base';
         loadFixtures("map-placeholders.html");
@@ -32,7 +32,7 @@ describe('Map tests', function() {
         });
 
         it('should load', function() {
-            showBgMap("backgroundMap", getJSONFixture("test/geotime/_data/countries.json"));
+            showBgMap("backgroundMap", getJSONFixture("test/phpunit/_data/countries.json"));
             expect(d3.select("#backgroundMap").empty()).toBeFalsy();
         })
     });
@@ -51,7 +51,7 @@ describe('Map tests', function() {
             }];
 
             initMapArea();
-            showBgMap("backgroundMap", getJSONFixture("test/geotime/_data/countries.json"));
+            showBgMap("backgroundMap", getJSONFixture("test/phpunit/_data/countries.json"));
 
             spyOn(window, "ajaxPost").and.callFake(function(options, callback) {
                 var response;

@@ -32,7 +32,7 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
         Geotime::clean();
 
         $this->neImport = new NaturalEarthImporter();
-        $this->neImport->import('test/geotime/_data/countries.json');
+        $this->neImport->import('test/phpunit/_data/countries.json');
     }
 
     protected function tearDown() {
@@ -57,7 +57,7 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
 
         Geotime::clean();
 
-        $nbCountriesImported = $this->neImport->import('test/geotime/_data/countries.json');
+        $nbCountriesImported = $this->neImport->import('test/phpunit/_data/countries.json');
         $this->assertEquals(count(self::$neSovereignties), $nbCountriesImported);
     }
 
@@ -65,8 +65,8 @@ class NaturalEarthImporterTest extends \PHPUnit_Framework_TestCase {
 
         Geotime::clean();
 
-        $this->neImport->import('test/geotime/_data/countries.json');
-        $nbCountriesImported = $this->neImport->import('test/geotime/_data/countries.json');
+        $this->neImport->import('test/phpunit/_data/countries.json');
+        $nbCountriesImported = $this->neImport->import('test/phpunit/_data/countries.json');
         $this->assertEquals(count(self::$neSovereignties), $nbCountriesImported);
     }
 
