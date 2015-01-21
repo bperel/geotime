@@ -1,6 +1,6 @@
 geotime
 =======
-Kingdoms though time.
+Kingdoms though time. The goal of this project is to produce a world map showing the countries borders' evolution through time, using Wikipedia data and maps, along with some user input.
 
 
 ###Requirements
