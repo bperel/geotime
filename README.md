@@ -98,3 +98,15 @@ An HTML coverage report will be generated in the coverage/ folder.
 Two main places :
 * The [index.html](index.html) page at the directory root.
 * The [admin section main page](admin/index.php) allowing authorized users to import geographical data into Geotime.
+
+###Troubleshooting
+
+During the installation of the NodeJS packages, some errors ("node command not found" or similar) may occur if you're using a Debian-based system. As the NodeJS documentation says :
+> The upstream name for the Node.js interpreter command is "node".
+> In Debian the interpreter command has been changed to "nodejs".
+> This was done to prevent a namespace collision: other commands use the same name in their upstreams, such as ax25-node from the "node" package.
+
+If running the command ```node -v``` doesn't indicate anything else than a list of related packages, yon can safely create a symbolic link to make the NPM packages use your NodeJS binary :
+```bash
+ln -s /usr/bin/nodejs /usr/bin/node
+```
