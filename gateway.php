@@ -27,8 +27,9 @@ elseif (isset($_POST['getSvg'])) {
 elseif (isset($_POST['addTerritory'])) {
     $mapId = $_POST['mapId'];
     $mapProjection = $_POST['mapProjection'];
-    $mapPosition = $_POST['mapPosition'];
-    Geotime::updateMap($mapId, $mapProjection, $mapPosition);
+    $mapCenter = $_POST['mapCenter'];
+    $mapScale = $_POST['mapScale'];
+    Geotime::updateMap($mapId, $mapProjection, $mapCenter, $mapScale);
 
     $referencedTerritoryId = $_POST['territoryId'];
     $territoryPeriodStart = $_POST['territoryPeriodStart'];

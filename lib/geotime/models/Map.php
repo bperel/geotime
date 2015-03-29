@@ -18,7 +18,8 @@ class Map extends Model {
         'fileName' => array('type' => 'string'),
         'uploadDate' => array('type' => 'date'),
         'territories' => array('model' => 'geotime\models\Territory', 'type' => 'references'),
-        'position' => array('type' => 'array'),
+        'center' => array('type' => 'array'),
+        'scale' => array('type' => 'int'),
         'projection' => array('type' => 'string')
     );
 
@@ -68,16 +69,31 @@ class Map extends Model {
     /**
      * @return array
      */
-    public function getPosition() {
-        return $this->__getter('position');
+    public function getCenter() {
+        return $this->__getter('center');
     }
 
     /**
-     * @param array $position
+     * @param array $center
      */
-    public function setPosition($position) {
-        $this->__setter('position', $position);
+    public function setCenter($center) {
+        $this->__setter('center', $center);
     }
+
+    /**
+     * @return int
+     */
+    public function getScale() {
+        return $this->__getter('scale');
+    }
+
+    /**
+     * @param int $scale
+     */
+    public function setScale($scale) {
+        $this->__setter('scale', $scale);
+    }
+
 
     /**
      * @return string
