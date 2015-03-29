@@ -16,9 +16,9 @@ function loadHelperConfig() {
 
 	helperStepsData = [
 		{
-			step: 1, content: ['Select 4 points on the maps.',
-							   '<span id="selectedPointsLength"></span>&nbsp;<label for="selectedPointsLength">selected points.</label>'
-							  +'<span id="selectedPoints"></span>'],
+			step: 1, content: ['Select at least 4 points on the maps.',
+							   '<span id="calibrationPointsLength">0</span>&nbsp;<label for="calibrationPointsLength">selected points.</label>'
+							  +'<span id="calibrationPoints"></span>'],
 			onLoad: [enableCalibrationPointSelection],
 			onUnload: [disableCalibrationPointSelection],
 			dataUpdate: saveMapProjection,
@@ -60,8 +60,13 @@ function enableCalibrationPointSelection() {
 		if (bgMapDragState === 'inactive') {
 			var mapOffsetLeft = svg.styleIntWithoutPx("margin-left") + mapPadding;
 			var mapOffsetTop = svg.styleIntWithoutPx("margin-top");
-			var coordinates = projection.invert([d3.event.x - mapOffsetLeft, d3.event.y - mapOffsetTop]);
-			saveCalibrationPoint('bgMap', {lng: coordinates[0], lat: coordinates[1]});
+			var coordinates = {
+				x: d3.event.x - mapOffsetLeft,
+				y: d3.event.y - mapOffsetTop
+			};
+			var latLngCoordinates = projection.invert([coordinates.x, coordinates.y]);
+			var pointIndex = addCalibrationPoint('bgMap', {lng: latLngCoordinates[0], lat: latLngCoordinates[1]});
+			addMarker('bgMap', pointIndex, coordinates);
 		}
 	});
 
@@ -70,7 +75,12 @@ function enableCalibrationPointSelection() {
 			if (!d3.event.defaultPrevented) {
 				var mapOffsetLeft = svgMap.styleIntWithoutPx("margin-left") + mapPadding;
 				var mapOffsetTop = svgMap.styleIntWithoutPx("margin-top");
-				saveCalibrationPoint('fgMap', {x: d3.event.x - mapOffsetLeft, y: d3.event.y - mapOffsetTop});
+				var coordinates = {
+					x: d3.event.x - mapOffsetLeft,
+					y: d3.event.y - mapOffsetTop
+				};
+				var pointIndex = addCalibrationPoint('fgMap', coordinates);
+				addMarker('fgMap', pointIndex, {x: d3.event.x - mapPadding, y: d3.event.y});
 			}
 		})
 		.call(svgmap_drag);
@@ -81,72 +91,65 @@ function disableCalibrationPointSelection() {
 	svgMap.on('click', null);
 }
 
-function saveCalibrationPoint(mapType, point) {
+function addCalibrationPoint(mapType, point) {
 	var index = 0;
 	while (calibrationPoints[index] && calibrationPoints[index][mapType]) {
 		index++;
 	}
 	calibrationPoints[index] = calibrationPoints[index] || {};
 	calibrationPoints[index][mapType] = point;
-	var pointsInfo = '';
-	for (var i = 0; i <calibrationPoints.length; i++) {
-		pointsInfo += '<br />Point '+i+' : ';
-		if (calibrationPoints[i].bgMap) {
-			pointsInfo += 'bg : '+JSON.stringify(calibrationPoints[i].bgMap);
-		}
-		if (calibrationPoints[i].fgMap) {
-			pointsInfo += 'fg : '+JSON.stringify(calibrationPoints[i].fgMap);
-		}
-	}
-	d3.select('#selectedPoints').html(pointsInfo);
-	d3.select('#selectedPointsLength').text(calibrationPoints.length);
+	showCalibrationPoints();
+	return index;
 }
 
+function showCalibrationPoints() {
+	var calibrationPointsElements = d3.select('#calibrationPoints').selectAll('.calibrationPoint').data(calibrationPoints);
+	calibrationPointsElements.enter().append('div').classed('calibrationPoint', true);
+
+	calibrationPointsElements
+		.text(function (d) {
+			var textParts = [];
+			if (d.bgMap) { textParts.push('bg : '+JSON.stringify(d.bgMap)); }
+			if (d.fgMap) { textParts.push('fg : '+JSON.stringify(d.fgMap)); }
+			return textParts.join(' - ');
+		})
+		.append("span")
+			.classed('removeCalibrationPoint', true)
+			.html("&nbsp;X")
+			.on('click', function(d, i) {
+			calibrationPoints.splice(i, 1);
+				showCalibrationPoints()
+			});
+
+	calibrationPointsElements.exit().remove();
+
+	d3.select('#calibrationPointsLength').text(calibrationPoints.length);
+}
 
 function saveMapProjection() {
 
 	var closestPointIndex = getClosestPointToCenter();
-	var centerCoords = [-calibrationPoints[closestPointIndex].bgMap.lng, -calibrationPoints[closestPointIndex].bgMap.lat];
+	var centerCoords = [calibrationPoints[closestPointIndex].bgMap.lng, calibrationPoints[closestPointIndex].bgMap.lat];
+	var scale = 140 * Math.abs(calibrationPoints[0].fgMap.x - calibrationPoints[1].fgMap.x) / Math.abs(calibrationPoints[0].bgMap.lng - calibrationPoints[1].bgMap.lng) ;
 
-	applyProjection(getSelectedProjection(), 85*getProjectedFgBgRatio(), centerCoords);
-	loadExternalMapPosition([
-		(svg.styleIntWithoutPx("width") - svgMap.styleIntWithoutPx("width")) / 2,
-		(svg.styleIntWithoutPx("height")- svgMap.styleIntWithoutPx("height"))/ 2
-	]);
+	applyProjection(getSelectedProjection(), centerCoords, scale);
+	centerExternalMap();
+
+
+    calibrateMapRotation(1, getCalibrationPointsDistanceDiffsValue);
+    calibrateMapScale();
+    //calibrateMapRotation(2);
+    //calibrateMapScale();
 
 	return function(d) {
 		d.map = {
 			id: svgMap.datum().id,
-			position: centerCoords,
+			center: centerCoords,
 			projection: getSelectedProjection()
 		};
 		return d;
 	};
 }
-
-function getProjectedFgBgRatio() {
-	return Math.abs(calibrationPoints[0].fgMap.x - calibrationPoints[1].fgMap.x) / Math.abs(calibrationPoints[0].bgMap.lng - calibrationPoints[1].bgMap.lng) ;
-}
-
-function getClosestPointToCenter() {
-	var width  = svgMap.styleIntWithoutPx("width"),
-		height = svgMap.styleIntWithoutPx("height"),
-		minDistance = null,
-		minDistancePointIndex = null;
-
-	var center = {x: width/2, y: height/2};
-
-	for (var i = 0; i <calibrationPoints.length; i++) {
-		var distance = Math.sqrt(Math.pow(calibrationPoints[i].fgMap.x - center.x, 2) + Math.pow(calibrationPoints[i].fgMap.y - center.y, 2));
-		if (minDistance === null || distance < minDistance) {
-			minDistance = distance;
-			minDistancePointIndex = i;
-		}
-	}
-
-	return minDistancePointIndex;
-}
-
 
 // Step 2
 function enableMapDragResize() {
@@ -177,13 +180,17 @@ function saveMapPosition() {
 		top    = svgMap.styleIntWithoutPx("margin-top"),
 		width  = svgMap.styleIntWithoutPx("width"),
 		height = svgMap.styleIntWithoutPx("height");
-	var pos = [
-		projection.invert([left,        top]),
-		projection.invert([left+width,  top+height])
-	];
+	var center = projection.invert([
+		left+width/2,
+		top+height/2
+	]);
+	var scale = parseInt(projection.scale());
 
 	return function(d) {
-		d.map = { position: pos };
+		d.map = {
+			center: center,
+			scale:  scale
+		};
 		return d;
 	};
 }

@@ -13,10 +13,10 @@
 }
 
 #bg{
-    fill: white;
+    fill: none;
 }
 
-#map, #externalSvg, #resizeHandle {
+#map, #externalSvg, #resizeHandle, #markers {
     position: absolute;
     left: 200px;
 }
