@@ -21,7 +21,7 @@ var projection,
 	zoom = d3.behavior.zoom()
 		.on("zoom", function() {
 			projection.scale(d3.event.scale);
-			svg.selectAll("path").attr("d", path);
+			drawPaths();
 		});
 
 var svgmap_drag = d3.behavior.drag()
@@ -65,6 +65,8 @@ function drawPaths() {
 	svg.selectAll('path.subunit').attr("d", path);
 	d3.select('#projectionCenter').text(projection.center().map(function(val) { return parseInt(val*10)/10; }));
 	d3.select('#projectionRotation').text(projection.rotate().map(function(val) { return parseInt(val*10)/10; }));
+
+	repositionCalibrationMarkers();
 }
 
 function dragstarted() {
@@ -117,7 +119,7 @@ function initMapPlaceHolders(callback) {
 
 function initMapArea() {
 
-	addDefsMarkers();
+	addCalibrationDefsMarkers();
 
 	svg = d3.select("#mapArea").append("svg")
 		.attr("width", width)

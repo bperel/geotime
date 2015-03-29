@@ -99,10 +99,10 @@ function addCalibrationPoint(mapType, clickedPoint) {
 		index++;
 	}
 	calibrationPoints[index] = calibrationPoints[index] || {};
-	calibrationPoints[index][mapType] = coordinates;
+	calibrationPoints[index][mapType] = clickedPoint;
 	showCalibrationPoints();
 
-	addMarker(mapType, index, clickedPoint);
+	addCalibrationMarker(mapType, index, coordinates);
 }
 
 function showCalibrationPoints() {
