@@ -1,1 +1,7 @@
 /.idea
+/node_modules
+/js/vendor
+/vendor
+/cache/json/*.json
+/cache/svg/*.svg
+/cache/thumbnails/*.png
