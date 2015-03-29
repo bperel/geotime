@@ -58,32 +58,16 @@ function loadHelperConfig() {
 function enableCalibrationPointSelection() {
 	svg.on('click', function() {
 		if (bgMapDragState === 'inactive') {
-			var mapOffsetLeft = svg.styleIntWithoutPx("margin-left") + mapPadding;
-			var mapOffsetTop = svg.styleIntWithoutPx("margin-top");
-			var coordinates = {
-				x: d3.event.x - mapOffsetLeft,
-				y: d3.event.y - mapOffsetTop
-			};
-			var latLngCoordinates = projection.invert([coordinates.x, coordinates.y]);
-			var pointIndex = addCalibrationPoint('bgMap', {lng: latLngCoordinates[0], lat: latLngCoordinates[1]});
-			addMarker('bgMap', pointIndex, coordinates);
+			addCalibrationPoint('bgMap', d3.event);
 		}
 	});
 
-	svgMap
-		.on('click', function() {
-			if (!d3.event.defaultPrevented) {
-				var mapOffsetLeft = svgMap.styleIntWithoutPx("margin-left") + mapPadding;
-				var mapOffsetTop = svgMap.styleIntWithoutPx("margin-top");
-				var coordinates = {
-					x: d3.event.x - mapOffsetLeft,
-					y: d3.event.y - mapOffsetTop
-				};
-				var pointIndex = addCalibrationPoint('fgMap', coordinates);
-				addMarker('fgMap', pointIndex, {x: d3.event.x - mapPadding, y: d3.event.y});
-			}
-		})
-		.call(svgmap_drag);
+	svgMap.on('click', function() {
+		if (!d3.event.defaultPrevented) {
+			addCalibrationPoint('fgMap', d3.event);
+		}
+	})
+	.call(svgmap_drag);
 }
 
 function disableCalibrationPointSelection() {
@@ -91,15 +75,34 @@ function disableCalibrationPointSelection() {
 	svgMap.on('click', null);
 }
 
-function addCalibrationPoint(mapType, point) {
+function addCalibrationPoint(mapType, clickedPoint) {
+	var mapOffset = mapType === 'fgMap'
+		? svgMap.mapOffset()
+		: svg.mapOffset();
+
+	clickedPoint = {
+		x: clickedPoint.x - mapOffset.x,
+		y: clickedPoint.y - mapOffset.y
+	};
+
+	var coordinates;
+	if (mapType === 'fgMap') {
+		coordinates = clickedPoint;
+	}
+	else {
+		var latLngCoordinates = projection.invert([clickedPoint.x, clickedPoint.y]);
+		coordinates = {lng: latLngCoordinates[0], lat: latLngCoordinates[1]};
+	}
+
 	var index = 0;
 	while (calibrationPoints[index] && calibrationPoints[index][mapType]) {
 		index++;
 	}
 	calibrationPoints[index] = calibrationPoints[index] || {};
-	calibrationPoints[index][mapType] = point;
+	calibrationPoints[index][mapType] = coordinates;
 	showCalibrationPoints();
-	return index;
+
+	addMarker(mapType, index, clickedPoint);
 }
 
 function showCalibrationPoints() {

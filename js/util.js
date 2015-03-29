@@ -42,7 +42,8 @@ function addDefsMarkers() {
 		.data([{type: 'bgMap'}, {type: 'fgMap'}])
 		.enter()
 			.append('g')
-			.attr('class', function(d) { return 'marker-group '+d.type; });
+			.attr('class', function(d) { return 'marker-group '+d.type; })
+			.attr('transform', function(d) { return 'translate('+(d.type === 'bgMap' ? 0 : -mapPadding)+' 0)'; });
 
 	var defs = markersSvg.append('defs');
 	var marker = defs.append('svg:g').attr('id','crosshair-marker');

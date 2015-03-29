@@ -314,6 +314,9 @@ function loadExternalMapPosition(projectedLeftTop) {
 	d3.selectAll("#externalSvg, #resizeHandle")
 		.style("margin-left", projectedLeftTop[0]+"px")
 		.style("margin-top",+ projectedLeftTop[1] +"px");
+
+	markersSvg.selectAll("g.fgMap")
+		.attr("transform", "translate("+projectedLeftTop.join(" ")+")");
 }
 
 function resizeExternalMap(width, height) {
@@ -409,3 +412,10 @@ function dragresize(){
 
 	resizeExternalMap(newWidth, newHeight);
 }
+
+d3.selection.prototype.mapOffset = function() {
+	return {
+		x: this.styleIntWithoutPx("margin-left") + mapPadding,
+		y: this.styleIntWithoutPx("margin-top")
+	};
+};
