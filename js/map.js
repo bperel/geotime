@@ -14,7 +14,7 @@ var dragMode = 'pan';
 
 var bgMapDragState;
 
-var calibrationPoints = [];/*{"fgMap":{"x":25,"y":32},"bgMap":{"lng":-5.176431760366858,"lat":47.99176350757324}},{"fgMap":{"x":71,"y":76},"bgMap":{"lng":11.186467446210473,"lat":38.19655249725234}},{"fgMap":{"x":101,"y":97},"bgMap":{"lng":20.278775575717304,"lat":32.60745024227653}},{"fgMap":{"x":149,"y":72},"bgMap":{"lng":35.473863339572624,"lat":36.552093656036504}},{"fgMap":{"x":94,"y":58},"bgMap":{"lng":19.061180648179203,"lat":41.96196456097777}}];*/
+var calibrationPoints = [];
 
 var projection,
 	path = d3.geo.path(),
@@ -265,6 +265,17 @@ function loadTerritoryMap() {
 								else {
 									resizeExternalMap();
 								}
+
+								//addCalibrationMarker("fgMap", {x: 97, y: 79});
+								//addCalibrationMarker("bgMap", {lng: -4.574263084142379, lat: 48.56731828363343});
+								//addCalibrationMarker("fgMap", {x: 603, y: 131});
+								//addCalibrationMarker("bgMap", {lng: 41.75346720786418, lat: 42.013724719120766});
+								//addCalibrationMarker("fgMap", {x: 366, y: 368});
+								//addCalibrationMarker("bgMap", {lng: 18.99885762981149, lat: 30.292211191787867});
+								//addCalibrationMarker("fgMap", {x: 548, y: 342});
+								//addCalibrationMarker("bgMap", {lng: 32.422440258590775, lat: 29.796239043857653});
+
+								showCalibrationPoints();
 							});
 						}
 					}

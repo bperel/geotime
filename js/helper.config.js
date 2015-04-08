@@ -85,24 +85,15 @@ function addCalibrationPoint(mapType, clickedPoint) {
 		y: clickedPoint.y - mapOffset.y
 	};
 
-	var coordinates;
-	if (mapType === 'fgMap') {
-		coordinates = clickedPoint;
-	}
-	else {
+	var coordinates = clickedPoint;
+	if (mapType === 'bgMap') {
 		var latLngCoordinates = projection.invert([clickedPoint.x, clickedPoint.y]);
-		coordinates = {lng: latLngCoordinates[0], lat: latLngCoordinates[1]};
+		coordinates.lng = latLngCoordinates[0];
+		coordinates.lat = latLngCoordinates[1];
 	}
 
-	var index = 0;
-	while (calibrationPoints[index] && calibrationPoints[index][mapType]) {
-		index++;
-	}
-	calibrationPoints[index] = calibrationPoints[index] || {};
-	calibrationPoints[index][mapType] = clickedPoint;
+	addCalibrationMarker(mapType, coordinates);
 	showCalibrationPoints();
-
-	addCalibrationMarker(mapType, index, coordinates);
 }
 
 function showCalibrationPoints() {
@@ -120,7 +111,7 @@ function showCalibrationPoints() {
 			.classed('removeCalibrationPoint', true)
 			.html("&nbsp;X")
 			.on('click', function(d, i) {
-			calibrationPoints.splice(i, 1);
+				calibrationPoints.splice(i, 1);
 				showCalibrationPoints()
 			});
 
@@ -131,23 +122,13 @@ function showCalibrationPoints() {
 
 function saveMapProjection() {
 
-	var closestPointIndex = getClosestPointToCenter();
-	var centerCoords = [calibrationPoints[closestPointIndex].bgMap.lng, calibrationPoints[closestPointIndex].bgMap.lat];
-	var scale = 140 * Math.abs(calibrationPoints[0].fgMap.x - calibrationPoints[1].fgMap.x) / Math.abs(calibrationPoints[0].bgMap.lng - calibrationPoints[1].bgMap.lng) ;
-
-	applyProjection(getSelectedProjection(), centerCoords, scale);
-	centerExternalMap();
-
-
-    calibrateMapRotation(1, getCalibrationPointsDistanceDiffsValue);
+	calibrateMapRotation();
     calibrateMapScale();
-    //calibrateMapRotation(2);
-    //calibrateMapScale();
 
 	return function(d) {
 		d.map = {
 			id: svgMap.datum().id,
-			center: centerCoords,
+			center: projection.center(),
 			projection: getSelectedProjection()
 		};
 		return d;
