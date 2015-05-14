@@ -1,7 +1,13 @@
-/.idea
-/node_modules
-/js/vendor
-/vendor
+/.idea/
+/bin/
+/build/
 /cache/json/*.json
 /cache/svg/*.svg
 /cache/thumbnails/*.png
+/composer.lock
+/composer.phar
+/geotime.log
+/js/vendor/
+/node_modules/
+/test/phpunit/cache/
+/vendor/
