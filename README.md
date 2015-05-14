@@ -10,7 +10,7 @@ The goal of this project is to produce a world map showing the countries borders
 * *nix
 * MongoDB
 * NodeJS and NPM
-* Apache+PHP 5 with MongoDB extension
+* Apache+PHP 5 with MongoDB, GD and curl extensions
 
 
 ###Installation
@@ -25,16 +25,17 @@ $ curl -sS https://getcomposer.org/installer | php
 $ php composer.phar install
 ```
 
+* Install NPM project dependencies (i.e. bower):
+```bash
+$ npm install
+```
+
 * Install Bower project dependencies :
 ```bash
-$ npm install -g bower
 $ bower install
 ```
 
-* (Optional) If you want to test the application, install the karma packages as well :
-```bash
-$ npm install karma karma-cli karma-jasmine karma-jasmine-jquery karma-jasmine-matchers karma-phantomjs-launcher karma-coverage karma-junit-reporter
-```
+`node command not found` error ? Have a look at the Troubleshooting session at the bottom of this page.
 
 * Set up some rights : 
 ```bash
@@ -101,7 +102,7 @@ Two main places :
 
 ###Troubleshooting
 
-During the installation of the NodeJS packages, some errors ("node command not found" or similar) may occur if you're using a Debian-based system. As the NodeJS documentation says :
+During the installation of the NodeJS packages, some errors (`node command not found` or similar) may occur if you're using a Debian-based system. As the NodeJS documentation says :
 > The upstream name for the Node.js interpreter command is "node".
 > In Debian the interpreter command has been changed to "nodejs".
 > This was done to prevent a namespace collision: other commands use the same name in their upstreams, such as ax25-node from the "node" package.

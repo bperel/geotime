@@ -1,0 +1,12 @@
+{
+  "name": "geotime",
+  "description": "Kingdoms though time.",
+  "contributors": [{
+    "name": "Bruno Perel",
+    "email": "brunoperel@gmail.com"
+  }],
+  "dependencies": {
+    "bower": "1.4.x"
+  },
+  "license": "CC-BY-SA-2.0"
+}
