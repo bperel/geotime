@@ -17,7 +17,8 @@ function loadHelperConfig() {
 	helperStepsData = [
 		{
 			step: 1, content: ['Select at least 4 points on the maps.',
-							   '<span id="calibrationPointsLength">0</span>&nbsp;<label for="calibrationPointsLength">selected points.</label>'
+							   'Click on the background map to add a point, then click on the foreground map at the corresponding location.' +
+                               '<br /><span id="calibrationPointsLength">0</span>&nbsp;<label for="calibrationPointsLength">selected points.</label>'
 							  +'<span id="calibrationPoints"></span>'],
 			onLoad: [enableCalibrationPointSelection],
 			onUnload: [disableCalibrationPointSelection],
@@ -109,7 +110,7 @@ function showCalibrationPoints() {
 		})
 		.append("span")
 			.classed('removeCalibrationPoint', true)
-			.html("&nbsp;X")
+			.html("&nbsp;X Remove point")
 			.on('click', function(d, i) {
 				calibrationPoints.splice(i, 1);
 				showCalibrationPoints()

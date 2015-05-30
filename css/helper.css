@@ -58,10 +58,12 @@
 
 .helperStep.active .if-active {
     display: block;
+    font-weight: normal;
 }
 
 .helperStep .removeCalibrationPoint {
     cursor: pointer;
+    color: red;
 }
 
 .helperStep #territoryId {

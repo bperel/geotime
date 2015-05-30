@@ -91,16 +91,6 @@ function getCalibrationPointsDistanceDiffsValue() { // distance diff-based value
     };
 }
 
-function getCalibrationPointsPositionDiffsValue() { // x/y coordinates diff-based value. Smaller is better
-    var sum = 0;
-    calibrationPoints.forEach(function(point) {
-        var bgMapPoint = [point.bgMap.x, point.bgMap.y];
-        var fgMapPoint = [point.fgMap.x - svgMap.datum().x, point.fgMap.y - svgMap.datum().y];
-		sum += Math.sqrt(Math.pow(bgMapPoint[0] - fgMapPoint[0], 2) + Math.pow(bgMapPoint[1] - fgMapPoint[1], 2));
-    });
-    return { value: sum};
-}
-
 var markerRadius = 9;
 function addCalibrationDefsMarkers() {
 	markersSvg = d3.select("#mapArea")
