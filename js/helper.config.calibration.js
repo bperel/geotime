@@ -6,9 +6,13 @@ function calibrateMapScale(min, max, inc) {
     inc = inc || 200;
     var bestScale = {scale: null, ratio: Infinity};
 
+    var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
+    var markers = group.selectAll('use');
+
     var newRatio;
     for (var newScale = min; newScale <= max; newScale += inc) {
-        applyProjection(getSelectedProjection(), projection.center(), newScale);
+        projection.scale(newScale);
+        markers.each(positionCalibrationMarker);
         newRatio = getCalibrationPointsDistanceDiffsValue().bgFgDistanceRatio;
         console.log('Calibrating with scale = '+newScale+', ratio = ' + newRatio);
         if (Math.abs(newRatio - 1) < Math.abs(bestScale.ratio -1)) {
@@ -137,20 +141,35 @@ function positionCalibrationMarker(d) {
 		.attr("y", d.coordinates.y);
 }
 
-function calibrateMapRotation() {
-	var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
+function calibrateMapRotation(axisDefaults) {
+    var incdeg,
+        axisCheckRange,
+        isPrecise = !!axisDefaults;
+
+    if (axisDefaults) {
+        incdeg = .5;
+        axisCheckRange = 5;
+    }
+    else {
+        incdeg = 5;
+        axisCheckRange = 89;
+        axisDefaults = [0,0,0];
+    }
+
+
+    var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
 	var markers = group.selectAll('use');
 
 	var min = Infinity;
 	var best = null;
-	for (var i = -89; i <= 89; i+=5) {
+	for (var i = axisDefaults[0] - axisCheckRange; i <= axisDefaults[0] + axisCheckRange; i += incdeg) {
 		console.log('Test axis 0 : '+i+'deg at '+new Date().toISOString());
-		for (var j = -89; j <= 89; j+=5) {
+		for (var j = axisDefaults[1] - axisCheckRange; j <= axisDefaults[1] + axisCheckRange; j += incdeg) {
 			projection.rotate([i,j,0]);
 			markers.each(positionCalibrationMarker);
-			var value = getCalibrationPointsDistanceDiffsValue();
-			if (value.value < min) {
-				min = value.value;
+			var value = getCalibrationPointsDistanceDiffsValue().value;
+			if (value < min) {
+				min = value;
 				best = [i,j,0];
 			}
 		}
@@ -159,17 +178,23 @@ function calibrateMapRotation() {
 	console.log('Best : '+best+' with '+min);
 
 	min = Infinity;
-	for (var k = -89; k <= 89; k++) {
+	for (var k = axisDefaults[2] - axisCheckRange; k <= axisDefaults[2] + axisCheckRange; k += incdeg) {
 		projection.rotate([best[0],best[1],k]);
 		markers.each(positionCalibrationMarker);
-		var value = getCalibrationPointsDistanceDiffsValue();
-		if (value.latitudeValue < min) {
-			min = value.latitudeValue;
+		var latitudeValue = getCalibrationPointsDistanceDiffsValue().latitudeValue;
+		if (latitudeValue < min) {
+			min = latitudeValue;
 			best[2] = k;
 		}
 	}
 
 	console.log(new Date().toISOString());
 	console.log('Best : '+best+' with '+min);
-	applyProjection(getSelectedProjection(), projection.center(), projection.scale(), best);
+
+    if (isPrecise) {
+        applyProjection(getSelectedProjection(), projection.center(), projection.scale(), best);
+    }
+	else {
+        calibrateMapRotation(best)
+    }
 }
