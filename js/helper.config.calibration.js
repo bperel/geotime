@@ -1,3 +1,8 @@
+function getMarkers() {
+    var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
+    return group.selectAll('use');
+}
+
 
 // Calibrate the background's center, scale and rotation so that the two maps are superimposed
 function calibrateMapScale(min, max, inc) {
@@ -6,8 +11,7 @@ function calibrateMapScale(min, max, inc) {
     inc = inc || 200;
     var bestScale = {scale: null, ratio: Infinity};
 
-    var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
-    var markers = group.selectAll('use');
+    var markers = getMarkers();
 
     var newRatio;
     for (var newScale = min; newScale <= max; newScale += inc) {
@@ -27,6 +31,37 @@ function calibrateMapScale(min, max, inc) {
     else {
 		applyProjection(getSelectedProjection(), projection.center(), bestScale.scale, projection.rotate());
 	}
+}
+
+function calibrateMapCenter() {
+    var markers = getMarkers();
+    var currentCenter = projection.center();
+
+    var externalMapOffsetToCenter = getExternalMapOffsetToCenter();
+
+    function getDirections(bgMapFirstPoint, fgMapFirstPoint) {
+        return {
+            x: bgMapFirstPoint.x - (fgMapFirstPoint.x + externalMapOffsetToCenter[0]) < 0 ? -1:  1,
+            y: bgMapFirstPoint.y - (fgMapFirstPoint.y + externalMapOffsetToCenter[1]) < 0 ? 1 : -1
+        };
+    }
+
+    var initialDirections = getDirections(calibrationPoints[0].bgMap, calibrationPoints[0].fgMap);
+    var directions = Object.create(initialDirections);
+    while(initialDirections.x === directions.x || initialDirections.y === directions.y) {
+        if (initialDirections.x === directions.x) {
+            currentCenter[0]+=directions.x;
+        }
+        if (initialDirections.y === directions.y) {
+            currentCenter[1]+=directions.y;
+        }
+        projection.center(currentCenter);
+        markers.each(positionCalibrationMarker);
+
+        directions = getDirections(calibrationPoints[0].bgMap, calibrationPoints[0].fgMap);
+    }
+
+    applyProjection(getSelectedProjection(), currentCenter, projection.scale(), projection.rotate());
 }
 
 function getCalibrationPointsDistanceDiffsValue() { // distance diff-based value. Smaller is better
@@ -156,9 +191,7 @@ function calibrateMapRotation(axisDefaults) {
         axisDefaults = [0,0,0];
     }
 
-
-    var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
-	var markers = group.selectAll('use');
+    var markers = getMarkers();
 
 	var min = Infinity;
 	var best = null;

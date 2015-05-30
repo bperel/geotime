@@ -311,11 +311,17 @@ function validateTerritory(data) {
 	);
 }
 
+function getExternalMapOffsetToCenter() {
+    return [
+        (svg.styleIntWithoutPx("width") - svgMap.styleIntWithoutPx("width")) / 2,
+        (svg.styleIntWithoutPx("height") - svgMap.styleIntWithoutPx("height")) / 2
+    ];
+}
+
 function centerExternalMap() {
-	loadExternalMapPosition([
-		(svg.styleIntWithoutPx("width") - svgMap.styleIntWithoutPx("width")) / 2,
-		(svg.styleIntWithoutPx("height") - svgMap.styleIntWithoutPx("height")) / 2
-	]);
+	loadExternalMapPosition(
+        getExternalMapOffsetToCenter()
+    );
 }
 
 function loadExternalMapPosition(projectedLeftTop) {

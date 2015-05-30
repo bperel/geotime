@@ -124,6 +124,7 @@ function saveMapProjection() {
 
 	calibrateMapRotation();
     calibrateMapScale();
+    calibrateMapCenter();
 
 	return function(d) {
 		d.map = {
