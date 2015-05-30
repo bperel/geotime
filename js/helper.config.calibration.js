@@ -28,7 +28,7 @@ function calibrateMapScale(min, max, inc) {
 function getCalibrationPointsDistanceDiffsValue() { // distance diff-based value. Smaller is better
 	var pxDistanceSums = {bgMap: 0, fgMap: 0, ratios: [], latitudeRatios: []};
 	calibrationPoints.forEach(function(point1, i) {
-		var bgMapPoint1 = [point1.bgMap.lng, point1.bgMap.lat];
+		var bgMapPoint1 = [point1.bgMap.x, point1.bgMap.y];
 		var fgMapPoint1 = [point1.fgMap.x, point1.fgMap.y];
 		calibrationPoints.forEach(function(point2, j) {
 			if (i < j) {
@@ -143,9 +143,9 @@ function calibrateMapRotation() {
 
 	var min = Infinity;
 	var best = null;
-	for (var i = -89; i <= 89; i+=10) {
+	for (var i = -89; i <= 89; i+=5) {
 		console.log('Test axis 0 : '+i+'deg at '+new Date().toISOString());
-		for (var j = -89; j <= 89; j+=10) {
+		for (var j = -89; j <= 89; j+=5) {
 			projection.rotate([i,j,0]);
 			markers.each(positionCalibrationMarker);
 			var value = getCalibrationPointsDistanceDiffsValue();
@@ -159,7 +159,7 @@ function calibrateMapRotation() {
 	console.log('Best : '+best+' with '+min);
 
 	min = Infinity;
-	for (var k = -89; k <= 89; k+=10) {
+	for (var k = -89; k <= 89; k++) {
 		projection.rotate([best[0],best[1],k]);
 		markers.each(positionCalibrationMarker);
 		var value = getCalibrationPointsDistanceDiffsValue();

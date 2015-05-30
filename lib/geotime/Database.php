@@ -22,7 +22,7 @@ class Database {
     static $connected = false;
 
     static function connect($dbName = null) {
-        $conf = parse_ini_file('/home/geotime/config.ini');
+        $conf = parse_ini_file('/home/bruno/config.ini');
         self::$username = $conf['username'];
         self::$password = $conf['password'];
 
