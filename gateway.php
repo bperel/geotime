@@ -24,13 +24,15 @@ elseif (isset($_POST['getTerritories'])) {
 elseif (isset($_POST['getSvg'])) {
     $object = Geotime::getIncompleteMapInfo();
 }
-elseif (isset($_POST['addTerritory'])) {
+elseif (isset($_POST['locateMap'])) {
     $mapId = $_POST['mapId'];
     $mapProjection = $_POST['mapProjection'];
+    $mapRotation = $_POST['mapRotation'];
     $mapCenter = $_POST['mapCenter'];
     $mapScale = $_POST['mapScale'];
-    Geotime::updateMap($mapId, $mapProjection, $mapCenter, $mapScale);
-
+    Geotime::updateMap($mapId, $mapProjection, $mapRotation, $mapCenter, $mapScale);
+}
+elseif (isset($_POST['addTerritory'])) {
     $referencedTerritoryId = $_POST['territoryId'];
     $territoryPeriodStart = $_POST['territoryPeriodStart'];
     $territoryPeriodEnd = $_POST['territoryPeriodEnd'];

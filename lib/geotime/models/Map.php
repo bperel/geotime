@@ -18,9 +18,10 @@ class Map extends Model {
         'fileName' => array('type' => 'string'),
         'uploadDate' => array('type' => 'date'),
         'territories' => array('model' => 'geotime\models\Territory', 'type' => 'references'),
+        'projection' => array('type' => 'string'),
+        'rotation' => array('type' => 'array'),
         'center' => array('type' => 'array'),
         'scale' => array('type' => 'int'),
-        'projection' => array('type' => 'string')
     );
 
     // @codeCoverageIgnoreStart
@@ -67,6 +68,34 @@ class Map extends Model {
     }
 
     /**
+     * @return string
+     */
+    public function getProjection() {
+        return $this->__getter('projection');
+    }
+
+    /**
+     * @param string $projection
+     */
+    public function setProjection($projection) {
+        $this->__setter('projection', $projection);
+    }
+
+    /**
+     * @return float[]
+     */
+    public function getRotation() {
+        return $this->__getter('rotation');
+    }
+
+    /**
+     * @param string $rotation
+     */
+    public function setRotation($rotation) {
+        $this->__setter('rotation', $rotation);
+    }
+
+    /**
      * @return array
      */
     public function getCenter() {
@@ -94,20 +123,6 @@ class Map extends Model {
         $this->__setter('scale', $scale);
     }
 
-
-    /**
-     * @return string
-     */
-    public function getProjection() {
-        return $this->__getter('projection');
-    }
-
-    /**
-     * @param string $projection
-     */
-    public function setProjection($projection) {
-        $this->__setter('projection', $projection);
-    }
     // @codeCoverageIgnoreEnd
 
     /**

@@ -140,12 +140,13 @@ class Geotime {
 
     /**
      * @param $mapId
-     * @param $mapProjection string
-     * @param $mapCenter string[]
-     * @param $mapScale
+     * @param $mapProjection string|null
+     * @param $mapRotation float[]|null
+     * @param $mapCenter string[]|null
+     * @param $mapScale int|null
      * @return Map|null
      */
-    public static function updateMap($mapId, $mapProjection = null, $mapCenter = null, $mapScale = null) {
+    public static function updateMap($mapId, $mapProjection = null, $mapRotation = null, $mapCenter = null, $mapScale = null) {
         /** @var Map $map */
         $map = Map::one(array('_id' => new \MongoId($mapId)));
         if (is_null($map)) {
@@ -154,6 +155,12 @@ class Geotime {
         else {
             if (!empty($mapProjection)) {
                 $map->setProjection($mapProjection);
+            }
+            if (!empty($mapRotation)) {
+                array_walk_recursive($mapRotation, function (&$item) {
+                    $item = floatval($item);
+                });
+                $map->setRotation($mapRotation);
             }
             if (!empty($mapCenter)) {
                 array_walk_recursive($mapCenter, function (&$item) {

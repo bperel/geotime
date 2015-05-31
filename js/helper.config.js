@@ -25,11 +25,10 @@ function loadHelperConfig() {
 			dataUpdate: saveMapProjection,
 			buttons: ['done', 'skip', 'cancel']
 		}, {
-			step: 2, content: ['Move the superimposed map so that it corresponds to the background borders.'],
+			step: 2, content: ['If necessary, move the superimposed map so that it corresponds to the background borders.'],
 			onLoad: [enableMapDragResize],
-			dataInit: initMapData,
 			dataUpdate: saveMapPosition,
-			onUnload: [disableMapDragResize],
+			onUnload: [disableMapDragResize, saveMapLocation],
 			buttons: ['done', 'skip', 'cancel']
 		}, {
 			step: 3, content: ['Select with your mouse a country whose name is written on the map or known by you.',
@@ -49,7 +48,7 @@ function loadHelperConfig() {
 							   '<label for="territoryPeriodStart">From </label><input type="number" id="territoryPeriodStart" />'
 							 + '<label for="territoryPeriodEnd"  > to  </label><input type="number" id="territoryPeriodEnd" />'],
 			dataUpdate: saveTerritoryPeriod,
-			onUnload: saveHelperData,
+			onUnload: [saveHelperData],
 			buttons: ['done', 'cancel']
 		}
 	];
@@ -131,6 +130,8 @@ function saveMapProjection() {
 		d.map = {
 			id: svgMap.datum().id,
 			center: projection.center(),
+            rotation: projection.rotate(),
+            scale: parseInt(projection.scale()),
 			projection: getSelectedProjection()
 		};
 		return d;
@@ -145,6 +146,19 @@ function enableMapDragResize() {
 		.classed("hidden", false);
 }
 
+function saveMapPosition() {
+    return function(d) {
+        d.map = {
+            id: svgMap.datum().id,
+            center: projection.center(),
+            rotation: projection.rotate(),
+            scale: projection.scale(),
+            projection: getSelectedProjection()
+        };
+        return d;
+    };
+}
+
 function disableMapDragResize() {
 	svgMap.on('mousedown.drag', null);
 	resizeHandle
@@ -152,33 +166,9 @@ function disableMapDragResize() {
 		.classed("hidden", true);
 }
 
-function initMapData() {
-	return function(d) {
-		d.map = {
-			id: svgMap.datum().id
-		};
-		return d;
-	};
-}
-
-function saveMapPosition() {
-	var left   = svgMap.styleIntWithoutPx("margin-left"),
-		top    = svgMap.styleIntWithoutPx("margin-top"),
-		width  = svgMap.styleIntWithoutPx("width"),
-		height = svgMap.styleIntWithoutPx("height");
-	var center = projection.invert([
-		left+width/2,
-		top+height/2
-	]);
-	var scale = parseInt(projection.scale());
-
-	return function(d) {
-		d.map = {
-			center: center,
-			scale:  scale
-		};
-		return d;
-	};
+function saveMapLocation() {
+    var mapData = helperSteps.data().filter(function(d) { return d.step === 2; })[0].map;
+    validateMapLocation(mapData);
 }
 
 // Step 3
