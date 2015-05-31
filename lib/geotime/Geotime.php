@@ -140,11 +140,13 @@ class Geotime {
 
     /**
      * @param $mapId
-     * @param $mapProjection string
-     * @param $mapPosition string[]
+     * @param $mapProjection string|null
+     * @param $mapRotation float[]|null
+     * @param $mapCenter string[]|null
+     * @param $mapScale int|null
      * @return Map|null
      */
-    public static function updateMap($mapId, $mapProjection = null, $mapPosition = null) {
+    public static function updateMap($mapId, $mapProjection = null, $mapRotation = null, $mapCenter = null, $mapScale = null) {
         /** @var Map $map */
         $map = Map::one(array('_id' => new \MongoId($mapId)));
         if (is_null($map)) {
@@ -154,13 +156,22 @@ class Geotime {
             if (!empty($mapProjection)) {
                 $map->setProjection($mapProjection);
             }
-            if (!empty($mapPosition)) {
-                array_walk_recursive($mapPosition, function (&$item) {
+            if (!empty($mapRotation)) {
+                array_walk_recursive($mapRotation, function (&$item) {
                     $item = floatval($item);
                 });
-                $map->setPosition($mapPosition);
+                $map->setRotation($mapRotation);
             }
-            if (!empty($mapProjection) && !empty($mapPosition)) {
+            if (!empty($mapCenter)) {
+                array_walk_recursive($mapCenter, function (&$item) {
+                    $item = floatval($item);
+                });
+                $map->setCenter($mapCenter);
+            }
+            if (!empty($mapScale)) {
+                $map->setScale($mapScale);
+            }
+            if (!empty($mapProjection) && !empty($mapCenter) && !empty($mapScale)) {
                 $map->save();
             }
             return $map;

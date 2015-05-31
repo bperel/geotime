@@ -4,12 +4,25 @@ var mapPadding = 200;
 var resizeHandleSize = 16;
 var maxExternalMapSizePercentage = 80;
 var svg;
+var markersSvg;
 var hoveredTerritory;
 var selectedTerritory;
 
+var projectionSelection;
+var dragAction;
+var dragMode = 'pan';
+
+var bgMapDragState;
+
+var calibrationPoints = [];
+
 var projection,
-	path,
-	zoom;
+	path = d3.geo.path(),
+	zoom = d3.behavior.zoom()
+		.on("zoom", function() {
+			projection.scale(d3.event.scale);
+			drawPaths();
+		});
 
 var svgmap_drag = d3.behavior.drag()
 	.origin(function(d) { return d; })
@@ -18,7 +31,7 @@ var svgmap_drag = d3.behavior.drag()
 
 var bgSvgmap_drag = d3.behavior.drag()
 	.origin(function(d) { return d; })
-	.on("dragstart", dragstarted)
+	.on("dragstart", bgMapDragStarted)
 	.on("drag", bgMapDragMove);
 
 
@@ -26,46 +39,72 @@ var svgmap_resize = d3.behavior.drag()
 	.on("dragstart", dragresizestarted)
 	.on("drag", dragresize);
 
-function applyProjection(name) {
+function applyProjection(name, center, scale, rotation) {
 	projection = d3.geo[name]()
-		.scale(width / 2 / Math.PI)
+		.center(center || [0, 0])
+		.scale(scale || width / 2 / Math.PI)
+		.rotate(rotation || (projection ? projection.rotate() : [0, 0, 0]))
 		.precision(.01);
 
-	path = d3.geo.path()
-		.projection(projection);
+	applyCurrentProjection();
+}
 
-	zoom = d3.behavior.zoom()
-		.translate(projection.translate())
-		.scale(projection.scale())
-		.on("zoom", function() {
-			projection.scale(d3.event.scale);
-			svg.selectAll("path").attr("d", path);
-		});
+function applyCurrentProjection() {
+	path.projection(projection);
+
+	zoom.scale(projection.scale());
 
 	svg
 		.call(bgSvgmap_drag)
-		.call(zoom)
-		.selectAll('path.subunit').attr("d", path)
+		.call(zoom);
 
+	drawPaths();
+}
+
+function drawPaths() {
+	svg.selectAll('path.subunit').attr("d", path);
+	d3.select('#projectionCenter').text(projection.center().map(function(val) { return parseInt(val*10)/10; }));
+	d3.select('#projectionRotation').text(projection.rotate().map(function(val) { return parseInt(val*10)/10; }));
+
+	repositionCalibrationMarkers();
 }
 
 function dragstarted() {
 	d3.event.sourceEvent.stopPropagation();
 }
 
+function bgMapDragStarted() {
+	bgMapDragState = 'inactive';
+}
+
+var longLatLimits = [180, 90];
+
 var lambda = d3.scale.linear()
 	.domain([0, width])
-	.range([-180, 180]);
+	.range([-longLatLimits[0], longLatLimits[0]]);
 
 var phi = d3.scale.linear()
 	.domain([0, mapHeight])
-	.range([90, -90]);
+	.range([longLatLimits[1], -longLatLimits[1]]);
 
 function bgMapDragMove(d) {
-	d.x = (d.x || d3.event.sourceEvent.pageX) + (d3.event ? d3.event.dx : 0);
-	d.y = (d.y || d3.event.sourceEvent.pageY) + (d3.event ? d3.event.dy : 0);
-	projection.rotate([lambda(d.x), phi(d.y)]);
-	svg.selectAll("path").attr("d", path);
+	if (d3.event && d3.event.dx && d3.event.dy) {
+		bgMapDragState = 'drag';
+	}
+	if (dragMode === 'pan') {
+		var currentCenter = projection.center();
+		var newCenter = [
+			Math.min(longLatLimits[0], Math.max(-longLatLimits[0], currentCenter[0]-d3.event.dx)),
+			Math.min(longLatLimits[1], Math.max(-longLatLimits[1], currentCenter[1]+d3.event.dy))
+		];
+		projection.center(newCenter);
+	}
+	else {
+		d.x = (d.x || d3.event.sourceEvent.pageX) + (d3.event ? d3.event.dx : 0);
+		d.y = (d.y || d3.event.sourceEvent.pageY) + (d3.event ? d3.event.dy : 0);
+		projection.rotate([lambda(d.x), phi(d.y)]);
+	}
+	drawPaths();
 }
 
 function dragmove(d) {
@@ -79,6 +118,9 @@ function initMapPlaceHolders(callback) {
 }
 
 function initMapArea() {
+
+	addCalibrationDefsMarkers();
+
 	svg = d3.select("#mapArea").append("svg")
 		.attr("width", width)
 		.attr("height", mapHeight)
@@ -90,20 +132,51 @@ function initMapArea() {
 		.attr("width", width)
 		.attr("height", mapHeight);
 
-	var projectionSelection = d3.select('#projectionSelection')
-		.on('change', function(d) {
-			var selectedOption = this.options[this.selectedIndex];
-			applyProjection(d3.select(selectedOption).datum().name);
+	projectionSelection = d3.select('#projectionSelection')
+		.on('change', function () {
+			applyProjection(getSelectedProjection(), projection.center(), projection.scale(), projection.rotate());
 		});
 
 	projectionSelection.selectAll('option')
 		.data([
-			{ name: 'mercator' },
-			{ name: 'equirectangular' },
-			{ name: 'orthographic' }
+			{name: 'mercator'},
+			{name: 'equirectangular'},
+			{name: 'orthographic'}
 		])
 		.enter().append('option')
-		.text(function(d) { return d.name; });
+		.text(function (d) {
+			return d.name;
+		});
+
+	dragAction = d3.select('#dragActionContainer')
+		.selectAll('input')
+		.data([
+			{name: 'pan', text: 'Pan on drag'},
+			{name: 'rotate', text: 'Rotate on drag'}
+		])
+		.enter().append('div').each(function (d) {
+			var wrapper = d3.select(this);
+			wrapper.append('input')
+				.attr('type', 'radio')
+				.attr('name', 'dragAction')
+				.attr('id', 'dragAction' + d.name)
+				.attr('checked', d.name === 'pan' ? 'checked' : null)
+				.on('click', function (d) {
+					dragMode = d.name;
+				});
+			wrapper.append("label")
+				.attr("for", 'dragAction' + d.name)
+				.text(d.text);
+		});
+}
+
+function getSelectedProjection() {
+	return d3.select(projectionSelection.node().options[projectionSelection.node().selectedIndex]).datum().name;
+}
+
+function setSelectedProjection(projectionName) {
+	projectionSelection.selectAll('option')
+		.attr('selected', function(d) { return d.name === projectionName ? 'selected' : null});
 }
 
 function showBgMap(id, data, error) {
@@ -118,7 +191,8 @@ function showBgMap(id, data, error) {
 			.enter()
 				.append("path")
 				.attr("class", "subunit-boundary subunit");
-		applyProjection('mercator');
+
+		applyProjection(getSelectedProjection());
 	}
 }
 
@@ -157,7 +231,10 @@ function loadTerritoryMap() {
 									.attr("name", mapFileName)
 									.attr("id", "externalSvg")
 									.classed("externalSvg", true)
-									.attr("preserveAspectRatio", "xMaxYMax meet");
+									.attr("preserveAspectRatio", "xMinYMin meet");
+
+								var svgMapWidth = parseInt(svgMap.attr("width"));
+								var svgMapHeight = parseInt(svgMap.attr("height"));
 
 								svgMap
 									.datum({
@@ -165,8 +242,8 @@ function loadTerritoryMap() {
 										fileName: incompleteMapInfo.fileName,
 										x: 0,
 										y: 0,
-										width: parseInt(svgMap.attr("width")),
-										height: parseInt(svgMap.attr("height"))
+										width: svgMapWidth,
+										height: svgMapHeight
 									});
 
 								if (!svgMap.attr("viewBox")) {
@@ -175,18 +252,31 @@ function loadTerritoryMap() {
 									});
 								}
 
+								setSelectedProjection(incompleteMapInfo.projection);
 								dragmove.call(svgMap.node(), svgMap.datum());
 
-								activateHelperNextStep();
+								resizeExternalMap(width * maxExternalMapSizePercentage / 100, mapHeight  * maxExternalMapSizePercentage / 100);
+								centerExternalMap();
 
-								if (incompleteMapInfo.position) {
-									var projectedLeftTop = projection(incompleteMapInfo.position[0]);
-									var projectedRightBottom = projection(incompleteMapInfo.position[1]);
-									loadExternalMapPosition(projectedLeftTop);
-									resizeExternalMap(projectedRightBottom[0]-projectedLeftTop[0], projectedRightBottom[1]-projectedLeftTop[1]);
+								if (incompleteMapInfo.center) {
+									applyProjection(incompleteMapInfo.projection, incompleteMapInfo.center, incompleteMapInfo.scale, incompleteMapInfo.rotation);
+                                    helper.datum().activeStep = 2;
+                                    activateHelperNextStep(true);
 								}
 								else {
 									resizeExternalMap();
+                                    activateHelperNextStep();
+
+                                    //addCalibrationMarker("fgMap", {x: 97, y: 79});
+                                    //addCalibrationMarker("bgMap", {lng: -4.574263084142379, lat: 48.56731828363343});
+                                    //addCalibrationMarker("fgMap", {x: 603, y: 131});
+                                    //addCalibrationMarker("bgMap", {lng: 41.75346720786418, lat: 42.013724719120766});
+                                    //addCalibrationMarker("fgMap", {x: 366, y: 368});
+                                    //addCalibrationMarker("bgMap", {lng: 18.99885762981149, lat: 30.292211191787867});
+                                    //addCalibrationMarker("fgMap", {x: 548, y: 342});
+                                    //addCalibrationMarker("bgMap", {lng: 32.422440258590775, lat: 29.796239043857653});
+
+                                    showCalibrationPoints();
 								}
 							});
 						}
@@ -198,13 +288,28 @@ function loadTerritoryMap() {
 	}
 }
 
+function validateMapLocation(mapData) {
+    ajaxPost(
+        {
+            locateMap: 1,
+            mapId: mapData.id,
+            mapProjection: mapData.projection,
+            mapRotation: mapData.rotation,
+            mapCenter: mapData.center,
+            mapScale: mapData.scale
+        },
+        function(error) {
+            if (error) {
+                alert(error);
+            }
+        }
+    );
+}
+
 function validateTerritory(data) {
 	ajaxPost(
 		{
 			addTerritory: 1,
-			mapId: data.map.id,
-			mapProjection: data.map.projection,
-			mapPosition: data.map.position,
 			territoryId: data.territory.id,
 			territoryPeriodStart: data.territory.period.start,
 			territoryPeriodEnd: data.territory.period.end,
@@ -222,6 +327,19 @@ function validateTerritory(data) {
 	);
 }
 
+function getExternalMapOffsetToCenter() {
+    return [
+        (svg.styleIntWithoutPx("width") - svgMap.styleIntWithoutPx("width")) / 2,
+        (svg.styleIntWithoutPx("height") - svgMap.styleIntWithoutPx("height")) / 2
+    ];
+}
+
+function centerExternalMap() {
+	loadExternalMapPosition(
+        getExternalMapOffsetToCenter()
+    );
+}
+
 function loadExternalMapPosition(projectedLeftTop) {
 	svgMap.datum(function(d) {
 		d.x = projectedLeftTop[0];
@@ -231,14 +349,27 @@ function loadExternalMapPosition(projectedLeftTop) {
 	d3.selectAll("#externalSvg, #resizeHandle")
 		.style("margin-left", projectedLeftTop[0]+"px")
 		.style("margin-top",+ projectedLeftTop[1] +"px");
+
+	markersSvg.selectAll("g.fgMap")
+		.attr("transform", "translate("+projectedLeftTop.join(" ")+")");
 }
 
 function resizeExternalMap(width, height) {
-	if (!width) { // Auto fit
+	var externalMapWidth  = parseInt(svgMap.attr("width" ));
+	var externalMapHeight = parseInt(svgMap.attr("height"));
+	if (width) {
+		var externalMapOriginalRatio = externalMapWidth / externalMapHeight;
+		var externalMapCurrentRatio = width / height;
+		if (externalMapCurrentRatio > externalMapOriginalRatio) {
+			width = height * externalMapOriginalRatio;
+		}
+		else if (externalMapCurrentRatio < externalMapOriginalRatio) {
+			height = width / externalMapOriginalRatio;
+		}
+	}
+	else { // Auto fit
 		var bgMapWidth  = parseInt(svg.attr("width" ));
 		var bgMapHeight = parseInt(svg.attr("height"));
-		var externalMapWidth = svgMap.datum().width;
-		var externalMapHeight = svgMap.datum().height;
 		var widthRatio = bgMapWidth / externalMapWidth;
 		var heightRatio = bgMapHeight / externalMapHeight;
 		if (widthRatio < 1 || heightRatio < 1) {
@@ -261,7 +392,8 @@ function resizeExternalMap(width, height) {
 		.style("width",  width +"px")
 		.style("height", height+"px")
 		.datum(function(d) {
-			d.width = width;d.height = height;
+			d.width = width;
+			d.height = height;
 			return d;
 		});
 
@@ -315,3 +447,10 @@ function dragresize(){
 
 	resizeExternalMap(newWidth, newHeight);
 }
+
+d3.selection.prototype.mapOffset = function() {
+	return {
+		x: this.styleIntWithoutPx("margin-left") + mapPadding,
+		y: this.styleIntWithoutPx("margin-top")
+	};
+};

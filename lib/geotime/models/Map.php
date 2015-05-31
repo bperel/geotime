@@ -18,8 +18,10 @@ class Map extends Model {
         'fileName' => array('type' => 'string'),
         'uploadDate' => array('type' => 'date'),
         'territories' => array('model' => 'geotime\models\Territory', 'type' => 'references'),
-        'position' => array('type' => 'array'),
-        'projection' => array('type' => 'string')
+        'projection' => array('type' => 'string'),
+        'rotation' => array('type' => 'array'),
+        'center' => array('type' => 'array'),
+        'scale' => array('type' => 'int'),
     );
 
     // @codeCoverageIgnoreStart
@@ -66,20 +68,6 @@ class Map extends Model {
     }
 
     /**
-     * @return array
-     */
-    public function getPosition() {
-        return $this->__getter('position');
-    }
-
-    /**
-     * @param array $position
-     */
-    public function setPosition($position) {
-        $this->__setter('position', $position);
-    }
-
-    /**
      * @return string
      */
     public function getProjection() {
@@ -92,6 +80,49 @@ class Map extends Model {
     public function setProjection($projection) {
         $this->__setter('projection', $projection);
     }
+
+    /**
+     * @return float[]
+     */
+    public function getRotation() {
+        return $this->__getter('rotation');
+    }
+
+    /**
+     * @param string $rotation
+     */
+    public function setRotation($rotation) {
+        $this->__setter('rotation', $rotation);
+    }
+
+    /**
+     * @return array
+     */
+    public function getCenter() {
+        return $this->__getter('center');
+    }
+
+    /**
+     * @param array $center
+     */
+    public function setCenter($center) {
+        $this->__setter('center', $center);
+    }
+
+    /**
+     * @return int
+     */
+    public function getScale() {
+        return $this->__getter('scale');
+    }
+
+    /**
+     * @param int $scale
+     */
+    public function setScale($scale) {
+        $this->__setter('scale', $scale);
+    }
+
     // @codeCoverageIgnoreEnd
 
     /**

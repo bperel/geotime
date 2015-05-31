@@ -19,7 +19,7 @@
         "tests"
     ],
     "dependencies": {
-        "d3": "~3.4.3",
+        "d3": "~3.5.5",
         "jquery": "~2.1.1",
         "lightgallery": "~1.1.4",
         "modernizr": "~2.6.2",

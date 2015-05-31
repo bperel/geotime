@@ -11,9 +11,10 @@ a {
     display: none;
 }
 
-#projectionSelectionContainer {
+#mapConfigContainer {
     margin: 10px;
     position: absolute;
+    z-index: 2;
 }
 
 #loadTerritoryMap {

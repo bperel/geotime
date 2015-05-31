@@ -155,7 +155,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $mapId = $map->getIdAsString();
         $map->delete();
 
-        $updatedMap = Geotime::updateMap($mapId, 'mercator', array(array('0', '0'), array('10', '10')));
+        $updatedMap = Geotime::updateMap($mapId, 'mercator', array('0','0','0'), array(array('0', '10')), 200);
         $this->assertNull($updatedMap);
     }
 
@@ -166,11 +166,13 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $map->save();
         $mapId = $map->getIdAsString();
 
-        $updatedMap = Geotime::updateMap($mapId, 'mercator2', array(array('0', '0'), array('10', '10')));
+        $updatedMap = Geotime::updateMap($mapId, 'mercator2', array('10','20','30'), array('5', '5'), 200);
         $this->assertNotNull($updatedMap);
         $this->assertEquals($updatedMap->getFileName(), $map->getFileName());
         $this->assertEquals($updatedMap->getProjection(), 'mercator2');
-        $this->assertEquals($updatedMap->getPosition(), array(array(0, 0), array(10, 10)));
+        $this->assertEquals($updatedMap->getCenter(), array(5, 5));
+        $this->assertEquals($updatedMap->getRotation(), array(10, 20, 30));
+        $this->assertEquals($updatedMap->getScale(), 200);
     }
 
     function testUpdateMapMissingData() {
@@ -180,7 +182,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $map->save();
         $mapId = $map->getIdAsString();
 
-        $updatedMap = Geotime::updateMap($mapId);
+        $updatedMap = Geotime::updateMap($mapId, null);
         $this->assertNotNull($updatedMap);
         $this->assertEquals($updatedMap->getFileName(), $map->getFileName());
         $this->assertEquals($updatedMap->getProjection(), $map->getProjection());
