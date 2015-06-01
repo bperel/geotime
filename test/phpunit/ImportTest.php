@@ -303,8 +303,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         /** @var Territory[] $territories */
         $territories = $secondMap->getTerritories();
         $this->assertNotNull($territories[0]->getPeriod());
-        $this->assertEquals(new \MongoDate(strtotime('0002-12-31 23:00:00')), $territories[0]->getPeriod()->getStart());
-        $this->assertEquals(new \MongoDate(strtotime('0842-12-31 23:00:00')), $territories[0]->getPeriod()->getEnd());
+        $this->assertEquals(new \MongoDate(strtotime('0003-01-01T00:00:00+02:00')), $territories[0]->getPeriod()->getStart());
+        $this->assertEquals(new \MongoDate(strtotime('0843-01-01T00:00:00+02:00')), $territories[0]->getPeriod()->getEnd());
     }
 
     public function testGetTerritoriesFromCriteriaGroup()
