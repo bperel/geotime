@@ -80,14 +80,20 @@ describe('Map tests', function() {
         it('should load', function() {
             loadTerritoryMap();
 
+            var bgWidth = width;
+            var bgHeight = mapHeight;
+
+            var svgWidth = 110;
+            var svgHeight = 60;
+
             expect(svgMap).toBeDefined();
             expect(svgMap.attr('name')).toEqual(territoryFilename);
-            expect(svgMap.datum().x).toEqual(0);
-            expect(svgMap.datum().y).toEqual(0);
-            expect(svgMap.datum().width).toEqual(110);
-            expect(svgMap.datum().height).toEqual(60);
-            expect(svgMap.style("margin-left")).toEqual('0px');
-            expect(svgMap.style("margin-top")).toEqual('0px');
+            expect(svgMap.datum().x).toEqual((bgWidth - svgWidth) /2);
+            expect(svgMap.datum().y).toEqual((bgHeight - svgHeight) /2);
+            expect(svgMap.datum().width).toEqual(svgWidth);
+            expect(svgMap.datum().height).toEqual(svgHeight);
+            expect(svgMap.style("margin-left")).toEqual((bgWidth - svgWidth) /2 + 'px');
+            expect(svgMap.style("margin-top")).toEqual((bgHeight - svgHeight) /2 + 'px');
         });
     });
 });

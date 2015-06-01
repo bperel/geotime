@@ -1,12 +1,27 @@
 {
   "name": "geotime",
   "description": "Kingdoms though time.",
-  "contributors": [{
-    "name": "Bruno Perel",
-    "email": "brunoperel@gmail.com"
-  }],
-  "dependencies": {
-    "bower": "1.4.x"
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/bperel/geotime.git"
   },
-  "license": "CC-BY-SA-2.0"
+  "contributors": [
+    {
+      "name": "Bruno Perel",
+      "email": "brunoperel@gmail.com"
+    }
+  ],
+  "license": "CC-BY-SA-2.0",
+  "dependencies": {
+    "bower": "~1.4.1"
+  },
+  "devDependencies": {
+    "jasmine-core": "~2.3.4",
+    "karma": "~0.12.35",
+    "karma-coverage": "~0.3.1",
+    "karma-jasmine": "~0.3.5",
+    "karma-jasmine-jquery": "~0.1.1",
+    "karma-phantomjs-launcher": "~0.2.0",
+    "phantomjs": "~1.9.17"
+  }
 }

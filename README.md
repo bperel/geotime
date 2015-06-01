@@ -25,7 +25,7 @@ $ curl -sS https://getcomposer.org/installer | php
 $ php composer.phar install
 ```
 
-* Install NPM project dependencies (i.e. bower):
+* Install NPM project dependencies (i.e. bower and Karma dependencies):
 ```bash
 $ npm install
 ```

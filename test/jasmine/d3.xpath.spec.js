@@ -16,7 +16,6 @@ describe('XPath tests', function() {
 
         it('should calculate XPath relative to an element', function() {
             expect(d3.select('[name="myNamedPath"]').xpath()).toEqual('/html/body/div/svg/path[2]');
-            expect(d3.select('[name="myNamedPath"]').xpath(d3.select('svg'))).toEqual('//path[2]');
         });
     });
 });

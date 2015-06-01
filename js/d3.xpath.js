@@ -1,4 +1,4 @@
-d3.selection.prototype.xpath = function(ignoreAncestorsFrom) {
+d3.selection.prototype.xpath = function() {
     var elt = this.node(),
         path;
     if (elt && elt.id) {

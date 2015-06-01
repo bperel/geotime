@@ -255,7 +255,7 @@ function loadTerritoryMap() {
 								setSelectedProjection(incompleteMapInfo.projection);
 								dragmove.call(svgMap.node(), svgMap.datum());
 
-								resizeExternalMap(width * maxExternalMapSizePercentage / 100, mapHeight  * maxExternalMapSizePercentage / 100);
+								resizeExternalMap();
 								centerExternalMap();
 
 								if (incompleteMapInfo.center) {
@@ -264,7 +264,6 @@ function loadTerritoryMap() {
                                     activateHelperNextStep(true);
 								}
 								else {
-									resizeExternalMap();
                                     activateHelperNextStep();
 
                                     //addCalibrationMarker("fgMap", {x: 97, y: 79});
