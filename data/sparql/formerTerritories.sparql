@@ -7,6 +7,7 @@ SELECT DISTINCT ?name (coalesce(?date1_precise, ?date1) as ?date1) (coalesce(?da
     LANG(?name)='en' AND
      (  ?subject = <http://dbpedia.org/resource/Category:Former_countries_in_Europe>
      OR ?subject = <http://dbpedia.org/resource/Category:Former_empires_of_Europe>
+     OR ?subject = <http://dbpedia.org/resource/Category:Former_empires>
      OR ?subject = <http://dbpedia.org/resource/Category:Former_republics>
      )
   )
