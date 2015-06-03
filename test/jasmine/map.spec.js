@@ -69,7 +69,7 @@ describe('Map tests', function() {
 
             spyOn(d3, 'xml').and.callFake(function(path, mime, callback) {
                 callback(( new window.DOMParser() ).parseFromString(
-                    '<svg width="110" height="60" id="simple" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'
+                    '<svg width="110" height="60" id="simple" xmlns="http://www.w3.org/2000/svg">'
                         +'<rect x="10" y="10" height="50" width="100" style="stroke:#ff0000; fill: #0000ff"/>'
                     +'</svg>',
                     mime)

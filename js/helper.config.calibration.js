@@ -153,7 +153,7 @@ function repositionCalibrationMarkers() {
 }
 
 function positionCalibrationMarker(d) {
-	if (d.coordinates.lng) {
+	if (d.coordinates.lng !== undefined) {
 		var xyCoordinates = projection([d.coordinates.lng, d.coordinates.lat]);
 		d.coordinates.x = xyCoordinates[0];
 		d.coordinates.y = xyCoordinates[1];

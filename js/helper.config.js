@@ -57,7 +57,7 @@ function loadHelperConfig() {
 // Step 1
 function enableCalibrationPointSelection() {
 	svg.on('click', function() {
-		if (bgMapDragState === 'inactive') {
+		if (bgMapDragState !== 'drag') {
 			addCalibrationPoint('bgMap', d3.event);
 		}
 	});
