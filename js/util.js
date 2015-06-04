@@ -38,3 +38,8 @@ d3.selection.prototype.styleIntWithoutPx = function(property) {
     var value = this.style(property);
     return value && parseInt(value.replace(/px$/,''));
 };
+
+Number.prototype.round10pow = function(p) {
+    p = p || 0;
+    return Math.round(this * Math.pow(10, p)) / Math.pow(10, p);
+};

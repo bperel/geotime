@@ -41,8 +41,8 @@ function calibrateMapCenter() {
 
     function getDirections(bgMapFirstPoint, fgMapFirstPoint) {
         return {
-            x: bgMapFirstPoint.x - (fgMapFirstPoint.x + externalMapOffsetToCenter[0]) < 0 ? -1:  1,
-            y: bgMapFirstPoint.y - (fgMapFirstPoint.y + externalMapOffsetToCenter[1]) < 0 ? 1 : -1
+            x: bgMapFirstPoint.x - (fgMapFirstPoint.x + externalMapOffsetToCenter.x) < 0 ? -1:  1,
+            y: bgMapFirstPoint.y - (fgMapFirstPoint.y + externalMapOffsetToCenter.y) < 0 ? 1 : -1
         };
     }
 
@@ -155,8 +155,8 @@ function repositionCalibrationMarkers() {
 function positionCalibrationMarker(d) {
 	if (d.coordinates.lng !== undefined) {
 		var xyCoordinates = projection([d.coordinates.lng, d.coordinates.lat]);
-		d.coordinates.x = xyCoordinates[0];
-		d.coordinates.y = xyCoordinates[1];
+		d.coordinates.x = xyCoordinates[0].round10pow(6);
+		d.coordinates.y = xyCoordinates[1].round10pow(6);
 	}
 	d.coordinates.x -= markerRadius;
 	d.coordinates.y -= markerRadius;

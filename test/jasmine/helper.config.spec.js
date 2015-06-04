@@ -44,6 +44,13 @@ describe('Calibration tests', function() {
                 mime)
             );
         });
+
+        d3.select('body').append('div').html(
+            '<br />' +
+            '<span id="calibrationPointsLength">0</span>&nbsp;<label for="calibrationPointsLength">selected points.</label>' +
+            '<span id="calibrationPoints"></span>'
+        );
+
     });
 
     afterEach(function() {
@@ -54,23 +61,44 @@ describe('Calibration tests', function() {
     describe('Adding calibration points', function() {
         it('should add a calibration point when clicking on a map', function() {
             var markerRadius = 9;
-            var bgMapOffset = {x: 200, y: 0};
 
             loadTerritoryMap();
 
+            var bgMapOffset = {x: 200, y: 0};
+            var fgMapOffset = svgMap.mapOffset();
+
+            expect(d3.select('#calibrationPoints').select('.calibrationPoint').size()).toEqual(0);
             expect(calibrationPoints.length).toEqual(0);
             expect(markersSvg.selectAll('g.marker-group use').size()).toEqual(0);
 
             enableCalibrationPointSelection();
 
+            // Bg point
             var clickedPoint = {x: 480, y: 250};
             d3.event = {x: clickedPoint.x + bgMapOffset.x, y: clickedPoint.y + bgMapOffset.y};
             svg.on('click')();
 
             expect(calibrationPoints.length).toEqual(1);
             expect(calibrationPoints[0].bgMap).toExist();
-            expect(Math.abs(calibrationPoints[0].bgMap.x - (clickedPoint.x - markerRadius))).toBeLessThan(0.001);
-            expect(Math.abs(calibrationPoints[0].bgMap.y - (clickedPoint.y - markerRadius))).toBeLessThan(0.001);
+            expect(calibrationPoints[0].fgMap).not.toExist();
+            expect(calibrationPoints[0].bgMap.x).toEqual(clickedPoint.x - markerRadius);
+            expect(calibrationPoints[0].bgMap.y).toEqual(clickedPoint.y - markerRadius);
+
+            expect(d3.select('#calibrationPoints').select('.calibrationPoint').size()).toEqual(1);
+            expect(markersSvg.selectAll('g.marker-group use').size()).toEqual(1);
+
+            // Fg point
+            clickedPoint = {x: 55, y: 30};
+            d3.event = {x: clickedPoint.x + fgMapOffset.x, y: clickedPoint.y + fgMapOffset.y};
+            svgMap.on('click')();
+
+            expect(calibrationPoints.length).toEqual(1);
+            expect(calibrationPoints[0].fgMap).toExist();
+            expect(calibrationPoints[0].fgMap.x).toEqual(clickedPoint.x - markerRadius);
+            expect(calibrationPoints[0].fgMap.y).toEqual(clickedPoint.y - markerRadius);
+
+            expect(d3.select('#calibrationPoints').select('.calibrationPoint').size()).toEqual(1);
+            expect(markersSvg.selectAll('g.marker-group use').size()).toEqual(2);
 
         });
     });

@@ -110,7 +110,7 @@ function bgMapDragMove(d) {
 function dragmove(d) {
 	d.x += d3.event ? d3.event.dx : 0;
 	d.y += d3.event ? d3.event.dy : 0;
-	loadExternalMapPosition([d.x, d.y]);
+	loadExternalMapPosition(d);
 }
 
 function initMapPlaceHolders(callback) {
@@ -327,10 +327,10 @@ function validateTerritory(data) {
 }
 
 function getExternalMapOffsetToCenter() {
-    return [
-        (svg.styleIntWithoutPx("width") - svgMap.styleIntWithoutPx("width")) / 2,
-        (svg.styleIntWithoutPx("height") - svgMap.styleIntWithoutPx("height")) / 2
-    ];
+    return {
+        x: (svg.styleIntWithoutPx("width") - svgMap.styleIntWithoutPx("width")) / 2,
+        y: (svg.styleIntWithoutPx("height") - svgMap.styleIntWithoutPx("height")) / 2
+    };
 }
 
 function centerExternalMap() {
@@ -341,16 +341,16 @@ function centerExternalMap() {
 
 function loadExternalMapPosition(projectedLeftTop) {
 	svgMap.datum(function(d) {
-		d.x = projectedLeftTop[0];
-		d.y = projectedLeftTop[1];
+		d.x = projectedLeftTop.x;
+		d.y = projectedLeftTop.y;
 		return d;
 	});
 	d3.selectAll("#externalSvg, #resizeHandle")
-		.style("margin-left", projectedLeftTop[0]+"px")
-		.style("margin-top",+ projectedLeftTop[1] +"px");
+		.style("margin-left", projectedLeftTop.x+"px")
+		.style("margin-top",+ projectedLeftTop.y +"px");
 
 	markersSvg.selectAll("g.fgMap")
-		.attr("transform", "translate("+projectedLeftTop.join(" ")+")");
+		.attr("transform", "translate("+[projectedLeftTop.x, projectedLeftTop.y].join(" ")+")");
 }
 
 function resizeExternalMap(width, height) {

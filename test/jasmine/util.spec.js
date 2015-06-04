@@ -2,13 +2,13 @@ describe('Util tests', function() {
 
     describe('styleIntWithoutPx', function() {
         it('should return an integer', function() {
-            d3.select('body').append('div').style('height', '15px');
-            expect(d3.select('body > div').styleIntWithoutPx('height')).toEqual(15);
+            d3.select('body').append('div').attr('id', 'styleGetterTest').style('height', '15px');
+            expect(d3.select('#styleGetterTest').styleIntWithoutPx('height')).toEqual(15);
         });
 
         it('should return null if no property is given', function() {
-            d3.select('body').append('div').style('height', '15px');
-            expect(d3.select('body > div').styleIntWithoutPx()).toEqual(null);
+            d3.select('body').append('div').attr('id', 'styleGetterTest').style('height', '15px');
+            expect(d3.select('#styleGetterTest').styleIntWithoutPx()).toEqual(null);
         });
     });
 
@@ -45,6 +45,15 @@ describe('Util tests', function() {
             var pathCoordinates = d3.select('#myPath').getPathCoordinates();
             expect(pathCoordinates[0]).toEqual([NaN, NaN]);
             expect(pathCoordinates[pathCoordinates.length-1]).toEqual([NaN, NaN]);
+        });
+    });
+
+    describe('round10pow', function() {
+        it('should round a number using 2 decimals', function() {
+            expect((123.456).round10pow(2)).toEqual(123.46);
+        });
+        it('should round a number using 0 decimals as default', function() {
+            expect((123.456).round10pow()).toEqual(123);
         });
     })
 });

@@ -88,8 +88,8 @@ function addCalibrationPoint(mapType, clickedPoint) {
 	var coordinates = clickedPoint;
 	if (mapType === 'bgMap') {
 		var latLngCoordinates = projection.invert([clickedPoint.x, clickedPoint.y]);
-		coordinates.lng = latLngCoordinates[0];
-		coordinates.lat = latLngCoordinates[1];
+		coordinates.lng = latLngCoordinates[0].round10pow(6);
+		coordinates.lat = latLngCoordinates[1].round10pow(6);
 	}
 
 	addCalibrationMarker(mapType, coordinates);
