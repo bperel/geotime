@@ -153,7 +153,8 @@ function saveMapPosition() {
             center: projection.center(),
             rotation: projection.rotate(),
             scale: projection.scale(),
-            projection: getSelectedProjection()
+            projection: getSelectedProjection(),
+            calibrationPoints: calibrationPoints.map(removeBgMapProjectedCoordinates)
         };
         return d;
     };

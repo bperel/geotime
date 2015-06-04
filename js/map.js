@@ -261,20 +261,18 @@ function loadTerritoryMap() {
 								if (incompleteMapInfo.center) {
 									applyProjection(incompleteMapInfo.projection, incompleteMapInfo.center, incompleteMapInfo.scale, incompleteMapInfo.rotation);
                                     helper.datum().activeStep = 2;
-                                    activateHelperNextStep(true);
+                                    activateHelperNextStep(null, true);
 								}
 								else {
                                     activateHelperNextStep();
 
-                                    //addCalibrationMarker("fgMap", {x: 97, y: 79});
-                                    //addCalibrationMarker("bgMap", {lng: -4.574263084142379, lat: 48.56731828363343});
-                                    //addCalibrationMarker("fgMap", {x: 603, y: 131});
-                                    //addCalibrationMarker("bgMap", {lng: 41.75346720786418, lat: 42.013724719120766});
-                                    //addCalibrationMarker("fgMap", {x: 366, y: 368});
-                                    //addCalibrationMarker("bgMap", {lng: 18.99885762981149, lat: 30.292211191787867});
-                                    //addCalibrationMarker("fgMap", {x: 548, y: 342});
-                                    //addCalibrationMarker("bgMap", {lng: 32.422440258590775, lat: 29.796239043857653});
-
+                                    if (incompleteMapInfo.calibrationPoints) {
+                                        for (var i=0; i<incompleteMapInfo.calibrationPoints.length;i++) {
+                                            var calibrationPoint = incompleteMapInfo.calibrationPoints[i];
+                                            addCalibrationMarker("fgMap", calibrationPoint.fgPoint);
+                                            addCalibrationMarker("bgMap", calibrationPoint.bgPoint);
+                                        }
+                                    }
                                     showCalibrationPoints();
 								}
 							});
@@ -295,7 +293,8 @@ function validateMapLocation(mapData) {
             mapProjection: mapData.projection,
             mapRotation: mapData.rotation,
             mapCenter: mapData.center,
-            mapScale: mapData.scale
+            mapScale: mapData.scale,
+            calibrationPoints: mapData.calibrationPoints
         },
         function(error) {
             if (error) {

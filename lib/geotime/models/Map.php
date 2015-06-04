@@ -22,6 +22,7 @@ class Map extends Model {
         'rotation' => array('type' => 'array'),
         'center' => array('type' => 'array'),
         'scale' => array('type' => 'int'),
+        'calibrationPoints' => array('model' => 'geotime\models\CalibrationPoint', 'type' => 'embeds')
     );
 
     // @codeCoverageIgnoreStart
@@ -121,6 +122,20 @@ class Map extends Model {
      */
     public function setScale($scale) {
         $this->__setter('scale', $scale);
+    }
+
+    /**
+     * @return \Purekid\Mongodm\Collection|CalibrationPoint[]
+     */
+    public function getCalibrationPoints() {
+        return $this->__getter('calibrationPoints');
+    }
+
+    /**
+     * @param CalibrationPoint[] $calibrationPoints
+     */
+    public function setCalibrationPoints($calibrationPoints) {
+        $this->__setter('calibrationPoints', $calibrationPoints);
     }
 
     // @codeCoverageIgnoreEnd

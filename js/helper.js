@@ -31,7 +31,7 @@ function initHelper(mapFileName, helperStepsData) {
 	helperSteps = helper.select('ul').selectAll('.helperStep');
 }
 
-function activateHelperNextStep(skipUnloadAction) {
+function activateHelperNextStep(stepElement, skipUnloadAction) {
 	if (helper.datum().activeStep > 0 && !skipUnloadAction) {
 		helperSteps
 			.filter(isActiveStepFilter)

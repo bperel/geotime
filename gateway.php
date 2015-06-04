@@ -30,7 +30,8 @@ elseif (isset($_POST['locateMap'])) {
     $mapRotation = $_POST['mapRotation'];
     $mapCenter = $_POST['mapCenter'];
     $mapScale = $_POST['mapScale'];
-    Geotime::updateMap($mapId, $mapProjection, $mapRotation, $mapCenter, $mapScale);
+    $calibrationPoints = $_POST['calibrationPoints'];
+    Geotime::updateMap($mapId, $mapProjection, $mapRotation, $mapCenter, $mapScale, $calibrationPoints);
 }
 elseif (isset($_POST['addTerritory'])) {
     $referencedTerritoryId = $_POST['territoryId'];

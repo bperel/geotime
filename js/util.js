@@ -31,6 +31,12 @@ function flattenArrayOfObjects(array) {
     return obj;
 }
 
+function removeBgMapProjectedCoordinates(calibrationPoint) {
+    delete calibrationPoint.bgMap.x;
+    delete calibrationPoint.bgMap.y;
+    return calibrationPoint;
+}
+
 d3.selection.prototype.styleIntWithoutPx = function(property) {
     if (!property) {
         return null;
