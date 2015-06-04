@@ -58,47 +58,58 @@ describe('Calibration tests', function() {
         svgMap = null;
     });
 
+    d3.selection.prototype.clickOnMap = function(clickedPoint) {
+        var offset = this === svg ? {x: 200, y: 0} : svgMap.mapOffset();
+
+        d3.event = {x: clickedPoint.x + offset.x, y: clickedPoint.y + offset.y};
+        this.on('click')();
+
+        return this;
+    };
+
     describe('Adding calibration points', function() {
         it('should add a calibration point when clicking on a map', function() {
             var markerRadius = 9;
 
             loadTerritoryMap();
 
-            var bgMapOffset = {x: 200, y: 0};
-            var fgMapOffset = svgMap.mapOffset();
-
-            expect(d3.select('#calibrationPoints').select('.calibrationPoint').size()).toEqual(0);
-            expect(calibrationPoints.length).toEqual(0);
-            expect(markersSvg.selectAll('g.marker-group use').size()).toEqual(0);
+            expect(d3.select('#calibrationPoints').select('.calibrationPoint').size()).toBe(0);
+            expect(calibrationPoints.length).toBe(0);
+            expect(markersSvg.selectAll('g.marker-group use').size()).toBe(0);
 
             enableCalibrationPointSelection();
 
             // Bg point
-            var clickedPoint = {x: 480, y: 250};
-            d3.event = {x: clickedPoint.x + bgMapOffset.x, y: clickedPoint.y + bgMapOffset.y};
-            svg.on('click')();
+            var clickedPoint = {x: width/2, y: mapHeight/2 +10};
+            svg.clickOnMap(clickedPoint);
 
-            expect(calibrationPoints.length).toEqual(1);
+            expect(calibrationPoints.length).toBe(1);
             expect(calibrationPoints[0].bgMap).toExist();
             expect(calibrationPoints[0].fgMap).not.toExist();
-            expect(calibrationPoints[0].bgMap.x).toEqual(clickedPoint.x - markerRadius);
-            expect(calibrationPoints[0].bgMap.y).toEqual(clickedPoint.y - markerRadius);
+            expect(calibrationPoints[0].bgMap.x).toBe(clickedPoint.x - markerRadius);
+            expect(calibrationPoints[0].bgMap.y).toBe(clickedPoint.y - markerRadius);
+            // Longitude and latitude are equal to 0 because we clicked on the middle of the map
+            expect(calibrationPoints[0].bgMap.lng).toBe(0);
+            expect(calibrationPoints[0].bgMap.lat).toBe(0);
 
-            expect(d3.select('#calibrationPoints').select('.calibrationPoint').size()).toEqual(1);
-            expect(markersSvg.selectAll('g.marker-group use').size()).toEqual(1);
+            expect(d3.select('#calibrationPoints').selectAll('.calibrationPoint').size()).toBe(1);
+            expect(markersSvg.selectAll('g.marker-group use').size()).toBe(1);
+
+            expect(d3.select('#calibrationPoints').select('.calibrationPoint').text()).toStartWith(
+                'bg : '+JSON.stringify({x: calibrationPoints[0].bgMap.x, y: calibrationPoints[0].bgMap.y, lng: 0, lat: 0})
+            );
 
             // Fg point
             clickedPoint = {x: 55, y: 30};
-            d3.event = {x: clickedPoint.x + fgMapOffset.x, y: clickedPoint.y + fgMapOffset.y};
-            svgMap.on('click')();
+            svgMap.clickOnMap(clickedPoint);
 
-            expect(calibrationPoints.length).toEqual(1);
+            expect(calibrationPoints.length).toBe(1);
             expect(calibrationPoints[0].fgMap).toExist();
-            expect(calibrationPoints[0].fgMap.x).toEqual(clickedPoint.x - markerRadius);
-            expect(calibrationPoints[0].fgMap.y).toEqual(clickedPoint.y - markerRadius);
+            expect(calibrationPoints[0].fgMap.x).toBe(clickedPoint.x - markerRadius);
+            expect(calibrationPoints[0].fgMap.y).toBe(clickedPoint.y - markerRadius);
 
-            expect(d3.select('#calibrationPoints').select('.calibrationPoint').size()).toEqual(1);
-            expect(markersSvg.selectAll('g.marker-group use').size()).toEqual(2);
+            expect(d3.select('#calibrationPoints').selectAll('.calibrationPoint').size()).toBe(1);
+            expect(markersSvg.selectAll('g.marker-group use').size()).toBe(2);
 
         });
     });
