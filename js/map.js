@@ -15,6 +15,7 @@ var dragMode = 'pan';
 var bgMapDragState;
 
 var calibrationPoints = [];
+var locatedTerritories = [];
 
 var projection,
 	path = d3.geo.path(),
@@ -258,6 +259,10 @@ function loadTerritoryMap() {
 								resizeExternalMap();
 								centerExternalMap();
 
+                                locatedTerritories = incompleteMapInfo.territories.filter(function(d) {
+                                    return d.referencedTerritory && d.area > 0;
+                                });
+
 								if (incompleteMapInfo.center) {
 									applyProjection(incompleteMapInfo.projection, incompleteMapInfo.center, incompleteMapInfo.scale, incompleteMapInfo.rotation);
                                     helper.datum().activeStep = 2;
@@ -429,6 +434,7 @@ function onHoveredTerritoryClick() {
 		selectedTerritory.classed("selected", true);
 	}
 	updateTerritoryId();
+    d3.select('#currentTerritory').classed('hidden', false);
 }
 
 function dragresizestarted() {
