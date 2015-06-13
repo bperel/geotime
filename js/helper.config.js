@@ -28,7 +28,7 @@ function loadHelperConfig() {
 			step: 2, content: ['If necessary, move the superimposed map so that it corresponds to the background borders.'],
 			onLoad: [enableMapDragResize],
 			dataUpdate: saveMapPosition,
-			onUnload: [disableMapDragResize, saveMapLocation],
+			onUnload: [disableMapDragResize, persistMapLocation],
 			buttons: ['done', 'skip', 'cancel']
 		}, {
 			step: 3, content: ['Locate territories.',
@@ -39,24 +39,15 @@ function loadHelperConfig() {
                                '<br /><div id="currentTerritory" class="hidden">' +
                                '<table><tr><td><label for="territoryName">Name :</label></td>' +
                                '<td><input type="text" id="territoryName" /></td></tr></table>' +
+                               '<br />had these borders ' +
+                               '<label for="territoryPeriodStart">from </label><input type="number" id="territoryPeriodStart" />' +
+                               '<label for="territoryPeriodEnd"  > to  </label><input type="number" id="territoryPeriodEnd" />' +
                                '<input type="button" id="addTerritory" class="validate" value="Add territory"/></div>'],
 			onLoad: [enableTerritorySelection,initTerritoryAutocomplete,showLocatedTerritories],
-			dataUpdate: saveTerritoryPosition, validate: checkSelectedTerritory,
-			onUnload: [disableTerritorySelection],
+            validate: checkSelectedTerritory,
+            dataUpdate: saveTerritoriesPosition,
+			onUnload: [disableTerritorySelection, persistTerritoriesPosition],
 			buttons: ['done', 'skip', 'cancel']
-		}, {
-			step: 4, content: ['<label for="territoryName">Type in its name</label>',
-							   '<input type="text" id="territoryName" />'],
-			onLoad: [],
-			dataUpdate: saveTerritoryName,
-			buttons: ['done', 'skip', 'cancel']
-		}, {
-			step: 5, content: ['During what period did this territory have these borders ?<br />',
-							   '<label for="territoryPeriodStart">From </label><input type="number" id="territoryPeriodStart" />'
-							 + '<label for="territoryPeriodEnd"  > to  </label><input type="number" id="territoryPeriodEnd" />'],
-			dataUpdate: saveTerritoryPeriod,
-			onUnload: [saveHelperData],
-			buttons: ['done', 'cancel']
 		}
 	];
 }
@@ -174,9 +165,8 @@ function disableMapDragResize() {
 		.classed("hidden", true);
 }
 
-function saveMapLocation() {
-    var mapData = helperSteps.data().filter(function(d) { return d.step === 2; })[0].map;
-    validateMapLocation(mapData);
+function persistMapLocation() {
+    validateMapLocation(getHelperStepData(2).map);
 }
 
 // Step 3
@@ -191,6 +181,11 @@ function enableTerritorySelection() {
 
     d3.select('#addTerritory').on('click', function() {
         locatedTerritories.push({
+            element: selectedTerritory,
+            period: {
+                start: d3.select('#territoryPeriodStart').node().value,
+                end: d3.select('#territoryPeriodEnd').node().value
+            },
             referencedTerritory: {
                 id: territoryName.datum().territoryId,
                 name: territoryName.datum().territoryName
@@ -198,6 +193,17 @@ function enableTerritorySelection() {
         });
         showLocatedTerritories();
     });
+}
+
+function initTerritoryAutocomplete() {
+    territoryName = d3.select('#territoryName');
+    territoryName.node().focus();
+
+    autocomplete(d3.select('#territoryName').node())
+        .dataField("name")
+        .width(960)
+        .height(500)
+        .render();
 }
 
 function disableTerritorySelection() {
@@ -253,51 +259,19 @@ function checkSelectedTerritory() {
 	return isSelectedTerritory;
 }
 
-function saveTerritoryPosition() {
-	var selectedTerritory = svgMap.select('path.selected');
+function saveTerritoriesPosition() {
 	return function(d) {
-		d.territory = {
-			coordinates: selectedTerritory.getPathCoordinates(),
-			xpath: selectedTerritory.xpath()
-		};
+		d.territories = locatedTerritories.map(function(locatedTerritory) {
+            locatedTerritory.xpath = locatedTerritory.element.xpath();
+            locatedTerritory.coordinates = locatedTerritory.element.getPathCoordinates();
+            delete locatedTerritory.element;
+
+            return locatedTerritory;
+        });
 		return d;
 	};
 }
 
-// Step 4
-function initTerritoryAutocomplete() {
-	territoryName = d3.select('#territoryName');
-	territoryName.node().focus();
-
-	autocomplete(d3.select('#territoryName').node())
-		.dataField("name")
-		.width(960)
-		.height(500)
-		.render();
-}
-
-function saveTerritoryName() {
-	return function(d) {
-		d.territory = {
-			id: territoryName.datum().territoryId
-		};
-		return d;
-	};
-}
-
-// Step 5
-function saveTerritoryPeriod() {
-	return function(d) {
-		d.territory = {
-			period: {
-				start: d3.select('#territoryPeriodStart').node().value,
-				end: d3.select('#territoryPeriodEnd').node().value
-			}
-		};
-		return d;
-	};
-}
-
-function saveHelperData() {
-	validateTerritory(flattenArrayOfObjects(helperSteps.data()));
+function persistTerritoriesPosition() {
+    validateTerritories(svgMap.datum().id, getHelperStepData().territories);
 }

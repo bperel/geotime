@@ -81,7 +81,7 @@ class Import {
 
                 // The map image couldn't be retrieved => the Map object that we started to fill and its references are deleted
                 if (is_null($imageMapUrlAndUploadDate)) {
-                    $currentMap->deleteReferences();
+                    $currentMap->deleteTerritories();
                 }
                 else {
                     $imageMapUrl = $imageMapUrlAndUploadDate['url'];

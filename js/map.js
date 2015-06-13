@@ -260,7 +260,7 @@ function loadTerritoryMap() {
 								centerExternalMap();
 
                                 locatedTerritories = incompleteMapInfo.territories.filter(function(d) {
-                                    return d.referencedTerritory && d.area > 0;
+                                    return d.referencedTerritory;
                                 });
 
 								if (incompleteMapInfo.center) {
@@ -309,16 +309,14 @@ function validateMapLocation(mapData) {
     );
 }
 
-function validateTerritory(data) {
+function validateTerritories(mapId, territoriesData) {
 	ajaxPost(
 		{
-			addTerritory: 1,
-			territoryId: data.territory.id,
-			territoryPeriodStart: data.territory.period.start,
-			territoryPeriodEnd: data.territory.period.end,
-			xpath: data.territory.xpath,
-			coordinates: data.territory.coordinates
-		},
+			addTerritories: 1,
+			mapId: mapId,
+			territories: territoriesData
+
+        },
 		function(error) {
 			if (error) {
 				alert(error);

@@ -144,6 +144,10 @@ class Territory extends Model {
         $this->__setter('referencedTerritory', $referencedTerritory);
     }
 
+    public function loadReferencedTerritory() {
+        $this->setReferencedTerritory($this->getReferencedTerritory());
+    }
+
     /**
      * @return int
      */
