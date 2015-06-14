@@ -260,7 +260,7 @@ function loadTerritoryMap() {
 								centerExternalMap();
 
                                 locatedTerritories = incompleteMapInfo.territories.filter(function(d) {
-                                    return d.referencedTerritory;
+                                    return d.referencedTerritory && d.area;
                                 });
 
 								if (incompleteMapInfo.center) {

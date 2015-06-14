@@ -222,6 +222,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($coordinates, $createdTerritory->getPolygon());
         $this->assertEquals(new \MongoDate(strtotime($territoryPeriodStart)), $createdTerritory->getPeriod()->getStart());
         $this->assertEquals(new \MongoDate(strtotime($territoryPeriodEnd)), $createdTerritory->getPeriod()->getEnd());
+        $this->assertGreaterThan(0, $createdTerritory->getArea());
 
         /** @var Map $mapWithTerritory */
         $mapWithTerritory = Map::id($mapId);
@@ -260,6 +261,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($coordinates, $territoryWithReference->getPolygon());
         $this->assertEquals(new \MongoDate(strtotime($territoryPeriodStart)), $territoryWithReference->getPeriod()->getStart());
         $this->assertEquals(new \MongoDate(strtotime($territoryPeriodEnd)), $territoryWithReference->getPeriod()->getEnd());
+        $this->assertGreaterThan(0, $territoryWithReference->getArea());
 
         /** @var Map $mapWithTerritory */
         $mapWithTerritory = Map::id($mapId);

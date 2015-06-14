@@ -202,7 +202,9 @@ class Geotime {
             return null;
         }
 
-        $territory = Territory::buildAndCreateWithReferencedTerritory($referencedTerritory, true, $territoryPeriodStart, $territoryPeriodEnd, $coordinates, $xpath);
+        $territory = Territory::buildAndCreateWithReferencedTerritory(
+            $referencedTerritory, true, $territoryPeriodStart, $territoryPeriodEnd, array(array($coordinates)), $xpath
+        );
         $map->addTerritory($territory);
         $map->save();
         return $coordinates;
