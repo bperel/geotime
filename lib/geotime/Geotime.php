@@ -2,6 +2,7 @@
 
 namespace geotime;
 
+use geotime\models\CalibrationPoint;
 use geotime\models\CriteriaGroup;
 use geotime\models\Map;
 use geotime\models\Period;
@@ -144,9 +145,10 @@ class Geotime {
      * @param $mapRotation float[]|null
      * @param $mapCenter string[]|null
      * @param $mapScale int|null
+     * @param $calibrationPoints string[]
      * @return Map|null
      */
-    public static function updateMap($mapId, $mapProjection = null, $mapRotation = null, $mapCenter = null, $mapScale = null) {
+    public static function updateMap($mapId, $mapProjection = null, $mapRotation = null, $mapCenter = null, $mapScale = null, $calibrationPoints = null) {
         /** @var Map $map */
         $map = Map::one(array('_id' => new \MongoId($mapId)));
         if (is_null($map)) {
@@ -170,6 +172,12 @@ class Geotime {
             }
             if (!empty($mapScale)) {
                 $map->setScale($mapScale);
+            }
+            if (!empty($calibrationPoints)) {
+                array_walk($calibrationPoints, function (&$calibrationPoint) {
+                    $calibrationPoint = CalibrationPoint::generateFromStrings(json_decode(json_encode($calibrationPoint)));
+                });
+                $map->setCalibrationPoints($calibrationPoints);
             }
             if (!empty($mapProjection) && !empty($mapCenter) && !empty($mapScale)) {
                 $map->save();
