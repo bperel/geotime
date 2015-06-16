@@ -56,6 +56,7 @@ describe('Calibration tests', function() {
     afterEach(function() {
         jasmine.Ajax.uninstall();
         svgMap = null;
+        calibrationPoints = [];
     });
 
     d3.selection.prototype.clickOnMap = function(clickedPoint) {
@@ -67,13 +68,15 @@ describe('Calibration tests', function() {
         return this;
     };
 
-    describe('Adding calibration points', function() {
+    describe('Adding and removing calibration points', function() {
         it('should add a calibration point when clicking on a map', function() {
             var markerRadius = 9;
 
             loadTerritoryMap();
 
-            expect(d3.select('#calibrationPoints').select('.calibrationPoint').size()).toBe(0);
+            var calibrationPointsTexts = d3.select('#calibrationPoints').selectAll('.calibrationPoint');
+
+            expect(calibrationPointsTexts.size()).toBe(0);
             expect(calibrationPoints.length).toBe(0);
             expect(markersSvg.selectAll('g.marker-group use').size()).toBe(0);
 
@@ -92,10 +95,11 @@ describe('Calibration tests', function() {
             expect(calibrationPoints[0].bgMap.lng).toBe(0);
             expect(calibrationPoints[0].bgMap.lat).toBe(0);
 
-            expect(d3.select('#calibrationPoints').selectAll('.calibrationPoint').size()).toBe(1);
+            calibrationPointsTexts = d3.select('#calibrationPoints').selectAll('.calibrationPoint');
+            expect(calibrationPointsTexts.size()).toBe(1);
             expect(markersSvg.selectAll('g.marker-group use').size()).toBe(1);
 
-            expect(d3.select('#calibrationPoints').select('.calibrationPoint').text()).toStartWith(
+            expect(calibrationPointsTexts.text()).toStartWith(
                 'bg : '+JSON.stringify({x: calibrationPoints[0].bgMap.x, y: calibrationPoints[0].bgMap.y, lng: 0, lat: 0})
             );
 
@@ -111,6 +115,20 @@ describe('Calibration tests', function() {
             expect(d3.select('#calibrationPoints').selectAll('.calibrationPoint').size()).toBe(1);
             expect(markersSvg.selectAll('g.marker-group use').size()).toBe(2);
 
+        });
+
+        it('should remove a calibration point when clicking on the "Remove point" link', function() {
+            loadTerritoryMap();
+            enableCalibrationPointSelection();
+
+            var clickedPoint = {x: width/2, y: mapHeight/2 +10};
+            svg.clickOnMap(clickedPoint);
+
+            var firstPointRemoveLink = d3.select('#calibrationPoints').select('.calibrationPoint .removeCalibrationPoint');
+            firstPointRemoveLink.on('click')(firstPointRemoveLink.datum(), 0);
+
+            expect(calibrationPoints.length).toBe(0);
+            expect(markersSvg.selectAll('g.marker-group use').size()).toBe(0);
         });
     });
 });

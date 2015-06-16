@@ -149,7 +149,10 @@ function addCalibrationMarker(type, coordinates) {
 
 function repositionCalibrationMarkers() {
 	var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
-	group.selectAll('use').each(positionCalibrationMarker);
+	group.selectAll('use').data(calibrationPoints)
+        .exit().remove();
+    group.selectAll('use').data(calibrationPoints)
+        .each(positionCalibrationMarker);
 }
 
 function positionCalibrationMarker(d) {
