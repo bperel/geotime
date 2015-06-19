@@ -4,7 +4,7 @@ var mapPadding = 200;
 var resizeHandleSize = 16;
 var maxExternalMapSizePercentage = 80;
 var svg;
-var markersSvg;
+var markersSvg = d3.selectAll('nothing');
 var hoveredTerritory;
 var selectedTerritory;
 
@@ -67,7 +67,9 @@ function drawPaths() {
 	d3.select('#projectionCenter').text(projection.center().map(function(val) { return parseInt(val*10)/10; }));
 	d3.select('#projectionRotation').text(projection.rotate().map(function(val) { return parseInt(val*10)/10; }));
 
-	repositionCalibrationMarkers();
+	if (markersSvg.size() > 0) {
+		markersSvg.repositionCalibrationMarkers();
+	}
 }
 
 function dragstarted() {
@@ -119,8 +121,6 @@ function initMapPlaceHolders(callback) {
 }
 
 function initMapArea() {
-
-	addCalibrationDefsMarkers();
 
 	svg = d3.select("#mapArea").append("svg")
 		.attr("width", width)
@@ -177,8 +177,6 @@ function initExternalSvgMap(mapFileName) {
 		svgMap = null;
 	}
 	isLoading = false;
-
-	initHelper(mapFileName, helperStepsData);
 }
 
 function loadTerritoryMapFromSvgElement(svgElement, mapFileName, mapInfo) {
@@ -236,6 +234,7 @@ function loadRandomTerritoryMap() {
 			function(error, incompleteMapInfo) {
 				if (!!incompleteMapInfo) {
 					loadTerritoryMap(incompleteMapInfo.fileName, incompleteMapInfo, loadUIConfig);
+					initHelper(incompleteMapInfo.fileName, helperStepsData);
 				}
 				isLoading = false;
 			}
@@ -244,6 +243,8 @@ function loadRandomTerritoryMap() {
 }
 
 function loadUI() {
+	addCalibrationDefsMarkers();
+
 	projectionSelection = d3.select('#projectionSelection')
 		.on('change', function () {
 			applyProjection(getSelectedProjection(), projection.center(), projection.scale(), projection.rotate());
@@ -417,9 +418,7 @@ function resizeExternalMap(width, height) {
 			return d;
 		});
 
-	resizeHandle
-		.style("left", (mapPadding + width  - resizeHandleSize)+"px")
-		.style("top",  (             height - resizeHandleSize)+"px");
+	return { width: width, height: height };
 }
 
 function onTerritoryMouseover() {
@@ -466,7 +465,11 @@ function dragresize(){
 		newHeight += d3.event.dy;
 	}
 
-	resizeExternalMap(newWidth, newHeight);
+	var widthHeight = resizeExternalMap(newWidth, newHeight);
+
+	resizeHandle
+		.style("left", (mapPadding + widthHeight.width  - resizeHandleSize)+"px")
+		.style("top",  (             widthHeight.height - resizeHandleSize)+"px");
 }
 
 d3.selection.prototype.mapOffset = function() {

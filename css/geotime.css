@@ -17,6 +17,10 @@ a {
     z-index: 2;
 }
 
+.externalSvg {
+    opacity: 0.5;
+}
+
 #loadRandomTerritoryMap {
     position: fixed;
     top: 0;

@@ -147,10 +147,12 @@ function addCalibrationMarker(type, coordinates) {
 		.each(function(d) { positionCalibrationMarker.call(this, d); });
 }
 
-function repositionCalibrationMarkers() {
-	var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
+d3.selection.prototype.repositionCalibrationMarkers = function() {
+	var group = this.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
 	group.selectAll('use').each(positionCalibrationMarker);
-}
+
+	return this;
+};
 
 function positionCalibrationMarker(d) {
 	if (d.coordinates.lng !== undefined) {
