@@ -132,43 +132,6 @@ function initMapArea() {
 		.attr("id", "bg")
 		.attr("width", width)
 		.attr("height", mapHeight);
-
-	projectionSelection = d3.select('#projectionSelection')
-		.on('change', function () {
-			applyProjection(getSelectedProjection(), projection.center(), projection.scale(), projection.rotate());
-		});
-
-	projectionSelection.selectAll('option')
-		.data([
-			{name: 'mercator'},
-			{name: 'equirectangular'},
-			{name: 'orthographic'}
-		])
-		.enter().append('option')
-		.text(function (d) {
-			return d.name;
-		});
-
-	dragAction = d3.select('#dragActionContainer')
-		.selectAll('input')
-		.data([
-			{name: 'pan', text: 'Pan on drag'},
-			{name: 'rotate', text: 'Rotate on drag'}
-		])
-		.enter().append('div').each(function (d) {
-			var wrapper = d3.select(this);
-			wrapper.append('input')
-				.attr('type', 'radio')
-				.attr('name', 'dragAction')
-				.attr('id', 'dragAction' + d.name)
-				.attr('checked', d.name === 'pan' ? 'checked' : null)
-				.on('click', function (d) {
-					dragMode = d.name;
-				});
-			wrapper.append("label")
-				.attr("for", 'dragAction' + d.name)
-				.text(d.text);
-		});
 }
 
 function getSelectedProjection() {
@@ -197,9 +160,11 @@ function showBgMap(id, data, error) {
 	}
 }
 
-function getAndShowBgMap(id, filePath) {
+function getAndShowBgMap(id, filePath, callback) {
+	callback = callback || function() {};
 	d3.json(filePath, function(error, world) {
 		showBgMap(id, world);
+		callback();
 	});
 }
 
@@ -270,7 +235,7 @@ function loadRandomTerritoryMap() {
 			{ getSvg: 1 },
 			function(error, incompleteMapInfo) {
 				if (!!incompleteMapInfo) {
-					loadTerritoryMap(incompleteMapInfo.fileName, incompleteMapInfo, initUI);
+					loadTerritoryMap(incompleteMapInfo.fileName, incompleteMapInfo, loadUIConfig);
 				}
 				isLoading = false;
 			}
@@ -278,7 +243,46 @@ function loadRandomTerritoryMap() {
 	}
 }
 
-function initUI(mapInfo) {
+function loadUI() {
+	projectionSelection = d3.select('#projectionSelection')
+		.on('change', function () {
+			applyProjection(getSelectedProjection(), projection.center(), projection.scale(), projection.rotate());
+		});
+
+	projectionSelection.selectAll('option')
+		.data([
+			{name: 'mercator'},
+			{name: 'equirectangular'},
+			{name: 'orthographic'}
+		])
+		.enter().append('option')
+		.text(function (d) {
+			return d.name;
+		});
+
+	dragAction = d3.select('#dragActionContainer')
+		.selectAll('input')
+		.data([
+			{name: 'pan', text: 'Pan on drag'},
+			{name: 'rotate', text: 'Rotate on drag'}
+		])
+		.enter().append('div').each(function (d) {
+			var wrapper = d3.select(this);
+			wrapper.append('input')
+				.attr('type', 'radio')
+				.attr('name', 'dragAction')
+				.attr('id', 'dragAction' + d.name)
+				.attr('checked', d.name === 'pan' ? 'checked' : null)
+				.on('click', function (d) {
+					dragMode = d.name;
+				});
+			wrapper.append("label")
+				.attr("for", 'dragAction' + d.name)
+				.text(d.text);
+		});
+}
+
+function loadUIConfig(mapInfo) {
 	displaySelectedProjection(mapInfo.projection);
 
 	if (mapInfo.territories) {
