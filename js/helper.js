@@ -1,4 +1,4 @@
-var helper;
+var helper = d3.select('nothing');
 var helperButtonsData = [];
 var helperSteps;
 var helperStepsData = [];

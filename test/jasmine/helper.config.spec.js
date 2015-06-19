@@ -62,7 +62,7 @@ describe('Calibration tests', function() {
         it('should add a calibration point when clicking on a map', function() {
             var markerRadius = 9;
 
-            loadTerritoryMap();
+            loadRandomTerritoryMap();
 
             var bgMapOffset = {x: 200, y: 0};
             var fgMapOffset = svgMap.mapOffset();

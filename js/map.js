@@ -175,7 +175,7 @@ function getSelectedProjection() {
 	return d3.select(projectionSelection.node().options[projectionSelection.node().selectedIndex]).datum().name;
 }
 
-function setSelectedProjection(projectionName) {
+function displaySelectedProjection(projectionName) {
 	projectionSelection.selectAll('option')
 		.attr('selected', function(d) { return d.name === projectionName ? 'selected' : null});
 }
@@ -216,77 +216,92 @@ function initExternalSvgMap(mapFileName) {
 	initHelper(mapFileName, helperStepsData);
 }
 
-function loadTerritoryMap() {
+function loadTerritoryMapFromSvgElement(svgElement, mapFileName, mapInfo) {
+	svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(svgElement, true)))
+		.attr("name", mapFileName)
+		.attr("id", "externalSvg")
+		.classed("externalSvg", true)
+		.attr("preserveAspectRatio", "xMinYMin meet");
+
+	var svgMapWidth = parseInt(svgMap.attr("width"));
+	var svgMapHeight = parseInt(svgMap.attr("height"));
+
+	svgMap
+		.datum({
+			id: mapInfo.id,
+			fileName: mapFileName,
+			x: 0,
+			y: 0,
+			width: svgMapWidth,
+			height: svgMapHeight
+		});
+
+	if (!svgMap.attr("viewBox")) {
+		svgMap.attr("viewBox", function (d) {
+			return "0 0 " + d.width + " " + d.height;
+		});
+	}
+
+	resizeExternalMap();
+	centerExternalMap();
+
+	if (mapInfo.projection) {
+		applyProjection(mapInfo.projection, mapInfo.center, mapInfo.scale, mapInfo.rotation);
+	}
+}
+
+function loadTerritoryMap(fileName, mapInfo, callback) {
+	var mapFileName = fileName;
+	if (mapFileName) {
+		if (!svgMap || svgMap.datum().fileName !== mapFileName) {
+			initExternalSvgMap(mapFileName);
+			d3.xml("cache/svg/" + mapFileName, "image/svg+xml", function (svgDocument) {
+				loadTerritoryMapFromSvgElement(svgDocument.documentElement, mapFileName, mapInfo);
+				callback(mapInfo);
+			});
+        }
+    }
+}
+
+function loadRandomTerritoryMap() {
 	if (!isLoading) {
 		isLoading = true;
 		ajaxPost(
 			{ getSvg: 1 },
 			function(error, incompleteMapInfo) {
 				if (!!incompleteMapInfo) {
-					var mapFileName = incompleteMapInfo.fileName;
-					if (mapFileName) {
-						if (!svgMap || svgMap.datum().fileName !== mapFileName) {
-							initExternalSvgMap(mapFileName);
-							d3.xml("cache/svg/" + mapFileName, "image/svg+xml", function (xml) {
-								svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
-									.attr("name", mapFileName)
-									.attr("id", "externalSvg")
-									.classed("externalSvg", true)
-									.attr("preserveAspectRatio", "xMinYMin meet");
-
-								var svgMapWidth = parseInt(svgMap.attr("width"));
-								var svgMapHeight = parseInt(svgMap.attr("height"));
-
-								svgMap
-									.datum({
-										id: incompleteMapInfo.id,
-										fileName: incompleteMapInfo.fileName,
-										x: 0,
-										y: 0,
-										width: svgMapWidth,
-										height: svgMapHeight
-									});
-
-								if (!svgMap.attr("viewBox")) {
-									svgMap.attr("viewBox", function (d) {
-										return "0 0 " + d.width + " " + d.height;
-									});
-								}
-
-								setSelectedProjection(incompleteMapInfo.projection);
-								dragmove.call(svgMap.node(), svgMap.datum());
-
-								resizeExternalMap();
-								centerExternalMap();
-
-                                locatedTerritories = incompleteMapInfo.territories.filter(function(d) {
-                                    return d.referencedTerritory && d.area;
-                                });
-
-								if (incompleteMapInfo.center) {
-									applyProjection(incompleteMapInfo.projection, incompleteMapInfo.center, incompleteMapInfo.scale, incompleteMapInfo.rotation);
-                                    helper.datum().activeStep = 2;
-                                    activateHelperNextStep(null, true);
-								}
-								else {
-                                    activateHelperNextStep();
-
-                                    if (incompleteMapInfo.calibrationPoints) {
-                                        for (var i=0; i<incompleteMapInfo.calibrationPoints.length;i++) {
-                                            var calibrationPoint = incompleteMapInfo.calibrationPoints[i];
-                                            addCalibrationMarker("fgMap", calibrationPoint.fgPoint);
-                                            addCalibrationMarker("bgMap", calibrationPoint.bgPoint);
-                                        }
-                                    }
-                                    showCalibrationPoints();
-								}
-							});
-						}
-					}
+					loadTerritoryMap(incompleteMapInfo.fileName, incompleteMapInfo, initUI);
 				}
 				isLoading = false;
 			}
 		);
+	}
+}
+
+function initUI(mapInfo) {
+	displaySelectedProjection(mapInfo.projection);
+
+	if (mapInfo.territories) {
+		locatedTerritories = mapInfo.territories.filter(function (d) {
+			return d.referencedTerritory && d.area;
+		});
+	}
+
+	if (mapInfo.center) {
+		helper.datum().activeStep = 2;
+		activateHelperNextStep(null, true);
+	}
+	else {
+		activateHelperNextStep();
+
+		if (mapInfo.calibrationPoints) {
+			for (var i = 0; i < mapInfo.calibrationPoints.length; i++) {
+				var calibrationPoint = mapInfo.calibrationPoints[i];
+				addCalibrationMarker("fgMap", calibrationPoint.fgPoint);
+				addCalibrationMarker("bgMap", calibrationPoint.bgPoint);
+			}
+		}
+		showCalibrationPoints();
 	}
 }
 

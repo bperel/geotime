@@ -17,7 +17,7 @@ a {
     z-index: 2;
 }
 
-#loadTerritoryMap {
+#loadRandomTerritoryMap {
     position: fixed;
     top: 0;
     right: 0;

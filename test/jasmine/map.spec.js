@@ -78,7 +78,7 @@ describe('Map tests', function() {
         });
 
         it('should load', function() {
-            loadTerritoryMap();
+            loadRandomTerritoryMap();
 
             var bgWidth = width;
             var bgHeight = mapHeight;
