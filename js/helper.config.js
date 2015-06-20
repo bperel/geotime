@@ -110,7 +110,8 @@ function showCalibrationPoints() {
 			.html("&nbsp;X Remove point")
 			.on('click', function(d, i) {
 				calibrationPoints.splice(i, 1);
-				showCalibrationPoints()
+				showCalibrationPoints();
+                repositionCalibrationMarkers();
 			});
 
 	calibrationPointsElements.exit().remove();

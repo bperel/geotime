@@ -148,8 +148,11 @@ function addCalibrationMarker(type, coordinates) {
 }
 
 d3.selection.prototype.repositionCalibrationMarkers = function() {
-	var group = this.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
-	group.selectAll('use').each(positionCalibrationMarker);
+	var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
+	group.selectAll('use').data(calibrationPoints)
+		.exit().remove();
+	group.selectAll('use').data(calibrationPoints)
+		.each(positionCalibrationMarker);
 
 	return this;
 };
