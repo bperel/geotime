@@ -47,17 +47,14 @@ function applyProjection(name, center, scale, rotation) {
 		.rotate(rotation || (projection ? projection.rotate() : [0, 0, 0]))
 		.precision(.01);
 
-	applyCurrentProjection();
+	if (svg) {
+		applyCurrentProjection();
+	}
 }
 
 function applyCurrentProjection() {
 	path.projection(projection);
-
 	zoom.scale(projection.scale());
-
-	svg
-		.call(bgSvgmap_drag)
-		.call(zoom);
 
 	drawPaths();
 }
@@ -156,6 +153,9 @@ function showBgMap(id, data, error) {
 				.append("path")
 				.attr("class", "subunit-boundary subunit");
 
+		svg
+			.call(bgSvgmap_drag)
+			.call(zoom);
 		applyProjection(getSelectedProjection());
 	}
 }
@@ -179,8 +179,8 @@ function initExternalSvgMap(mapFileName) {
 	isLoading = false;
 }
 
-function loadTerritoryMapFromSvgElement(svgElement, mapFileName, mapInfo) {
-	svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(svgElement, true)))
+function loadTerritoryMapFromSvgElement(mapFileName, mapInfo) {
+	svgMap
 		.attr("name", mapFileName)
 		.attr("id", "externalSvg")
 		.classed("externalSvg", true)
@@ -213,15 +213,27 @@ function loadTerritoryMapFromSvgElement(svgElement, mapFileName, mapInfo) {
 	}
 }
 
-function loadTerritoryMap(fileName, mapInfo, callback) {
+function loadTerritoryMap(fileName, mapInfo, contentFromFileSystem, callback) {
 	var mapFileName = fileName;
 	if (mapFileName) {
 		if (!svgMap || svgMap.datum().fileName !== mapFileName) {
 			initExternalSvgMap(mapFileName);
-			d3.xml("cache/svg/" + mapFileName, "image/svg+xml", function (svgDocument) {
-				loadTerritoryMapFromSvgElement(svgDocument.documentElement, mapFileName, mapInfo);
-				callback(mapInfo);
-			});
+			if (!!contentFromFileSystem) {
+				var svgWrapper = document.createElement('div');
+				svgWrapper.innerHTML = contentFromFileSystem;
+				var mapArea = d3.select("#mapArea");
+				mapArea.node().appendChild(svgWrapper);
+				svgMap = mapArea.select('svg');
+				loadTerritoryMapFromSvgElement(mapFileName, mapInfo);
+				return callback(mapInfo);
+			}
+			else {
+				d3.xml("cache/svg/" + mapFileName, "image/svg+xml", function (svgDocument) {
+					svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(svgDocument.documentElement, true)));
+					loadTerritoryMapFromSvgElement(mapFileName, mapInfo);
+					callback(mapInfo);
+				});
+			}
         }
     }
 }
@@ -233,7 +245,7 @@ function loadRandomTerritoryMap() {
 			{ getSvg: 1 },
 			function(error, incompleteMapInfo) {
 				if (!!incompleteMapInfo) {
-					loadTerritoryMap(incompleteMapInfo.fileName, incompleteMapInfo, loadUIConfig);
+					loadTerritoryMap(incompleteMapInfo.fileName, incompleteMapInfo, false, loadUIConfig);
 					initHelper(incompleteMapInfo.fileName, helperStepsData);
 				}
 				isLoading = false;
@@ -350,8 +362,8 @@ function validateTerritories(mapId, territoriesData) {
 
 function getExternalMapOffsetToCenter() {
     return {
-        x: (svg.styleIntWithoutPx("width") - svgMap.styleIntWithoutPx("width")) / 2,
-        y: (svg.styleIntWithoutPx("height") - svgMap.styleIntWithoutPx("height")) / 2
+        x: (width - svgMap.styleIntWithoutPx("width")) / 2,
+        y: (mapHeight - svgMap.styleIntWithoutPx("height")) / 2
     };
 }
 
@@ -375,50 +387,50 @@ function loadExternalMapPosition(projectedLeftTop) {
 		.attr("transform", "translate("+[projectedLeftTop.x, projectedLeftTop.y].join(" ")+")");
 }
 
-function resizeExternalMap(width, height) {
+function resizeExternalMap(forcedWidth, forcedHeight) {
 	var externalMapWidth  = parseInt(svgMap.attr("width" ));
 	var externalMapHeight = parseInt(svgMap.attr("height"));
-	if (width) {
+	if (forcedWidth) {
 		var externalMapOriginalRatio = externalMapWidth / externalMapHeight;
-		var externalMapCurrentRatio = width / height;
+		var externalMapCurrentRatio = forcedWidth / forcedHeight;
 		if (externalMapCurrentRatio > externalMapOriginalRatio) {
-			width = height * externalMapOriginalRatio;
+			forcedWidth = forcedHeight * externalMapOriginalRatio;
 		}
 		else if (externalMapCurrentRatio < externalMapOriginalRatio) {
-			height = width / externalMapOriginalRatio;
+			forcedHeight = forcedWidth / externalMapOriginalRatio;
 		}
 	}
 	else { // Auto fit
-		var bgMapWidth  = parseInt(svg.attr("width" ));
-		var bgMapHeight = parseInt(svg.attr("height"));
+		var bgMapWidth  = width;
+		var bgMapHeight = mapHeight;
 		var widthRatio = bgMapWidth / externalMapWidth;
 		var heightRatio = bgMapHeight / externalMapHeight;
 		if (widthRatio < 1 || heightRatio < 1) {
 			if (widthRatio < heightRatio) {
-				width = bgMapWidth * (maxExternalMapSizePercentage / 100);
-				height = externalMapHeight / (externalMapWidth / width);
+				forcedWidth = bgMapWidth * (maxExternalMapSizePercentage / 100);
+				forcedHeight = externalMapHeight / (externalMapWidth / forcedWidth);
 			}
 			else {
-				height = bgMapHeight * (maxExternalMapSizePercentage / 100);
-				width = externalMapWidth / (externalMapHeight / height);
+				forcedHeight = bgMapHeight * (maxExternalMapSizePercentage / 100);
+				forcedWidth = externalMapWidth / (externalMapHeight / forcedHeight);
 			}
 		}
 		else {
-			width = svgMap.datum().width;
-			height = svgMap.datum().height;
+			forcedWidth = svgMap.datum().width;
+			forcedHeight = svgMap.datum().height;
 		}
 	}
 
 	svgMap
-		.style("width",  width +"px")
-		.style("height", height+"px")
+		.style("width",  forcedWidth +"px")
+		.style("height", forcedHeight+"px")
 		.datum(function(d) {
-			d.width = width;
-			d.height = height;
+			d.width = forcedWidth;
+			d.height = forcedHeight;
 			return d;
 		});
 
-	return { width: width, height: height };
+	return { width: forcedWidth, height: forcedHeight };
 }
 
 function onTerritoryMouseover() {
