@@ -387,7 +387,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $imageInfos = $this->mock->getCommonsImageInfos('Wiki-commons.png');
 
         $this->assertNotNull($imageInfos);
-        $this->assertEquals('http://upload.wikimedia.org/wikipedia/commons/7/79/Wiki-commons.png', $imageInfos['url']);
+        $this->assertEquals('https://upload.wikimedia.org/wikipedia/commons/7/79/Wiki-commons.png', $imageInfos['url']);
         $this->assertEquals(strtotime('2006-10-02T01:19:24Z'), $imageInfos['uploadDate']->sec);
     }
 

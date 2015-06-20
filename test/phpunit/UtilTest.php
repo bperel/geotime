@@ -11,7 +11,7 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
     static $fixtures_dir_svg = "test/phpunit/_fixtures/svg/";
     static $fixtures_dir_thumbnails = "test/phpunit/_fixtures/thumbnails/";
 
-    static $wikimediaLogoLocation = "http://upload.wikimedia.org/wikipedia/commons/8/81/Wikimedia-logo.svg";
+    static $wikimediaLogoLocation = "https://upload.wikimedia.org/wikipedia/commons/8/81/Wikimedia-logo.svg";
     static $wikimediaLogoFileName = "logo.svg";
 
     static $simpleSvgFileName = "simple.svg";

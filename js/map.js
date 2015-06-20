@@ -109,8 +109,8 @@ function bgMapDragMove(d) {
 }
 
 function dragmove(d) {
-	d.x += d3.event ? d3.event.dx : 0;
-	d.y += d3.event ? d3.event.dy : 0;
+	d.x += d3.event ? d3.event.dx || 0 : 0;
+	d.y += d3.event ? d3.event.dy || 0 : 0;
 	loadExternalMapPosition(d);
 }
 

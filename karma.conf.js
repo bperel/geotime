@@ -10,7 +10,7 @@ module.exports = function(config) {
 
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-        frameworks: ['jasmine'],
+        frameworks: ['jasmine', 'jasmine-matchers'],
 
 
         // list of files / patterns to load in the browser
@@ -21,7 +21,6 @@ module.exports = function(config) {
             { pattern: 'js/vendor/d3/d3.min.js', watched: false },
             { pattern: 'js/vendor/topojson/topojson.js', watched: false },
             { pattern: 'js/vendor/jasmine/lib/jasmine-core/jasmine.js', watched: false },
-            //{ pattern: 'js/vendor/jasmine-matchers/src/*.js', watched: false },
             { pattern: 'js/vendor/jquery/dist/jquery.min.js', watched: false },
             { pattern: 'js/vendor/jasmine-jquery/lib/jasmine-jquery.js', watched: false },
             { pattern: 'test/jasmine/mock-ajax.js', watched: false },
@@ -85,6 +84,7 @@ module.exports = function(config) {
         plugins: [
             'karma-phantomjs-launcher',
             'karma-jasmine-jquery',
+            'karma-jasmine-matchers',
             'karma-jasmine',
             'karma-junit-reporter',
             'karma-coverage'
