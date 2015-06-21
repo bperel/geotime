@@ -14,6 +14,7 @@ class Util {
     public static $cache_dir_json = "cache/json/";
     public static $phantomjs_path = "bin/phantomjs";
     public static $rasterize_script_path = "js/headless/rasterize.js";
+    public static $invertpath_script_path = "js/headless/invertpath.js";
     public static $rasterize_script_success_output = "thumbnail created";
     public static $thumbnailSize = 400;
 
@@ -110,6 +111,31 @@ class Util {
             self::$log->debug($command);
             return false;
         }
+    }
+
+    /**
+     * @param $svgFileName
+     * @param $pathId
+     * @param $projectionName
+     * @param $projectionCenter
+     * @param $projectionScale
+     * @param $projectionRotation
+     * @return array|null
+     */
+    static function calculatePathCoordinates($svgFileName, $pathId, $projectionName, $projectionCenter, $projectionScale, $projectionRotation) {
+        $command = implode(' ', array(
+            self::$phantomjs_path,
+            self::$invertpath_script_path,
+            $svgFileName,
+            $pathId,
+            $projectionName,
+            implode(',',$projectionCenter),
+            $projectionScale,
+            implode(',',$projectionRotation),
+            '2>&1'
+        ));
+        $result = shell_exec($command);
+        return json_decode($result);
     }
 
     static function resizeImage($thumbnailPath, $size) {

@@ -52,7 +52,8 @@ if (system.args.length < 2) {
 					return d3.select('svg path#' + pathId).getPathCoordinates();
 				});
 			}, system.args, fs.read(svgPath));
-			console.log(pathCoordinates);
+			console.log(JSON.stringify(pathCoordinates));
+			phantom.exit(0);
 		}, 500);
     };
 

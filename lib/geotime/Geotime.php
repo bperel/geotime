@@ -182,13 +182,12 @@ class Geotime {
     /**
      * @param $mapId string
      * @param $territoryId string
-     * @param $coordinates string
      * @param $xpath string
      * @param $territoryPeriodStart string
      * @param $territoryPeriodEnd string
      * @return mixed|null
      */
-    public static function saveLocatedTerritory($mapId, $territoryId, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
+    public static function saveLocatedTerritory($mapId, $territoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
     {
         /** @var Map $map */
         $map = Map::one(array('_id' => new \MongoId($mapId)));
@@ -203,11 +202,12 @@ class Geotime {
         }
 
         $territory = Territory::buildAndCreateWithReferencedTerritory(
-            $referencedTerritory, true, $territoryPeriodStart, $territoryPeriodEnd, array(array($coordinates)), $xpath
+            $referencedTerritory, true, $territoryPeriodStart, $territoryPeriodEnd, $xpath
         );
+        $geocoordinates = $territory->calculateCoordinates($map);
+        $territory->setPolygon(array(array($geocoordinates)));
         $map->addTerritory($territory);
         $map->save();
-        return $coordinates;
     }
 
     public static function getCriteriaGroupsNumber() {
