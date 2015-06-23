@@ -124,9 +124,9 @@ class Util {
      */
     static function calculatePathCoordinates($svgFileName, $pathId, $projectionName, $projectionCenter, $projectionScale, $projectionRotation) {
         $command = implode(' ', array(
-            self::$phantomjs_path,
+            str_replace('/', DIRECTORY_SEPARATOR, self::$phantomjs_path),
             self::$invertpath_script_path,
-            $svgFileName,
+            self::$cache_dir_svg.$svgFileName,
             $pathId,
             $projectionName,
             implode(',',$projectionCenter),

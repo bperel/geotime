@@ -75,5 +75,15 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertFalse($success);
     }
+
+    public function testInvertPath() {
+        $old_cache_dir = Util::$cache_dir_svg;
+        Util::$cache_dir_svg = self::$fixtures_dir_svg;
+
+        $result = Util::calculatePathCoordinates('simpleMap.svg', 'simplePath', 'mercator', array(0,0,0), 500, array(0,0,0));
+        $this->assertInternalType('array', $result);
+
+        Util::$cache_dir_svg = $old_cache_dir;
+    }
 }
  

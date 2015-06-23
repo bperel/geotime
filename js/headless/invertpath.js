@@ -1,21 +1,32 @@
 var page = require('webpage').create(),
-    system = require('system'),
-    fs = require('fs'),
-    svgPath, output, size;
+	system = require('system'),
+	server = require('webserver').create(),
+	fs = require('fs'),
+	svgPath;
 
-
-if (system.args.length < 2) {
-    console.error('Invalid arguments');
-    phantom.exit(1);
+if (system.args.length < 7) {
+	console.error('Invalid arguments');
+	phantom.exit(1);
 } else {
-    svgPath = fs.workingDirectory + '/cache/svg/' + system.args[1];
-    if (!fs.isFile(svgPath)) {
-        console.log(svgPath+' does not exist');
-        phantom.exit(1);
-    }
+	svgPath = fs.workingDirectory + '/' + system.args[1];
+	if (!fs.isFile(svgPath)) {
+		console.log(svgPath + ' does not exist');
+		phantom.exit(1);
+	}
+	server.listen('127.0.0.1:8888', function (request, response) {
+		var cleanedUrl = request.url
+			.replace(/\//g, '\\')
+			.replace(/\?.*$/g, '');
+		//console.log('Requesting ' + request.url + ', loading ' + cleanedUrl);
+		var pagePath = fs.workingDirectory.replace(/\//g, '\\') + cleanedUrl;
+		response.statusCode = 200;
+		response.write(fs.read(pagePath));
+		response.close();
 
-    page.onLoadFinished = function() {
-		setTimeout(function() {
+	});
+
+	page.open('http://127.0.0.1:8888/index_headless.html', function () {
+		setTimeout(function () {
 			var pathCoordinates = page.evaluate(function (args, svgContent) {
 				var d3 = window.d3;
 
@@ -55,7 +66,5 @@ if (system.args.length < 2) {
 			console.log(JSON.stringify(pathCoordinates));
 			phantom.exit(0);
 		}, 500);
-    };
-
-    page.open('http://localhost/geotime/index_headless.html');
+	});
 }
