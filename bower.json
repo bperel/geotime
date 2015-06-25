@@ -23,10 +23,10 @@
         "jquery": "~2.1.1",
         "lightgallery": "~1.1.4",
         "modernizr": "~2.6.2",
-        "topojson": "~1.5.1"
+        "topojson": "~1.5.1",
+        "requirejs": "~2.1.15"
     },
     "devDependencies": {
-        "requirejs": "~2.1.15",
         "socket.io-client-fixed": "~1.2.1"
     }
 }

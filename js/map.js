@@ -4,7 +4,7 @@ var mapPadding = 200;
 var resizeHandleSize = 16;
 var maxExternalMapSizePercentage = 80;
 var svg;
-var markersSvg;
+var markersSvg = d3.selectAll('nothing');
 var hoveredTerritory;
 var selectedTerritory;
 
@@ -15,6 +15,7 @@ var dragMode = 'pan';
 var bgMapDragState;
 
 var calibrationPoints = [];
+var locatedTerritories = [];
 
 var projection,
 	path = d3.geo.path(),
@@ -46,17 +47,14 @@ function applyProjection(name, center, scale, rotation) {
 		.rotate(rotation || (projection ? projection.rotate() : [0, 0, 0]))
 		.precision(.01);
 
-	applyCurrentProjection();
+	if (svg) {
+		applyCurrentProjection();
+	}
 }
 
 function applyCurrentProjection() {
 	path.projection(projection);
-
 	zoom.scale(projection.scale());
-
-	svg
-		.call(bgSvgmap_drag)
-		.call(zoom);
 
 	drawPaths();
 }
@@ -66,7 +64,9 @@ function drawPaths() {
 	d3.select('#projectionCenter').text(projection.center().map(function(val) { return parseInt(val*10)/10; }));
 	d3.select('#projectionRotation').text(projection.rotate().map(function(val) { return parseInt(val*10)/10; }));
 
-	repositionCalibrationMarkers();
+	if (markersSvg.size() > 0) {
+		markersSvg.repositionCalibrationMarkers();
+	}
 }
 
 function dragstarted() {
@@ -119,8 +119,6 @@ function initMapPlaceHolders(callback) {
 
 function initMapArea() {
 
-	addCalibrationDefsMarkers();
-
 	svg = d3.select("#mapArea").append("svg")
 		.attr("width", width)
 		.attr("height", mapHeight)
@@ -131,6 +129,133 @@ function initMapArea() {
 		.attr("id", "bg")
 		.attr("width", width)
 		.attr("height", mapHeight);
+}
+
+function getSelectedProjection() {
+	return d3.select(projectionSelection.node().options[projectionSelection.node().selectedIndex]).datum().name;
+}
+
+function displaySelectedProjection(projectionName) {
+	projectionSelection.selectAll('option')
+		.attr('selected', function(d) { return d.name === projectionName ? 'selected' : null});
+}
+
+function showBgMap(id, data, error) {
+	if (error) {
+		console.error(error);
+	}
+	else {
+		svg.append("g")
+			.attr("id", id)
+			.selectAll(".subunit")
+			.data(data.features)
+			.enter()
+				.append("path")
+				.attr("class", "subunit-boundary subunit");
+
+		svg
+			.call(bgSvgmap_drag)
+			.call(zoom);
+		applyProjection(getSelectedProjection());
+	}
+}
+
+function getAndShowBgMap(id, filePath, callback) {
+	callback = callback || function() {};
+	d3.json(filePath, function(error, world) {
+		showBgMap(id, world);
+		callback();
+	});
+}
+
+var svgMap = null;
+var isLoading = false;
+
+function initExternalSvgMap(mapFileName) {
+	$('#externalSvg').remove();
+	if (svgMap) {
+		svgMap = null;
+	}
+	isLoading = false;
+}
+
+function loadTerritoryMapFromSvgElement(mapFileName, mapInfo) {
+	svgMap
+		.attr("name", mapFileName)
+		.attr("id", "externalSvg")
+		.classed("externalSvg", true)
+		.attr("preserveAspectRatio", "xMinYMin meet");
+
+	var svgMapWidth = parseInt(svgMap.attr("width"));
+	var svgMapHeight = parseInt(svgMap.attr("height"));
+
+	svgMap
+		.datum({
+			id: mapInfo.id,
+			fileName: mapFileName,
+			x: 0,
+			y: 0,
+			width: svgMapWidth,
+			height: svgMapHeight
+		});
+
+	if (!svgMap.attr("viewBox")) {
+		svgMap.attr("viewBox", function (d) {
+			return "0 0 " + d.width + " " + d.height;
+		});
+	}
+
+	resizeExternalMap();
+	centerExternalMap();
+
+	if (mapInfo.projection) {
+		applyProjection(mapInfo.projection, mapInfo.center, mapInfo.scale, mapInfo.rotation);
+	}
+}
+
+function loadTerritoryMap(fileName, mapInfo, contentFromFileSystem, callback) {
+	var mapFileName = fileName;
+	if (mapFileName) {
+		if (!svgMap || svgMap.datum().fileName !== mapFileName) {
+			initExternalSvgMap(mapFileName);
+			if (!!contentFromFileSystem) {
+				var svgWrapper = document.createElement('div');
+				svgWrapper.innerHTML = contentFromFileSystem;
+				var mapArea = d3.select("#mapArea");
+				mapArea.node().appendChild(svgWrapper);
+				svgMap = mapArea.select('svg');
+				loadTerritoryMapFromSvgElement(mapFileName, mapInfo);
+				return callback(mapInfo);
+			}
+			else {
+				d3.xml("cache/svg/" + mapFileName, "image/svg+xml", function (svgDocument) {
+					svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(svgDocument.documentElement, true)));
+					loadTerritoryMapFromSvgElement(mapFileName, mapInfo);
+					callback(mapInfo);
+				});
+			}
+        }
+    }
+}
+
+function loadRandomTerritoryMap() {
+	if (!isLoading) {
+		isLoading = true;
+		ajaxPost(
+			{ getSvg: 1 },
+			function(error, incompleteMapInfo) {
+				if (!!incompleteMapInfo) {
+					loadTerritoryMap(incompleteMapInfo.fileName, incompleteMapInfo, false, loadUIConfig);
+					initHelper(incompleteMapInfo.fileName, helperStepsData);
+				}
+				isLoading = false;
+			}
+		);
+	}
+}
+
+function loadUI() {
+	addCalibrationDefsMarkers();
 
 	projectionSelection = d3.select('#projectionSelection')
 		.on('change', function () {
@@ -170,118 +295,30 @@ function initMapArea() {
 		});
 }
 
-function getSelectedProjection() {
-	return d3.select(projectionSelection.node().options[projectionSelection.node().selectedIndex]).datum().name;
-}
+function loadUIConfig(mapInfo) {
+	displaySelectedProjection(mapInfo.projection);
 
-function setSelectedProjection(projectionName) {
-	projectionSelection.selectAll('option')
-		.attr('selected', function(d) { return d.name === projectionName ? 'selected' : null});
-}
+	if (mapInfo.territories) {
+		locatedTerritories = mapInfo.territories.filter(function (d) {
+			return d.referencedTerritory && d.area;
+		});
+	}
 
-function showBgMap(id, data, error) {
-	if (error) {
-		console.error(error);
+	if (mapInfo.center) {
+		helper.datum().activeStep = 2;
+		activateHelperNextStep(null, true);
 	}
 	else {
-		svg.append("g")
-			.attr("id", id)
-			.selectAll(".subunit")
-			.data(data.features)
-			.enter()
-				.append("path")
-				.attr("class", "subunit-boundary subunit");
+		activateHelperNextStep();
 
-		applyProjection(getSelectedProjection());
-	}
-}
-
-function getAndShowBgMap(id, filePath) {
-	d3.json(filePath, function(error, world) {
-		showBgMap(id, world);
-	});
-}
-
-var svgMap = null;
-var isLoading = false;
-
-function initExternalSvgMap(mapFileName) {
-	$('#externalSvg').remove();
-	if (svgMap) {
-		svgMap = null;
-	}
-	isLoading = false;
-
-	initHelper(mapFileName, helperStepsData);
-}
-
-function loadTerritoryMap() {
-	if (!isLoading) {
-		isLoading = true;
-		ajaxPost(
-			{ getSvg: 1 },
-			function(error, incompleteMapInfo) {
-				if (!!incompleteMapInfo) {
-					var mapFileName = incompleteMapInfo.fileName;
-					if (mapFileName) {
-						if (!svgMap || svgMap.datum().fileName !== mapFileName) {
-							initExternalSvgMap(mapFileName);
-							d3.xml("cache/svg/" + mapFileName, "image/svg+xml", function (xml) {
-								svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(xml.documentElement, true)))
-									.attr("name", mapFileName)
-									.attr("id", "externalSvg")
-									.classed("externalSvg", true)
-									.attr("preserveAspectRatio", "xMinYMin meet");
-
-								var svgMapWidth = parseInt(svgMap.attr("width"));
-								var svgMapHeight = parseInt(svgMap.attr("height"));
-
-								svgMap
-									.datum({
-										id: incompleteMapInfo.id,
-										fileName: incompleteMapInfo.fileName,
-										x: 0,
-										y: 0,
-										width: svgMapWidth,
-										height: svgMapHeight
-									});
-
-								if (!svgMap.attr("viewBox")) {
-									svgMap.attr("viewBox", function (d) {
-										return "0 0 " + d.width + " " + d.height;
-									});
-								}
-
-								setSelectedProjection(incompleteMapInfo.projection);
-								dragmove.call(svgMap.node(), svgMap.datum());
-
-								resizeExternalMap();
-								centerExternalMap();
-
-								if (incompleteMapInfo.center) {
-									applyProjection(incompleteMapInfo.projection, incompleteMapInfo.center, incompleteMapInfo.scale, incompleteMapInfo.rotation);
-                                    helper.datum().activeStep = 2;
-                                    activateHelperNextStep(null, true);
-								}
-								else {
-                                    activateHelperNextStep();
-
-                                    if (incompleteMapInfo.calibrationPoints) {
-                                        for (var i=0; i<incompleteMapInfo.calibrationPoints.length;i++) {
-                                            var calibrationPoint = incompleteMapInfo.calibrationPoints[i];
-                                            addCalibrationMarker("fgMap", calibrationPoint.fgPoint);
-                                            addCalibrationMarker("bgMap", calibrationPoint.bgPoint);
-                                        }
-                                    }
-                                    showCalibrationPoints();
-								}
-							});
-						}
-					}
-				}
-				isLoading = false;
+		if (mapInfo.calibrationPoints) {
+			for (var i = 0; i < mapInfo.calibrationPoints.length; i++) {
+				var calibrationPoint = mapInfo.calibrationPoints[i];
+				addCalibrationMarker("fgMap", calibrationPoint.fgPoint);
+				addCalibrationMarker("bgMap", calibrationPoint.bgPoint);
 			}
-		);
+		}
+		showCalibrationPoints();
 	}
 }
 
@@ -304,16 +341,14 @@ function validateMapLocation(mapData) {
     );
 }
 
-function validateTerritory(data) {
+function validateTerritories(mapId, territoriesData) {
 	ajaxPost(
 		{
-			addTerritory: 1,
-			territoryId: data.territory.id,
-			territoryPeriodStart: data.territory.period.start,
-			territoryPeriodEnd: data.territory.period.end,
-			xpath: data.territory.xpath,
-			coordinates: data.territory.coordinates
-		},
+			addTerritories: 1,
+			mapId: mapId,
+			territories: territoriesData
+
+        },
 		function(error) {
 			if (error) {
 				alert(error);
@@ -327,8 +362,8 @@ function validateTerritory(data) {
 
 function getExternalMapOffsetToCenter() {
     return {
-        x: (svg.styleIntWithoutPx("width") - svgMap.styleIntWithoutPx("width")) / 2,
-        y: (svg.styleIntWithoutPx("height") - svgMap.styleIntWithoutPx("height")) / 2
+        x: (width - svgMap.styleIntWithoutPx("width")) / 2,
+        y: (mapHeight - svgMap.styleIntWithoutPx("height")) / 2
     };
 }
 
@@ -352,52 +387,50 @@ function loadExternalMapPosition(projectedLeftTop) {
 		.attr("transform", "translate("+[projectedLeftTop.x, projectedLeftTop.y].join(" ")+")");
 }
 
-function resizeExternalMap(width, height) {
+function resizeExternalMap(forcedWidth, forcedHeight) {
 	var externalMapWidth  = parseInt(svgMap.attr("width" ));
 	var externalMapHeight = parseInt(svgMap.attr("height"));
-	if (width) {
+	if (forcedWidth) {
 		var externalMapOriginalRatio = externalMapWidth / externalMapHeight;
-		var externalMapCurrentRatio = width / height;
+		var externalMapCurrentRatio = forcedWidth / forcedHeight;
 		if (externalMapCurrentRatio > externalMapOriginalRatio) {
-			width = height * externalMapOriginalRatio;
+			forcedWidth = forcedHeight * externalMapOriginalRatio;
 		}
 		else if (externalMapCurrentRatio < externalMapOriginalRatio) {
-			height = width / externalMapOriginalRatio;
+			forcedHeight = forcedWidth / externalMapOriginalRatio;
 		}
 	}
 	else { // Auto fit
-		var bgMapWidth  = parseInt(svg.attr("width" ));
-		var bgMapHeight = parseInt(svg.attr("height"));
+		var bgMapWidth  = width;
+		var bgMapHeight = mapHeight;
 		var widthRatio = bgMapWidth / externalMapWidth;
 		var heightRatio = bgMapHeight / externalMapHeight;
 		if (widthRatio < 1 || heightRatio < 1) {
 			if (widthRatio < heightRatio) {
-				width = bgMapWidth * (maxExternalMapSizePercentage / 100);
-				height = externalMapHeight / (externalMapWidth / width);
+				forcedWidth = bgMapWidth * (maxExternalMapSizePercentage / 100);
+				forcedHeight = externalMapHeight / (externalMapWidth / forcedWidth);
 			}
 			else {
-				height = bgMapHeight * (maxExternalMapSizePercentage / 100);
-				width = externalMapWidth / (externalMapHeight / height);
+				forcedHeight = bgMapHeight * (maxExternalMapSizePercentage / 100);
+				forcedWidth = externalMapWidth / (externalMapHeight / forcedHeight);
 			}
 		}
 		else {
-			width = svgMap.datum().width;
-			height = svgMap.datum().height;
+			forcedWidth = svgMap.datum().width;
+			forcedHeight = svgMap.datum().height;
 		}
 	}
 
 	svgMap
-		.style("width",  width +"px")
-		.style("height", height+"px")
+		.style("width",  forcedWidth +"px")
+		.style("height", forcedHeight+"px")
 		.datum(function(d) {
-			d.width = width;
-			d.height = height;
+			d.width = forcedWidth;
+			d.height = forcedHeight;
 			return d;
 		});
 
-	resizeHandle
-		.style("left", (mapPadding + width  - resizeHandleSize)+"px")
-		.style("top",  (             height - resizeHandleSize)+"px");
+	return { width: forcedWidth, height: forcedHeight };
 }
 
 function onTerritoryMouseover() {
@@ -429,6 +462,7 @@ function onHoveredTerritoryClick() {
 		selectedTerritory.classed("selected", true);
 	}
 	updateTerritoryId();
+    d3.select('#currentTerritory').classed('hidden', false);
 }
 
 function dragresizestarted() {
@@ -443,7 +477,11 @@ function dragresize(){
 		newHeight += d3.event.dy;
 	}
 
-	resizeExternalMap(newWidth, newHeight);
+	var widthHeight = resizeExternalMap(newWidth, newHeight);
+
+	resizeHandle
+		.style("left", (mapPadding + widthHeight.width  - resizeHandleSize)+"px")
+		.style("top",  (             widthHeight.height - resizeHandleSize)+"px");
 }
 
 d3.selection.prototype.mapOffset = function() {

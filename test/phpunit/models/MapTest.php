@@ -47,7 +47,7 @@ class MapTest extends \PHPUnit_Framework_TestCase {
 
         $map = Map::generateAndSaveReferences($imageFileName, $date1Str, $date2Str);
         $map->save();
-        $map->deleteReferences();
+        $map->deleteTerritories();
 
         /** @var Map $map */
         $map = Map::one(array());

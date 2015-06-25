@@ -140,7 +140,7 @@ function autocomplete(parent) {
             function row_onClick(rowData) {
                 hideDropDown();
                 input
-                    .datum(function(d) { return {territoryId: rowData.id}; })
+                    .datum(function() { return {territoryId: rowData.id, territoryName: rowData.name }; })
                     .node().value= rowData[_dataField];
                 _selectedFunction(rowData);
             }

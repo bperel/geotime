@@ -68,6 +68,14 @@ class Map extends Model {
         $this->__setter('territories', $territories);
     }
 
+    public function loadTerritories() {
+        $territories = $this->getTerritories();
+        foreach($territories as $territory) {
+            $territory->loadReferencedTerritory();
+        }
+        $this->__setter('territories', $territories);
+    }
+
     /**
      * @return string
      */
@@ -163,8 +171,15 @@ class Map extends Model {
         return $map;
     }
 
-    public function deleteReferences() {
-        self::$log->debug('Deleting references of map '.$this->getFileName());
+    /**
+     * @param $territory Territory
+     */
+    public function addTerritory($territory) {
+        $this->getTerritories()->add($territory);
+    }
+
+    public function deleteTerritories() {
+        self::$log->debug('Deleting territories from map '.$this->getFileName());
 
         foreach($this->getTerritories() as $territory) {
             $territory->getPeriod()->delete();

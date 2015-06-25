@@ -17,7 +17,11 @@ a {
     z-index: 2;
 }
 
-#loadTerritoryMap {
+.externalSvg {
+    opacity: 0.5;
+}
+
+#loadRandomTerritoryMap {
     position: fixed;
     top: 0;
     right: 0;
@@ -28,7 +32,6 @@ a {
 .form-control {
     outline: 0;
     border: 1px solid #ECECEC;
-    width: 95%;
     background-color: #ffffff;
     padding: 6px;
     border-radius: 2px;

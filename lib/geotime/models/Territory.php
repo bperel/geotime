@@ -2,6 +2,7 @@
 
 namespace geotime\models;
 
+use geotime\Util;
 use Logger;
 use Purekid\Mongodm\Model;
 
@@ -44,36 +45,14 @@ class Territory extends Model {
             }
         }
 
-        return self::buildAndCreateWithReferencedTerritory($referencedTerritory,
-            false, $fieldValues['startDate'], $fieldValues['endDate']
+        return self::buildAndCreateWithReferencedTerritory($referencedTerritory, false, $fieldValues['startDate'], $fieldValues['endDate']
         );
     }
 
-    /**
-     * @param string $startDate
-     * @param string $endDate
-     * @param string $polygon
-     * @param string $previous
-     * @param string $next
-     * @internal param string $name
-     * @return Territory
-     */
-    public static function buildAndCreateReferencedTerritory($startDate = '', $endDate = '', $polygon = '', $previous = '', $next = '') {
-        return self::buildAndCreate(false, $startDate, $endDate, $polygon, null, $previous, $next);
-    }
-
-    /**
-     * @param boolean $userMade
-     * @param string $startDate
-     * @param string $endDate
-     * @param string $polygon
-     * @param string $xpath
-     * @internal param string $name
-     * @return Territory
-     */
-    private static function buildAndCreate($userMade, $startDate = '', $endDate = '', $polygon = '', $xpath = '') {
+    public static function buildAndCreateFromNEData($referencedTerritory, $coordinates) {
         $territory = new Territory();
-        return $territory->buildAndSave(null, $userMade, $startDate, $endDate, $polygon, $xpath);
+        $territory->setPolygon($coordinates);
+        return $territory->buildAndSave($referencedTerritory, false);
     }
 
     /**
@@ -81,14 +60,12 @@ class Territory extends Model {
      * @param $usermade
      * @param string $startDate
      * @param string $endDate
-     * @param string $polygon
      * @param string $xpath
      * @return Territory
      */
-    public static function buildAndCreateWithReferencedTerritory($referencedTerritory, $usermade, $startDate = '', $endDate = '',
-                                                                 $polygon = '', $xpath = '') {
+    public static function buildAndCreateWithReferencedTerritory($referencedTerritory, $usermade, $startDate = '', $endDate = '', $xpath = '') {
         $territory = new Territory();
-        return $territory->buildAndSave($referencedTerritory, $usermade, $startDate, $endDate, $polygon, $xpath);
+        return $territory->buildAndSave($referencedTerritory, $usermade, $startDate, $endDate, $xpath);
     }
 
     /**
@@ -96,18 +73,13 @@ class Territory extends Model {
      * @param $userMade boolean
      * @param $startDate string
      * @param $endDate string
-     * @param $polygon string
      * @param $xpath string
-     * @internal param string $name
      * @return Territory
      */
-    private function buildAndSave($referencedTerritory, $userMade, $startDate = '', $endDate = '', $polygon = '', $xpath = null) {
+    private function buildAndSave($referencedTerritory, $userMade, $startDate = '', $endDate = '', $xpath = null) {
         $this->setReferencedTerritory($referencedTerritory);
         if (!empty($startDate) && !empty($endDate)) {
             $this->setPeriod(Period::generate($startDate, $endDate));
-        }
-        if (!empty($polygon)) {
-            $this->setPolygon($polygon);
         }
         if (!empty($xpath)) {
             $this->setXpath($xpath);
@@ -142,6 +114,10 @@ class Territory extends Model {
     public function setReferencedTerritory($referencedTerritory)
     {
         $this->__setter('referencedTerritory', $referencedTerritory);
+    }
+
+    public function loadReferencedTerritory() {
+        $this->setReferencedTerritory($this->getReferencedTerritory());
     }
 
     /**
@@ -231,6 +207,25 @@ class Territory extends Model {
         $this->setArea($this->calculateArea());
     }
 
+    private function getElementIdFromPath() {
+        return preg_replace('#^\/\/path\[id="([^"]+)"\]$#', '$1', $this->getXpath());
+    }
+
+    /**
+     * @param Map $map
+     * @return string
+     */
+    public function calculateCoordinates($map)
+    {
+        return Util::calculatePathCoordinates(
+            $map->getFileName(),
+            $this->getElementIdFromPath(),
+            $map->getProjection(),
+            $map->getCenter(),
+            $map->getScale(),
+            $map->getRotation()
+        );
+    }
 
     /**
      * Calculate the approximate area of the polygon were it projected onto

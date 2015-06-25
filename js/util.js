@@ -13,10 +13,13 @@ function ajaxPost(options, callback) {
 d3.selection.prototype.getPathCoordinates = function() {
     var path = this.node();
     var len = path.getTotalLength();
+	var ratio = parseInt(svgMap.attr('width')) / svgMap.styleIntWithoutPx('width');
+	var offset = getExternalMapOffsetToCenter();
+
     var coordinates = [];
     for(var i=0; i<len; i++){
         var p=path.getPointAtLength(i);
-        coordinates.push(projection.invert([p.x, p.y]));
+        coordinates.push(projection.invert([offset.x + p.x/ratio, offset.y + p.y/ratio]));
     }
     return coordinates;
 };

@@ -63,7 +63,7 @@ class NaturalEarthImporter {
         $territories = array();
         foreach($countriesAndCoordinates as $countryName=>$coordinates) {
             $referencedTerritory = ReferencedTerritory::buildAndCreate($countryName);
-            $t = Territory::buildAndCreateWithReferencedTerritory($referencedTerritory, false, null, null, $coordinates);
+            $t = Territory::buildAndCreateFromNEData($referencedTerritory, $coordinates);
             $territories[] = $t;
         }
 
