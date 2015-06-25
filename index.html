@@ -18,6 +18,19 @@
         <link rel="stylesheet" href="css/helper.css">
 
         <script type="text/javascript" src="js/dependencies.js"></script>
+        <script type="text/javascript">
+            onLoad = function() {
+                initMapPlaceHolders(function() {
+                    initMapArea();
+                    loadUI();
+                    loadHelperConfig();
+                    getAndShowBgMap("backgroundMap", "data/external/ne_110m_coastline.json", function() {
+                        applyCurrentProjection();
+                    });
+                });
+                d3.select('#loadRandomTerritoryMap').on('click', loadRandomTerritoryMap);
+            };
+        </script>
         <script data-main="js/main" src="js/vendor/requirejs/require.js"></script>
 
     </head>

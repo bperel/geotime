@@ -1,3 +1,5 @@
+var onLoad = function() {};
+
 var dependencies = [
 	'vendor/modernizr/modernizr',
 	'vendor/d3/d3.min',
