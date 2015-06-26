@@ -100,7 +100,8 @@ function bgMapDragMove(d) {
 }
 
 function initMapPlaceHolders(callback) {
-	$('#map-placeholders').load('map-placeholders.html', {}, callback);
+	$('#map-config-container').load('placeholders/map-projection.html', {});
+	$('#map-placeholders').load('placeholders/map.html', {}, callback);
 }
 
 function initBackgroundMap() {
