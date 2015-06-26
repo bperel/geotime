@@ -8,7 +8,8 @@ describe('Helper tests', function() {
 
     beforeEach(function(){
         jasmine.getFixtures().fixturesPath = 'base';
-        loadFixtures("map-placeholders.html");
+        loadFixtures("placeholders/map.html");
+        loadFixtures("placeholders/map-projection.html");
 
         callbacks = {
             myOnLoad: function() {

@@ -6,7 +6,8 @@ describe('Map tests', function() {
         loadJSONFixtures("test/phpunit/_data/countries.json");
 
         jasmine.getFixtures().fixturesPath = 'base';
-        loadFixtures("map-placeholders.html");
+        loadFixtures("placeholders/map.html");
+        loadFixtures("placeholders/map-projection.html");
 
         // then install the mock
         jasmine.Ajax.install();

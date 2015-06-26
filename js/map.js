@@ -114,7 +114,8 @@ function dragmove(d) {
 }
 
 function initMapPlaceHolders(callback) {
-	$('#map-placeholders').load('map-placeholders.html', {}, callback);
+	$('#map-config-container').load('placeholders/map-projection.html', {});
+	$('#map-placeholders').load('placeholders/map.html', {}, callback);
 }
 
 function initMapArea() {
@@ -156,7 +157,10 @@ function showBgMap(id, data, error) {
 		svg
 			.call(bgSvgmap_drag)
 			.call(zoom);
-		applyProjection(getSelectedProjection());
+
+		if (projectionSelection && projectionSelection.length) {
+			applyProjection(getSelectedProjection());
+		}
 	}
 }
 
