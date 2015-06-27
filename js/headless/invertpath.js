@@ -15,12 +15,18 @@ if (system.args.length < 7) {
 	}
 	server.listen('127.0.0.1:8888', function (request, response) {
 		var cleanedUrl = request.url
-			.replace(/\//g, '\\')
+			.replace(/\//g, fs.separator)
 			.replace(/\?.*$/g, '');
 		//console.log('Requesting ' + request.url + ', loading ' + cleanedUrl);
-		var pagePath = fs.workingDirectory.replace(/\//g, '\\') + cleanedUrl;
+		var pagePath = fs.workingDirectory.replace(/\//g, fs.separator) + cleanedUrl;
 		response.statusCode = 200;
-		response.write(fs.read(pagePath));
+		try {
+			response.write(fs.read(pagePath));
+		} catch(err) {
+			console.error('Error while reading ' + cleanedUrl + '(requested URL : '+request.url+')');
+			response.close();
+			phantom.exit(1);
+		}
 		response.close();
 
 	});
@@ -63,7 +69,9 @@ if (system.args.length < 7) {
 					return d3.select('svg path#' + pathId).getPathCoordinates();
 				});
 			}, system.args, fs.read(svgPath));
+
 			console.log(JSON.stringify(pathCoordinates));
+			server.close();
 			phantom.exit(0);
 		}, 500);
 	});
