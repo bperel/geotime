@@ -161,6 +161,10 @@ function showBgMap(id, data, error) {
 		if (projectionSelection && projectionSelection.length) {
 			applyProjection(getSelectedProjection());
 		}
+		else {
+			projection = d3.geo.mercator();
+			applyCurrentProjection();
+		}
 	}
 }
 

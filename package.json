@@ -24,6 +24,9 @@
     "karma-jasmine-matchers": "~2.0.0-beta1",
     "karma-junit-reporter": "~0.2.2",
     "karma-phantomjs-launcher": "~0.2.0",
-    "phantomjs": "~1.9.17"
+    "phantomjs": "~1.9.17",
+    "requirejs": "~2.1.18",
+    "karma-requirejs": "~0.2.2",
+    "bower-requirejs": "~1.1.3"
   }
 }
