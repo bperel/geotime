@@ -13,7 +13,7 @@ if (system.args.length < 7) {
 		console.log(svgPath + ' does not exist');
 		phantom.exit(1);
 	}
-	server.listen('127.0.0.1:8888', function (request, response) {
+	var serverCreated = server.listen('127.0.0.1:8888', function (request, response) {
 		var cleanedUrl = request.url
 			.replace(/\//g, fs.separator)
 			.replace(/\?.*$/g, '');
@@ -30,6 +30,11 @@ if (system.args.length < 7) {
 		response.close();
 
 	});
+
+	if (!serverCreated) {
+		console.error('Error while creating HTTP server');
+		phantom.exit(1);
+	}
 
 	page.open('http://127.0.0.1:8888/index_headless.html', function () {
 		setTimeout(function () {
