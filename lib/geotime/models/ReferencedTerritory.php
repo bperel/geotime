@@ -3,11 +3,10 @@
 namespace geotime\models;
 
 use Logger;
-use Purekid\Mongodm\Model;
 
 Logger::configure("lib/geotime/logger.xml");
 
-class ReferencedTerritory extends Model
+class ReferencedTerritory extends GeotimeModel
 {
     static $collection = "referencedTerritories";
 

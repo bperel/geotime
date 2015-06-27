@@ -36,11 +36,13 @@ elseif (isset($_POST['locateMap'])) {
 elseif (isset($_POST['addTerritories'])) {
     $mapId = $_POST['mapId'];
     foreach($_POST['territories'] as $territory) {
-        $referencedTerritoryId = $territory['referencedTerritory']['id'];
-        $xpath = $territory['xpath'];
-        $territoryPeriodStart = $territory['period']['start'];
-        $territoryPeriodEnd = $territory['period']['end'];
-        Geotime::saveLocatedTerritory($mapId, $referencedTerritoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
+        if (!array_key_exists('id', $territory)) {
+            $referencedTerritoryId = $territory['referencedTerritory']['id'];
+            $xpath = $territory['xpath'];
+            $territoryPeriodStart = $territory['period']['start'].'-01-01';
+            $territoryPeriodEnd = $territory['period']['end'].'-01-01';
+            Geotime::saveLocatedTerritory($mapId, $referencedTerritoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
+        }
     }
 }
 

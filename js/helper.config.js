@@ -263,8 +263,9 @@ function checkSelectedTerritory() {
 function saveTerritoriesPosition() {
 	return function(d) {
 		d.territories = locatedTerritories.map(function(locatedTerritory) {
-            locatedTerritory.xpath = locatedTerritory.element.xpath();
-            locatedTerritory.coordinates = locatedTerritory.element.getPathCoordinates();
+			if (!locatedTerritory.id) {
+				locatedTerritory.xpath = locatedTerritory.element.xpath();
+			}
             delete locatedTerritory.element;
 
             return locatedTerritory;

@@ -3,12 +3,11 @@
 namespace geotime\models;
 
 use Logger;
-use Purekid\Mongodm\Model;
 
 Logger::configure("lib/geotime/logger.xml");
 
 
-class Map extends Model {
+class Map extends GeotimeModel {
     static $collection = "maps";
 
     /** @var \Logger */
@@ -187,19 +186,22 @@ class Map extends Model {
         }
     }
 
-    public function getIdAsString() {
-        $subKey='$id';
-        $id = $this->getId();
-        return $id->$subKey;
-    }
-
     /**
      * @return object
      */
     public function __toSimplifiedObject() {
-        $arr = $this->toArray(array('_type','_id'), true, 5);
-        $arr['id'] = $this->getIdAsString();
-        return json_decode(json_encode($arr));
+        $territories = $this->getTerritories();
+        $simplifiedTerritories = array();
+        /** @var Territory[] $territories */
+        foreach($territories as $territory) {
+            $territory->loadReferencedTerritory();
+            $simplifiedTerritories[] = $territory->__toSimplifiedObject(true);
+        }
+
+        $simplifiedMap = parent::__toSimplifiedObject();
+        $simplifiedMap->territories = $simplifiedTerritories;
+
+        return $simplifiedMap;
     }
 }
 

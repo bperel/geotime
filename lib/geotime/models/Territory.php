@@ -4,11 +4,10 @@ namespace geotime\models;
 
 use geotime\Util;
 use Logger;
-use Purekid\Mongodm\Model;
 
 Logger::configure("lib/geotime/logger.xml");
 
-class Territory extends Model {
+class Territory extends GeotimeModel {
     static $collection = "territories";
 
     /** @var \Logger */
@@ -289,6 +288,17 @@ class Territory extends Model {
         }
 
         return Territory::count($parameters);
+    }
+
+    /**
+     * @param $noCoordinates boolean
+     * @return object
+     */
+    public function __toSimplifiedObject($noCoordinates) {
+        $simplifiedTerritory = parent::__toSimplifiedObject();
+        $simplifiedTerritory->referencedTerritory = $this->getReferencedTerritory()->__toSimplifiedObject();
+        unset($simplifiedTerritory->polygon);
+        return $simplifiedTerritory;
     }
 }
 

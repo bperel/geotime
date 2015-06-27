@@ -125,7 +125,6 @@ class Geotime {
         /** @var Map $incompleteMap */
         $incompleteMap = Map::one(array('uploadDate'=>array('$exists' => true)));
         if (!is_null($incompleteMap)) {
-            $incompleteMap->loadTerritories();
             return $incompleteMap->__toSimplifiedObject();
         }
 
@@ -206,6 +205,7 @@ class Geotime {
         );
         $geocoordinates = $territory->calculateCoordinates($map);
         $territory->setPolygon(array(array($geocoordinates)));
+        $territory->save();
         $map->addTerritory($territory);
         $map->save();
     }
