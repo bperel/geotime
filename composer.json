@@ -12,14 +12,18 @@
 
 	"require": {
 		"phpunit/phpunit": "4.3.*",
+	  	"phpunit/dbunit": ">=1.2",
 		"purekid/mongodm": "1.4.2",
 		"psr/log": "1.0.0",
 		"apache/log4php": "2.3.0",
-		"jakoch/phantomjs-installer": "1.9.*"
+		"jakoch/phantomjs-installer": "1.9.*",
+		"doctrine/orm": "2.4.*",
+		"symfony/yaml": "2.*"
 	},
 	"autoload": {
 		"psr-0": {
-			"geotime": "lib/"
+		  	"geotime\\models\\mariadb": "lib/geotime/new_models/",
+		  	"geotime\\helpers": "lib/geotime/new_models_helpers/"
 		}
 	},
 	"config": {

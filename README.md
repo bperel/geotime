@@ -42,7 +42,9 @@ $ bower install
 $ chmod -R +w test/phpunit/cache
 $ chmod -R +w cache
 ```
-* Set up the rights for the normal and test DBs, using the admin user : 
+* Set up the rights for the normal and test DBs, using the admin user :
+
+Create a MySQL or MariaDB empty database called "geotime".
 ```bash
 $ mongo
 MongoDB shell version: 2.4.9
