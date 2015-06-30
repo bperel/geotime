@@ -4,7 +4,7 @@ use Doctrine\ORM\EntityManager;
 
 class ModelHelper {
     /** @var EntityManager $incompleteMap */
-    public static $em;
+    private static $em;
 
     /**
      * @return EntityManager
@@ -13,7 +13,15 @@ class ModelHelper {
     {
         return self::$em;
     }
+
+    /**
+     * @param $em EntityManager
+     */
+    public static function setEm($em)
+    {
+        self::$em = $em;
+    }
 }
 
 /** @var EntityManager $entityManager */
-ModelHelper::$em = $entityManager;
+ModelHelper::setEm($entityManager);

@@ -4,6 +4,7 @@ namespace geotime\Test\Helper;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\SchemaTool;
 use geotime\helpers\ModelHelper;
 use PHPUnit_Extensions_Database_DataSet_IDataSet;
@@ -11,7 +12,7 @@ use PHPUnit_Extensions_Database_DB_IDatabaseConnection;
 use PHPUnit_Extensions_Database_TestCase;
 
 
-class MariaDbTestHelper extends \PHPUnit_Extensions_Database_TestCase {
+abstract class MariaDbTestHelper extends \PHPUnit_Extensions_Database_TestCase {
 
     /**
      * @var EntityManager
@@ -27,23 +28,28 @@ class MariaDbTestHelper extends \PHPUnit_Extensions_Database_TestCase {
     static $jsonSourceDir = 'test/phpunit/_data';
 
     public function setUp() {
-        $tool = new SchemaTool(ModelHelper::$em);
-        $classes = ModelHelper::$em->getMetaDataFactory()->getAllMetaData();
+        $tool = new SchemaTool(ModelHelper::getEm());
+        $classes = ModelHelper::getEm()->getMetaDataFactory()->getAllMetaData();
 
         $tool->dropSchema($classes);
         $tool->createSchema($classes);
     }
 
     public function tearDown() {
-        $tool = new SchemaTool(ModelHelper::$em);
-        $classes = ModelHelper::$em->getMetaDataFactory()->getAllMetaData();
+        $tool = new SchemaTool(ModelHelper::getEm());
+        $classes = ModelHelper::getEm()->getMetaDataFactory()->getAllMetaData();
 
-        //$tool->dropSchema($classes);
+        $tool->dropSchema($classes);
     }
 
     public function testConnect() {
 
     }
+
+    /**
+     * @return EntityRepository
+     */
+    public abstract function getRepository();
 
     /* Tests */
 /*
@@ -83,15 +89,6 @@ class MariaDbTestHelper extends \PHPUnit_Extensions_Database_TestCase {
      */
     protected function getConnection()
     {
-        // Retrieve PDO instance
-        $pdo = ModelHelper::$em->getConnection()->getWrappedConnection();
-
-        // Clear Doctrine to be safe
-        ModelHelper::$em->clear();
-
-        // Pass to PHPUnit
-        return $this->createDefaultDBConnection($pdo, 'geotime_test');
-
     }
 
     /**
@@ -101,7 +98,6 @@ class MariaDbTestHelper extends \PHPUnit_Extensions_Database_TestCase {
      */
     protected function getDataSet()
     {
-        return $this->createArrayDataSet(array());
     }
 }
 

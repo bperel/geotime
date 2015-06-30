@@ -69,7 +69,7 @@ class ReferencedTerritoryHelper
     public static function count() {
         $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb->select('count(referencedTerritory.id)');
-        $qb->from('geotime\\models\\mariadb\\ReferencedTerritory','referencedTerritory');
+        $qb->from(ReferencedTerritory::class,'referencedTerritory');
 
         return $qb->getQuery()->getSingleScalarResult();
     }

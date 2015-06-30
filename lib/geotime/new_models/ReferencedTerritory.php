@@ -46,6 +46,7 @@ class ReferencedTerritory
         $this->next = $next;
     }
 
+    // @codeCoverageIgnoreStart
     /**
      * @return integer
      */
@@ -101,6 +102,6 @@ class ReferencedTerritory
     {
         $this->next = $next;
     }
-
+    // @codeCoverageIgnoreEnd
 
 }
