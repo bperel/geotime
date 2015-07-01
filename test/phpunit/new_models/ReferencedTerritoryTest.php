@@ -21,7 +21,7 @@ class ReferencedTerritoryTest extends MariaDbTestHelper {
 
     public function getRepository()
     {
-        return ModelHelper::getEm()->getRepository(ReferencedTerritory::class);
+        return ModelHelper::getEm()->getRepository(ReferencedTerritory::CLASSNAME);
     }
 
     public function testReferencedTerritoriesStringToTerritoryArray() {

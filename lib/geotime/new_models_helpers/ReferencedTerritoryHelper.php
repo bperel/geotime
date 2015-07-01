@@ -55,7 +55,7 @@ class ReferencedTerritoryHelper
     {
         return array_map(
             function ($referencedTerritoryName) {
-                $referencedTerritory = ModelHelper::getEm()->getRepository(ReferencedTerritory::class)
+                $referencedTerritory = ModelHelper::getEm()->getRepository(ReferencedTerritory::CLASSNAME)
                     ->findOneBy(array('name' => $referencedTerritoryName));
                 if (is_null($referencedTerritory) && !empty($referencedTerritoryName)) {
                     $referencedTerritory = self::buildAndCreate($referencedTerritoryName);
@@ -69,7 +69,7 @@ class ReferencedTerritoryHelper
     public static function count() {
         $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb->select('count(referencedTerritory.id)');
-        $qb->from(ReferencedTerritory::class,'referencedTerritory');
+        $qb->from(ReferencedTerritory::CLASSNAME,'referencedTerritory');
 
         return $qb->getQuery()->getSingleScalarResult();
     }

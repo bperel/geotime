@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping\ManyToMany;
  **/
 class ReferencedTerritory
 {
+    const CLASSNAME = __CLASS__;
 
     /** @Id @Column(type="integer") @GeneratedValue *
      * @Column(type="integer")

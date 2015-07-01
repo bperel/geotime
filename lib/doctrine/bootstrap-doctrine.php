@@ -3,28 +3,46 @@
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 
-$conf = parse_ini_file('/home/geotime/config.ini');
-$username = $conf['username'];
-$password = $conf['password'];
+class DoctrineBootstrap {
+    /**
+     * @return \Doctrine\ORM\Configuration
+     */
+    static function getMetadataConfig() {
+        $isDevMode = true;
+        return Setup::createAnnotationMetadataConfiguration(array(__DIR__."/../geotime/new_models"), $isDevMode);
+    }
 
-//Logger::configure("../geotime/logger.xml");
+    private static function getEntityManagerFromConnectionParams($connectionParams) {
+        $config = self::getMetadataConfig();
+        $conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $config);
+        return EntityManager::create($conn, $config);
+    }
 
-// Create a simple "default" Doctrine ORM configuration for Annotations
-$isDevMode = true;
-$config = Setup::createAnnotationMetadataConfiguration(array(__DIR__."/../geotime/new_models"), $isDevMode);
+    static function getEntityManager() {
+        $conf = parse_ini_file('/home/geotime/config.ini');
+        $username = $conf['username'];
+        $password = $conf['password'];
 
-// database configuration parameters
-$connectionParams = array(
-    'dbname' => 'geotime',
-    'user' => $username,
-    'password' => $password,
-    'host' => 'localhost',
-    'driver' => 'pdo_mysql',
-    'server_version' => '15.1'
-);
-$conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $config);
-$entityManager = EntityManager::create($conn, $config);
+        $connectionParams = array(
+            'dbname' => 'geotime',
+            'user' => $username,
+            'password' => $password,
+            'host' => 'localhost',
+            'driver' => 'pdo_mysql',
+            'server_version' => '15.1'
+        );
 
-$connectionParamsForTest = array_merge($connectionParams, array('dbname' => 'geotime_test'));
-$connForTest = \Doctrine\DBAL\DriverManager::getConnection($connectionParamsForTest, $config);
-$entityManagerForTest = EntityManager::create($connForTest, $config);
+        return self::getEntityManagerFromConnectionParams($connectionParams);
+
+    }
+
+    static function getTestEntityManager() {
+        $connectionParams = array(
+            'user' => 'test',
+            'password' => 'test',
+            'memory' => true,
+            'driver' => 'pdo_sqlite'
+        );
+        return self::getEntityManagerFromConnectionParams($connectionParams);
+    }
+}
