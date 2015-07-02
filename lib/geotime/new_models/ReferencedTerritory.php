@@ -1,17 +1,12 @@
 <?php
 namespace geotime\models\mariadb;
 
-use Doctrine\ORM\Mapping\Column;
-use Doctrine\ORM\Mapping\Entity;
-use Doctrine\ORM\Mapping\Id;
-use Doctrine\ORM\Mapping\JoinTable;
-use Doctrine\ORM\Mapping\ManyToMany;
-
 /**
  * @Entity @Table(name="referencedTerritories")
  **/
 class ReferencedTerritory
 {
+    const CLASSNAME = __CLASS__;
 
     /** @Id @Column(type="integer") @GeneratedValue *
      * @Column(type="integer")
@@ -103,5 +98,4 @@ class ReferencedTerritory
         $this->next = $next;
     }
     // @codeCoverageIgnoreEnd
-
 }

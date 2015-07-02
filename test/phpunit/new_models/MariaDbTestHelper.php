@@ -42,10 +42,6 @@ abstract class MariaDbTestHelper extends \PHPUnit_Extensions_Database_TestCase {
         $tool->dropSchema($classes);
     }
 
-    public function testConnect() {
-
-    }
-
     /**
      * @return EntityRepository
      */
@@ -103,3 +99,4 @@ abstract class MariaDbTestHelper extends \PHPUnit_Extensions_Database_TestCase {
 
 $entityManager = $GLOBALS['entityManagerForTest'];
 include_once('ModelHelper.php');
+include_once('AbstractAbstractEntityHelper.php');
