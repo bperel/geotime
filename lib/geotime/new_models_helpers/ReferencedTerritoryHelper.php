@@ -1,8 +1,9 @@
 <?php
 namespace geotime\helpers;
 use geotime\models\mariadb\ReferencedTerritory;
+use geotime\new_models\AbstractEntityHelper;
 
-class ReferencedTerritoryHelper
+class ReferencedTerritoryHelperAbstract implements AbstractEntityHelper
 {
     /**
      * @param $object \stdClass
@@ -72,5 +73,10 @@ class ReferencedTerritoryHelper
         $qb->from(ReferencedTerritory::CLASSNAME,'referencedTerritory');
 
         return $qb->getQuery()->getSingleScalarResult();
+    }
+
+    static final function getTableName()
+    {
+        return ModelHelper::getEm()->getClassMetadata(ReferencedTerritory::CLASSNAME)->getTableName();
     }
 }
