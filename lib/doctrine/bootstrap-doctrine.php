@@ -2,6 +2,7 @@
 
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
+use Doctrine\DBAL\Types\Type;
 
 class DoctrineBootstrap {
     /**
@@ -9,13 +10,18 @@ class DoctrineBootstrap {
      */
     static function getMetadataConfig() {
         $isDevMode = true;
-        return Setup::createAnnotationMetadataConfiguration(array(__DIR__."/../geotime/new_models"), $isDevMode);
+        return Setup::createAnnotationMetadataConfiguration(array(__DIR__."/../geotime/new_models", __DIR__."/../geotime/types"), $isDevMode);
     }
 
     private static function getEntityManagerFromConnectionParams($connectionParams) {
         $config = self::getMetadataConfig();
         $conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $config);
-        return EntityManager::create($conn, $config);
+        $em = EntityManager::create($conn, $config);
+
+        Type::addType('calibration_point', geotime\models\mariadb\types\CalibrationPointType::$CLASSNAME);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('calibration_point', 'string');
+
+        return $em;
     }
 
     static function getEntityManager() {
@@ -46,3 +52,6 @@ class DoctrineBootstrap {
         return self::getEntityManagerFromConnectionParams($connectionParams);
     }
 }
+
+include_once('CalibrationPoint.php');
+include_once('CalibrationPointType.php');
