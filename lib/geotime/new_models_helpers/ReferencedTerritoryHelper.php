@@ -1,9 +1,12 @@
 <?php
 namespace geotime\helpers;
+use geotime\models\mariadb\CalibrationPoint;
+use geotime\models\mariadb\CoordinateLatLng;
+use geotime\models\mariadb\CoordinateXY;
 use geotime\models\mariadb\ReferencedTerritory;
 use geotime\new_models\AbstractEntityHelper;
 
-class ReferencedTerritoryHelperAbstract implements AbstractEntityHelper
+class ReferencedTerritoryHelper implements AbstractEntityHelper
 {
     /**
      * @param $object \stdClass
@@ -32,7 +35,7 @@ class ReferencedTerritoryHelperAbstract implements AbstractEntityHelper
      * @param string $name
      * @param string $previous
      * @param string $next
-     * @return \geotime\models\ReferencedTerritory
+     * @return ReferencedTerritory
      */
     public static function buildAndCreate($name, $previous = null, $next = null)
     {
@@ -43,6 +46,9 @@ class ReferencedTerritoryHelperAbstract implements AbstractEntityHelper
         if (!empty($next)) {
             $referencedTerritory->setNext(self::referencedTerritoriesStringToTerritoryArray($next));
         }
+        $calibrationPoint = new CalibrationPoint(new CoordinateLatLng(1, 2), new CoordinateXY(3, 4));
+        $referencedTerritory->setCalibrationPoint($calibrationPoint);
+
         ModelHelper::getEm()->persist($referencedTerritory);
         ModelHelper::getEm()->flush();
         return $referencedTerritory;

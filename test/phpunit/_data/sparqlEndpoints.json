@@ -1,19 +1,6 @@
 [
   {
 	"name": "Dbpedia",
-	"rootUrl": "http://endPointTest",
-	"endPoint": "sparql",
-	"method": "POST",
-	"parameters": [
-	  {
-		"default-graph-uri": "http://endPointTest"
-	  },
-	  {
-		"query": "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n<<query>>"
-	  },
-	  {
-		"output": "json"
-	  }
-	]
+	"parameters": {}
   }
 ]

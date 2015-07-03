@@ -2,14 +2,16 @@
 
 namespace geotime;
 
-use geotime\models\Map;
-use geotime\models\Period;
-use geotime\models\ReferencedTerritory;
-use geotime\models\Territory;
+use geotime\helpers\ModelHelper;
+use geotime\helpers\ReferencedTerritoryHelper;
+use geotime\helpers\TerritoryHelper;
+use geotime\models\mariadb\Map;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
 
+include_once('Territory.php');
+include_once('Map.php');
 include_once('Util.php');
 
 class NaturalEarthImporter {
@@ -27,7 +29,8 @@ class NaturalEarthImporter {
 
         $start = microtime(true);
         /** @var Map $naturalDataMap */
-        $naturalDataMap = Map::one(array('fileName'=>$fileName));
+        $naturalDataMap = ModelHelper::getEm()->getRepository(Map::CLASSNAME)
+            ->findOneBy(array('fileName' => $fileName));
         if (!is_null($naturalDataMap)) {
             $nbImportedCountries = count($naturalDataMap->getTerritories());
             self::$log->info('The Natural Earth data has already been imported');
@@ -35,10 +38,6 @@ class NaturalEarthImporter {
 
             return $nbImportedCountries;
         }
-
-        $p = new Period();
-        $p->setStart(new \MongoDate(strtotime(self::$dataDate)));
-        $p->setEnd(new \MongoDate(strtotime(self::$dataDate)));
 
         $countriesAndCoordinates = array();
 
@@ -62,15 +61,17 @@ class NaturalEarthImporter {
 
         $territories = array();
         foreach($countriesAndCoordinates as $countryName=>$coordinates) {
-            $referencedTerritory = ReferencedTerritory::buildAndCreate($countryName);
-            $t = Territory::buildAndCreateFromNEData($referencedTerritory, $coordinates);
+            $referencedTerritory = ReferencedTerritoryHelper::buildAndCreate($countryName);
+            $t = TerritoryHelper::buildAndCreateFromNEData($referencedTerritory, $coordinates);
             $territories[] = $t;
         }
+
 
         $map = new Map();
         $map->setFileName($fileName);
         $map->setTerritories($territories);
-        $map->save();
+        ModelHelper::getEm()->persist($map);
+        ModelHelper::getEm()->flush();
 
         $nbImportedCountries = count($countriesAndCoordinates);
 
