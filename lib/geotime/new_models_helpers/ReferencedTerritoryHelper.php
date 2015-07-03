@@ -6,7 +6,7 @@ use geotime\models\mariadb\CoordinateXY;
 use geotime\models\mariadb\ReferencedTerritory;
 use geotime\new_models\AbstractEntityHelper;
 
-class ReferencedTerritoryHelperAbstract implements AbstractEntityHelper
+class ReferencedTerritoryHelper implements AbstractEntityHelper
 {
     /**
      * @param $object \stdClass
@@ -35,7 +35,7 @@ class ReferencedTerritoryHelperAbstract implements AbstractEntityHelper
      * @param string $name
      * @param string $previous
      * @param string $next
-     * @return \geotime\models\ReferencedTerritory
+     * @return ReferencedTerritory
      */
     public static function buildAndCreate($name, $previous = null, $next = null)
     {

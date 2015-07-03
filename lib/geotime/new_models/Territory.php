@@ -2,10 +2,13 @@
 
 namespace geotime\models\mariadb;
 
+include_once('ReferencedTerritory.php');
+
 /**
  * @Entity @Table(name="territories")
  **/
 class Territory {
+    const CLASSNAME = __CLASS__;
 
     /** @Id @Column(type="integer") @GeneratedValue *
      * @Column(type="integer")
@@ -36,6 +39,18 @@ class Territory {
     /** @Column(type="boolean") **/
     var $userMade;
 
+    function __construct($referencedTerritory = null, $polygon = null, $area = 0, $xpath = null, $startDate = null, $endDate = null, $userMade = null)
+    {
+        $this->referencedTerritory = $referencedTerritory;
+        $this->polygon = $polygon;
+        $this->area = $area;
+        $this->xpath = $xpath;
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+        $this->userMade = $userMade;
+    }
+
+    // @codeCoverageIgnoreStart
     /**
      * @return ReferencedTerritory
      */
@@ -147,4 +162,5 @@ class Territory {
     {
         $this->userMade = $userMade;
     }
+    // @codeCoverageIgnoreEnd
 }

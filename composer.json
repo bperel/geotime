@@ -24,7 +24,8 @@
 		"psr-0": {
             "geotime\\models\\mariadb": "lib/geotime/",
             "geotime\\models\\mariadb\\types": "lib/geotime/types/",
-		  	"geotime\\helpers": "lib/geotime/new_models_helpers/"
+		  	"geotime\\helpers": "lib/geotime/new_models_helpers/",
+		  	"geotime": "lib/geotime/"
 		}
 	},
 	"config": {

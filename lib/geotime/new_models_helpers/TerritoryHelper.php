@@ -1,5 +1,6 @@
 <?php
 namespace geotime\helpers;
+use geotime\models\mariadb\Map;
 use geotime\models\mariadb\Territory;
 use geotime\models\mariadb\ReferencedTerritory;
 use geotime\new_models\AbstractEntityHelper;
@@ -81,7 +82,7 @@ class TerritoryHelper implements AbstractEntityHelper
      * @param $xpath string
      * @return Territory
      */
-    private function buildAndSave($territory, $referencedTerritory, $userMade, $startDate = '', $endDate = '', $xpath = null) {
+    private static function buildAndSave($territory, $referencedTerritory, $userMade, $startDate = '', $endDate = '', $xpath = null) {
         $territory->setReferencedTerritory($referencedTerritory);
         if (!empty($startDate) && !empty($endDate)) {
             $territory->setStartDate(new \DateTime($startDate));
@@ -91,7 +92,7 @@ class TerritoryHelper implements AbstractEntityHelper
             $territory->setXpath($xpath);
         }
         $territory->setUserMade($userMade);
-        return $this->save($territory);
+        return self::save($territory);
     }
 
     /**
@@ -178,14 +179,20 @@ class TerritoryHelper implements AbstractEntityHelper
      * @return int
      */
     public static function countForPeriod($startDate, $endDate, $locatedTerritoriesOnly=false) {
-        // TODO
-        /*
-        $parameters = array('period.$id'=>new \MongoId($period->getId()));
+        $qb = ModelHelper::getEm()->createQueryBuilder();
+        $qb->select('count(territory.id)');
+        $qb->from(Territory::CLASSNAME,'territory');
+        $qb->where('territory.startDate >= :startDate AND territory.endDate >= :endDate')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate);
+
         if ($locatedTerritoriesOnly) {
-            $parameters['polygon'] = array('$exists'=>true);
+            $qb->andWhere($qb->expr()->andx(
+                $qb->expr()->isNotNull('territory.polygon')
+            ));
         }
 
-        return Territory::count($parameters);*/
+        return $qb->getQuery()->getSingleScalarResult();
     }
 
     /**
@@ -206,8 +213,8 @@ class TerritoryHelper implements AbstractEntityHelper
      * @param $territory Territory
      * @return Territory
      */
-    private function save($territory) {
-        $territory->setArea($this->calculateArea($territory));
+    private static function save($territory) {
+        $territory->setArea(self::calculateArea($territory));
         ModelHelper::getEm()->persist($territory);
         ModelHelper::getEm()->flush();
 
