@@ -11,6 +11,17 @@ class CoordinateLatLng {
     /** @var $lng float */
     var $lng;
 
+    /**
+     * CoordinateLatLng constructor.
+     * @param float $lat
+     * @param float $lng
+     */
+    public function __construct($lat, $lng)
+    {
+        $this->lat = $lat;
+        $this->lng = $lng;
+    }
+
     // @codeCoverageIgnoreStart
     /**
      * @return float

@@ -23,22 +23,15 @@ class ModelHelper {
     }
 
     /**
-     * @param $tableName string
      * @param $fileName string
-     *
-     * @return void
+     * @param $callback
      */
-    public static function importFromJson($tableName, $fileName)
+    public static function importFromJson($fileName, $callback)
     {
         if (file_exists($fileName)) {
             $data = json_decode(file_get_contents($fileName));
             if (is_array($data)) {
-                $connection = ModelHelper::getEm()->getConnection();
-                foreach($data as $tuple) {
-                    if (is_object($tuple)) {
-                        $connection->insert($tableName, (array)$tuple);
-                    }
-                }
+                array_map($callback, $data);
             }
         }
     }

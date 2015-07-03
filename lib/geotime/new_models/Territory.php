@@ -27,13 +27,13 @@ class Territory {
     /** @Column(type="integer") **/
     var $area;
 
-    /** @Column(type="string") **/
+    /** @Column(type="string", nullable=true) **/
     var $xpath;
 
-    /** @Column(type="datetime") **/
+    /** @Column(type="datetime", nullable=true) **/
     var $startDate;
 
-    /** @Column(type="datetime") **/
+    /** @Column(type="datetime", nullable=true) **/
     var $endDate;
 
     /** @Column(type="boolean") **/

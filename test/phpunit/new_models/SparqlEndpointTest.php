@@ -24,6 +24,13 @@ class SparqlEndpointTest extends MariaDbTestHelper {
 
     public function testImportFromJson() {
         SparqlEndpointHelper::importFromJson("test/phpunit/_data/sparqlEndpoints.json");
+
+        $qb = ModelHelper::getEm()->createQueryBuilder();
+        $qb->select('count(sparqlEndPoint.id)');
+        $qb->from(SparqlEndpoint::CLASSNAME,'sparqlEndPoint');
+
+        $count = $qb->getQuery()->getSingleScalarResult();
+        $this->assertEquals(1, $count);
     }
 }
  

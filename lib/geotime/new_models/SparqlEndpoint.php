@@ -29,19 +29,8 @@ class SparqlEndpoint
     var $method;
 
 
-    /** @Column(type="simple_array") **/
+    /** @Column(type="object") **/
     var $parameters;
-
-    function __construct($name, $rootUrl, $endPoint, $method, $parameters)
-    {
-        $this->name = $name;
-        $this->rootUrl = $rootUrl;
-        $this->endPoint = $endPoint;
-        $this->method = $method;
-        $this->parameters = $parameters;
-    }
-
-
 
     // @codeCoverageIgnoreStart
     /**

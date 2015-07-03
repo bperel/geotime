@@ -51,14 +51,14 @@ class ReferencedTerritoryTest extends MariaDbTestHelper {
         /** @var ReferencedTerritory $newReferencedTerritory */
         $newReferencedTerritory = $this->getRepository()->findOneBy(array('name' => $newReferencedTerritoryName));
         $this->assertNotNull($newReferencedTerritory);
-        $this->assertEquals(count($newReferencedTerritory->getPrevious()), 1);
-        $this->assertEquals(count($newReferencedTerritory->getNext()), 1);
+        $this->assertEquals(1, count($newReferencedTerritory->getPrevious()));
+        $this->assertEquals(1, count($newReferencedTerritory->getNext()));
 
         /** @var ReferencedTerritory $previousReferencedTerritory */
         $previousReferencedTerritory = $this->getRepository()->findOneBy(array('name' => $previousReferencedTerritoryName));
         $this->assertNotNull($previousReferencedTerritory);
-        $this->assertEquals(count($previousReferencedTerritory->getPrevious()), 0);
-        $this->assertEquals(count($previousReferencedTerritory->getNext()), 0);
+        $this->assertEquals(0, count($previousReferencedTerritory->getPrevious()));
+        $this->assertEquals(0, count($previousReferencedTerritory->getNext()));
     }
 
     public function testBuildAndSaveFromObject() {
@@ -72,14 +72,14 @@ class ReferencedTerritoryTest extends MariaDbTestHelper {
         /** @var ReferencedTerritory $newReferencedTerritory */
         $newReferencedTerritory = $this->getRepository()->findOneBy(array('name' => $object->name->value));
         $this->assertNotNull($newReferencedTerritory);
-        $this->assertEquals(count($newReferencedTerritory->getPrevious()), 1);
-        $this->assertEquals(count($newReferencedTerritory->getNext()), 2);
+        $this->assertEquals(1, count($newReferencedTerritory->getPrevious()));
+        $this->assertEquals(2, count($newReferencedTerritory->getNext()));
 
         /** @var ReferencedTerritory $previousReferencedTerritory */
         $previousReferencedTerritory = $this->getRepository()->findOneBy(array('name' => $object->previous->value));
         $this->assertNotNull($previousReferencedTerritory);
-        $this->assertEquals(count($previousReferencedTerritory->getPrevious()), 0);
-        $this->assertEquals(count($previousReferencedTerritory->getNext()), 0);
+        $this->assertEquals(0, count($previousReferencedTerritory->getPrevious()));
+        $this->assertEquals(0, count($previousReferencedTerritory->getNext()));
     }
 
     public function testBuildAndSaveFromIncompleteObject() {
@@ -91,8 +91,8 @@ class ReferencedTerritoryTest extends MariaDbTestHelper {
         /** @var ReferencedTerritory $newReferencedTerritory */
         $newReferencedTerritory = $this->getRepository()->findOneBy(array('name' => $object->name->value));
         $this->assertNotNull($newReferencedTerritory);
-        $this->assertEquals(count($newReferencedTerritory->getPrevious()), 1);
-        $this->assertEquals(count($newReferencedTerritory->getNext()), 2);
+        $this->assertEquals(0, count($newReferencedTerritory->getPrevious()));
+        $this->assertEquals(0, count($newReferencedTerritory->getNext()));
     }
 }
  

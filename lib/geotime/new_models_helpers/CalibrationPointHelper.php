@@ -1,6 +1,8 @@
 <?php
 namespace geotime\helpers;
 use geotime\models\mariadb\CalibrationPoint;
+use geotime\models\mariadb\CoordinateLatLng;
+use geotime\models\mariadb\CoordinateXY;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
@@ -16,13 +18,8 @@ class CalibrationPointHelper
      */
     public static function generateFromStrings($calibrationPoint) {
 
-        $bgPointCoordinates = new CoordinateLatLng();
-        $bgPointCoordinates->setLng($calibrationPoint->bgMap->lng);
-        $bgPointCoordinates->setLat($calibrationPoint->bgMap->lat);
-
-        $fgPointCoordinates = new CoordinateXY();
-        $fgPointCoordinates->setX($calibrationPoint->fgMap->x);
-        $fgPointCoordinates->setY($calibrationPoint->fgMap->y);
+        $bgPointCoordinates = new CoordinateLatLng($calibrationPoint->bgMap->lng, $calibrationPoint->bgMap->lat);
+        $fgPointCoordinates = new CoordinateXY($calibrationPoint->fgMap->x, $calibrationPoint->fgMap->y);
 
         return new CalibrationPoint($bgPointCoordinates, $fgPointCoordinates);
     }

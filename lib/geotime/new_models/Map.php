@@ -16,7 +16,7 @@ class Map {
     /** @Column(type="string") **/
     var $fileName;
 
-    /** @Column(type="datetime") **/
+    /** @Column(type="datetime", nullable=true) **/
     var $uploadDate;
 
     /**
@@ -36,7 +36,6 @@ class Map {
     /** @Column(type="integer", nullable=true) **/
     var $scale;
 
-    /**
     /** @Column(type="json_array", nullable=true) **/
     var $calibrationPoints;
 

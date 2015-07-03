@@ -136,12 +136,12 @@ class TerritoryHelper implements AbstractEntityHelper
      * @param $territory Territory
      * @return int|null The approximate signed geodesic area of the polygon in square kilometers.
      */
-    function calculateArea($territory) {
+    private static function calculateArea($territory) {
         $coords = $territory->getPolygon();
         if (!is_null($coords)) {
             $area = 0;
             foreach($coords as $landCoords) {
-                $area += $this->calculateLandArea($landCoords[0]); // The natural data export encapsulates the coords in an extra array
+                $area += self::calculateLandArea($landCoords[0]); // The natural data export encapsulates the coords in an extra array
             }
 
             return intval(abs($area) / pow(10,6));
@@ -153,7 +153,7 @@ class TerritoryHelper implements AbstractEntityHelper
      * @param $landCoords
      * @return float
      */
-    public function calculateLandArea($landCoords)
+    public static function calculateLandArea($landCoords)
     {
         $area = 0;
         if (count($landCoords) > 2) {

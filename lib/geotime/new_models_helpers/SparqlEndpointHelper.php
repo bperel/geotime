@@ -17,6 +17,20 @@ class SparqlEndpointHelper implements AbstractEntityHelper
         if (is_null($fileName)) {
             $fileName = self::$cachePath;
         }
-        ModelHelper::importFromJson(self::getTableName(), $fileName);
+
+        $tableName = self::getTableName();
+
+        ModelHelper::importFromJson($fileName, function($object) use ($tableName) {
+            $sparqlEndPoint = new SparqlEndpoint();
+            $sparqlEndPoint->setName($object->name);
+            $sparqlEndPoint->setRootUrl($object->rootUrl);
+            $sparqlEndPoint->setEndPoint($object->endPoint);
+            $sparqlEndPoint->setMethod($object->method);
+            $sparqlEndPoint->setParameters($object->parameters);
+
+            ModelHelper::getEm()->persist($sparqlEndPoint);
+        });
+
+        ModelHelper::getEm()->flush();
     }
 }
