@@ -23,7 +23,7 @@ class MapHelper implements AbstractEntityHelper
     {
         self::$log->debug('Generating references for map '.$imageMapFullName);
 
-        $territory = new Territory(null, new \stdClass(), 0, '', new \DateTime($startDateStr), new \DateTime($endDateStr), true);
+        $territory = new Territory(null, true, new \stdClass(), 0, '', new \DateTime($startDateStr), new \DateTime($endDateStr));
 
         ModelHelper::getEm()->persist($territory);
         ModelHelper::getEm()->flush();
@@ -73,6 +73,35 @@ class MapHelper implements AbstractEntityHelper
 
         return $simplifiedMap;
         */
+    }
+
+    /**
+     * @param $mapId int
+     * @return null|Map
+     */
+    public static function find($mapId) {
+        return ModelHelper::getEm()->getRepository(Map::CLASSNAME)
+            ->find($mapId);
+    }
+
+    /**
+     * @param $mapId int
+     */
+    public static function delete($mapId) {
+        $map = self::find($mapId);
+        ModelHelper::getEm()->remove($map);
+        ModelHelper::getEm()->flush();
+    }
+
+    /**
+     * @return int
+     */
+    public static function count() {
+        $qb = ModelHelper::getEm()->createQueryBuilder();
+        $qb->select('count(map.id)');
+        $qb->from(Map::CLASSNAME,'map');
+
+        return $qb->getQuery()->getSingleScalarResult();
     }
 
     // @codeCoverageIgnoreStart

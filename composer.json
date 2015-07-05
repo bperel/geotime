@@ -21,11 +21,12 @@
 		"symfony/yaml": "2.*"
 	},
 	"autoload": {
-		"psr-0": {
-            "geotime\\models\\mariadb": "lib/geotime/",
-            "geotime\\models\\mariadb\\types": "lib/geotime/types/",
-		  	"geotime\\helpers": "lib/geotime/new_models_helpers/",
-		  	"geotime": "lib/geotime/"
+		"psr-4": {
+            "geotime\\models\\mariadb\\": "lib/geotime/",
+            "geotime\\models\\mariadb\\types\\": "lib/geotime/types/",
+		  	"geotime\\Test\\Helper\\": "test/phpunit/",
+		  	"geotime\\helpers\\": "lib/geotime/new_models_helpers/",
+		  	"geotime\\": "lib/geotime/"
 		}
 	},
 	"config": {

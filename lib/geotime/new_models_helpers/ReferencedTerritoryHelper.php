@@ -62,8 +62,7 @@ class ReferencedTerritoryHelper implements AbstractEntityHelper
     {
         return array_map(
             function ($referencedTerritoryName) {
-                $referencedTerritory = ModelHelper::getEm()->getRepository(ReferencedTerritory::CLASSNAME)
-                    ->findOneBy(array('name' => $referencedTerritoryName));
+                $referencedTerritory = self::findOneByName($referencedTerritoryName);
                 if (is_null($referencedTerritory) && !empty($referencedTerritoryName)) {
                     $referencedTerritory = self::buildAndCreate($referencedTerritoryName);
                 }
@@ -73,6 +72,18 @@ class ReferencedTerritoryHelper implements AbstractEntityHelper
         );
     }
 
+    /**
+     * @param $name
+     * @return ReferencedTerritory|object
+     */
+    public static function findOneByName($name) {
+        return ModelHelper::getEm()->getRepository(ReferencedTerritory::CLASSNAME)
+            ->findOneBy(array('name' => $name));
+    }
+
+    /**
+     * @return int
+     */
     public static function count() {
         $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb->select('count(referencedTerritory.id)');

@@ -4,6 +4,8 @@ use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Doctrine\DBAL\Types\Type;
 
+use geotime\models\mariadb\types\CalibrationPointType;
+
 class DoctrineBootstrap {
     /**
      * @return \Doctrine\ORM\Configuration
@@ -15,11 +17,12 @@ class DoctrineBootstrap {
 
     private static function getEntityManagerFromConnectionParams($connectionParams) {
         $config = self::getMetadataConfig();
+        //$config->setSQLLogger(new \Doctrine\DBAL\Logging\EchoSQLLogger());
         $conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $config);
         $em = EntityManager::create($conn, $config);
 
-        Type::addType('calibration_point', geotime\models\mariadb\types\CalibrationPointType::$CLASSNAME);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('calibration_point', 'string');
+        Type::addType(CalibrationPointType::MYTYPE, CalibrationPointType::$CLASSNAME);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('CALIBRATION_POINT', CalibrationPointType::MYTYPE);
 
         return $em;
     }
@@ -52,6 +55,3 @@ class DoctrineBootstrap {
         return self::getEntityManagerFromConnectionParams($connectionParams);
     }
 }
-
-include_once('CalibrationPoint.php');
-include_once('CalibrationPointType.php');

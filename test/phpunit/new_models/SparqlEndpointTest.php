@@ -4,12 +4,11 @@ namespace geotime\Test;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\SparqlEndpointHelper;
 use geotime\models\mariadb\SparqlEndpoint;
-use geotime\Test\Helper\MariaDbTestHelper;
+use geotime\Test\Helper\EntityTestHelper;
 
-include_once('MariaDbTestHelper.php');
-include_once('SparqlEndpointHelper.php');
+include_once('EntityTestHelper.php');
 
-class SparqlEndpointTest extends MariaDbTestHelper {
+class SparqlEndpointTest extends EntityTestHelper {
 
     static function setUpBeforeClass() {
     }

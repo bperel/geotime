@@ -5,12 +5,11 @@ namespace geotime\Test;
 use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
 use geotime\models\mariadb\Map;
-use geotime\Test\Helper\MariaDbTestHelper;
+use geotime\Test\Helper\EntityTestHelper;
 
-include_once('MariaDbTestHelper.php');
-include_once('MapHelper.php');
+include_once('EntityTestHelper.php');
 
-class MapTest extends MariaDbTestHelper {
+class MapTest extends EntityTestHelper {
 
     static function setUpBeforeClass() {
         //Map::$log->info(__CLASS__." tests started");

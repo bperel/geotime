@@ -29,7 +29,7 @@ class ReferencedTerritory
     var $next;
 
     /**
-     * @Column(type="calibration_point", nullable= true)
+     * @Column(type="calibrationPoint", nullable= true)
      * @var CalibrationPoint
      */
     private $calibrationPoint;

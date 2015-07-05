@@ -45,7 +45,7 @@ class TerritoryHelper implements AbstractEntityHelper
             }
         }
 
-        return self::buildAndCreateWithReferencedTerritory($referencedTerritory, false, $fieldValues['startDate'], $fieldValues['endDate']
+        return self::buildAndCreateWithReferencedTerritory($referencedTerritory, $fieldValues['startDate'], $fieldValues['endDate']
         );
     }
 
@@ -55,35 +55,30 @@ class TerritoryHelper implements AbstractEntityHelper
      * @return Territory
      */
     public static function buildAndCreateFromNEData($referencedTerritory, $coordinates) {
-        $territory = new Territory();
-        $territory->setPolygon($coordinates);
-        return self::buildAndSave($territory, $referencedTerritory, false);
+        $territory = new Territory($referencedTerritory, false, $coordinates);
+        return self::buildAndSave($territory);
     }
 
     /**
      * @param ReferencedTerritory $referencedTerritory
-     * @param $usermade
      * @param string $startDate
      * @param string $endDate
      * @param string $xpath
      * @return Territory
      */
-    public static function buildAndCreateWithReferencedTerritory($referencedTerritory, $usermade, $startDate = '', $endDate = '', $xpath = '') {
-        $territory = new Territory();
-        return self::buildAndSave($territory, $referencedTerritory, $usermade, $startDate, $endDate, $xpath);
+    public static function buildAndCreateWithReferencedTerritory($referencedTerritory, $startDate = '', $endDate = '', $xpath = '') {
+        $territory = new Territory($referencedTerritory, true);
+        return self::buildAndSave($territory, $startDate, $endDate, $xpath);
     }
 
     /**
      * @param $territory Territory
-     * @param $referencedTerritory ReferencedTerritory
-     * @param $userMade boolean
      * @param $startDate string
      * @param $endDate string
      * @param $xpath string
      * @return Territory
      */
-    private static function buildAndSave($territory, $referencedTerritory, $userMade, $startDate = '', $endDate = '', $xpath = null) {
-        $territory->setReferencedTerritory($referencedTerritory);
+    private static function buildAndSave($territory, $startDate = '', $endDate = '', $xpath = null) {
         if (!empty($startDate) && !empty($endDate)) {
             $territory->setStartDate(new \DateTime($startDate));
             $territory->setEndDate(new \DateTime($endDate));
@@ -91,7 +86,6 @@ class TerritoryHelper implements AbstractEntityHelper
         if (!empty($xpath)) {
             $territory->setXpath($xpath);
         }
-        $territory->setUserMade($userMade);
         return self::save($territory);
     }
 
@@ -219,6 +213,17 @@ class TerritoryHelper implements AbstractEntityHelper
         ModelHelper::getEm()->flush();
 
         return $territory;
+    }
+
+    /**
+     * @return int
+     */
+    public static function count() {
+        $qb = ModelHelper::getEm()->createQueryBuilder();
+        $qb->select('count(territory.id)');
+        $qb->from(Territory::CLASSNAME,'territory');
+
+        return $qb->getQuery()->getSingleScalarResult();
     }
 
     // @codeCoverageIgnoreStart

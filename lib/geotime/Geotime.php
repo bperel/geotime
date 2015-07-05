@@ -2,10 +2,10 @@
 
 namespace geotime;
 
-use geotime\models\CalibrationPoint;
-use geotime\models\CriteriaGroup;
+use geotime\helpers\CalibrationPointHelper;
+use geotime\helpers\CriteriaGroupHelper;
+use geotime\helpers\ModelHelper;
 use geotime\models\Map;
-use geotime\models\Period;
 use geotime\models\ReferencedTerritory;
 use geotime\models\Territory;
 use Logger;
@@ -30,16 +30,28 @@ class Geotime {
      */
     static function getMapsAndLocalizedTerritoriesCount($svgOnly) {
 
-        $filters = $svgOnly ? array('fileName' => array('$regex' => '.svg$')) : array();
+        $qb = ModelHelper::getEm()->createQueryBuilder();
+        $qb
+            ->select('map')
+            ->from(models\mariadb\Map::CLASSNAME,'map');
+
+        if ($svgOnly) {
+            $qb->where(
+                $qb->expr()->like('map.fileName', $qb->expr()->literal('%.svg'))
+            );
+        }
+
+        /** @var models\mariadb\Map[] $maps */
+        $maps = $qb->getQuery()->getResult();
 
         return array_reduce(
-            Map::find($filters)->toArray(),
-            function($result, Map $map) {
-                $territories = $map->getTerritories()->toArray();
+            $maps,
+            function($result, models\mariadb\Map $map) {
+                $territories = $map->getTerritories()->getValues();
                 $result[$map->getFileName()] = array(
                     'count' => count($territories),
                     'area'  => array_sum(
-                        array_map(function (Territory $territory) {
+                        array_map(function (models\mariadb\Territory $territory) {
                             return $territory->getArea();
                         }, $territories)
                     )
@@ -80,36 +92,27 @@ class Geotime {
      */
     static function getCoverageInfo() {
 
-        $periodsAndCoverage = Territory::aggregate(
-            array(
-                array(
-                    '$group' => array(
-                        '_id' => '$period',
-                        'areaSum' => array(
-                            '$sum' => '$area'
-                        )
-                    )
-                )
-            )
-        );
+        $qb = ModelHelper::getEm()->createQueryBuilder();
+        $qb
+            ->select('territory.startDate, territory.endDate, territory.userMade, sum(territory.area) as areaSum')
+            ->from(models\mariadb\Territory::CLASSNAME,'territory')
+            ->groupBy('territory.startDate, territory.endDate, territory.userMade')
+            ->orderBy('territory.userMade DESC, territory.startDate, territory.endDate');
+
+        $periodsAndCoverage = $qb->getQuery()->getArrayResult();
 
         $formattedPeriodsAndCoverage = array();
-        foreach($periodsAndCoverage['result'] as $periodAndCoverage) {
-            $periodArray = $periodAndCoverage['_id'];
-
-            if (is_null($periodArray)) { // No period specified <=> Natural earth data
-                $period = new Period();
-                $period->setStart(new \MongoDate(strtotime(NaturalEarthImporter::$dataDate)));
-                $period->setEnd(new \MongoDate(strtotime(NaturalEarthImporter::$dataDate)));
-            }
-            else {
-                $period = new Period($periodArray);
-            }
+        foreach($periodsAndCoverage as $periodAndCoverage) {
             $coverage = new \stdClass();
-            $coverage->start = $period->getStartYear();
-            $coverage->end = $period->getEndYear();
+            if ($periodAndCoverage['userMade']) {
+                $coverage->start = $periodAndCoverage['startDate']->format('Y');
+                $coverage->end = $periodAndCoverage['endDate']->format('Y');
+            }
+            else {  // Natural earth data
+                $coverage->start = date('Y', strtotime(NaturalEarthImporter::$dataDate));
+                $coverage->end = date('Y', strtotime(NaturalEarthImporter::$dataDate));
+            }
             $coverage->coverage = $periodAndCoverage['areaSum'];
-
             $formattedPeriodsAndCoverage[] = $coverage;
         }
 
@@ -166,9 +169,9 @@ class Geotime {
                 $map->setScale($mapScale);
             }
             if (!empty($calibrationPoints)) {
-                array_walk($calibrationPoints, function (&$calibrationPoint) {
-                    $calibrationPoint = CalibrationPoint::generateFromStrings(json_decode(json_encode($calibrationPoint)));
-                });
+                $calibrationPoints = array_map(function (&$calibrationPoint) {
+                    return CalibrationPointHelper::generateFromStrings(json_decode(json_encode($calibrationPoint)));
+                }, $calibrationPoints);
                 $map->setCalibrationPoints($calibrationPoints);
             }
             if (!empty($mapProjection) && !empty($mapCenter) && !empty($mapScale)) {
@@ -211,7 +214,7 @@ class Geotime {
     }
 
     public static function getCriteriaGroupsNumber() {
-        return CriteriaGroup::count();
+        return CriteriaGroupHelper::count();
     }
 
     /**
@@ -219,12 +222,15 @@ class Geotime {
      * @param bool $keepMaps
      */
     public static function clean($keepMaps=false) {
+        $connection = ModelHelper::getEm()->getConnection();
+        $platform = $connection->getDatabasePlatform();
+
         if (!$keepMaps) {
-            Map::drop();
+            $connection->executeUpdate($platform->getTruncateTableSQL('maps', true));
         }
-        Territory::drop();
-        ReferencedTerritory::drop();
-        Period::drop();
+        else {
+            $connection->executeUpdate($platform->getTruncateTableSQL('territories', true));
+        }
     }
 }
 

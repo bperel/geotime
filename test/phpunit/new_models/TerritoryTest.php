@@ -8,14 +8,10 @@ use geotime\helpers\TerritoryHelper;
 use geotime\models\mariadb\ReferencedTerritory;
 use geotime\models\mariadb\Territory;
 use geotime\NaturalEarthImporter;
-use geotime\Test\Helper\MariaDbTestHelper;
+use geotime\Test\Helper\EntityTestHelper;
 
-include_once('MariaDbTestHelper.php');
-include_once('ReferencedTerritoryHelper.php');
-include_once('TerritoryHelper.php');
-include_once('NaturalEarthImporter.php');
-
-class TerritoryTest extends MariaDbTestHelper {
+include_once('EntityTestHelper.php');
+class TerritoryTest extends EntityTestHelper {
 
     static function setUpBeforeClass() {
         // Territory::$log->info(__CLASS__." tests started");
@@ -65,16 +61,10 @@ class TerritoryTest extends MariaDbTestHelper {
     }
 
     public function testCountForPeriod() {
-        $territory = new Territory();
-        $territory->setStartDate(new \DateTime('2000-01-01'));
-        $territory->setEndDate(new \DateTime('2004-12-31'));
-        $territory->setUserMade(true);
+        $territory = new Territory(null, true, null, 0, null, new \DateTime('2000-01-01'), new \DateTime('2004-12-31'));
         ModelHelper::getEm()->persist($territory);
 
-        $territory2 = new Territory();
-        $territory2->setStartDate(new \DateTime('2003-01-01'));
-        $territory2->setEndDate(new \DateTime('2006-01-01'));
-        $territory2->setUserMade(true);
+        $territory2 = new Territory(null, true, null, 0, null, new \DateTime('2003-01-01'), new \DateTime('2006-01-01'));
         ModelHelper::getEm()->persist($territory2);
 
         ModelHelper::getEm()->flush();

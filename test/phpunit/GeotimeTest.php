@@ -1,15 +1,22 @@
 <?php
 namespace geotime\Test;
 
+use Doctrine\ORM\EntityRepository;
+use geotime\helpers\ModelHelper;
+
 use geotime\Database;
 use geotime\Geotime;
-use geotime\models\Map;
-use geotime\models\ReferencedTerritory;
+use geotime\helpers\MapHelper;
+use geotime\helpers\ReferencedTerritoryHelper;
+use geotime\helpers\TerritoryHelper;
+use geotime\models\mariadb\Map;
 use geotime\models\Territory;
 use geotime\NaturalEarthImporter;
-use PHPUnit_Framework_TestCase;
+use geotime\Test\Helper\MariaDbTestHelper;
 
-class GeotimeTest extends \PHPUnit_Framework_TestCase {
+include_once('MariaDbTestHelper.php');
+
+class GeotimeTest extends MariaDbTestHelper {
 
     static $neMapName = 'test/phpunit/_data/countries.json';
     static $customMapName = 'testImage.svg';
@@ -30,7 +37,8 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         Geotime::$log->info(__CLASS__." tests ended");
     }
 
-    protected function setUp() {
+    public function setUp() {
+        parent::setUp();
         Database::connect(Database::$testDbName);
 
         Geotime::clean();
@@ -38,13 +46,11 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $neImport = new NaturalEarthImporter();
         $neImport->import(self::$neMapName);
 
-        $map = Map::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
-        $map->setUploadDate(new \MongoDate());
-        $map->save();
-    }
+        $map = MapHelper::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
+        $map->setUploadDate(new \DateTime());
 
-    protected function tearDown() {
-        Geotime::clean();
+        ModelHelper::getEm()->persist($map);
+        ModelHelper::getEm()->flush();
     }
 
     public function testGetPeriodsAndTerritoriesData() {
@@ -75,22 +81,34 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
 
     public function testClean() {
 
+        $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
+        $t = new \geotime\models\mariadb\Territory($referencedTerritory, true);
+        ModelHelper::getEm()->persist($t);
+        ModelHelper::getEm()->flush();
+
+        $this->assertNotEquals(0, TerritoryHelper::count());
+        $this->assertNotEquals(0, MapHelper::count());
+
         Geotime::clean();
+
         $this->assertEquals(0, Territory::count());
-        $this->assertEquals(0, Map::count());
+        $this->assertEquals(0, MapHelper::count());
     }
 
-    public function testCleanAfterManualImport() {
+    public function testCleanKeepMaps() {
 
-        Geotime::clean();
+        $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
+        $t = new \geotime\models\mariadb\Territory($referencedTerritory, true);
+        ModelHelper::getEm()->persist($t);
+        ModelHelper::getEm()->flush();
 
-        $t = new Territory();
-        $t->save();
-        $this->assertEquals(1, Territory::count());
+        $this->assertNotEquals(0, TerritoryHelper::count());
+        $this->assertNotEquals(0, MapHelper::count());
 
-        Geotime::clean();
+        Geotime::clean(true);
 
         $this->assertEquals(0, Territory::count());
+        $this->assertNotEquals(0, MapHelper::count());
     }
 
     public function testGetPeriodsAndCoverage() {
@@ -152,11 +170,13 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
 
     function testUpdateMapInexisting() {
         $map = new Map();
-        $map->save();
-        $mapId = $map->getIdAsString();
-        $map->delete();
 
-        $updatedMap = Geotime::updateMap($mapId, 'mercator', array('0', '0', '0'), array(array('0', '10')), 200);
+        ModelHelper::getEm()->persist($map);
+        ModelHelper::getEm()->flush();
+
+        MapHelper::delete($map->getId());
+
+        $updatedMap = Geotime::updateMap($map->getId(), 'mercator', array('0', '0', '0'), array(array('0', '10')), 200);
         $this->assertNull($updatedMap);
     }
 
@@ -164,8 +184,11 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $map = new Map();
         $map->setFileName(self::$customMapName);
         $map->setProjection('mercator');
-        $map->save();
-        $mapId = $map->getIdAsString();
+
+        ModelHelper::getEm()->persist($map);
+        ModelHelper::getEm()->flush();
+
+        $mapId = $map->getId();
 
         $updatedMap = Geotime::updateMap(
             $mapId, 'mercator2', array('10', '20', '30'), array('5', '5'), 200,
@@ -186,8 +209,10 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $map = new Map();
         $map->setFileName(self::$customMapName);
         $map->setProjection('mercator');
-        $map->save();
-        $mapId = $map->getIdAsString();
+
+        ModelHelper::getEm()->persist($map);
+        ModelHelper::getEm()->flush();
+        $mapId = $map->getId();
 
         $updatedMap = Geotime::updateMap($mapId, null);
         $this->assertNotNull($updatedMap);
@@ -197,10 +222,12 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
 
     function testAddLocatedTerritory() {
         $map = new Map();
-        $map->save();
-        $mapId = $map->getIdAsString();
 
-        $referencedTerritory = ReferencedTerritory::one(array('name' => 'France'));
+        ModelHelper::getEm()->persist($map);
+        ModelHelper::getEm()->flush();
+        $mapId = $map->getId();
+
+        $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
 
         $coordinates = array(
             array(-76.73647242455775, 19.589864044838837),
@@ -225,7 +252,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $this->assertGreaterThan(0, $createdTerritory->getArea());
 
         /** @var Map $mapWithTerritory */
-        $mapWithTerritory = Map::id($mapId);
+        $mapWithTerritory = MapHelper::find($mapId);
         $this->assertEquals(count($mapWithTerritory->getTerritories()), 1);
 
         $this->assertEquals(Geotime::getImportedTerritoriesCount(), 3);
@@ -233,10 +260,12 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
 
     function testUpdateLocatedTerritory() {
         $map = new Map();
-        $map->save();
-        $mapId = $map->getIdAsString();
 
-        $referencedTerritory = ReferencedTerritory::one(array('name' => 'France'));
+        ModelHelper::getEm()->persist($map);
+        ModelHelper::getEm()->flush();
+        $mapId = $map->getId();
+
+        $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
 
         $coordinates = array(
             array(-76.73647242455775, 19.589864044838837),
@@ -249,7 +278,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $territoryPeriodEnd = '1991-04-06';
 
         Geotime::saveLocatedTerritory(
-            $mapId, $referencedTerritory->getId()->__toString(), $xpath, $territoryPeriodStart, $territoryPeriodEnd
+            $mapId, $referencedTerritory->getId(), $xpath, $territoryPeriodStart, $territoryPeriodEnd
         );
 
         /** @var Territory $territoryWithReference */
@@ -264,8 +293,16 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $this->assertGreaterThan(0, $territoryWithReference->getArea());
 
         /** @var Map $mapWithTerritory */
-        $mapWithTerritory = Map::id($mapId);
+        $mapWithTerritory = MapHelper::find($mapId);
         $this->assertEquals(count($mapWithTerritory->getTerritories()), 1);
 
     }
-} 
+
+    /**
+     * @return EntityRepository
+     */
+    public function getRepository()
+    {
+        // TODO: Implement getRepository() method.
+    }
+}

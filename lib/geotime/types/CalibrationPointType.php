@@ -20,7 +20,7 @@ class CalibrationPointType extends Type
      */
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        return self::SQL_DECLARATION;
+        return $platform->getDoctrineTypeMapping('text');
     }
 
     /**
@@ -57,5 +57,10 @@ class CalibrationPointType extends Type
     public function getName()
     {
         return self::MYTYPE; // modify to match your constant name
+    }
+
+    public function canRequireSQLConversion()
+    {
+        return true;
     }
 }

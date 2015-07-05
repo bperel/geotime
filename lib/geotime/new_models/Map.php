@@ -1,6 +1,7 @@
 <?php
 
 namespace geotime\models\mariadb;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @Entity @Table(name="maps")
@@ -40,6 +41,16 @@ class Map {
     var $calibrationPoints;
 
     // @codeCoverageIgnoreStart
+
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
     /**
      * @return string
      */
@@ -73,7 +84,7 @@ class Map {
     }
 
     /**
-     * @return Territory[]
+     * @return ArrayCollection
      */
     public function getTerritories()
     {

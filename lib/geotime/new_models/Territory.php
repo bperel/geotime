@@ -27,6 +27,9 @@ class Territory {
     /** @Column(type="integer") **/
     var $area;
 
+    /** @Column(type="boolean") **/
+    var $userMade;
+
     /** @Column(type="string", nullable=true) **/
     var $xpath;
 
@@ -36,10 +39,7 @@ class Territory {
     /** @Column(type="datetime", nullable=true) **/
     var $endDate;
 
-    /** @Column(type="boolean") **/
-    var $userMade;
-
-    function __construct($referencedTerritory = null, $polygon = null, $area = 0, $xpath = null, $startDate = null, $endDate = null, $userMade = null)
+    function __construct($referencedTerritory, $userMade, $polygon = null, $area = 0, $xpath = null, $startDate = null, $endDate = null)
     {
         $this->referencedTerritory = $referencedTerritory;
         $this->polygon = $polygon;
@@ -145,6 +145,21 @@ class Territory {
     public function setEndDate($endDate)
     {
         $this->endDate = $endDate;
+    }
+
+
+    /**
+     * @return bool|string
+     */
+    public function getStartYear() {
+        return date('Y', $this->getStartDate());
+    }
+
+    /**
+     * @return bool|string
+     */
+    public function getEndYear() {
+        return date('Y', $this->getEndDate());
     }
 
     /**

@@ -4,13 +4,11 @@ namespace geotime\Test\Helper;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\SchemaTool;
 use geotime\helpers\ModelHelper;
 use PHPUnit_Extensions_Database_DataSet_IDataSet;
 use PHPUnit_Extensions_Database_DB_IDatabaseConnection;
 use PHPUnit_Extensions_Database_TestCase;
-
 
 abstract class MariaDbTestHelper extends \PHPUnit_Extensions_Database_TestCase {
 
@@ -41,11 +39,6 @@ abstract class MariaDbTestHelper extends \PHPUnit_Extensions_Database_TestCase {
 
         $tool->dropSchema($classes);
     }
-
-    /**
-     * @return EntityRepository
-     */
-    public abstract function getRepository();
 
     /* Tests */
 /*

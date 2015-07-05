@@ -3,13 +3,10 @@
 namespace geotime\Test;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
-use geotime\Test\Helper\MariaDbTestHelper;
+use geotime\Test\Helper\EntityTestHelper;
 use geotime\models\mariadb\ReferencedTerritory;
 
-include_once('MariaDbTestHelper.php');
-include_once('ReferencedTerritoryHelper.php');
-
-class ReferencedTerritoryTest extends MariaDbTestHelper {
+class ReferencedTerritoryTest extends EntityTestHelper {
 
     static function setUpBeforeClass() {
         //ReferencedTerritory::$log->info(__CLASS__." tests started");
