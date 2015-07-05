@@ -182,7 +182,7 @@ class TerritoryHelper implements AbstractEntityHelper
         $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb->select('count(territory.id)');
         $qb->from(Territory::CLASSNAME,'territory');
-        $qb->where('territory.startDate >= :startDate AND territory.endDate >= :endDate')
+        $qb->where('territory.startDate <= :endDate AND territory.endDate >= :startDate')
             ->setParameter('startDate', $startDate)
             ->setParameter('endDate', $endDate);
 
@@ -221,10 +221,12 @@ class TerritoryHelper implements AbstractEntityHelper
         return $territory;
     }
 
+    // @codeCoverageIgnoreStart
     static final function getTableName()
     {
         return ModelHelper::getEm()->getClassMetadata(ReferencedTerritory::CLASSNAME)->getTableName();
     }
+    // @codeCoverageIgnoreEnd
 }
 
 TerritoryHelper::$log = Logger::getLogger("main");

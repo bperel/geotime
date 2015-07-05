@@ -4,6 +4,7 @@ namespace geotime\Test;
 
 use Doctrine\ORM\EntityRepository;
 use geotime\helpers\ModelHelper;
+use geotime\helpers\TerritoryHelper;
 use geotime\models\mariadb\ReferencedTerritory;
 use geotime\models\mariadb\Territory;
 use geotime\NaturalEarthImporter;
@@ -26,7 +27,6 @@ class TerritoryTest extends MariaDbTestHelper {
 
     public function setUp() {
         parent::setUp();
-        $all = $this->getRepository()->findAll();
         $neImport = new NaturalEarthImporter();
         $neImport->import('test/phpunit/_data/countries.json');
     }
@@ -62,6 +62,27 @@ class TerritoryTest extends MariaDbTestHelper {
         /** @var Territory $luxembourg */
         $luxembourg = $this->getRepository()->findOneBy(array('referencedTerritory' => $luxembourgReferencedTerritory));
         $this->assertEquals(2412, $luxembourg->getArea());
+    }
+
+    public function testCountForPeriod() {
+        $territory = new Territory();
+        $territory->setStartDate(new \DateTime('2000-01-01'));
+        $territory->setEndDate(new \DateTime('2004-12-31'));
+        $territory->setUserMade(true);
+        ModelHelper::getEm()->persist($territory);
+
+        $territory2 = new Territory();
+        $territory2->setStartDate(new \DateTime('2003-01-01'));
+        $territory2->setEndDate(new \DateTime('2006-01-01'));
+        $territory2->setUserMade(true);
+        ModelHelper::getEm()->persist($territory2);
+
+        ModelHelper::getEm()->flush();
+
+        $this->assertEquals(2, TerritoryHelper::countForPeriod(new \DateTime('2002-01-01'),new \DateTime('2004-01-01')));
+        $this->assertEquals(2, TerritoryHelper::countForPeriod(new \DateTime('1999-01-01'),new \DateTime('2020-01-01')));
+        $this->assertEquals(1, TerritoryHelper::countForPeriod(new \DateTime('1999-01-01'),new \DateTime('2000-01-01')));
+        $this->assertEquals(0, TerritoryHelper::countForPeriod(new \DateTime('2006-01-02'),new \DateTime('2010-01-01')));
     }
 }
  

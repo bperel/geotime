@@ -1,7 +1,6 @@
 <?php
 namespace geotime\helpers;
 use geotime\models\mariadb\Map;
-use geotime\models\mariadb\ReferencedTerritory;
 use geotime\models\mariadb\Territory;
 use geotime\new_models\AbstractEntityHelper;
 
@@ -76,10 +75,12 @@ class MapHelper implements AbstractEntityHelper
         */
     }
 
+    // @codeCoverageIgnoreStart
     static final function getTableName()
     {
-        return ModelHelper::getEm()->getClassMetadata(ReferencedTerritory::CLASSNAME)->getTableName();
+        return ModelHelper::getEm()->getClassMetadata(Map::CLASSNAME)->getTableName();
     }
+    // @codeCoverageIgnoreEnd
 }
 
 MapHelper::$log = Logger::getLogger("main");

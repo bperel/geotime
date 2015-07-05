@@ -8,11 +8,6 @@ class SparqlEndpointHelper implements AbstractEntityHelper
 {
     static $cachePath = 'data/sparqlEndpoints.json';
 
-    static final function getTableName()
-    {
-        return ModelHelper::getEm()->getClassMetadata(SparqlEndpoint::CLASSNAME)->getTableName();
-    }
-
     public static function importFromJson($fileName=null) {
         if (is_null($fileName)) {
             $fileName = self::$cachePath;
@@ -33,4 +28,11 @@ class SparqlEndpointHelper implements AbstractEntityHelper
 
         ModelHelper::getEm()->flush();
     }
+
+    // @codeCoverageIgnoreStart
+    static final function getTableName()
+    {
+        return ModelHelper::getEm()->getClassMetadata(SparqlEndpoint::CLASSNAME)->getTableName();
+    }
+    // @codeCoverageIgnoreEnd
 }

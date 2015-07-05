@@ -81,8 +81,10 @@ class ReferencedTerritoryHelper implements AbstractEntityHelper
         return $qb->getQuery()->getSingleScalarResult();
     }
 
+    // @codeCoverageIgnoreStart
     static final function getTableName()
     {
         return ModelHelper::getEm()->getClassMetadata(ReferencedTerritory::CLASSNAME)->getTableName();
     }
+    // @codeCoverageIgnoreEnd
 }
