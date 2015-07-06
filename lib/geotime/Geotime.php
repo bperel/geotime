@@ -2,6 +2,9 @@
 
 namespace geotime;
 
+use Doctrine\ORM\AbstractQuery;
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\PersistentCollection;
 use geotime\helpers\CalibrationPointHelper;
 use geotime\helpers\CriteriaGroupHelper;
 use geotime\helpers\ModelHelper;
@@ -121,17 +124,29 @@ class Geotime {
     }
 
     /**
-     * @return object|null
+     * @return \geotime\models\mariadb\Map|null
      */
     public static function getIncompleteMapInfo()
     {
-        /** @var Map $incompleteMap */
-        $incompleteMap = Map::one(array('uploadDate'=>array('$exists' => true)));
-        if (!is_null($incompleteMap)) {
-            return $incompleteMap->__toSimplifiedObject();
-        }
+        $qb = ModelHelper::getEm()->createQueryBuilder();
 
-        return null;
+        $qb
+            ->addSelect('map')
+            ->from(models\mariadb\Map::CLASSNAME,'map')
+            ->where(
+                $qb->expr()->isNotNull('map.uploadDate')
+            )
+        ;
+
+        $query = $qb->getQuery();
+
+        $map = $query->getSingleResult(AbstractQuery::HYDRATE_OBJECT);
+
+        /** @var PersistentCollection $mapTerritories */
+        $mapTerritories = $map->territories;
+        $map->territories = $mapTerritories->toArray();
+
+        return $map;
     }
 
     /**
@@ -228,9 +243,8 @@ class Geotime {
         if (!$keepMaps) {
             $connection->executeUpdate($platform->getTruncateTableSQL('maps', true));
         }
-        else {
-            $connection->executeUpdate($platform->getTruncateTableSQL('territories', true));
-        }
+
+        $connection->executeUpdate($platform->getTruncateTableSQL('territories', true));
     }
 }
 

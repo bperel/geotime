@@ -91,7 +91,7 @@ class GeotimeTest extends MariaDbTestHelper {
 
         Geotime::clean();
 
-        $this->assertEquals(0, Territory::count());
+        $this->assertEquals(0, TerritoryHelper::count());
         $this->assertEquals(0, MapHelper::count());
     }
 
@@ -107,7 +107,7 @@ class GeotimeTest extends MariaDbTestHelper {
 
         Geotime::clean(true);
 
-        $this->assertEquals(0, Territory::count());
+        $this->assertEquals(0, TerritoryHelper::count());
         $this->assertNotEquals(0, MapHelper::count());
     }
 
@@ -134,11 +134,11 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertNotNull($incompleteMap);
         $this->assertEquals('testImage.svg', $incompleteMap->fileName);
 
-        $startDate = new \MongoDate(strtotime('1980-01-02'));
-        $this->assertEquals($startDate->sec, $incompleteMap->territories[0]->period->start->sec);
+        $startDate = new \DateTime('1980-01-02');
+        $this->assertEquals($startDate, $incompleteMap->territories[0]->startDate);
 
-        $endDate = new \MongoDate(strtotime('1991-02-03'));
-        $this->assertEquals($endDate->sec, $incompleteMap->territories[0]->period->end->sec);
+        $endDate = new \DateTime('1991-02-03');
+        $this->assertEquals($endDate, $incompleteMap->territories[0]->endDate);
     }
 
     function testGetIncompleteMapInfoNotFound() {
