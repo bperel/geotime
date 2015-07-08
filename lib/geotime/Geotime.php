@@ -3,14 +3,14 @@
 namespace geotime;
 
 use Doctrine\ORM\AbstractQuery;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\PersistentCollection;
 use geotime\helpers\CalibrationPointHelper;
 use geotime\helpers\CriteriaGroupHelper;
+use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
+use geotime\helpers\TerritoryHelper;
 use geotime\models\Map;
 use geotime\models\ReferencedTerritory;
-use geotime\models\Territory;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
@@ -68,24 +68,37 @@ class Geotime {
      * @param $startingWith
      * @return array|string
      */
-    static function getReferencedTerritories($startingWith) {
+    public static function getReferencedTerritories($startingWith)
+    {
         if (is_null($startingWith) || strlen($startingWith) === 0) {
             return 'At least the first letter of the territory name must me given.';
         }
+
+        $qb = ModelHelper::getEm()->createQueryBuilder();
+        $qb
+            ->select('referencedTerritory')
+            ->from(\geotime\models\mariadb\ReferencedTerritory::CLASSNAME, 'referencedTerritory')
+            ->where($qb->expr()->like('referencedTerritory.name', ':prefix'))
+            ->setParameter('prefix', $startingWith . '%');
+
+        $results = $qb->getQuery()->getResult();
+
         return array_map(
-            function(ReferencedTerritory $referencedTerritory) {
-                return array('id' => $referencedTerritory->getId()->__toString(), 'name' => $referencedTerritory->getName());
+            function (\geotime\models\mariadb\ReferencedTerritory $referencedTerritory) {
+                return array(
+                    'id' => $referencedTerritory->getId(),
+                    'name' => $referencedTerritory->getName()
+                );
             },
-            ReferencedTerritory::find(array('name' => array('$regex' => '^'.$startingWith)), array('name' => 1), array('name'=> 1))->toArray()
+            $results
         );
     }
-
 
     /**
      * @return int
      */
     static function getImportedTerritoriesCount() {
-        return Territory::count(array('userMade' => false));
+        return TerritoryHelper::count(false);
     }
 
     /**
@@ -140,12 +153,13 @@ class Geotime {
 
         $query = $qb->getQuery();
 
-        $map = $query->getSingleResult(AbstractQuery::HYDRATE_OBJECT);
+        $map = $query->getOneOrNullResult(AbstractQuery::HYDRATE_OBJECT);
 
-        /** @var PersistentCollection $mapTerritories */
-        $mapTerritories = $map->territories;
-        $map->territories = $mapTerritories->toArray();
-
+        if (!is_null($map)) {
+            /** @var PersistentCollection $mapTerritories */
+            $mapTerritories = $map->territories;
+            $map->territories = $mapTerritories->toArray();
+        }
         return $map;
     }
 
@@ -159,8 +173,8 @@ class Geotime {
      * @return Map|null
      */
     public static function updateMap($mapId, $mapProjection = null, $mapRotation = null, $mapCenter = null, $mapScale = null, $calibrationPoints = null) {
-        /** @var Map $map */
-        $map = Map::one(array('_id' => new \MongoId($mapId)));
+        /** @var \geotime\models\mariadb\Map $map */
+        $map = MapHelper::find($mapId);
         if (is_null($map)) {
             return null;
         }
@@ -190,7 +204,8 @@ class Geotime {
                 $map->setCalibrationPoints($calibrationPoints);
             }
             if (!empty($mapProjection) && !empty($mapCenter) && !empty($mapScale)) {
-                $map->save();
+                ModelHelper::getEm()->persist($map);
+                ModelHelper::getEm()->flush();
             }
             return $map;
         }
@@ -206,8 +221,8 @@ class Geotime {
      */
     public static function saveLocatedTerritory($mapId, $territoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
     {
-        /** @var Map $map */
-        $map = Map::one(array('_id' => new \MongoId($mapId)));
+        /** @var \geotime\models\mariadb\Map $map */
+        $map = MapHelper::find($mapId);
         if (is_null($map)) {
             return null;
         }
@@ -218,14 +233,17 @@ class Geotime {
             return null;
         }
 
-        $territory = Territory::buildAndCreateWithReferencedTerritory(
+        $territory = TerritoryHelper::buildAndCreateWithReferencedTerritory(
             $referencedTerritory, true, $territoryPeriodStart, $territoryPeriodEnd, $xpath
         );
-        $geocoordinates = $territory->calculateCoordinates($map);
-        $territory->setPolygon(array(array($geocoordinates)));
-        $territory->save();
+        $geocoordinates = TerritoryHelper::calculateCoordinates($territory, $map);
+        $territory->setPolygon(json_decode(json_encode(array(array($geocoordinates)))));
+        ModelHelper::getEm()->persist($territory);
+
         $map->addTerritory($territory);
-        $map->save();
+        ModelHelper::getEm()->persist($map);
+
+        ModelHelper::getEm()->flush();
     }
 
     public static function getCriteriaGroupsNumber() {

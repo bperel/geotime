@@ -93,7 +93,7 @@ class TerritoryHelper implements AbstractEntityHelper
      * @param $territory Territory
      * @return string
      */
-    private function getElementIdFromPath($territory) {
+    private static function getElementIdFromPath($territory) {
         return preg_replace('#^\/\/path\[id="([^"]+)"\]$#', '$1', $territory->getXpath());
     }
 
@@ -103,11 +103,11 @@ class TerritoryHelper implements AbstractEntityHelper
      * @param $map Map
      * @return string
      */
-    public function calculateCoordinates($territory, $map)
+    public static function calculateCoordinates($territory, $map)
     {
         return Util::calculatePathCoordinates(
             $map->getFileName(),
-            $this->getElementIdFromPath($territory),
+            self::getElementIdFromPath($territory),
             $map->getProjection(),
             $map->getCenter(),
             $map->getScale(),
@@ -216,12 +216,19 @@ class TerritoryHelper implements AbstractEntityHelper
     }
 
     /**
+     * @param bool $userMadeFilter
      * @return int
      */
-    public static function count() {
+    public static function count($userMadeFilter = null) {
         $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb->select('count(territory.id)');
         $qb->from(Territory::CLASSNAME,'territory');
+        if (!is_null($userMadeFilter)) {
+            $qb->where(
+                $qb->expr()->eq('territory.userMade', ':userMade')
+            )
+            ->setParameter('userMade', $userMadeFilter);
+        }
 
         return $qb->getQuery()->getSingleScalarResult();
     }

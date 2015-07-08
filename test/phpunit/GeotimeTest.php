@@ -156,7 +156,6 @@ class GeotimeTest extends MariaDbTestHelper {
 
     function testGetTerritories() {
         $this->assertEquals(1, count(Geotime::getReferencedTerritories('Fr')));
-        $this->assertEquals(0, count(Geotime::getReferencedTerritories('fr')));
 
         $this->assertEquals(1, count(Geotime::getReferencedTerritories('J')));
         $this->assertEquals(0, count(Geotime::getReferencedTerritories('K')));
@@ -169,20 +168,21 @@ class GeotimeTest extends MariaDbTestHelper {
     }
 
     function testUpdateMapInexisting() {
-        $map = new Map();
+        $map = MapHelper::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
 
         ModelHelper::getEm()->persist($map);
         ModelHelper::getEm()->flush();
 
-        MapHelper::delete($map->getId());
+        $mapId = $map->getId();
 
-        $updatedMap = Geotime::updateMap($map->getId(), 'mercator', array('0', '0', '0'), array(array('0', '10')), 200);
+        MapHelper::delete($mapId);
+
+        $updatedMap = Geotime::updateMap($mapId, 'mercator', array('0', '0', '0'), array(array('0', '10')), 200);
         $this->assertNull($updatedMap);
     }
 
     function testUpdateMap() {
-        $map = new Map();
-        $map->setFileName(self::$customMapName);
+        $map = MapHelper::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
         $map->setProjection('mercator');
 
         ModelHelper::getEm()->persist($map);
@@ -202,16 +202,16 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertEquals($updatedMap->getScale(), 200);
 
         $calibrationPoints = $updatedMap->getCalibrationPoints();
-        $this->assertInstanceOf('geotime\models\CalibrationPoint', $calibrationPoints[0]);
+        $this->assertInstanceOf('geotime\models\mariadb\CalibrationPoint', $calibrationPoints[0]);
     }
 
     function testUpdateMapMissingData() {
-        $map = new Map();
-        $map->setFileName(self::$customMapName);
+        $map = MapHelper::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
         $map->setProjection('mercator');
 
         ModelHelper::getEm()->persist($map);
         ModelHelper::getEm()->flush();
+
         $mapId = $map->getId();
 
         $updatedMap = Geotime::updateMap($mapId, null);
@@ -221,10 +221,11 @@ class GeotimeTest extends MariaDbTestHelper {
     }
 
     function testAddLocatedTerritory() {
-        $map = new Map();
+        $map = MapHelper::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
 
         ModelHelper::getEm()->persist($map);
         ModelHelper::getEm()->flush();
+
         $mapId = $map->getId();
 
         $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
