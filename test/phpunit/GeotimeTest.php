@@ -10,16 +10,20 @@ use geotime\helpers\MapHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
 use geotime\helpers\TerritoryHelper;
 use geotime\models\mariadb\Map;
-use geotime\models\Territory;
+use geotime\models\mariadb\Territory;
 use geotime\NaturalEarthImporter;
 use geotime\Test\Helper\MariaDbTestHelper;
+use geotime\Util;
 
 include_once('MariaDbTestHelper.php');
 
 class GeotimeTest extends MariaDbTestHelper {
 
     static $neMapName = 'test/phpunit/_data/countries.json';
+    static $fixtures_dir_svg = "test/phpunit/_fixtures/svg/";
+
     static $customMapName = 'testImage.svg';
+    static $simpleMapName = 'simpleMap.svg';
 
     static $neAreas = array(
         405267, /* Japan */
@@ -31,6 +35,7 @@ class GeotimeTest extends MariaDbTestHelper {
 
     static function setUpBeforeClass() {
         Geotime::$log->info(__CLASS__." tests started");
+        Util::$cache_dir_svg = self::$fixtures_dir_svg;
     }
 
     static function tearDownAfterClass() {
@@ -82,7 +87,7 @@ class GeotimeTest extends MariaDbTestHelper {
     public function testClean() {
 
         $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
-        $t = new \geotime\models\mariadb\Territory($referencedTerritory, true);
+        $t = new Territory($referencedTerritory, true);
         ModelHelper::getEm()->persist($t);
         ModelHelper::getEm()->flush();
 
@@ -98,7 +103,7 @@ class GeotimeTest extends MariaDbTestHelper {
     public function testCleanKeepMaps() {
 
         $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
-        $t = new \geotime\models\mariadb\Territory($referencedTerritory, true);
+        $t = new Territory($referencedTerritory, true);
         ModelHelper::getEm()->persist($t);
         ModelHelper::getEm()->flush();
 
@@ -221,7 +226,11 @@ class GeotimeTest extends MariaDbTestHelper {
     }
 
     function testAddLocatedTerritory() {
-        $map = MapHelper::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
+        $map = MapHelper::generateAndSaveReferences(self::$simpleMapName, '1980-01-02', '1991-02-03');
+        $map->setProjection('mercator');
+        $map->setCenter(array(0,0));
+        $map->setScale(700);
+        $map->setRotation(array(0,0,0));
 
         ModelHelper::getEm()->persist($map);
         ModelHelper::getEm()->flush();
@@ -230,26 +239,19 @@ class GeotimeTest extends MariaDbTestHelper {
 
         $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
 
-        $coordinates = array(
-            array(-76.73647242455775, 19.589864044838837),
-            array(-76.67084026038955, 19.24637514426756),
-            array(-76.51475666216831, 18.926012649077077)
-        );
-
-        $xpath = '//path[id="My territory"]';
+        $xpath = '//path[id="simplePath"]';
         $territoryPeriodStart = '1980-01-02';
         $territoryPeriodEnd = '1991-04-06';
 
         Geotime::saveLocatedTerritory($mapId, $referencedTerritory->getId(), $xpath, $territoryPeriodStart, $territoryPeriodEnd);
 
-        /** @var Territory $createdTerritory */
-        $createdTerritory = Territory::one(array('xpath' => $xpath));
+        $createdTerritory = TerritoryHelper::findOneByXpath($xpath);
         $this->assertNotEmpty($createdTerritory);
         $this->assertEquals($createdTerritory->getUserMade(), true);
         $this->assertEquals($xpath, $createdTerritory->getXpath());
-        $this->assertEquals(array(array($coordinates)), $createdTerritory->getPolygon());
-        $this->assertEquals(new \MongoDate(strtotime($territoryPeriodStart)), $createdTerritory->getPeriod()->getStart());
-        $this->assertEquals(new \MongoDate(strtotime($territoryPeriodEnd)), $createdTerritory->getPeriod()->getEnd());
+        $this->assertInternalType('array', $createdTerritory->getPolygon()[0][0]);
+        $this->assertEquals(new \DateTime($territoryPeriodStart), $createdTerritory->getStartDate());
+        $this->assertEquals(new \DateTime($territoryPeriodEnd), $createdTerritory->getEndDate());
         $this->assertGreaterThan(0, $createdTerritory->getArea());
 
         /** @var Map $mapWithTerritory */
@@ -257,46 +259,6 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertEquals(count($mapWithTerritory->getTerritories()), 1);
 
         $this->assertEquals(Geotime::getImportedTerritoriesCount(), 3);
-    }
-
-    function testUpdateLocatedTerritory() {
-        $map = new Map();
-
-        ModelHelper::getEm()->persist($map);
-        ModelHelper::getEm()->flush();
-        $mapId = $map->getId();
-
-        $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
-
-        $coordinates = array(
-            array(-76.73647242455775, 19.589864044838837),
-            array(-76.67084026038955, 19.24637514426756),
-            array(-76.51475666216831, 18.926012649077077)
-        );
-
-        $xpath = '//path[id="My territory"]';
-        $territoryPeriodStart = '1980-01-02';
-        $territoryPeriodEnd = '1991-04-06';
-
-        Geotime::saveLocatedTerritory(
-            $mapId, $referencedTerritory->getId(), $xpath, $territoryPeriodStart, $territoryPeriodEnd
-        );
-
-        /** @var Territory $territoryWithReference */
-        $territoryWithReference = Territory::one(array('xpath' => $xpath));
-        $this->assertNotEmpty($territoryWithReference);
-        $this->assertEquals($territoryWithReference->getReferencedTerritory(), $referencedTerritory);
-        $this->assertEquals($territoryWithReference->getUserMade(), true);
-        $this->assertEquals($xpath, $territoryWithReference->getXpath());
-        $this->assertEquals(array(array($coordinates)), $territoryWithReference->getPolygon());
-        $this->assertEquals(new \MongoDate(strtotime($territoryPeriodStart)), $territoryWithReference->getPeriod()->getStart());
-        $this->assertEquals(new \MongoDate(strtotime($territoryPeriodEnd)), $territoryWithReference->getPeriod()->getEnd());
-        $this->assertGreaterThan(0, $territoryWithReference->getArea());
-
-        /** @var Map $mapWithTerritory */
-        $mapWithTerritory = MapHelper::find($mapId);
-        $this->assertEquals(count($mapWithTerritory->getTerritories()), 1);
-
     }
 
     /**

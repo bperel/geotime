@@ -26,6 +26,8 @@ abstract class MariaDbTestHelper extends \PHPUnit_Extensions_Database_TestCase {
     static $jsonSourceDir = 'test/phpunit/_data';
 
     public function setUp() {
+        ModelHelper::getEm()->clear();
+
         $tool = new SchemaTool(ModelHelper::getEm());
         $classes = ModelHelper::getEm()->getMetaDataFactory()->getAllMetaData();
 

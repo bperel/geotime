@@ -8,9 +8,8 @@ use geotime\helpers\CalibrationPointHelper;
 use geotime\helpers\CriteriaGroupHelper;
 use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
+use geotime\helpers\ReferencedTerritoryHelper;
 use geotime\helpers\TerritoryHelper;
-use geotime\models\Map;
-use geotime\models\ReferencedTerritory;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
@@ -170,7 +169,7 @@ class Geotime {
      * @param $mapCenter string[]|null
      * @param $mapScale int|null
      * @param $calibrationPoints string[]
-     * @return Map|null
+     * @return \geotime\models\mariadb\Map|null
      */
     public static function updateMap($mapId, $mapProjection = null, $mapRotation = null, $mapCenter = null, $mapScale = null, $calibrationPoints = null) {
         /** @var \geotime\models\mariadb\Map $map */
@@ -217,7 +216,7 @@ class Geotime {
      * @param $xpath string
      * @param $territoryPeriodStart string
      * @param $territoryPeriodEnd string
-     * @return mixed|null
+     * @return null
      */
     public static function saveLocatedTerritory($mapId, $territoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
     {
@@ -227,23 +226,25 @@ class Geotime {
             return null;
         }
 
-        /** @var ReferencedTerritory $referencedTerritory */
-        $referencedTerritory = ReferencedTerritory::one(array('_id' => new \MongoId($territoryId)));
+        $referencedTerritory = ReferencedTerritoryHelper::find($territoryId);
         if (is_null($referencedTerritory)) {
             return null;
         }
 
         $territory = TerritoryHelper::buildAndCreateWithReferencedTerritory(
-            $referencedTerritory, true, $territoryPeriodStart, $territoryPeriodEnd, $xpath
+            $referencedTerritory, $territoryPeriodStart, $territoryPeriodEnd, $xpath
         );
         $geocoordinates = TerritoryHelper::calculateCoordinates($territory, $map);
-        $territory->setPolygon(json_decode(json_encode(array(array($geocoordinates)))));
-        ModelHelper::getEm()->persist($territory);
 
-        $map->addTerritory($territory);
-        ModelHelper::getEm()->persist($map);
+        if (!is_null($geocoordinates)) {
+            $territory->setPolygon(json_decode(json_encode(array(array($geocoordinates)))));
+            TerritoryHelper::save($territory);
 
-        ModelHelper::getEm()->flush();
+            $map->addTerritory($territory);
+            ModelHelper::getEm()->persist($map);
+
+            ModelHelper::getEm()->flush();
+        }
     }
 
     public static function getCriteriaGroupsNumber() {

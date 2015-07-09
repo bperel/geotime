@@ -21,10 +21,10 @@ class Territory {
      **/
     var $referencedTerritory;
 
-    /** @Column(type="object") **/
+    /** @Column(type="object", nullable=true) **/
     var $polygon;
 
-    /** @Column(type="integer") **/
+    /** @Column(type="integer", nullable=true) **/
     var $area;
 
     /** @Column(type="boolean") **/

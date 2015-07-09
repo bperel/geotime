@@ -204,10 +204,19 @@ class TerritoryHelper implements AbstractEntityHelper
     }
 
     /**
+     * @param $xpath string
+     * @return null|Territory
+     */
+    public static function findOneByXpath($xpath) {
+        return ModelHelper::getEm()->getRepository(Territory::CLASSNAME)
+            ->findOneBy(array('xpath' => $xpath));
+    }
+
+    /**
      * @param $territory Territory
      * @return Territory
      */
-    private static function save($territory) {
+    public static function save($territory) {
         $territory->setArea(self::calculateArea($territory));
         ModelHelper::getEm()->persist($territory);
         ModelHelper::getEm()->flush();

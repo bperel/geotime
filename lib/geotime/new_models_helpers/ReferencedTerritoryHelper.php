@@ -73,6 +73,15 @@ class ReferencedTerritoryHelper implements AbstractEntityHelper
     }
 
     /**
+     * @param $referencedTerritoryId int
+     * @return null|ReferencedTerritory
+     */
+    public static function find($referencedTerritoryId) {
+        return ModelHelper::getEm()->getRepository(ReferencedTerritory::CLASSNAME)
+            ->find($referencedTerritoryId);
+    }
+
+    /**
      * @param $name
      * @return ReferencedTerritory|object
      */
