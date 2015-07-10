@@ -8,9 +8,8 @@ The goal of this project is to produce a world map showing the countries borders
 ###Requirements
 
 * *nix
-* MongoDB
 * NodeJS and NPM
-* Apache+PHP 5 with MongoDB, GD and curl extensions
+* Apache+PHP 5 with GD and curl extensions
 
 
 ###Installation
@@ -42,46 +41,8 @@ $ bower install
 $ chmod -R +w test/phpunit/cache
 $ chmod -R +w cache
 ```
-* Set up the rights for the normal and test DBs, using the admin user :
 
-Create a MySQL or MariaDB empty database called "geotime".
-```bash
-$ mongo
-MongoDB shell version: 2.4.9
-connecting to: test
-> db.auth("admin","myadminpassword")
-1
-> use geotime
-switched to db geotime
-> db.addUser({user: "mydbusername", pwd: "mydbpassword", "roles": ["readWrite", "dbAdmin"]})
-{
-        "user" : "mydbusername",
-        "pwd" : "efd1d99dce309152fed1f152572b7735",
-        "roles" : [
-                "readWrite",
-                "dbAdmin"
-        ],
-        "_id" : ObjectId("5333ff533102c9b9d51a62a3")
-}
-> use geotime_test
-switched to db geotime_test
-> db.addUser({user: "mydbusername", pwd: "mydbpassword", "roles": ["readWrite", "dbAdmin"]})
-{
-        "user" : "mydbusername",
-        "pwd" : "efd1d99dce309152fed1f152572b7735",
-        "roles" : [
-                "readWrite",
-                "dbAdmin"
-        ],
-        "_id" : ObjectId("5333ff533102c9b9d51a62a3")
-}
-```
-* Set up the DB connection  : create a file shaped like :
-```ini
-username=mydbusername
-password=mydbpassword
-```
-and specify its path in [lib/geotime/Database.php](lib/geotime/Database.php) : these credentials will be used for the DB connection.
+* Create a MySQL or MariaDB empty database called "geotime".
 
 * Set up the admin section credentials : the [admin/.htaccess](admin/.htaccess) file references the .htpasswd file containing the admin credentials. Generate the latter using the following command : 
 ```bash
