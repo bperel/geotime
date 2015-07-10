@@ -3,6 +3,7 @@ namespace geotime\helpers;
 
 use geotime\models\mariadb\CriteriaGroup;
 use geotime\new_models\AbstractEntityHelper;
+use geotime\Util;
 
 class CriteriaGroupHelper implements AbstractEntityHelper
 {
@@ -15,19 +16,19 @@ class CriteriaGroupHelper implements AbstractEntityHelper
 
         $tableName = self::getTableName();
 
-        ModelHelper::importFromJson($fileName, function($object) use ($tableName) {
+        Util::importFromJson($fileName, function ($object) use ($tableName) {
             $criteriaGroup = new CriteriaGroup();
             $criteriaGroup->setName($object->name);
             $criteriaGroup->setSort($object->sort);
             $criteriaGroup->setType($object->type);
             $criteria = new \stdClass();
-            foreach($object->criteria as $criterium) {
-                $criteria->{$criterium->key}=$criterium->value;
+            foreach ($object->criteria as $criterium) {
+                $criteria->{$criterium->key} = $criterium->value;
             }
             $criteriaGroup->setCriteria($criteria);
             $optional = new \stdClass();
-            foreach($object->criteria as $criterium) {
-                $optional->{$criterium->key}=$criterium->value;
+            foreach ($object->criteria as $criterium) {
+                $optional->{$criterium->key} = $criterium->value;
             }
             $criteriaGroup->setOptional($optional);
 

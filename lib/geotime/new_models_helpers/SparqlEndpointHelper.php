@@ -3,6 +3,7 @@ namespace geotime\helpers;
 
 use geotime\models\mariadb\SparqlEndpoint;
 use geotime\new_models\AbstractEntityHelper;
+use geotime\Util;
 
 class SparqlEndpointHelper implements AbstractEntityHelper
 {
@@ -15,7 +16,7 @@ class SparqlEndpointHelper implements AbstractEntityHelper
 
         $tableName = self::getTableName();
 
-        ModelHelper::importFromJson($fileName, function($object) use ($tableName) {
+        Util::importFromJson($fileName, function ($object) use ($tableName) {
             $sparqlEndPoint = new SparqlEndpoint();
             $sparqlEndPoint->setName($object->name);
             $sparqlEndPoint->setRootUrl($object->rootUrl);

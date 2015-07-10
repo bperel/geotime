@@ -22,19 +22,6 @@ class ModelHelper {
         self::$em = $em;
     }
 
-    /**
-     * @param $fileName string
-     * @param $callback
-     */
-    public static function importFromJson($fileName, $callback)
-    {
-        if (file_exists($fileName)) {
-            $data = json_decode(file_get_contents($fileName));
-            if (is_array($data)) {
-                array_map($callback, $data);
-            }
-        }
-    }
 }
 
 /** @var EntityManager $entityManager */

@@ -2,6 +2,7 @@
 
 namespace geotime;
 
+use Exception;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
@@ -12,7 +13,6 @@ class Util {
     public static $cache_dir_svg = "cache/svg/";
     public static $cache_dir_thumbnails = "cache/thumbnails/";
     public static $cache_dir_json = "cache/json/";
-    public static $phantomjs_path = "bin/phantomjs";
     public static $rasterize_script_path = "js/headless/rasterize.js";
     public static $invertpath_script_path = "js/headless/invertpath.js";
     public static $rasterize_script_success_output = "thumbnail created";
@@ -24,22 +24,34 @@ class Util {
     /** @var \Logger */
     static $log;
 
+    static function getPhantomJsPath() {
+        return implode(DIRECTORY_SEPARATOR, array('bin', 'phantomjs'));
+    }
+
+    /**
+     * @param string $url
+     * @param string $type
+     * @param array $parameters
+     * @param bool $headersOnly
+     * @return bool|string
+     */
     static function curl_get_contents($url, $type = "GET", $parameters = array(), $headersOnly = false) {
 
         $ch = curl_init();
         if ($type === "POST") {
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
-        }
-        else {
+        } else {
             $url .= '?' . http_build_query($parameters);
         }
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/525.13 (KHTML, like Gecko) Chrome/0.A.B.C Safari/525.13');
+        curl_setopt($ch, CURLOPT_USERAGENT,
+            'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/525.13 (KHTML, like Gecko) Chrome/0.A.B.C Safari/525.13');
         curl_setopt($ch, CURLOPT_URL, $url);
         if ($headersOnly) {
-            curl_setopt($ch, CURLOPT_HEADER, TRUE);
+            curl_setopt($ch, CURLOPT_HEADER, true);
         }
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_ENCODING, "gzip");
 
         $page = curl_exec($ch);
@@ -94,7 +106,7 @@ class Util {
 
     static function generateThumbnailFromSvg($svgName) {
         $thumbnailOutput = self::$cache_dir_thumbnails . $svgName . '.png';
-        $command = implode(' ', array(self::$phantomjs_path, self::$rasterize_script_path, '"' . self::$cache_dir_svg . $svgName . '"', '"' . $thumbnailOutput . '"', '2>&1'));
+        $command = implode(' ', array(self::getPhantomJsPath(), self::$rasterize_script_path, '"' . self::$cache_dir_svg . $svgName . '"', '"' . $thumbnailOutput . '"', '2>&1'));
         $output = shell_exec($command);
         if (trim($output) === self::$rasterize_script_success_output) {
             if (self::resizeImage($thumbnailOutput, self::$thumbnailSize)) {
@@ -124,7 +136,7 @@ class Util {
      */
     static function calculatePathCoordinates($svgFileName, $pathId, $projectionName, $projectionCenter, $projectionScale, $projectionRotation) {
         $command = implode(' ', array(
-            str_replace('/', DIRECTORY_SEPARATOR, self::$phantomjs_path),
+            self::getPhantomJsPath(),
             self::$invertpath_script_path,
             self::$cache_dir_svg.$svgFileName,
             $pathId,
@@ -191,6 +203,25 @@ class Util {
             self::$log->info('Successfully stored JSON file '.$fileName);
         }
         return $pageAsJson;
+    }
+
+    /**
+     * @param $fileName string
+     * @param $callback
+     * @return bool
+     */
+    public static function importFromJson($fileName, $callback)
+    {
+        if (file_exists($fileName)) {
+            $data = json_decode(file_get_contents($fileName));
+            if (is_array($data)) {
+                array_map($callback, $data);
+
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 

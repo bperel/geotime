@@ -8,6 +8,7 @@ use PHPUnit_Framework_TestCase;
 
 class UtilTest extends \PHPUnit_Framework_TestCase {
 
+    static $fixtures_dir_json = 'test/phpunit/_fixtures/json';
     static $fixtures_dir_svg = "test/phpunit/_fixtures/svg/";
     static $fixtures_dir_thumbnails = "test/phpunit/_fixtures/thumbnails/";
 
@@ -84,6 +85,21 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
         $this->assertInternalType('array', $result);
 
         Util::$cache_dir_svg = $old_cache_dir;
+    }
+
+    public function testImportFromJson() {
+        $success = Util::importFromJson(self::$fixtures_dir_json . '/simple.json', function ($o) {
+            $this->assertObjectHasAttribute('a', $o);
+            $this->assertInternalType('array', $o->a);
+            $this->assertEquals('c', $o->a[0]->b);
+            $this->assertEquals('e', $o->a[1]->d);
+        });
+        $this->assertTrue($success);
+    }
+
+    public function testImportFromJsonInvalidFileName() {
+        $success = Util::importFromJson(self::$fixtures_dir_json . '/nonexisting.json', function ($o) {});
+        $this->assertFalse($success);
     }
 }
  
