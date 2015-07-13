@@ -213,6 +213,22 @@ class TerritoryHelper implements AbstractEntityHelper
     }
 
     /**
+     * @param $referencedTerritoryId integer
+     * @return null|Territory
+     */
+    public static function findOneByReferencedTerritoryId($referencedTerritoryId) {
+        $qb = ModelHelper::getEm()->createQueryBuilder();
+        $qb->select('territory')
+            ->from(Territory::CLASSNAME,'territory')
+            ->join('territory.referencedTerritory', 'referencedTerritory')
+            ->where(
+                $qb->expr()->eq('referencedTerritory.id', $qb->expr()->literal($referencedTerritoryId))
+            );
+
+        return $qb->getQuery()->getSingleResult();
+    }
+
+    /**
      * @return Territory[]
      */
     public static function findWithPeriod() {

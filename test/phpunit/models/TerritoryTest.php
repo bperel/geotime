@@ -2,53 +2,77 @@
 
 namespace geotime\Test;
 
-use geotime\Database;
-use geotime\Geotime;
-use geotime\models\ReferencedTerritory;
-use geotime\models\Territory;
+use Doctrine\ORM\EntityRepository;
+use geotime\helpers\ModelHelper;
+use geotime\helpers\TerritoryHelper;
+use geotime\models\mariadb\ReferencedTerritory;
+use geotime\models\mariadb\Territory;
 use geotime\NaturalEarthImporter;
-use PHPUnit_Framework_TestCase;
+use geotime\Test\Helper\EntityTestHelper;
 
-
-class TerritoryTest extends \PHPUnit_Framework_TestCase {
+include_once('EntityTestHelper.php');
+class TerritoryTest extends EntityTestHelper {
 
     static function setUpBeforeClass() {
-        Territory::$log->info(__CLASS__." tests started");
+        // Territory::$log->info(__CLASS__." tests started");
     }
 
     static function tearDownAfterClass() {
-        Territory::$log->info(__CLASS__." tests ended");
+        // Territory::$log->info(__CLASS__." tests ended");
     }
 
-    protected function setUp() {
-        Database::connect(Database::$testDbName);
-
-        Geotime::clean();
-
+    public function setUp() {
+        parent::setUp();
         $neImport = new NaturalEarthImporter();
         $neImport->import('test/phpunit/_data/countries.json');
     }
 
+    /**
+     * @return EntityRepository
+     */
+    public function getRepository()
+    {
+        return ModelHelper::getEm()->getRepository(Territory::CLASSNAME);
+    }
 
-    protected function tearDown() {
-        Geotime::clean();
+    /**
+     * @return EntityRepository
+     */
+    public function getReferencedTerritoryRepository()
+    {
+        return ModelHelper::getEm()->getRepository(ReferencedTerritory::CLASSNAME);
     }
 
     public function testGetTerritoryArea() {
 
         /** @var ReferencedTerritory $japanReferencedTerritory */
-        $japanReferencedTerritory = ReferencedTerritory::one(array('name'=>'Japan'));
+        $japanReferencedTerritory = $this->getReferencedTerritoryRepository()->findOneBy(array('name' => 'Japan'));
 
         /** @var Territory $japan */
-        $japan = Territory::one(Territory::getReferencedTerritoryFilter($japanReferencedTerritory));
+        $japan = $this->getRepository()->findOneBy(array('referencedTerritory' => $japanReferencedTerritory));
         $this->assertEquals(405267, $japan->getArea());
 
         /** @var ReferencedTerritory $luxembourgReferencedTerritory */
-        $luxembourgReferencedTerritory = ReferencedTerritory::one(array('name'=>'Luxembourg'));
+        $luxembourgReferencedTerritory = $this->getReferencedTerritoryRepository()->findOneBy(array('name' => 'Luxembourg'));
 
         /** @var Territory $luxembourg */
-        $luxembourg = Territory::one(Territory::getReferencedTerritoryFilter($luxembourgReferencedTerritory));
+        $luxembourg = $this->getRepository()->findOneBy(array('referencedTerritory' => $luxembourgReferencedTerritory));
         $this->assertEquals(2412, $luxembourg->getArea());
+    }
+
+    public function testCountForPeriod() {
+        $territory = new Territory(null, true, null, 0, null, new \DateTime('2000-01-01'), new \DateTime('2004-12-31'));
+        ModelHelper::getEm()->persist($territory);
+
+        $territory2 = new Territory(null, true, null, 0, null, new \DateTime('2003-01-01'), new \DateTime('2006-01-01'));
+        ModelHelper::getEm()->persist($territory2);
+
+        ModelHelper::getEm()->flush();
+
+        $this->assertEquals(2, TerritoryHelper::countForPeriod(new \DateTime('2002-01-01'),new \DateTime('2004-01-01')));
+        $this->assertEquals(2, TerritoryHelper::countForPeriod(new \DateTime('1999-01-01'),new \DateTime('2020-01-01')));
+        $this->assertEquals(1, TerritoryHelper::countForPeriod(new \DateTime('1999-01-01'),new \DateTime('2000-01-01')));
+        $this->assertEquals(0, TerritoryHelper::countForPeriod(new \DateTime('2006-01-02'),new \DateTime('2010-01-01')));
     }
 }
  

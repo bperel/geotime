@@ -2,28 +2,26 @@
 
 namespace geotime\Test;
 
-use geotime\Database;
-use geotime\Geotime;
-use geotime\models\Map;
-use PHPUnit_Framework_TestCase;
+use geotime\helpers\MapHelper;
+use geotime\helpers\ModelHelper;
+use geotime\models\mariadb\Map;
+use geotime\Test\Helper\EntityTestHelper;
 
+include_once('EntityTestHelper.php');
 
-class MapTest extends \PHPUnit_Framework_TestCase {
+class MapTest extends EntityTestHelper {
 
     static function setUpBeforeClass() {
-        Map::$log->info(__CLASS__." tests started");
+        //Map::$log->info(__CLASS__." tests started");
     }
 
     static function tearDownAfterClass() {
-        Map::$log->info(__CLASS__." tests ended");
+        //Map::$log->info(__CLASS__." tests ended");
     }
 
-    protected function setUp() {
-        Database::connect(Database::$testDbName);
-    }
-
-    protected function tearDown() {
-        Geotime::clean();
+    public function getRepository()
+    {
+        return ModelHelper::getEm()->getRepository(Map::CLASSNAME);
     }
 
     public function testGenerateMap() {
@@ -31,13 +29,13 @@ class MapTest extends \PHPUnit_Framework_TestCase {
         $date2Str = '2013-07-15';
         $imageFileName = 'testImage.svg';
 
-        $map = Map::generateAndSaveReferences($imageFileName, $date1Str, $date2Str);
+        $map = MapHelper::generateAndSaveReferences($imageFileName, $date1Str, $date2Str);
         $this->assertNotNull($map);
         $this->assertEquals($imageFileName, $map->getFileName());
 
         $territories = $map->getTerritories();
-        $this->assertInstanceOf('MongoDate', $territories[0]->getPeriod()->getStart());
-        $this->assertInstanceOf('MongoDate', $territories[0]->getPeriod()->getEnd());
+        $this->assertInstanceOf('DateTime', $territories[0]->getStartDate());
+        $this->assertInstanceOf('DateTime', $territories[0]->getEndDate());
     }
 
     public function testDeleteReferences() {
@@ -45,14 +43,17 @@ class MapTest extends \PHPUnit_Framework_TestCase {
         $date2Str = '2013-07-15';
         $imageFileName = 'testImage.svg';
 
-        $map = Map::generateAndSaveReferences($imageFileName, $date1Str, $date2Str);
-        $map->save();
-        $map->deleteTerritories();
+        $map = MapHelper::generateAndSaveReferences($imageFileName, $date1Str, $date2Str);
+        $map->setUploadDate(new \DateTime());
+
+        ModelHelper::getEm()->persist($map);
+        ModelHelper::getEm()->flush();
+
+        MapHelper::deleteTerritories($map);
 
         /** @var Map $map */
-        $map = Map::one(array());
+        $map = $this->getRepository()->findOneBy(array());
         $this->assertEquals(0, count($map->getTerritories()));
-
     }
 }
  
