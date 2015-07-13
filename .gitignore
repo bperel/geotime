@@ -1,4 +1,5 @@
 /.idea/
+/admin/.htaccess
 /bin/
 /build/
 /cache/json/*.json
