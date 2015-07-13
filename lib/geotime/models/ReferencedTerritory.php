@@ -1,91 +1,67 @@
 <?php
+namespace geotime\models\mariadb;
 
-namespace geotime\models;
-
-use Logger;
-
-Logger::configure("lib/geotime/logger.xml");
-
-class ReferencedTerritory extends GeotimeModel
+/**
+ * @Entity @Table(name="referencedTerritories")
+ **/
+class ReferencedTerritory
 {
-    static $collection = "referencedTerritories";
+    const CLASSNAME = __CLASS__;
 
-    /** @var \Logger */
-    static $log;
+    /** @Id @Column(type="integer") @GeneratedValue *
+     * @Column(type="integer")
+     */
+    var $id;
 
-    protected static $attrs = array(
-        'name' => array('type' => 'string'),
-        'previous' => array('type' => 'references', 'model' => 'geotime\models\ReferencedTerritory'),
-        'next' => array('type' => 'references', 'model' => 'geotime\models\ReferencedTerritory')
-    );
+    /** @Column(type="string") **/
+    var $name;
 
     /**
-     * @param $object \stdClass
-     * @return ReferencedTerritory
+     * @ManyToMany(targetEntity="ReferencedTerritory")
+     * @JoinTable(name="previous_referenced_territories")
      */
-    public static function buildAndSaveFromObject($object) {
-        $fields = array(
-            'name' => 'name',
-            'previous' => 'previous',
-            'next' => 'next'
-        );
-        $fieldValues = array();
-        foreach($fields as $mappedField => $optionalField) {
-            if (isset($object->$optionalField)) {
-                $fieldValues[$mappedField] = $object->$optionalField->value;
-            }
-            else {
-                $fieldValues[$mappedField] = '';
-            }
-        }
-
-        return ReferencedTerritory::buildAndCreate($fieldValues['name'], $fieldValues['previous'], $fieldValues['next']);
-    }
+    var $previous;
 
     /**
-     * @param string $name
-     * @param string $previous
-     * @param string $next
-     * @return \geotime\models\ReferencedTerritory
+     * @ManyToMany(targetEntity="ReferencedTerritory")
+     * @JoinTable(name="next_referenced_territories")
      */
-    public static function buildAndCreate($name, $previous = null, $next = null) {
-        $referencedTerritory = new ReferencedTerritory();
-        $referencedTerritory->setName($name);
-        if (!empty($previous)) {
-            $referencedTerritory->setPrevious(self::referencedTerritoriesStringToTerritoryArray($previous));
-        }
-        if (!empty($next)) {
-            $referencedTerritory->setNext(self::referencedTerritoriesStringToTerritoryArray($next));
-        }
-        $referencedTerritory->save();
-        return $referencedTerritory;
-    }
+    var $next;
 
     /**
-     * @param $territoriesString string
-     * @return ReferencedTerritory[]
+     * @Column(type="calibrationPoint", nullable= true)
+     * @var CalibrationPoint
      */
-    public static function referencedTerritoriesStringToTerritoryArray($territoriesString) {
-        return array_map(
-            function($referencedTerritoryName) {
-                $referencedTerritory = ReferencedTerritory::one(array('name' => $referencedTerritoryName));
-                if (is_null($referencedTerritory) && !empty($referencedTerritoryName)) {
-                    $referencedTerritory = ReferencedTerritory::buildAndCreate($referencedTerritoryName);
-                }
-                return $referencedTerritory;
-            },
-            explode('|', $territoriesString)
-        );
+    private $calibrationPoint;
+
+    /**
+     * ReferencedTerritory constructor.
+     * @param $name
+     * @param $previous
+     * @param $next
+     */
+    public function __construct($name, $previous = array(), $next = array())
+    {
+        $this->name = $name;
+        $this->previous = $previous;
+        $this->next = $next;
     }
 
     // @codeCoverageIgnoreStart
+    /**
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
 
     /**
      * @return string
      */
     public function getName()
     {
-        return $this->__getter('name');
+        return $this->name;
     }
 
     /**
@@ -93,7 +69,7 @@ class ReferencedTerritory extends GeotimeModel
      */
     public function setName($name)
     {
-        $this->__setter('name', $name);
+        $this->name = $name;
     }
 
     /**
@@ -101,7 +77,7 @@ class ReferencedTerritory extends GeotimeModel
      */
     public function getPrevious()
     {
-        return $this->__getter('previous');
+        return $this->previous;
     }
 
     /**
@@ -109,7 +85,7 @@ class ReferencedTerritory extends GeotimeModel
      */
     public function setPrevious($previous)
     {
-        $this->__setter('previous', $previous);
+        $this->previous = $previous;
     }
 
     /**
@@ -117,7 +93,7 @@ class ReferencedTerritory extends GeotimeModel
      */
     public function getNext()
     {
-        return $this->__getter('next');
+        return $this->next;
     }
 
     /**
@@ -125,10 +101,23 @@ class ReferencedTerritory extends GeotimeModel
      */
     public function setNext($next)
     {
-        $this->__setter('next', $next);
+        $this->next = $next;
     }
 
+    /**
+     * @return CalibrationPoint
+     */
+    public function getCalibrationPoint()
+    {
+        return $this->calibrationPoint;
+    }
+
+    /**
+     * @param CalibrationPoint $calibrationPoint
+     */
+    public function setCalibrationPoint($calibrationPoint)
+    {
+        $this->calibrationPoint = $calibrationPoint;
+    }
     // @codeCoverageIgnoreEnd
 }
-
-ReferencedTerritory::$log = Logger::getLogger("main");

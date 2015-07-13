@@ -1,99 +1,126 @@
 <?php
+namespace geotime\models\mariadb;
 
-namespace geotime\models;
+/**
+ * @Entity @Table(name="sparqlEndpoints")
+ **/
+class SparqlEndpoint
+{
+    const CLASSNAME = __CLASS__;
 
-use Purekid\Mongodm\Model;
-use geotime\Database;
+    /** @Id @Column(type="integer") @GeneratedValue *
+     * @Column(type="integer")
+     */
+    var $id;
+
+    /** @Column(type="string") **/
+    var $name;
 
 
-class SparqlEndpoint extends Model {
-    static $collection = 'sparqlEndpoints';
-    static $cachePath = 'data/sparqlEndpoints.json';
+    /** @Column(type="string") **/
+    var $rootUrl;
 
-    protected static $attrs = array(
-        'name' => array('type' => 'string'),
-        'rootUrl' => array('type' => 'string'),
-        'endPoint' => array('type' => 'string'),
-        'method' => array('type' => 'string'),
-        'parameters' => array('type' => 'array')
-    );
 
-    public static function importFromJson($fileName=null) {
-        if (is_null($fileName)) {
-            $fileName = self::$cachePath;
-        }
-        return Database::importFromJson($fileName, self::$collection);
-    }
+    /** @Column(type="string") **/
+    var $endPoint;
+
+
+    /** @Column(type="string") **/
+    var $method;
+
+
+    /** @Column(type="object") **/
+    var $parameters;
 
     // @codeCoverageIgnoreStart
     /**
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
      * @return string
      */
-    public function getName() {
-        return $this->__getter('name');
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
      * @param string $name
      */
-    public function setName($name) {
-        $this->__setter('name', $name);
+    public function setName($name)
+    {
+        $this->name = $name;
     }
 
     /**
      * @return string
      */
-    public function getRootUrl() {
-        return $this->__getter('rootUrl');
+    public function getRootUrl()
+    {
+        return $this->rootUrl;
     }
 
     /**
      * @param string $rootUrl
      */
-    public function setRootUrl($rootUrl) {
-        $this->__setter('rootUrl', $rootUrl);
+    public function setRootUrl($rootUrl)
+    {
+        $this->rootUrl = $rootUrl;
     }
 
     /**
      * @return string
      */
-    public function getEndpoint() {
-        return $this->__getter('endPoint');
+    public function getEndPoint()
+    {
+        return $this->endPoint;
     }
 
     /**
-     * @param string $endpoint
+     * @param string $endPoint
      */
-    public function setEndpoint($endpoint) {
-        $this->__setter('endPoint', $endpoint);
+    public function setEndPoint($endPoint)
+    {
+        $this->endPoint = $endPoint;
     }
 
     /**
      * @return string
      */
-    public function getMethod() {
-        return $this->__getter('method');
+    public function getMethod()
+    {
+        return $this->method;
     }
 
     /**
      * @param string $method
      */
-    public function setMethod($method) {
-        $this->__setter('method', $method);
+    public function setMethod($method)
+    {
+        $this->method = $method;
     }
 
     /**
-     * @return array
+     * @return string[]
      */
-    public function getParameters() {
-        return $this->__getter('parameters');
+    public function getParameters()
+    {
+        return $this->parameters;
     }
 
     /**
-     * @param array $parameters
+     * @param string[] $parameters
      */
-    public function setParameters($parameters) {
-        $this->__setter('parameters', $parameters);
+    public function setParameters($parameters)
+    {
+        $this->parameters = $parameters;
     }
+
     // @codeCoverageIgnoreEnd
-} 
+
+}

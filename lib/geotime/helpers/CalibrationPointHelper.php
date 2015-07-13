@@ -13,7 +13,7 @@ class CalibrationPointHelper
     static $log;
 
     /**
-     * \stdClass @param $calibrationPoint
+     * @param $calibrationPoint \stdClass
      * @return CalibrationPoint
      */
     public static function generateFromStrings($calibrationPoint) {

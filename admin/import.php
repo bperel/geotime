@@ -2,14 +2,15 @@
 
 namespace geotime\admin;
 
-use geotime\Database;
+use DoctrineBootstrap;
 use geotime\Geotime;
+use geotime\helpers\ModelHelper;
 use geotime\Import;
 use geotime\NaturalEarthImporter;
 
-chdir("..");
-require_once("vendor/autoload.php");
-Database::connect();
+require_once("../vendor/autoload.php");
+
+ModelHelper::setEm(DoctrineBootstrap::getEntityManager());
 
 $clean = isset($_GET['clean']);
 

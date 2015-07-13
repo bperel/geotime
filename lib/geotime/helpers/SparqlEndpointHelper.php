@@ -2,7 +2,8 @@
 namespace geotime\helpers;
 
 use geotime\models\mariadb\SparqlEndpoint;
-use geotime\new_models\AbstractEntityHelper;
+use geotime\models\AbstractEntityHelper;
+use geotime\Util;
 
 class SparqlEndpointHelper implements AbstractEntityHelper
 {
@@ -15,7 +16,7 @@ class SparqlEndpointHelper implements AbstractEntityHelper
 
         $tableName = self::getTableName();
 
-        ModelHelper::importFromJson($fileName, function($object) use ($tableName) {
+        Util::importFromJson($fileName, function ($object) use ($tableName) {
             $sparqlEndPoint = new SparqlEndpoint();
             $sparqlEndPoint->setName($object->name);
             $sparqlEndPoint->setRootUrl($object->rootUrl);
@@ -27,6 +28,32 @@ class SparqlEndpointHelper implements AbstractEntityHelper
         });
 
         ModelHelper::getEm()->flush();
+    }
+
+    /**
+     * @param $id
+     * @return SparqlEndpoint|object
+     */
+    public static function findOne($id) {
+        return ModelHelper::getEm()->getRepository(SparqlEndpoint::CLASSNAME)
+            ->find($id);
+    }
+
+    /**
+     * @param $name
+     * @return SparqlEndpoint|object
+     */
+    public static function findOneByName($name) {
+        return ModelHelper::getEm()->getRepository(SparqlEndpoint::CLASSNAME)
+            ->findOneBy(array('name' => $name));
+    }
+
+    public static function deleteAll() {
+        $qb = ModelHelper::getEm()->createQueryBuilder();
+        $qb->delete('sparqlEndpoint');
+        $qb->from(SparqlEndpoint::CLASSNAME,'sparqlEndpoint');
+
+        return $qb->getQuery()->execute();
     }
 
     // @codeCoverageIgnoreStart

@@ -3,10 +3,15 @@
 namespace geotime;
 
 require_once("vendor/autoload.php");
-Database::connect();
+require_once("lib/doctrine/bootstrap-doctrine.php");
+
+use DoctrineBootstrap;
+use geotime\helpers\ModelHelper;
+
+$entityManager = DoctrineBootstrap::getEntityManager();
+ModelHelper::setEm($entityManager);
 
 header('Content-Type: application/json');
-
 $object = new \stdClass();
 
 if (isset($_POST['getCoverage'])) {

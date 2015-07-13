@@ -4,10 +4,15 @@ use geotime\models\mariadb\CalibrationPoint;
 use geotime\models\mariadb\CoordinateLatLng;
 use geotime\models\mariadb\CoordinateXY;
 use geotime\models\mariadb\ReferencedTerritory;
-use geotime\new_models\AbstractEntityHelper;
+use geotime\models\AbstractEntityHelper;
+use Logger;
 
 class ReferencedTerritoryHelper implements AbstractEntityHelper
 {
+
+    /** @var \Logger */
+    static $log;
+
     /**
      * @param $object \stdClass
      * @return ReferencedTerritory
@@ -73,6 +78,15 @@ class ReferencedTerritoryHelper implements AbstractEntityHelper
     }
 
     /**
+     * @param $referencedTerritoryId int
+     * @return null|ReferencedTerritory
+     */
+    public static function find($referencedTerritoryId) {
+        return ModelHelper::getEm()->getRepository(ReferencedTerritory::CLASSNAME)
+            ->find($referencedTerritoryId);
+    }
+
+    /**
      * @param $name
      * @return ReferencedTerritory|object
      */
@@ -99,3 +113,5 @@ class ReferencedTerritoryHelper implements AbstractEntityHelper
     }
     // @codeCoverageIgnoreEnd
 }
+
+ReferencedTerritoryHelper::$log = Logger::getLogger("main");

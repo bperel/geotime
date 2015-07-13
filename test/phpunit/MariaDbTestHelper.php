@@ -90,6 +90,6 @@ abstract class MariaDbTestHelper extends \PHPUnit_Extensions_Database_TestCase {
     }
 }
 
-$entityManager = $GLOBALS['entityManagerForTest'];
 include_once('ModelHelper.php');
+ModelHelper::setEm($GLOBALS['entityManagerForTest']);
 include_once('AbstractEntityHelper.php');
