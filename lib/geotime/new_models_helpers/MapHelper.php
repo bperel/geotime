@@ -56,6 +56,15 @@ class MapHelper implements AbstractEntityHelper
     }
 
     /**
+     * @return Map[]
+     */
+    public static function findAll()
+    {
+        return ModelHelper::getEm()->getRepository(Map::CLASSNAME)
+            ->findAll();
+    }
+
+    /**
      * @return object
      */
     public function __toSimplifiedObject() {
@@ -82,6 +91,15 @@ class MapHelper implements AbstractEntityHelper
     public static function find($mapId) {
         return ModelHelper::getEm()->getRepository(Map::CLASSNAME)
             ->find($mapId);
+    }
+
+    /**
+     * @param $fileName
+     * @return Map|object
+     */
+    public static function findOneByFileName($fileName) {
+        return ModelHelper::getEm()->getRepository(Map::CLASSNAME)
+            ->findOneBy(array('fileName' => $fileName));
     }
 
     /**

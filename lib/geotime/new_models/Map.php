@@ -84,7 +84,7 @@ class Map {
     }
 
     /**
-     * @return ArrayCollection
+     * @return Territory[]
      */
     public function getTerritories()
     {

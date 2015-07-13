@@ -1,20 +1,20 @@
 <?php
 namespace geotime\Test;
 
-use geotime\Database;
-use geotime\Geotime;
+use geotime\helpers\CriteriaGroupHelper;
+use geotime\helpers\MapHelper;
+use geotime\helpers\ModelHelper;
+use geotime\helpers\ReferencedTerritoryHelper;
+use geotime\helpers\SparqlEndpointHelper;
+use geotime\helpers\TerritoryHelper;
 use geotime\Import;
-use geotime\models\Criteria;
-use geotime\models\CriteriaGroup;
-use geotime\models\CriteriaGroupsType;
-use geotime\models\Map;
-use geotime\models\ReferencedTerritory;
-use geotime\models\SparqlEndpoint;
-use geotime\models\Territory;
+use geotime\models\mariadb\CriteriaGroup;
+use geotime\models\mariadb\Map;
+use geotime\models\mariadb\Territory;
+use geotime\Test\Helper\MariaDbTestHelper;
 use geotime\Util;
-use PHPUnit_Framework_TestCase;
 
-class ImportTest extends \PHPUnit_Framework_TestCase {
+class ImportTest extends MariaDbTestHelper {
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|Import
@@ -41,34 +41,24 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         unlink(Util::$cache_dir_json."Former Empires.json");
     }
 
-    protected function setUp() {
+    public function setUp() {
+
+        parent::setUp();
+
         $this->mock = $this->getMockBuilder('geotime\Import')
             ->setMethods(array('getCommonsImageXMLInfo', 'getSparqlQueryResultsFromQuery'))
             ->getMock();
 
         $this->import = new Import();
 
-        Database::connect(Database::$testDbName);
-
-        Geotime::clean();
-
-        Criteria::drop();
-        CriteriaGroup::drop();
-        SparqlEndpoint::drop();
-
-        CriteriaGroup::importFromJson("test/phpunit/_data/criteriaGroups.json");
-        SparqlEndpoint::importFromJson("test/phpunit/_data/sparqlEndpoints.json");
+        CriteriaGroupHelper::importFromJson("test/phpunit/_data/criteriaGroups.json");
+        SparqlEndpointHelper::importFromJson("test/phpunit/_data/sparqlEndpoints.json");
     }
 
-    protected function tearDown() {
-        SparqlEndpoint::drop();
-
-        CriteriaGroup::drop();
-        Criteria::drop();
-
-        Geotime::clean();
-
+    public function tearDown() {
         Import::$criteriaGroups = null;
+
+        parent::tearDown();
     }
 
     /* Fixtures */
@@ -104,30 +94,31 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
      * @param string $type
      * @return CriteriaGroup
      */
-    private function generateSampleCriteriaGroup($name='Former empires', $type=CriteriaGroupsType::Maps) {
-        $criteria1 = new Criteria(array('key'=>'field1', 'value'=>'value1'));
-        $criteria1->save();
+    private function generateSampleCriteriaGroup($name='Former empires', $type=CriteriaGroupHelper::Maps) {
+        $criteria = new \stdClass();
+        $criteria->field1 = 'value1';
+        $criteria->field2 = 'value2';
 
-        $criteria2 = new Criteria(array('key'=>'field2', 'value'=>'value2'));
-        $criteria2->save();
-
-        $optionalCriteria = new Criteria(array('key'=>'field3', 'value'=>'value3'));
-        $optionalCriteria->save();
+        $optionalCriteria = new \stdClass();
+        $optionalCriteria->field3 = 'value3';
 
         $c = new CriteriaGroup();
         $c->setName($name);
         $c->setType($type);
         $c->setSort(array("field1", "field2"));
-        $c->setCriteria(array($criteria1, $criteria2));
-        $c->setOptional(array($optionalCriteria));
-        $c->save();
+        $c->setCriteria($criteria);
+        $c->setOptional($optionalCriteria);
+        $c->setOptional($optionalCriteria);
 
-        return CriteriaGroup::one();
+        ModelHelper::getEm()->persist($c);
+        ModelHelper::getEm()->flush();
+
+        return CriteriaGroupHelper::findByName($name)[0];
     }
 
     /**
      * @param string $fileName
-     * @param \MongoDate $uploadDate
+     * @param \DateTime $uploadDate
      * @return Map
      */
     private function generateAndSaveSampleMap($fileName, $uploadDate) {
@@ -135,9 +126,11 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $map = new Map();
         $map->setFileName($fileName);
         $map->setUploadDate($uploadDate);
-        $map->save();
 
-        return Map::one();
+        ModelHelper::getEm()->persist($map);
+        ModelHelper::getEm()->flush();
+
+        return MapHelper::findOneByFileName($fileName);
     }
 
     /* Tests */
@@ -149,13 +142,13 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     public function testInitCriteriaGroups() {
         $this->assertEmpty(Import::$criteriaGroups);
         Import::initCriteriaGroups();
-        $this->assertEquals(2, CriteriaGroup::count());
+        $this->assertEquals(2, CriteriaGroupHelper::count());
 
-        $this->assertArrayHasKey(CriteriaGroupsType::Maps, Import::$criteriaGroups);
-        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupsType::Maps]));
+        $this->assertArrayHasKey(CriteriaGroupHelper::Maps, Import::$criteriaGroups);
+        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupHelper::Maps]));
 
-        $this->assertArrayHasKey(CriteriaGroupsType::Territories, Import::$criteriaGroups);
-        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupsType::Territories]));
+        $this->assertArrayHasKey(CriteriaGroupHelper::Territories, Import::$criteriaGroups);
+        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupHelper::Territories]));
     }
 
     public function testInitCriteriaGroupsAlreadyDone()
@@ -164,13 +157,13 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         Import::initCriteriaGroups();
         Import::initCriteriaGroups();
 
-        $this->assertEquals(2, CriteriaGroup::count());
+        $this->assertEquals(2, CriteriaGroupHelper::count());
 
-        $this->assertArrayHasKey(CriteriaGroupsType::Maps, Import::$criteriaGroups);
-        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupsType::Maps]));
+        $this->assertArrayHasKey(CriteriaGroupHelper::Maps, Import::$criteriaGroups);
+        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupHelper::Maps]));
 
-        $this->assertArrayHasKey(CriteriaGroupsType::Territories, Import::$criteriaGroups);
-        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupsType::Territories]));
+        $this->assertArrayHasKey(CriteriaGroupHelper::Territories, Import::$criteriaGroups);
+        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupHelper::Territories]));
     }
 
     /* This test uses the live Dbpedia results */
@@ -192,7 +185,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     */
 
     public function testBuildSparqlQuery() {
-        CriteriaGroup::drop();
         $query = $this->import->buildSparqlQuery($this->generateSampleCriteriaGroup());
 
         $this->assertEquals("SELECT * WHERE { ?e field1 value1 . ?e field2 value2 . OPTIONAL { ?e field3 value3 } } ORDER BY field1 field2", $query);
@@ -240,8 +232,11 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetMapsFromCriteriaGroupCachedJson() {
+        $criteriaGroup = new CriteriaGroup();
+        $criteriaGroup->setName('Former empires');
+
         $maps = $this->mock->storeMapsFromCriteriaGroup(
-            new CriteriaGroup(array('name'=>'Former empires')),
+            $criteriaGroup,
             Util::$cache_dir_json."Former Empires.json"
         );
 
@@ -260,12 +255,11 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetMapsFromCriteriaGroupExistingMap() {
-        CriteriaGroup::drop();
         $criteriaGroup = $this->generateSampleCriteriaGroup();
 
         $this->setSparqlJsonFixture('Former Empires.json');
 
-        $this->generateAndSaveSampleMap('German Empire 1914.svg', new \MongoDate());
+        $this->generateAndSaveSampleMap('German Empire 1914.svg', new \DateTime());
 
         $maps = $this->mock->storeMapsFromCriteriaGroup($criteriaGroup);
         $this->assertEquals(2, count($maps));
@@ -276,8 +270,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetMapsFromCriteriaGroup() {
-        CriteriaGroup::drop();
-        $criteriaGroup = $this->generateSampleCriteriaGroup('Former empires', CriteriaGroupsType::Maps);
+        $criteriaGroup = $this->generateSampleCriteriaGroup('Former empires', CriteriaGroupHelper::Maps);
         $this->setSparqlJsonFixture('Former Empires.json');
         $this->setFetchSvgUrlsFixture();
 
@@ -291,9 +284,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
         /** @var Territory[] $territories */
         $territories = $firstMap->getTerritories();
-        $this->assertNotNull($territories[0]->getPeriod());
-        $this->assertEquals(new \MongoDate(strtotime('1871-01-18')), $territories[0]->getPeriod()->getStart());
-        $this->assertEquals(new \MongoDate(strtotime('1918-11-18')), $territories[0]->getPeriod()->getEnd());
+        $this->assertEquals(new \DateTime('1871-01-18'), $territories[0]->getStartDate());
+        $this->assertEquals(new \DateTime('1918-11-18'), $territories[0]->getEndDate());
 
         $secondMap = next($maps);
         $this->assertNull($secondMap->getId());
@@ -302,36 +294,33 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
         /** @var Territory[] $territories */
         $territories = $secondMap->getTerritories();
-        $this->assertNotNull($territories[0]->getPeriod());
-        $this->assertEquals(new \MongoDate(strtotime('0003-01-01T00:00:00+02:00')), $territories[0]->getPeriod()->getStart());
-        $this->assertEquals(new \MongoDate(strtotime('0843-01-01T00:00:00+02:00')), $territories[0]->getPeriod()->getEnd());
+        $this->assertEquals(new \DateTime('0003-01-01T00:00:00+02:00'), $territories[0]->getStartDate());
+        $this->assertEquals(new \DateTime('0843-01-01T00:00:00+02:00'), $territories[0]->getEndDate());
     }
 
     public function testGetTerritoriesFromCriteriaGroup()
     {
-        CriteriaGroup::drop();
-        $criteriaGroup = $this->generateSampleCriteriaGroup('Former european countries', CriteriaGroupsType::Territories);
+        $criteriaGroup = $this->generateSampleCriteriaGroup('Former european countries', CriteriaGroupHelper::Territories);
         $this->setSparqlJsonFixture('Former countries in Europe.json');
 
         $territories = $this->mock->storeTerritoriesFromCriteriaGroup($criteriaGroup);
         $this->assertEquals(1, count($territories));
 
-        $this->assertEquals(1, Territory::count());
+        $this->assertEquals(1, TerritoryHelper::count());
     }
 
     public function testGetAlreadyExistingTerritoriesFromCriteriaGroup()
     {
-        CriteriaGroup::drop();
-        $criteriaGroup = $this->generateSampleCriteriaGroup('Former european countries', CriteriaGroupsType::Territories);
+        $criteriaGroup = $this->generateSampleCriteriaGroup('Former european countries', CriteriaGroupHelper::Territories);
         $this->setSparqlJsonFixture('Former countries in Europe.json');
 
         $territories = $this->mock->storeTerritoriesFromCriteriaGroup($criteriaGroup);
         $this->assertEquals(1, count($territories));
-        $this->assertEquals(1, Territory::count());
+        $this->assertEquals(1, TerritoryHelper::count());
 
         $territories = $this->mock->storeTerritoriesFromCriteriaGroup($criteriaGroup);
         $this->assertEquals(0, count($territories));
-        $this->assertEquals(1, Territory::count());
+        $this->assertEquals(1, TerritoryHelper::count());
     }
 
     public function testGetTerritoriesFromCriteriaGroupInvalidJson() {
@@ -346,7 +335,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
     }
 
     function testGetDatesFromSparqlResultInvalidCriteriaGroup() {
-        CriteriaGroup::drop();
         $criteriaGroup = $this->generateSampleCriteriaGroup('Invalid criteria group name');
 
         $this->setSparqlJsonFixture('Former Empires.json');
@@ -388,7 +376,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertNotNull($imageInfos);
         $this->assertEquals('https://upload.wikimedia.org/wikipedia/commons/7/79/Wiki-commons.png', $imageInfos['url']);
-        $this->assertEquals(strtotime('2006-10-02T01:19:24Z'), $imageInfos['uploadDate']->sec);
+        $this->assertEquals(new \DateTime('2006-10-02T01:19:24Z'), $imageInfos['uploadDate']);
     }
 
     /* This test uses the live toolserver */
@@ -415,21 +403,21 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
 
     public function testFetchAndStoreImageNewMap() {
         $mapFileName = 'testImage.svg';
-        $map = Map::generateAndSaveReferences('testImage.svg', '1980-01-02', '1991-02-03');
-        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $mapFileName, new \MongoDate(strtotime('2013-07-25T17:33:40Z')));
+        $map = MapHelper::generateAndSaveReferences('testImage.svg', '1980-01-02', '1991-02-03');
+        $hasCreatedMap = $this->import->fetchAndStoreImage($map, $mapFileName, new \DateTime('2013-07-25T17:33:40Z'));
 
         $this->assertTrue($hasCreatedMap);
-        $this->assertEquals(1, Map::count());
+        $this->assertEquals(1, MapHelper::count());
 
         /** @var Map $storedMap */
-        $storedMap = Map::one();
+        $storedMap = MapHelper::findAll()[0];
         $territories = $storedMap->getTerritories();
-        $this->assertEquals(new \MongoDate(strtotime('1980-01-02')), $territories[0]->getPeriod()->getStart());
-        $this->assertEquals(new \MongoDate(strtotime('1991-02-03')), $territories[0]->getPeriod()->getEnd());
+        $this->assertEquals(new \DateTime('1980-01-02'), $territories[0]->getStartDate());
+        $this->assertEquals(new \DateTime('1991-02-03'), $territories[0]->getEndDate());
     }
 
     public function testFetchAndStoreImageExistingMap() {
-        $uploadDate = new \MongoDate(strtotime('2013-01-02T03:04:05Z'));
+        $uploadDate = new \DateTime('2013-01-02T03:04:05Z');
 
         $mapFileName = 'testImage.svg';
         $map = $this->generateAndSaveSampleMap($mapFileName, $uploadDate);
@@ -437,13 +425,13 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $hasCreatedMap = $this->import->fetchAndStoreImage($map, $mapFileName, $uploadDate);
 
         $this->assertFalse($hasCreatedMap);
-        $this->assertEquals(1, Map::count());
+        $this->assertEquals(1, MapHelper::count());
     }
 
     public function testFetchAndStoreImageOutdatedMap()
     {
-        $storedMapUploadDate = new \MongoDate(strtotime('2012-01-02T03:04:05Z'));
-        $uploadDate = new \MongoDate(strtotime('2013-01-02T03:04:05Z'));
+        $storedMapUploadDate = new \DateTime('2012-01-02T03:04:05Z');
+        $uploadDate = new \DateTime('2013-01-02T03:04:05Z');
 
         $mapFileName = 'testImage.svg';
         $map = $this->generateAndSaveSampleMap($mapFileName, $storedMapUploadDate);
@@ -451,7 +439,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $hasCreatedMap = $this->import->fetchAndStoreImage($map, $mapFileName, $uploadDate);
 
         $this->assertTrue($hasCreatedMap);
-        $this->assertEquals(1, Map::count());
+        $this->assertEquals(1, MapHelper::count());
     }
 
     public function testImportTerritoriesFromSparqlQuery() {
@@ -459,17 +447,17 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->setSparqlJsonFixture($resultFile);
         $this->mock->importReferencedTerritoriesFromQuery($resultFile.'.sparql', $resultFile, true);
 
-        $this->assertEquals(11, ReferencedTerritory::count(array()));
+        $this->assertEquals(11, ReferencedTerritoryHelper::count());
 
         /** @var Territory[] $initialTerritories */
-        $initialTerritories = Territory::find(array('period' => array('$exists' => true)));
+        $initialTerritories = TerritoryHelper::findWithPeriod();
         $referencedTerritoryNames = array_map(function(Territory $value) {
             return $value->getReferencedTerritory()->getName();
-        }, $initialTerritories->toArray());
+        }, $initialTerritories);
         $this->assertEquals(array('Abbasid Caliphate', 'Alania'), $referencedTerritoryNames);
 
-        /** @var ReferencedTerritory $firstTerritory */
-        $firstTerritory = ReferencedTerritory::one(array('name' => 'Abbasid Caliphate'));
+        /** @var \geotime\models\mariadb\ReferencedTerritory $firstTerritory */
+        $firstTerritory = ReferencedTerritoryHelper::findOneByName('Abbasid Caliphate');
         $firstTerritoryPreviousTerritories = $firstTerritory->getPrevious();
         $this->assertEquals(4, count($firstTerritoryPreviousTerritories));
         $this->assertEquals('Dabuyid dynasty', $firstTerritoryPreviousTerritories[0]->getName());
@@ -478,8 +466,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(5, count($firstTerritoryNextTerritories));
         $this->assertEquals('Aghlabids', $firstTerritoryNextTerritories[0]->getName());
 
-        /** @var ReferencedTerritory $secondTerritory */
-        $secondTerritory = ReferencedTerritory::one(array('name' => 'Alania'));
+        /** @var \geotime\models\mariadb\ReferencedTerritory $secondTerritory */
+        $secondTerritory = ReferencedTerritoryHelper::findOneByName('Alania');
         $secondTerritoryPreviousTerritories = $secondTerritory->getPrevious();
         $this->assertEquals(0, count($secondTerritoryPreviousTerritories));
     }

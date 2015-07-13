@@ -32,6 +32,14 @@ class CriteriaGroup
     /** @Column(type="object") **/
     var $name;
 
+    /**
+     * CriteriaGroup constructor.
+     */
+    public function __construct()
+    {
+        $this->criteria = new \stdClass();
+        $this->optional = new \stdClass();
+    }
 
     // @codeCoverageIgnoreStart
     /**

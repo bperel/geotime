@@ -9,6 +9,9 @@ class CriteriaGroupHelper implements AbstractEntityHelper
 {
     static $cachePath = 'data/criteriaGroups.json';
 
+    const Maps = 'maps';
+    const Territories = 'territories';
+
     public static function importFromJson($fileName=null) {
         if (is_null($fileName)) {
             $fileName = self::$cachePath;
@@ -47,6 +50,32 @@ class CriteriaGroupHelper implements AbstractEntityHelper
         $qb->from(CriteriaGroup::CLASSNAME,'criteriaGroup');
 
         return $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * @return null|CriteriaGroup[]
+     */
+    public static function findAll() {
+        return ModelHelper::getEm()->getRepository(CriteriaGroup::CLASSNAME)
+            ->findAll();
+    }
+
+    /**
+     * @param $name
+     * @return CriteriaGroup[]|object
+     */
+    public static function findByName($name) {
+        return ModelHelper::getEm()->getRepository(CriteriaGroup::CLASSNAME)
+            ->findBy(array('name' => $name));
+    }
+
+    /**
+     * @param $type
+     * @return CriteriaGroup[]|object
+     */
+    public static function findByType($type) {
+        return ModelHelper::getEm()->getRepository(CriteriaGroup::CLASSNAME)
+            ->findBy(array('type' => $type));
     }
 
     // @codeCoverageIgnoreStart

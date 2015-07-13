@@ -30,6 +30,24 @@ class SparqlEndpointHelper implements AbstractEntityHelper
         ModelHelper::getEm()->flush();
     }
 
+    /**
+     * @param $id
+     * @return SparqlEndpoint|object
+     */
+    public static function findOne($id) {
+        return ModelHelper::getEm()->getRepository(SparqlEndpoint::CLASSNAME)
+            ->find($id);
+    }
+
+    /**
+     * @param $name
+     * @return SparqlEndpoint|object
+     */
+    public static function findOneByName($name) {
+        return ModelHelper::getEm()->getRepository(SparqlEndpoint::CLASSNAME)
+            ->findOneBy(array('name' => $name));
+    }
+
     // @codeCoverageIgnoreStart
     static final function getTableName()
     {
