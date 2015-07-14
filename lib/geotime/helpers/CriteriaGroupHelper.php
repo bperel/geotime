@@ -79,8 +79,7 @@ class CriteriaGroupHelper implements AbstractEntityHelper
 
     public static function deleteAll() {
         $qb = ModelHelper::getEm()->createQueryBuilder();
-        $qb->delete('criteriaGroup');
-        $qb->from(CriteriaGroup::CLASSNAME,'criteriaGroup');
+        $qb->delete(CriteriaGroup::CLASSNAME);
 
         return $qb->getQuery()->execute();
     }

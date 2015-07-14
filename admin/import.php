@@ -9,8 +9,12 @@ use geotime\Import;
 use geotime\NaturalEarthImporter;
 
 require_once("../vendor/autoload.php");
+require_once("../lib/doctrine/bootstrap-doctrine.php");
 
-ModelHelper::setEm(DoctrineBootstrap::getEntityManager());
+chdir("..");
+
+$entityManager = DoctrineBootstrap::getEntityManager();
+ModelHelper::setEm($entityManager);
 
 $clean = isset($_GET['clean']);
 
