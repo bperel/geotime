@@ -39,6 +39,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $neImport->import(self::$neMapName);
 
         $map = Map::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
+        $map->setUploadDate(new \MongoDate());
         $map->save();
     }
 
@@ -195,6 +196,10 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
     }
 
     function testAddLocatedTerritory() {
+        $map = new Map();
+        $map->save();
+        $mapId = $map->getIdAsString();
+
         $referencedTerritory = ReferencedTerritory::one(array('name' => 'France'));
 
         $coordinates = array(
@@ -207,21 +212,30 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $territoryPeriodStart = '1980-01-02';
         $territoryPeriodEnd = '1991-04-06';
 
-        Geotime::saveLocatedTerritory($referencedTerritory->getId(), $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
+        Geotime::saveLocatedTerritory($mapId, $referencedTerritory->getId(), $xpath, $territoryPeriodStart, $territoryPeriodEnd);
 
         /** @var Territory $createdTerritory */
         $createdTerritory = Territory::one(array('xpath' => $xpath));
         $this->assertNotEmpty($createdTerritory);
         $this->assertEquals($createdTerritory->getUserMade(), true);
         $this->assertEquals($xpath, $createdTerritory->getXpath());
-        $this->assertEquals($coordinates, $createdTerritory->getPolygon());
+        $this->assertEquals(array(array($coordinates)), $createdTerritory->getPolygon());
         $this->assertEquals(new \MongoDate(strtotime($territoryPeriodStart)), $createdTerritory->getPeriod()->getStart());
         $this->assertEquals(new \MongoDate(strtotime($territoryPeriodEnd)), $createdTerritory->getPeriod()->getEnd());
+        $this->assertGreaterThan(0, $createdTerritory->getArea());
+
+        /** @var Map $mapWithTerritory */
+        $mapWithTerritory = Map::id($mapId);
+        $this->assertEquals(count($mapWithTerritory->getTerritories()), 1);
 
         $this->assertEquals(Geotime::getImportedTerritoriesCount(), 3);
     }
 
     function testUpdateLocatedTerritory() {
+        $map = new Map();
+        $map->save();
+        $mapId = $map->getIdAsString();
+
         $referencedTerritory = ReferencedTerritory::one(array('name' => 'France'));
 
         $coordinates = array(
@@ -235,7 +249,7 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $territoryPeriodEnd = '1991-04-06';
 
         Geotime::saveLocatedTerritory(
-            $referencedTerritory->getId()->__toString(), $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd
+            $mapId, $referencedTerritory->getId()->__toString(), $xpath, $territoryPeriodStart, $territoryPeriodEnd
         );
 
         /** @var Territory $territoryWithReference */
@@ -244,9 +258,14 @@ class GeotimeTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($territoryWithReference->getReferencedTerritory(), $referencedTerritory);
         $this->assertEquals($territoryWithReference->getUserMade(), true);
         $this->assertEquals($xpath, $territoryWithReference->getXpath());
-        $this->assertEquals($coordinates, $territoryWithReference->getPolygon());
+        $this->assertEquals(array(array($coordinates)), $territoryWithReference->getPolygon());
         $this->assertEquals(new \MongoDate(strtotime($territoryPeriodStart)), $territoryWithReference->getPeriod()->getStart());
         $this->assertEquals(new \MongoDate(strtotime($territoryPeriodEnd)), $territoryWithReference->getPeriod()->getEnd());
+        $this->assertGreaterThan(0, $territoryWithReference->getArea());
+
+        /** @var Map $mapWithTerritory */
+        $mapWithTerritory = Map::id($mapId);
+        $this->assertEquals(count($mapWithTerritory->getTerritories()), 1);
 
     }
 } 

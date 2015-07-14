@@ -122,18 +122,10 @@ class Geotime {
      */
     public static function getIncompleteMapInfo()
     {
-        /** @var Territory $matchingTerritories */
-        $matchingTerritory = Territory::one(array(
-            'polygon' => array('$exists' => false)));
-
-        if (!is_null($matchingTerritory)) {
-            /** @var Map $incompleteMap */
-            $incompleteMap = Map::one(array(
-                'territories.$id' => new \MongoId($matchingTerritory->getId()),
-            ));
-            if (!is_null($incompleteMap)) {
-                return $incompleteMap->__toSimplifiedObject();
-            }
+        /** @var Map $incompleteMap */
+        $incompleteMap = Map::one(array('uploadDate'=>array('$exists' => true)));
+        if (!is_null($incompleteMap)) {
+            return $incompleteMap->__toSimplifiedObject();
         }
 
         return null;
@@ -187,22 +179,35 @@ class Geotime {
     }
 
     /**
+     * @param $mapId string
      * @param $territoryId string
-     * @param $coordinates string
      * @param $xpath string
      * @param $territoryPeriodStart string
      * @param $territoryPeriodEnd string
      * @return mixed|null
      */
-    public static function saveLocatedTerritory($territoryId, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
+    public static function saveLocatedTerritory($mapId, $territoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
     {
+        /** @var Map $map */
+        $map = Map::one(array('_id' => new \MongoId($mapId)));
+        if (is_null($map)) {
+            return null;
+        }
+
         /** @var ReferencedTerritory $referencedTerritory */
         $referencedTerritory = ReferencedTerritory::one(array('_id' => new \MongoId($territoryId)));
         if (is_null($referencedTerritory)) {
             return null;
         }
-        Territory::buildAndCreateWithReferencedTerritory($referencedTerritory, true, $territoryPeriodStart, $territoryPeriodEnd, $coordinates, $xpath);
-        return $coordinates;
+
+        $territory = Territory::buildAndCreateWithReferencedTerritory(
+            $referencedTerritory, true, $territoryPeriodStart, $territoryPeriodEnd, $xpath
+        );
+        $geocoordinates = $territory->calculateCoordinates($map);
+        $territory->setPolygon(array(array($geocoordinates)));
+        $territory->save();
+        $map->addTerritory($territory);
+        $map->save();
     }
 
     public static function getCriteriaGroupsNumber() {

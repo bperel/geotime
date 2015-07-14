@@ -61,7 +61,25 @@
     font-weight: normal;
 }
 
-.helperStep .removeCalibrationPoint {
+.helperStep .section {
+    position: relative;
+    border: 1px dashed gray;
+    padding: 5px 5px 25px;
+}
+
+.helperStep .section .title {
+    font-weight: bold;
+    color: dimgray;
+}
+
+.helperStep .section .validate {
+    bottom: 0;
+    right: 0;
+    position: absolute;
+}
+
+.helperStep .removeCalibrationPoint,
+.helperStep .removeLocatedTerritory {
     cursor: pointer;
     color: red;
 }
@@ -72,4 +90,8 @@
 
 .helperStep #territoryId.clicked {
     color: black;
+}
+
+.helperStep #locatedTerritories {
+    margin-left: 10px;
 }

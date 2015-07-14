@@ -11,7 +11,7 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
     static $fixtures_dir_svg = "test/phpunit/_fixtures/svg/";
     static $fixtures_dir_thumbnails = "test/phpunit/_fixtures/thumbnails/";
 
-    static $wikimediaLogoLocation = "http://upload.wikimedia.org/wikipedia/commons/8/81/Wikimedia-logo.svg";
+    static $wikimediaLogoLocation = "https://upload.wikimedia.org/wikipedia/commons/8/81/Wikimedia-logo.svg";
     static $wikimediaLogoFileName = "logo.svg";
 
     static $simpleSvgFileName = "simple.svg";
@@ -74,6 +74,16 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
         $success = Util::storeSvgWithThumbnail($svg, 'lo/go.svg');
 
         $this->assertFalse($success);
+    }
+
+    public function testInvertPath() {
+        $old_cache_dir = Util::$cache_dir_svg;
+        Util::$cache_dir_svg = self::$fixtures_dir_svg;
+
+        $result = Util::calculatePathCoordinates('simpleMap.svg', 'simplePath', 'mercator', array(0,0,0), 500, array(0,0,0));
+        $this->assertInternalType('array', $result);
+
+        Util::$cache_dir_svg = $old_cache_dir;
     }
 }
  

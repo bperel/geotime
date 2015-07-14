@@ -17,36 +17,25 @@
         <link rel="stylesheet" href="css/slider.css">
         <link rel="stylesheet" href="css/helper.css">
 
-        <script src="js/vendor/modernizr/modernizr.js"></script>
-        <script src="js/vendor/d3/d3.min.js"></script>
-        <script src="js/vendor/topojson/topojson.js"></script>
-
-        <script src="js/autocomplete.js"></script>
+        <script type="text/javascript" src="js/dependencies.js"></script>
+        <script type="text/javascript">
+            onLoad = function() {
+                initMapPlaceHolders(function() {
+                    initMapArea();
+                    loadUI();
+                    loadHelperConfig();
+                    getAndShowBgMap("backgroundMap", "data/external/ne_110m_coastline.json", function() {
+                        applyCurrentProjection();
+                    });
+                });
+                d3.select('#loadRandomTerritoryMap').on('click', loadRandomTerritoryMap);
+            };
+        </script>
+        <script data-main="js/main" src="js/vendor/requirejs/require.js"></script>
 
     </head>
     <body>
-
         <div id="map-placeholders"></div>
-        <a href="javascript:void(0)" id="loadTerritoryMap">Load a random territory</a>
-
-        <script src="js/vendor/jquery/dist/jquery.min.js"></script>
-
-        <script src="js/d3.xpath.js"></script>
-        <script src="js/plugins.js"></script>
-        <script src="js/util.js"></script>
-        <script src="js/main.js"></script>
-        <script src="js/map.js"></script>
-        <script src="js/helper.config.js"></script>
-        <script src="js/helper.config.calibration.js"></script>
-        <script src="js/helper.js"></script>
-
-        <script type="text/javascript">
-            initMapPlaceHolders(function() {
-                initMapArea();
-                loadHelperConfig();
-                getAndShowBgMap("backgroundMap", "data/external/ne_110m_coastline.json");
-            });
-            d3.select('#loadTerritoryMap').on('click', loadTerritoryMap);
-        </script>
+        <a href="javascript:void(0)" id="loadRandomTerritoryMap">Load a random territory</a>
     </body>
 </html>

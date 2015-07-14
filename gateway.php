@@ -33,13 +33,17 @@ elseif (isset($_POST['locateMap'])) {
     $calibrationPoints = $_POST['calibrationPoints'];
     Geotime::updateMap($mapId, $mapProjection, $mapRotation, $mapCenter, $mapScale, $calibrationPoints);
 }
-elseif (isset($_POST['addTerritory'])) {
-    $referencedTerritoryId = $_POST['territoryId'];
-    $territoryPeriodStart = $_POST['territoryPeriodStart'];
-    $territoryPeriodEnd = $_POST['territoryPeriodEnd'];
-    $xpath = $_POST['xpath'];
-    $coordinates = $_POST['coordinates'];
-    $object->coord = Geotime::saveLocatedTerritory($referencedTerritoryId, $coordinates, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
+elseif (isset($_POST['addTerritories'])) {
+    $mapId = $_POST['mapId'];
+    foreach($_POST['territories'] as $territory) {
+        if (!array_key_exists('id', $territory)) {
+            $referencedTerritoryId = $territory['referencedTerritory']['id'];
+            $xpath = $territory['xpath'];
+            $territoryPeriodStart = $territory['period']['start'].'-01-01';
+            $territoryPeriodEnd = $territory['period']['end'].'-01-01';
+            Geotime::saveLocatedTerritory($mapId, $referencedTerritoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
+        }
+    }
 }
 
 echo json_encode($object);

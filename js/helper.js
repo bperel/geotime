@@ -1,4 +1,4 @@
-var helper;
+var helper = d3.select('nothing');
 var helperButtonsData = [];
 var helperSteps;
 var helperStepsData = [];
@@ -90,6 +90,11 @@ function isActiveStepFilter(d) {
 
 function isValidStepFilter(d) {
 	return !d.validate || d.validate();
+}
+
+function getHelperStepData(step) {
+    step = step || helper.datum().activeStep;
+    return helperSteps.data().filter(function(d) { return d.step === step; })[0];
 }
 
 function empty() { return {}; }

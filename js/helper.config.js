@@ -28,28 +28,26 @@ function loadHelperConfig() {
 			step: 2, content: ['If necessary, move the superimposed map so that it corresponds to the background borders.'],
 			onLoad: [enableMapDragResize],
 			dataUpdate: saveMapPosition,
-			onUnload: [disableMapDragResize, saveMapLocation],
+			onUnload: [disableMapDragResize, persistMapLocation],
 			buttons: ['done', 'skip', 'cancel']
 		}, {
-			step: 3, content: ['Select with your mouse a country whose name is written on the map or known by you.',
-							   'Chosen territory : <span id="territoryId">None</span>'],
-			onLoad: [enableTerritorySelection],
-			dataUpdate: saveTerritoryPosition, validate: checkSelectedTerritory,
-			onUnload: [disableTerritorySelection],
+			step: 3, content: ['Locate territories.',
+							   'Located territories : <span id="locatedTerritoriesNumber"></span>' +
+                               '<div id="locatedTerritories"></div>' +
+                               '<br /><div id="addTerritorySection" class="section"><div class="title">Add territory location</div>' +
+                               'Currently selected territory : <span id="territoryId">None</span>' +
+                               '<br /><div id="currentTerritory" class="hidden">' +
+                               '<table><tr><td><label for="territoryName">Name :</label></td>' +
+                               '<td><input type="text" id="territoryName" /></td></tr></table>' +
+                               '<br />had these borders ' +
+                               '<label for="territoryPeriodStart">from </label><input type="number" id="territoryPeriodStart" />' +
+                               '<label for="territoryPeriodEnd"  > to  </label><input type="number" id="territoryPeriodEnd" />' +
+                               '<input type="button" id="addTerritory" class="validate" value="Add territory"/></div>'],
+			onLoad: [enableTerritorySelection,initTerritoryAutocomplete,showLocatedTerritories],
+            validate: checkSelectedTerritory,
+            dataUpdate: saveTerritoriesPosition,
+			onUnload: [disableTerritorySelection, persistTerritoriesPosition],
 			buttons: ['done', 'skip', 'cancel']
-		}, {
-			step: 4, content: ['<label for="territoryName">Type in its name</label>',
-							   '<input type="text" id="territoryName" />'],
-			onLoad: [initTerritoryAutocomplete],
-			dataUpdate: saveTerritoryName,
-			buttons: ['done', 'skip', 'cancel']
-		}, {
-			step: 5, content: ['During what period did this territory have these borders ?<br />',
-							   '<label for="territoryPeriodStart">From </label><input type="number" id="territoryPeriodStart" />'
-							 + '<label for="territoryPeriodEnd"  > to  </label><input type="number" id="territoryPeriodEnd" />'],
-			dataUpdate: saveTerritoryPeriod,
-			onUnload: [saveHelperData],
-			buttons: ['done', 'cancel']
 		}
 	];
 }
@@ -168,9 +166,8 @@ function disableMapDragResize() {
 		.classed("hidden", true);
 }
 
-function saveMapLocation() {
-    var mapData = helperSteps.data().filter(function(d) { return d.step === 2; })[0].map;
-    validateMapLocation(mapData);
+function persistMapLocation() {
+    validateMapLocation(getHelperStepData(2).map);
 }
 
 // Step 3
@@ -182,6 +179,32 @@ function enableTerritorySelection() {
 		.on("mouseover", onTerritoryMouseover)
 		.on("mouseout",  onTerritoryMouseout)
 		.on("click",     onHoveredTerritoryClick);
+
+    d3.select('#addTerritory').on('click', function() {
+        locatedTerritories.push({
+            element: selectedTerritory,
+            period: {
+                start: d3.select('#territoryPeriodStart').node().value,
+                end: d3.select('#territoryPeriodEnd').node().value
+            },
+            referencedTerritory: {
+                id: territoryName.datum().territoryId,
+                name: territoryName.datum().territoryName
+            }
+        });
+        showLocatedTerritories();
+    });
+}
+
+function initTerritoryAutocomplete() {
+    territoryName = d3.select('#territoryName');
+    territoryName.node().focus();
+
+    autocomplete(d3.select('#territoryName').node())
+        .dataField("name")
+        .width(960)
+        .height(500)
+        .render();
 }
 
 function disableTerritorySelection() {
@@ -208,6 +231,27 @@ function updateTerritoryId() {
 		.text(id);
 }
 
+function showLocatedTerritories() {
+    var locatedTerritoriesElements = d3.select('#locatedTerritories').selectAll('.locatedTerritory').data(locatedTerritories);
+    locatedTerritoriesElements.enter().append('div').classed('locatedTerritory', true);
+
+    locatedTerritoriesElements
+        .text(function (d) {
+            return d.referencedTerritory.name;
+        })
+        .append("span")
+            .classed('removeLocatedTerritory', true)
+            .html("&nbsp;X Remove")
+            .on('click', function(d, i) {
+            locatedTerritories.splice(i, 1);
+                showLocatedTerritories()
+            });
+
+    locatedTerritoriesElements.exit().remove();
+
+    d3.select('#locatedTerritoriesNumber').text(locatedTerritories.length);
+}
+
 function checkSelectedTerritory() {
 	var isSelectedTerritory = !svgMap.select('path.selected').empty();
 	if (!isSelectedTerritory) {
@@ -216,51 +260,20 @@ function checkSelectedTerritory() {
 	return isSelectedTerritory;
 }
 
-function saveTerritoryPosition() {
-	var selectedTerritory = svgMap.select('path.selected');
+function saveTerritoriesPosition() {
 	return function(d) {
-		d.territory = {
-			coordinates: selectedTerritory.getPathCoordinates(),
-			xpath: selectedTerritory.xpath()
-		};
-		return d;
-	};
-}
-
-// Step 4
-function initTerritoryAutocomplete() {
-	territoryName = d3.select('#territoryName');
-	territoryName.node().focus();
-
-	autocomplete(d3.select('#territoryName').node())
-		.dataField("name")
-		.width(960)
-		.height(500)
-		.render();
-}
-
-function saveTerritoryName() {
-	return function(d) {
-		d.territory = {
-			id: territoryName.datum().territoryId
-		};
-		return d;
-	};
-}
-
-// Step 5
-function saveTerritoryPeriod() {
-	return function(d) {
-		d.territory = {
-			period: {
-				start: d3.select('#territoryPeriodStart').node().value,
-				end: d3.select('#territoryPeriodEnd').node().value
+		d.territories = locatedTerritories.map(function(locatedTerritory) {
+			if (!locatedTerritory.id) {
+				locatedTerritory.xpath = locatedTerritory.element.xpath();
 			}
-		};
+            delete locatedTerritory.element;
+
+            return locatedTerritory;
+        });
 		return d;
 	};
 }
 
-function saveHelperData() {
-	validateTerritory(flattenArrayOfObjects(helperSteps.data()));
+function persistTerritoriesPosition() {
+    validateTerritories(svgMap.datum().id, getHelperStepData().territories);
 }
