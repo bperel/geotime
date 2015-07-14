@@ -1,49 +1,58 @@
 <?php
 
-namespace geotime\models;
-
-use Purekid\Mongodm\Model;
+namespace geotime\models\mariadb;
 
 
-class CoordinateLatLng extends Model {
+class CoordinateLatLng {
 
-    protected static $attrs = array(
-        'lat' => array('type' => 'float'),
-        'lng' => array('type' => 'float')
-    );
+    /** @var $lat float */
+    var $lat;
+
+    /** @var $lng float */
+    var $lng;
+
+    /**
+     * CoordinateLatLng constructor.
+     * @param float $lat
+     * @param float $lng
+     */
+    public function __construct($lat, $lng)
+    {
+        $this->lat = $lat;
+        $this->lng = $lng;
+    }
 
     // @codeCoverageIgnoreStart
     /**
-     * @return double
+     * @return float
      */
     public function getLat()
     {
-        return $this->__getter('lat');
+        return $this->lat;
     }
 
     /**
-     * @param double $lat
+     * @param float $lat
      */
     public function setLat($lat)
     {
-        $this->__setter('lat', $lat);
+        $this->lat = $lat;
     }
 
     /**
-     * @return double
+     * @return float
      */
     public function getLng()
     {
-        return $this->__getter('lng');
+        return $this->lng;
     }
 
     /**
-     * @param double $lng
+     * @param float $lng
      */
     public function setLng($lng)
     {
-        $this->__setter('lng', $lng);
+        $this->lng = $lng;
     }
     // @codeCoverageIgnoreEnd
-
 }

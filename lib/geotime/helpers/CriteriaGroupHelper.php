@@ -2,7 +2,7 @@
 namespace geotime\helpers;
 
 use geotime\models\mariadb\CriteriaGroup;
-use geotime\new_models\AbstractEntityHelper;
+use geotime\models\AbstractEntityHelper;
 use geotime\Util;
 
 class CriteriaGroupHelper implements AbstractEntityHelper
@@ -76,6 +76,14 @@ class CriteriaGroupHelper implements AbstractEntityHelper
     public static function findByType($type) {
         return ModelHelper::getEm()->getRepository(CriteriaGroup::CLASSNAME)
             ->findBy(array('type' => $type));
+    }
+
+    public static function deleteAll() {
+        $qb = ModelHelper::getEm()->createQueryBuilder();
+        $qb->delete('criteriaGroup');
+        $qb->from(CriteriaGroup::CLASSNAME,'criteriaGroup');
+
+        return $qb->getQuery()->execute();
     }
 
     // @codeCoverageIgnoreStart

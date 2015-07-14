@@ -1,49 +1,59 @@
 <?php
 
-namespace geotime\models;
-
-use Purekid\Mongodm\Model;
+namespace geotime\models\mariadb;
 
 
-class CoordinateXY extends Model {
+class CoordinateXY {
 
-    protected static $attrs = array(
-        'x' => array('type' => 'float'),
-        'y' => array('type' => 'float')
-    );
+    const CLASSNAME = __CLASS__;
+
+    /** @var $x float */
+    var $x;
+
+    /** @var $y float */
+    var $y;
+
+    /**
+     * @param float $x
+     * @param float $y
+     */
+    function __construct($x, $y)
+    {
+        $this->x = $x;
+        $this->y = $y;
+    }
 
     // @codeCoverageIgnoreStart
     /**
-     * @return double
+     * @return float
      */
     public function getX()
     {
-        return $this->__getter('x');
+        return $this->x;
     }
 
     /**
-     * @param double $x
+     * @param float $x
      */
     public function setX($x)
     {
-        $this->__setter('x', $x);
+        $this->x = $x;
     }
 
     /**
-     * @return double
+     * @return float
      */
     public function getY()
     {
-        return $this->__getter('y');
+        return $this->y;
     }
 
     /**
-     * @param double $y
+     * @param float $y
      */
     public function setY($y)
     {
-        $this->__setter('y', $y);
+        $this->y = $y;
     }
     // @codeCoverageIgnoreEnd
-
 }

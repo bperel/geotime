@@ -4,7 +4,6 @@ namespace geotime\Test;
 use Doctrine\ORM\EntityRepository;
 use geotime\helpers\ModelHelper;
 
-use geotime\Database;
 use geotime\Geotime;
 use geotime\helpers\MapHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
@@ -44,9 +43,6 @@ class GeotimeTest extends MariaDbTestHelper {
 
     public function setUp() {
         parent::setUp();
-        Database::connect(Database::$testDbName);
-
-        Geotime::clean();
 
         $neImport = new NaturalEarthImporter();
         $neImport->import(self::$neMapName);

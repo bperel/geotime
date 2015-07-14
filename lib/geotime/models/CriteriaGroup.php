@@ -1,100 +1,127 @@
 <?php
+namespace geotime\models\mariadb;
 
-namespace geotime\models;
+/**
+ * @Entity @Table(name="criteriaGroups")
+ **/
+class CriteriaGroup
+{
+    const CLASSNAME = __CLASS__;
 
-use Purekid\Mongodm\Model;
-use geotime\Database;
+    /** @Id @Column(type="integer") @GeneratedValue *
+     * @Column(type="integer")
+     */
+    var $id;
 
-class CriteriaGroup extends Model {
-    static $collection = 'criteriaGroups';
-    static $cachePath = 'data/criteriaGroups.json';
+    /** @Column(type="string") **/
+    var $type;
 
-    protected static $attrs = array(
-        'type' => array('type' => 'string'),
-        'criteria' => array('model' => 'geotime\models\Criteria', 'type' => 'embeds'),
-        'optional' => array('model' => 'geotime\models\Criteria', 'type' => 'embeds'),
-        'sort' => array('type' => 'array'),
-        'name' => array('type' => 'string')
-    );
 
-    public static function importFromJson($fileName=null) {
-        if (is_null($fileName)) {
-            $fileName = self::$cachePath;
-        }
-        return Database::importFromJson($fileName, self::$collection);
+    /** @Column(type="object") **/
+    var $criteria;
+
+
+    /** @Column(type="object") **/
+    var $optional;
+
+
+    /** @Column(type="simple_array") **/
+    var $sort;
+
+
+    /** @Column(type="object") **/
+    var $name;
+
+    /**
+     * CriteriaGroup constructor.
+     */
+    public function __construct()
+    {
+        $this->criteria = new \stdClass();
+        $this->optional = new \stdClass();
     }
 
     // @codeCoverageIgnoreStart
-
     /**
      * @return string
      */
-    public function getType() {
-        return $this->__getter('type');
+    public function getType()
+    {
+        return $this->type;
     }
 
     /**
      * @param string $type
      */
-    public function setType($type) {
-        $this->__setter('type', $type);
+    public function setType($type)
+    {
+        $this->type = $type;
     }
 
     /**
-     * @return Criteria[]
+     * @return \stdClass
      */
-    public function getCriteria() {
-        return $this->__getter('criteria');
+    public function getCriteria()
+    {
+        return $this->criteria;
     }
 
     /**
-     * @param Criteria[] $criteria
+     * @param \stdClass $criteria
      */
-    public function setCriteria(array $criteria) {
-        $this->__setter('criteria', $criteria);
+    public function setCriteria($criteria)
+    {
+        $this->criteria = $criteria;
     }
 
     /**
-     * @return Criteria[]
+     * @return \stdClass
      */
-    public function getOptional() {
-        return $this->__getter('optional');
+    public function getOptional()
+    {
+        return $this->optional;
     }
 
     /**
-     * @param Criteria[] $optional
+     * @param \stdClass $optional
      */
-    public function setOptional(array $optional) {
-        $this->__setter('optional', $optional);
+    public function setOptional($optional)
+    {
+        $this->optional = $optional;
     }
 
     /**
      * @return array
      */
-    public function getSort() {
-        return $this->__getter('sort');
+    public function getSort()
+    {
+        return $this->sort;
     }
 
     /**
      * @param array $sort
      */
-    public function setSort($sort) {
-        $this->__setter('sort', $sort);
+    public function setSort($sort)
+    {
+        $this->sort = $sort;
     }
 
     /**
      * @return string
      */
-    public function getName() {
-        return $this->__getter('name');
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
      * @param string $name
      */
-    public function setName($name) {
-        $this->__setter('name', $name);
+    public function setName($name)
+    {
+        $this->name = $name;
     }
+
     // @codeCoverageIgnoreEnd
 
-} 
+}

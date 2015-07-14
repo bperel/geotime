@@ -1,5 +1,10 @@
 <?php
 
+set_include_path(implode(PATH_SEPARATOR, array(get_include_path(),__DIR__.'/../../lib/geotime')));
+set_include_path(implode(PATH_SEPARATOR, array(get_include_path(),__DIR__.'/../../lib/geotime/models')));
+set_include_path(implode(PATH_SEPARATOR, array(get_include_path(),__DIR__.'/../../lib/geotime/helpers')));
+set_include_path(implode(PATH_SEPARATOR, array(get_include_path(),__DIR__.'/../../lib/geotime/types')));
+
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Doctrine\DBAL\Types\Type;
@@ -12,7 +17,7 @@ class DoctrineBootstrap {
      */
     static function getMetadataConfig() {
         $isDevMode = true;
-        return Setup::createAnnotationMetadataConfiguration(array(__DIR__."/../geotime/new_models", __DIR__."/../geotime/types"), $isDevMode);
+        return Setup::createAnnotationMetadataConfiguration(array(__DIR__."/../geotime/models", __DIR__."/../geotime/types"), $isDevMode);
     }
 
     private static function getEntityManagerFromConnectionParams($connectionParams) {

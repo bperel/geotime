@@ -1,6 +1,6 @@
 <?php
 
-namespace geotime\new_models;
+namespace geotime\helpers;
 
 interface AbstractEntityHelper {
     static function getTableName();

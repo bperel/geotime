@@ -46,9 +46,11 @@ class Geotime {
         /** @var models\mariadb\Map[] $maps */
         $maps = $qb->getQuery()->getResult();
 
-        return array_reduce(
+        $result = array();
+
+        array_walk(
             $maps,
-            function($result, models\mariadb\Map $map) {
+            function(models\mariadb\Map $map) use (&$result) {
                 $territories = $map->getTerritories()->getValues();
                 $result[$map->getFileName()] = array(
                     'count' => count($territories),
@@ -58,9 +60,10 @@ class Geotime {
                         }, $territories)
                     )
                 );
-                return $result;
             }
         );
+
+        return $result;
     }
 
     /**

@@ -2,7 +2,7 @@
 namespace geotime\helpers;
 
 use geotime\models\mariadb\SparqlEndpoint;
-use geotime\new_models\AbstractEntityHelper;
+use geotime\models\AbstractEntityHelper;
 use geotime\Util;
 
 class SparqlEndpointHelper implements AbstractEntityHelper
@@ -46,6 +46,14 @@ class SparqlEndpointHelper implements AbstractEntityHelper
     public static function findOneByName($name) {
         return ModelHelper::getEm()->getRepository(SparqlEndpoint::CLASSNAME)
             ->findOneBy(array('name' => $name));
+    }
+
+    public static function deleteAll() {
+        $qb = ModelHelper::getEm()->createQueryBuilder();
+        $qb->delete('sparqlEndpoint');
+        $qb->from(SparqlEndpoint::CLASSNAME,'sparqlEndpoint');
+
+        return $qb->getQuery()->execute();
     }
 
     // @codeCoverageIgnoreStart

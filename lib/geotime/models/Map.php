@@ -1,208 +1,191 @@
 <?php
 
-namespace geotime\models;
+namespace geotime\models\mariadb;
 
-use Logger;
+/**
+ * @Entity @Table(name="maps")
+ **/
+class Map {
+    const CLASSNAME = __CLASS__;
 
-Logger::configure("lib/geotime/logger.xml");
+    /** @Id @Column(type="integer") @GeneratedValue *
+     * @Column(type="integer")
+     */
+    var $id;
 
+    /** @Column(type="string") **/
+    var $fileName;
 
-class Map extends GeotimeModel {
-    static $collection = "maps";
+    /** @Column(type="datetime", nullable=true) **/
+    var $uploadDate;
 
-    /** @var \Logger */
-    static $log;
+    /**
+     * @OneToMany(targetEntity="Territory", mappedBy="map")
+     **/
+    var $territories;
 
-    protected static $attrs = array(
-        'fileName' => array('type' => 'string'),
-        'uploadDate' => array('type' => 'date'),
-        'territories' => array('model' => 'geotime\models\Territory', 'type' => 'references'),
-        'projection' => array('type' => 'string'),
-        'rotation' => array('type' => 'array'),
-        'center' => array('type' => 'array'),
-        'scale' => array('type' => 'int'),
-        'calibrationPoints' => array('model' => 'geotime\models\CalibrationPoint', 'type' => 'embeds')
-    );
+    /** @Column(type="string", nullable=true) **/
+    var $projection;
+
+    /** @Column(type="simple_array", nullable=true) **/
+    var $rotation;
+
+    /** @Column(type="simple_array", nullable=true) **/
+    var $center;
+
+    /** @Column(type="integer", nullable=true) **/
+    var $scale;
+
+    /** @Column(type="json_array", nullable=true) **/
+    var $calibrationPoints;
 
     // @codeCoverageIgnoreStart
+
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
     /**
      * @return string
      */
-    public function getFileName() {
-        return $this->__getter('fileName');
+    public function getFileName()
+    {
+        return $this->fileName;
     }
 
     /**
      * @param string $fileName
      */
-    public function setFileName($fileName) {
-        $this->__setter('fileName', $fileName);
+    public function setFileName($fileName)
+    {
+        $this->fileName = $fileName;
     }
 
     /**
-     * @return \MongoDate
+     * @return \DateTime
      */
-    public function getUploadDate() {
-        return $this->__getter('uploadDate');
+    public function getUploadDate()
+    {
+        return $this->uploadDate;
     }
 
     /**
-     * @param \MongoDate $uploadDate
+     * @param \DateTime $uploadDate
      */
-    public function setUploadDate($uploadDate) {
-        $this->__setter('uploadDate', $uploadDate);
+    public function setUploadDate($uploadDate)
+    {
+        $this->uploadDate = $uploadDate;
     }
 
     /**
-     * @return \Purekid\Mongodm\Collection|Territory[]
+     * @return Territory[]
      */
-    public function getTerritories() {
-        return $this->__getter('territories');
+    public function getTerritories()
+    {
+        return $this->territories;
     }
 
     /**
      * @param Territory[] $territories
      */
-    public function setTerritories($territories) {
-        $this->__setter('territories', $territories);
-    }
-
-    public function loadTerritories() {
-        $territories = $this->getTerritories();
-        foreach($territories as $territory) {
-            $territory->loadReferencedTerritory();
-        }
-        $this->__setter('territories', $territories);
-    }
-
-    /**
-     * @return string
-     */
-    public function getProjection() {
-        return $this->__getter('projection');
-    }
-
-    /**
-     * @param string $projection
-     */
-    public function setProjection($projection) {
-        $this->__setter('projection', $projection);
-    }
-
-    /**
-     * @return float[]
-     */
-    public function getRotation() {
-        return $this->__getter('rotation');
-    }
-
-    /**
-     * @param string $rotation
-     */
-    public function setRotation($rotation) {
-        $this->__setter('rotation', $rotation);
-    }
-
-    /**
-     * @return array
-     */
-    public function getCenter() {
-        return $this->__getter('center');
-    }
-
-    /**
-     * @param array $center
-     */
-    public function setCenter($center) {
-        $this->__setter('center', $center);
-    }
-
-    /**
-     * @return int
-     */
-    public function getScale() {
-        return $this->__getter('scale');
-    }
-
-    /**
-     * @param int $scale
-     */
-    public function setScale($scale) {
-        $this->__setter('scale', $scale);
-    }
-
-    /**
-     * @return \Purekid\Mongodm\Collection|CalibrationPoint[]
-     */
-    public function getCalibrationPoints() {
-        return $this->__getter('calibrationPoints');
-    }
-
-    /**
-     * @param CalibrationPoint[] $calibrationPoints
-     */
-    public function setCalibrationPoints($calibrationPoints) {
-        $this->__setter('calibrationPoints', $calibrationPoints);
-    }
-
-    // @codeCoverageIgnoreEnd
-
-    /**
-     * @param $imageMapFullName
-     * @param $startDateStr
-     * @param $endDateStr
-     * @return Map
-     */
-    public static function generateAndSaveReferences($imageMapFullName, $startDateStr, $endDateStr)
+    public function setTerritories($territories)
     {
-        self::$log->debug('Generating references for map '.$imageMapFullName);
-
-        $period = Period::generate($startDateStr, $endDateStr);
-
-        $territory = new Territory();
-        $territory->setPeriod($period);
-        $territory->save();
-
-        $map = new Map();
-        $map->setFileName($imageMapFullName);
-        $map->setTerritories(array($territory));
-
-        return $map;
+        $this->territories = $territories;
     }
 
     /**
      * @param $territory Territory
      */
     public function addTerritory($territory) {
-        $this->getTerritories()->add($territory);
-    }
-
-    public function deleteTerritories() {
-        self::$log->debug('Deleting territories from map '.$this->getFileName());
-
-        foreach($this->getTerritories() as $territory) {
-            $territory->getPeriod()->delete();
-            $territory->delete();
+        if (!is_array($this->territories)) {
+            $this->territories = array();
         }
+        $this->territories[] = $territory;
     }
 
     /**
-     * @return object
+     * @return string
      */
-    public function __toSimplifiedObject() {
-        $territories = $this->getTerritories();
-        $simplifiedTerritories = array();
-        /** @var Territory[] $territories */
-        foreach($territories as $territory) {
-            $territory->loadReferencedTerritory();
-            $simplifiedTerritories[] = $territory->__toSimplifiedObject(true);
-        }
-
-        $simplifiedMap = parent::__toSimplifiedObject();
-        $simplifiedMap->territories = $simplifiedTerritories;
-
-        return $simplifiedMap;
+    public function getProjection()
+    {
+        return $this->projection;
     }
-}
 
-Map::$log = Logger::getLogger("main");
+    /**
+     * @param string $projection
+     */
+    public function setProjection($projection)
+    {
+        $this->projection = $projection;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRotation()
+    {
+        return $this->rotation;
+    }
+
+    /**
+     * @param array $rotation
+     */
+    public function setRotation($rotation)
+    {
+        $this->rotation = $rotation;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCenter()
+    {
+        return $this->center;
+    }
+
+    /**
+     * @param array $center
+     */
+    public function setCenter($center)
+    {
+        $this->center = $center;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getScale()
+    {
+        return $this->scale;
+    }
+
+    /**
+     * @param integer $scale
+     */
+    public function setScale($scale)
+    {
+        $this->scale = $scale;
+    }
+
+    /**
+     * @return CalibrationPoint[]
+     */
+    public function getCalibrationPoints()
+    {
+        return $this->calibrationPoints;
+    }
+
+    /**
+     * @param CalibrationPoint[] $calibrationPoints
+     */
+    public function setCalibrationPoints($calibrationPoints)
+    {
+        $this->calibrationPoints = $calibrationPoints;
+    }
+    // @codeCoverageIgnoreEnd
+}

@@ -2,21 +2,21 @@
 
 namespace geotime\admin;
 
-use geotime\Database;
+use DoctrineBootstrap;
+use geotime\helpers\CriteriaGroupHelper;
+use geotime\helpers\ModelHelper;
+use geotime\helpers\SparqlEndpointHelper;
 use geotime\Import;
-use geotime\models\CriteriaGroup;
-use geotime\models\SparqlEndpoint;
 
-chdir("..");
-require_once("vendor/autoload.php");
+require_once("../vendor/autoload.php");
 
-Database::connect();
+ModelHelper::setEm(DoctrineBootstrap::getEntityManager());
 
-CriteriaGroup::drop();
-CriteriaGroup::importFromJson();
+CriteriaGroupHelper::deleteAll();
+CriteriaGroupHelper::importFromJson();
 
-SparqlEndpoint::drop();
-SparqlEndpoint::importFromJson();
+SparqlEndpointHelper::deleteAll();
+SparqlEndpointHelper::importFromJson();
 
 Import::instance()->importReferencedTerritories('formerTerritories', false);
 

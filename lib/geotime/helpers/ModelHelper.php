@@ -23,6 +23,3 @@ class ModelHelper {
     }
 
 }
-
-/** @var EntityManager $entityManager */
-ModelHelper::setEm($entityManager);
