@@ -208,8 +208,9 @@ class Geotime {
             if (!empty($mapProjection) && !empty($mapCenter) && !empty($mapScale)) {
                 ModelHelper::getEm()->persist($map);
                 ModelHelper::getEm()->flush();
+                return MapHelper::find($mapId);
             }
-            return $map;
+            return null;
         }
     }
 
