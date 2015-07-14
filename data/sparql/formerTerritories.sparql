@@ -1,28 +1,36 @@
-SELECT DISTINCT ?name (coalesce(?date1_precise, ?date1) as ?date1) (coalesce(?date2_precise, ?date2) as ?date2) (GROUP_CONCAT(distinct ?previous; separator="|") AS ?previous) (GROUP_CONCAT(distinct ?next; separator="|") AS ?next) WHERE {
-  ?e <http://www.w3.org/2000/01/rdf-schema#label> ?name
-. ?e <http://purl.org/dc/terms/subject> ?subject
-. ?e <http://dbpedia.org/ontology/foundingYear> ?date1
-. ?e <http://dbpedia.org/ontology/dissolutionYear> ?date2
-. FILTER(
-    LANG(?name)='en' AND
-     (  ?subject = <http://dbpedia.org/resource/Category:Former_countries_in_Europe>
-     OR ?subject = <http://dbpedia.org/resource/Category:Former_empires_of_Europe>
-     OR ?subject = <http://dbpedia.org/resource/Category:Former_empires>
-     OR ?subject = <http://dbpedia.org/resource/Category:Former_republics>
-     )
-  )
-. OPTIONAL {
-  ?e <http://dbpedia.org/ontology/foundingDate> ?date1_precise
-}
-. OPTIONAL {
-  ?e <http://dbpedia.org/ontology/dissolutionDate> ?date2_precise
-}
-. OPTIONAL {
-  ?e <http://dbpedia.org/property/p> ?previous
-}
-. OPTIONAL {
-  ?e <http://dbpedia.org/property/s> ?next
-}
+SELECT DISTINCT
+  ?name
+  (coalesce(?date1_precise, ?date1, ?date1_1) as ?date1)
+  (coalesce(?date2_precise, ?date2, ?date2_1) as ?date2)
+  (GROUP_CONCAT(distinct ?previous; separator="|") AS ?previous)
+  (GROUP_CONCAT(distinct ?next; separator="|") AS ?next) WHERE {
+    ?e <http://www.w3.org/2000/01/rdf-schema#label> ?name
+  . ?e <http://purl.org/dc/terms/subject> ?subject
+  . ?e <http://dbpedia.org/property/yearStart> ?date1_1
+  . ?e <http://dbpedia.org/property/yearEnd> ?date2_1
+  . FILTER(
+      LANG(?name)='en' AND
+       (  ?subject = <http://dbpedia.org/resource/Category:Former_countries_in_Europe>
+       OR ?subject = <http://dbpedia.org/resource/Category:Former_empires_of_Europe>
+       OR ?subject = <http://dbpedia.org/resource/Category:Former_empires>
+       OR ?subject = <http://dbpedia.org/resource/Category:Former_republics>
+       OR ?subject = <http://dbpedia.org/resource/Category:States_and_territories_established_in_1814>
+       )
+    )
+  . OPTIONAL {
+    ?e <http://dbpedia.org/ontology/foundingDate> ?date1_precise
+  . ?e <http://dbpedia.org/ontology/foundingYear> ?date1
+  }
+  . OPTIONAL {
+    ?e <http://dbpedia.org/ontology/dissolutionDate> ?date2_precise
+  . ?e <http://dbpedia.org/ontology/dissolutionYear> ?date2
+  }
+  . OPTIONAL {
+    ?e <http://dbpedia.org/property/p> ?previous
+  }
+  . OPTIONAL {
+    ?e <http://dbpedia.org/property/s> ?next
+  }
 }
 
 ORDER BY ?name
