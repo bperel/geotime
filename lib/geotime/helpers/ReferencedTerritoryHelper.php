@@ -4,7 +4,6 @@ use geotime\models\mariadb\CalibrationPoint;
 use geotime\models\mariadb\CoordinateLatLng;
 use geotime\models\mariadb\CoordinateXY;
 use geotime\models\mariadb\ReferencedTerritory;
-use geotime\models\AbstractEntityHelper;
 use Logger;
 
 class ReferencedTerritoryHelper implements AbstractEntityHelper

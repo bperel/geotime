@@ -2,7 +2,6 @@
 namespace geotime\helpers;
 
 use geotime\models\mariadb\CriteriaGroup;
-use geotime\models\AbstractEntityHelper;
 use geotime\Util;
 
 class CriteriaGroupHelper implements AbstractEntityHelper

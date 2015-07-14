@@ -3,7 +3,6 @@ namespace geotime\helpers;
 use geotime\models\mariadb\Map;
 use geotime\models\mariadb\Territory;
 use geotime\models\mariadb\ReferencedTerritory;
-use geotime\models\AbstractEntityHelper;
 use geotime\Util;
 use Logger;
 

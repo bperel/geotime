@@ -2,7 +2,6 @@
 namespace geotime\helpers;
 
 use geotime\models\mariadb\SparqlEndpoint;
-use geotime\models\AbstractEntityHelper;
 use geotime\Util;
 
 class SparqlEndpointHelper implements AbstractEntityHelper
