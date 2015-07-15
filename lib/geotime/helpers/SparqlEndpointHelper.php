@@ -49,8 +49,7 @@ class SparqlEndpointHelper implements AbstractEntityHelper
 
     public static function deleteAll() {
         $qb = ModelHelper::getEm()->createQueryBuilder();
-        $qb->delete('sparqlEndpoint');
-        $qb->from(SparqlEndpoint::CLASSNAME,'sparqlEndpoint');
+        $qb->delete(SparqlEndpoint::CLASSNAME);
 
         return $qb->getQuery()->execute();
     }

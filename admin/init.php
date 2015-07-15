@@ -9,8 +9,12 @@ use geotime\helpers\SparqlEndpointHelper;
 use geotime\Import;
 
 require_once("../vendor/autoload.php");
+require_once("../lib/doctrine/bootstrap-doctrine.php");
 
-ModelHelper::setEm(DoctrineBootstrap::getEntityManager());
+chdir("..");
+
+$entityManager = DoctrineBootstrap::getEntityManager();
+ModelHelper::setEm($entityManager);
 
 CriteriaGroupHelper::deleteAll();
 CriteriaGroupHelper::importFromJson();
