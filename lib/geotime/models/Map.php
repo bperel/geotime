@@ -1,6 +1,7 @@
 <?php
 
 namespace geotime\models\mariadb;
+use Doctrine\ORM\PersistentCollection;
 
 /**
  * @Entity @Table(name="maps")
@@ -83,7 +84,7 @@ class Map {
     }
 
     /**
-     * @return Territory[]
+     * @return PersistentCollection|Territory[]
      */
     public function getTerritories()
     {

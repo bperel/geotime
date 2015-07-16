@@ -34,31 +34,32 @@ class Geotime {
 
         $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb
-            ->select('map')
-            ->from(models\mariadb\Map::CLASSNAME,'map');
-
+            ->select('map.fileName')
+            ->addSelect('count(territory.id) as territoryNumber, coalesce(sum(territory.area), 0) as territoryAreaSum')
+            ->from(models\mariadb\Map::CLASSNAME,'map')
+            ->leftJoin('map.territories', 'territory')
+            ->groupBy('map.fileName');
         if ($svgOnly) {
             $qb->where(
                 $qb->expr()->like('map.fileName', $qb->expr()->literal('%.svg'))
             );
         }
 
+        $query = $qb->getQuery();
+
+        $sql = $query->getSQL();
+
         /** @var models\mariadb\Map[] $maps */
-        $maps = $qb->getQuery()->getResult();
+        $mapsAndTerritoryInfo = $query->getResult();
 
         $result = array();
 
         array_walk(
-            $maps,
-            function(models\mariadb\Map $map) use (&$result) {
-                $territories = $map->getTerritories()->getValues();
-                $result[$map->getFileName()] = array(
-                    'count' => count($territories),
-                    'area'  => array_sum(
-                        array_map(function (models\mariadb\Territory $territory) {
-                            return $territory->getArea();
-                        }, $territories)
-                    )
+            $mapsAndTerritoryInfo,
+            function($mapAndTerritoryInfo) use (&$result) {
+                $result[$mapAndTerritoryInfo['fileName']] = array(
+                    'count' => intval($mapAndTerritoryInfo['territoryNumber']),
+                    'area' => intval($mapAndTerritoryInfo['territoryAreaSum'])
                 );
             }
         );

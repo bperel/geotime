@@ -59,16 +59,18 @@ class NaturalEarthImporter {
             }
         }
 
+        $map = new Map();
+        $map->setFileName($fileName);
+
         $territories = array();
         foreach($countriesAndCoordinates as $countryName=>$coordinates) {
             $referencedTerritory = ReferencedTerritoryHelper::buildAndCreate($countryName);
             $t = TerritoryHelper::buildAndCreateFromNEData($referencedTerritory, $coordinates);
+            $t->setMap($map);
             $territories[] = $t;
         }
 
 
-        $map = new Map();
-        $map->setFileName($fileName);
         $map->setTerritories($territories);
         ModelHelper::getEm()->persist($map);
         ModelHelper::getEm()->flush();

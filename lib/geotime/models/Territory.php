@@ -39,6 +39,12 @@ class Territory {
     /** @Column(type="datetime", nullable=true) **/
     var $endDate;
 
+    /**
+     * @ManyToOne(targetEntity="Map", cascade={"persist"})
+     * @JoinColumn(name="map", referencedColumnName="id")
+     **/
+    var $map;
+
     function __construct($referencedTerritory, $userMade, $polygon = null, $area = 0, $xpath = null, $startDate = null, $endDate = null)
     {
         $this->referencedTerritory = $referencedTerritory;
@@ -176,6 +182,22 @@ class Territory {
     public function setUserMade($userMade)
     {
         $this->userMade = $userMade;
+    }
+
+    /**
+     * @return Map
+     */
+    public function getMap()
+    {
+        return $this->map;
+    }
+
+    /**
+     * @param Map $map
+     */
+    public function setMap($map)
+    {
+        $this->map = $map;
     }
     // @codeCoverageIgnoreEnd
 }

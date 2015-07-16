@@ -50,6 +50,11 @@ class GeotimeTest extends MariaDbTestHelper {
         $map = MapHelper::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
         $map->setUploadDate(new \DateTime());
 
+        $referencedTerritory = ReferencedTerritoryHelper::buildAndCreate('A referenced territory');
+        $territory = TerritoryHelper::buildAndCreateWithReferencedTerritory($referencedTerritory);
+        $map->addTerritory($territory);
+        $territory->setMap($map);
+
         ModelHelper::getEm()->persist($map);
         ModelHelper::getEm()->flush();
     }
