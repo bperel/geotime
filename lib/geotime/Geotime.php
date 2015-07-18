@@ -152,6 +152,7 @@ class Geotime {
             ->where(
                 $qb->expr()->isNotNull('map.uploadDate')
             )
+            ->setMaxResults(1)
         ;
 
         $query = $qb->getQuery();
