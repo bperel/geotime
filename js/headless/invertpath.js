@@ -1,6 +1,6 @@
 var page = require('webpage').create(),
 	system = require('system'),
-	server = require('webserver').create(),
+	localserver = require('./localserver'),
 	fs = require('fs'),
 	svgPath;
 
@@ -13,30 +13,10 @@ if (system.args.length < 7) {
 		console.log(svgPath + ' does not exist');
 		phantom.exit(1);
 	}
-	var serverCreated = server.listen('127.0.0.1:8888', function (request, response) {
-		var cleanedUrl = request.url
-			.replace(/\//g, fs.separator)
-			.replace(/\?.*$/g, '');
-		//console.log('Requesting ' + request.url + ', loading ' + cleanedUrl);
-		var pagePath = fs.workingDirectory.replace(/\//g, fs.separator) + cleanedUrl;
-		response.statusCode = 200;
-		try {
-			response.write(fs.read(pagePath));
-		} catch(err) {
-			console.error('Error while reading ' + cleanedUrl + '(requested URL : '+request.url+')');
-			response.close();
-			phantom.exit(1);
-		}
-		response.close();
 
-	});
+	localserver.create();
 
-	if (!serverCreated) {
-		console.error('Error while creating HTTP server');
-		phantom.exit(1);
-	}
-
-	page.open('http://127.0.0.1:8888/index_headless.html', function () {
+	page.open('http://'+localserver.url+'/index_headless.html', function () {
 		setTimeout(function () {
 			var pathCoordinates = page.evaluate(function (args, svgContent) {
 				var d3 = window.d3;
@@ -76,7 +56,7 @@ if (system.args.length < 7) {
 			}, system.args, fs.read(svgPath));
 
 			console.log(JSON.stringify(pathCoordinates));
-			server.close();
+			localserver.close();
 			phantom.exit(0);
 		}, 500);
 	});
