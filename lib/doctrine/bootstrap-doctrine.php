@@ -55,6 +55,7 @@ class DoctrineBootstrap {
             'user' => 'test',
             'password' => 'test',
             'memory' => true,
+            'path' => __DIR__.'/geotime.sqlite',
             'driver' => 'pdo_sqlite'
         );
         return self::getEntityManagerFromConnectionParams($connectionParams);
