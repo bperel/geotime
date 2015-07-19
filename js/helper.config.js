@@ -21,6 +21,7 @@ function loadHelperConfig() {
                                '<br /><span id="calibrationPointsLength">0</span>&nbsp;<label for="calibrationPointsLength">selected points.</label>'
 							  +'<span id="calibrationPoints"></span>'],
 			onLoad: [enableCalibrationPointSelection],
+			validate: checkCalibrationPoints,
 			onUnload: [disableCalibrationPointSelection],
 			dataUpdate: saveMapProjection,
 			buttons: ['done', 'skip', 'cancel']
@@ -95,7 +96,9 @@ function addCalibrationPoint(mapType, clickedPoint) {
 }
 
 function showCalibrationPoints() {
-	var calibrationPointsElements = d3.select('#calibrationPoints').selectAll('.calibrationPoint').data(calibrationPoints);
+	var groupedCalibrationPoints = getGroupedCalibrationPoints();
+
+	var calibrationPointsElements = d3.select('#calibrationPoints').selectAll('.calibrationPoint').data(groupedCalibrationPoints);
 	calibrationPointsElements.enter().append('div').classed('calibrationPoint', true);
 
 	calibrationPointsElements
@@ -108,15 +111,32 @@ function showCalibrationPoints() {
 		.append("span")
 			.classed('removeCalibrationPoint', true)
 			.html("&nbsp;X Remove point")
-			.on('click', function(d, i) {
-				calibrationPoints.splice(i, 1);
+			.on('click', function(d, pointId) {
+				var toDelete = [];
+				calibrationPoints.forEach(function(calibrationPoint, i) {
+					if (calibrationPoint.pointId === pointId) {
+						toDelete.push(i);
+					}
+				});
+				toDelete.reverse().forEach(function(calibrationPointIndex) {
+					calibrationPoints.splice(calibrationPointIndex, 1);
+				});
+
 				showCalibrationPoints();
-                repositionCalibrationMarkers();
+                markersSvg.repositionCalibrationMarkers();
 			});
 
 	calibrationPointsElements.exit().remove();
 
-	d3.select('#calibrationPointsLength').text(calibrationPoints.length);
+	d3.select('#calibrationPointsLength').text(groupedCalibrationPoints.length);
+}
+
+function checkCalibrationPoints() {
+	if (calibrationPoints.length < 4) {
+		alert('Please select at least 4 points');
+		return false;
+	}
+	return true;
 }
 
 function saveMapProjection() {

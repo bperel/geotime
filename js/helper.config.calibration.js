@@ -1,3 +1,5 @@
+var calibrationPoints = [];
+
 function getMarkers() {
     var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
     return group.selectAll('use');
@@ -46,8 +48,10 @@ function calibrateMapCenter() {
         };
     }
 
-    var initialDirections = getDirections(calibrationPoints[0].bgMap, calibrationPoints[0].fgMap);
-    var directions = Object.create(initialDirections);
+	var groupedCalibrationPoints = getGroupedCalibrationPoints();
+
+    var initialDirections = getDirections(groupedCalibrationPoints[0].bgMap, groupedCalibrationPoints[0].fgMap);
+    var directions = JSON.parse(JSON.stringify(initialDirections));
     while(initialDirections.x === directions.x || initialDirections.y === directions.y) {
         if (initialDirections.x === directions.x) {
             currentCenter[0]+=directions.x;
@@ -58,7 +62,7 @@ function calibrateMapCenter() {
         projection.center(currentCenter);
         markers.each(positionCalibrationMarker);
 
-        directions = getDirections(calibrationPoints[0].bgMap, calibrationPoints[0].fgMap);
+        directions = getDirections(groupedCalibrationPoints[0].bgMap, groupedCalibrationPoints[0].fgMap);
     }
 
     applyProjection(getSelectedProjection(), currentCenter, projection.scale(), projection.rotate());
@@ -66,10 +70,12 @@ function calibrateMapCenter() {
 
 function getCalibrationPointsDistanceDiffsValue() { // distance diff-based value. Smaller is better
 	var pxDistanceSums = {bgMap: 0, fgMap: 0, ratios: [], latitudeRatios: []};
-	calibrationPoints.forEach(function(point1, i) {
+	var groupedCalibrationPoints = getGroupedCalibrationPoints();
+
+	groupedCalibrationPoints.forEach(function(point1, i) {
 		var bgMapPoint1 = [point1.bgMap.x, point1.bgMap.y];
 		var fgMapPoint1 = [point1.fgMap.x, point1.fgMap.y];
-		calibrationPoints.forEach(function(point2, j) {
+		groupedCalibrationPoints.forEach(function(point2, j) {
 			if (i < j) {
 				var bgMapPoint2 = [point2.bgMap.x, point2.bgMap.y];
 				var fgMapPoint2 = [point2.fgMap.x, point2.fgMap.y];
@@ -94,7 +100,7 @@ function getCalibrationPointsDistanceDiffsValue() { // distance diff-based value
 var markerRadius = 9;
 function addCalibrationDefsMarkers() {
 	markersSvg = d3.select("#mapArea")
-		.append("svg").attr("id", "markers")
+		.insert("svg", ":first-child").attr("id", "markers")
 		.attr("width", width)
 		.attr("height", mapHeight);
 
@@ -131,31 +137,51 @@ function addCalibrationDefsMarkers() {
 
 function addCalibrationMarker(type, coordinates) {
 
-	var index = 0;
-	while (calibrationPoints[index] && calibrationPoints[index][type]) {
-		index++;
-	}
-	calibrationPoints[index] = calibrationPoints[index] || {};
-	calibrationPoints[index][type] = coordinates;
+	var pointId = 0;
+	calibrationPoints.forEach(function(calibrationPoint) {
+		if (calibrationPoint.type === type && calibrationPoint.pointId >= pointId) {
+			pointId = calibrationPoint.pointId + 1;
+		}
+	});
 
-	var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === type; });
+	calibrationPoints.push({pointId: pointId, type: type, coordinates: coordinates});
 
-	group.selectAll('use').filter(function(d) { return d.pointId === index; })
-		.data([{type: type, pointId: index, coordinates: coordinates}])
-		.enter().append('use')
-		.attr('xlink:href', '#crosshair-marker')
-		.each(function(d) { positionCalibrationMarker.call(this, d); });
+	markersSvg.repositionCalibrationMarkers(type);
 }
 
-d3.selection.prototype.repositionCalibrationMarkers = function() {
-	var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
-	group.selectAll('use').data(calibrationPoints)
-		.exit().remove();
-	group.selectAll('use').data(calibrationPoints)
-		.each(positionCalibrationMarker);
+d3.selection.prototype.repositionCalibrationMarkers = function(type, forceEnter) {
+	var filter = function(d) { return !type || d.type === type; };
+	var groupCalibrationPoints = markersSvg.selectAll('g.marker-group').filter(filter).selectAll('use');
 
+	var calibrationPointsElements = groupCalibrationPoints.data(calibrationPoints);
+
+	calibrationPointsElements
+		.exit().remove();
+	if (forceEnter) {
+		groupCalibrationPoints.filter(filter)
+			.each(positionCalibrationMarker);
+	}
+	else {
+		calibrationPointsElements
+			.enter().append('use')
+			.filter(filter)
+			.attr('xlink:href', '#crosshair-marker')
+			.each(positionCalibrationMarker);
+	}
 	return this;
 };
+
+function getGroupedCalibrationPoints() {
+	var shownCalibrationPoints = {};
+	calibrationPoints.forEach(function(d) {
+		if (!(shownCalibrationPoints[d.pointId])) {
+			shownCalibrationPoints[d.pointId] = {};
+		}
+		shownCalibrationPoints[d.pointId][d.type] = d.coordinates;
+	});
+
+	return d3.values(shownCalibrationPoints);
+}
 
 function positionCalibrationMarker(d) {
 	if (d.coordinates.lng !== undefined) {
@@ -171,8 +197,8 @@ function positionCalibrationMarker(d) {
 		.attr("y", d.coordinates.y);
 }
 
-function calibrateMapRotation(axisDefaults) {
-    var incdeg,
+function calibrateMapRotationForProjection(projectionName, axisDefaults) {
+	var incdeg,
         axisCheckRange,
         isPrecise = !!axisDefaults;
 
@@ -191,7 +217,7 @@ function calibrateMapRotation(axisDefaults) {
 	var min = Infinity;
 	var best = null;
 	for (var i = axisDefaults[0] - axisCheckRange; i <= axisDefaults[0] + axisCheckRange; i += incdeg) {
-		console.log('Test axis 0 : '+i+'deg at '+new Date().toISOString());
+		//console.log('Test axis 0 : '+i+'deg at '+new Date().toISOString());
 		for (var j = axisDefaults[1] - axisCheckRange; j <= axisDefaults[1] + axisCheckRange; j += incdeg) {
 			projection.rotate([i,j,0]);
 			markers.each(positionCalibrationMarker);
@@ -220,9 +246,36 @@ function calibrateMapRotation(axisDefaults) {
 	console.log('Best : '+best+' with '+min);
 
     if (isPrecise) {
-        applyProjection(getSelectedProjection(), projection.center(), projection.scale(), best);
+		return { projection: projectionName, min: min, rotation: best };
     }
 	else {
-        calibrateMapRotation(best)
+        return calibrateMapRotationForProjection(projectionName, best)
     }
+}
+
+function calibrateMapRotation() {
+
+	var currentProjection = projection;
+
+	var bestProjectionResult = {min: Infinity};
+	projectionSelection.selectAll('option').data().forEach(function(d) {
+		var projectionName = d.name;
+
+		projection = d3.geo[projectionName]()
+			.center(currentProjection.center())
+			.scale(currentProjection.scale())
+			.rotate(currentProjection.rotate());
+
+		var calibrationResults =  calibrateMapRotationForProjection(projectionName);
+		if (calibrationResults.min < bestProjectionResult.min) {
+			bestProjectionResult = JSON.parse(JSON.stringify(calibrationResults));
+		}
+		console.log('Result : '+JSON.stringify(calibrationResults));
+	});
+
+	if (bestProjectionResult.projection) {
+		applyProjection(bestProjectionResult.projection, projection.center(), projection.scale(), bestProjectionResult.rotation);
+	}
+
+	console.log('Best result : '+JSON.stringify(bestProjectionResult));
 }

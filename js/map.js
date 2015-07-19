@@ -14,7 +14,6 @@ var dragMode = 'pan';
 
 var bgMapDragState;
 
-var calibrationPoints = [];
 var locatedTerritories = [];
 
 var projection,
@@ -65,7 +64,7 @@ function drawPaths() {
 	d3.select('#projectionRotation').text(projection.rotate().map(function(val) { return parseInt(val*10)/10; }));
 
 	if (markersSvg.size() > 0) {
-		markersSvg.repositionCalibrationMarkers();
+		markersSvg.repositionCalibrationMarkers('bgMap', true);
 	}
 }
 
@@ -304,7 +303,7 @@ function loadUIConfig(mapInfo) {
 		});
 	}
 
-	if (mapInfo.center) {
+	if (mapInfo.center && mapInfo.center.length) {
 		helper.datum().activeStep = 2;
 		activateHelperNextStep(null, true);
 	}
