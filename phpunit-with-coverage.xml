@@ -13,6 +13,8 @@
     </filter>
 
     <logging>
+        <log type="coverage-html" target="build/php/coverage" charset="UTF-8" yui="true" highlight="true"/>
+        <log type="coverage-clover" target="build/php/coverage.xml"/>
         <log type="junit" target="build/php/test-results.xml"/>
     </logging>
 </phpunit>
