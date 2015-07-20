@@ -25,7 +25,6 @@ if ($clean) {
 $naturalEarthImporter = new NaturalEarthImporter();
 $naturalEarthImporter->import('data/external/ne_110m_admin_0_countries.json');
 
-Import::initCriteriaGroups();
 Import::importMaps(!$clean);
 
 ?><br /><a href="index.html">Back to admin home</a>

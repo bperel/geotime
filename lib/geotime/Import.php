@@ -2,7 +2,6 @@
 
 namespace geotime;
 
-use geotime\helpers\CriteriaGroupHelper;
 use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
@@ -15,9 +14,6 @@ Logger::configure("lib/geotime/logger.xml");
 include_once('Util.php');
 
 class Import {
-
-    /** @var models\mariadb\CriteriaGroup[][] */
-    static $criteriaGroups;
 
     /** @var \Logger */
     static $log;
@@ -34,20 +30,6 @@ class Import {
      */
     public static function instance() {
         return new Import();
-    }
-
-    static function initCriteriaGroups() {
-        if (isset(self::$criteriaGroups)) {
-            self::$log->info("Criteria groups have already been initialized");
-        }
-        else {
-            self::$criteriaGroups = array(
-                CriteriaGroupHelper::Maps        => CriteriaGroupHelper::findByType(CriteriaGroupHelper::Maps),
-                CriteriaGroupHelper::Territories => CriteriaGroupHelper::findByType(CriteriaGroupHelper::Territories)
-            );
-            self::$log->info(count(self::$criteriaGroups[CriteriaGroupHelper::Maps])       ." map criteria groups found");
-            self::$log->info(count(self::$criteriaGroups[CriteriaGroupHelper::Territories])." territory criteria groups found");
-        }
     }
 
     function importReferencedTerritories($contentName, $useCachedJson = true) {
@@ -68,12 +50,13 @@ class Import {
         $importStartTime = time();
         self::$log->info('Starting SVG and JSON importation.');
 
-        /** @var models\mariadb\CriteriaGroup $criteriaGroup */
-        foreach(self::$criteriaGroups[CriteriaGroupHelper::Maps] as $criteriaGroup) {
-            $criteriaGroupName = $criteriaGroup->getName();
-            $fileName = Util::$cache_dir_json . $criteriaGroupName . ".json";
+        $sparqlQueryFiles = array('formerEmpires');
 
-            $maps = self::instance()->storeMapsFromCriteriaGroup($criteriaGroup, $fileName, $useCachedJson);
+        foreach($sparqlQueryFiles as $sparqlQueryFile) {
+            $cacheFileName = Util::$cache_dir_json . $sparqlQueryFile . ".json";
+            $sparqlQuery = file_get_contents(Util::$data_dir_sparql.$sparqlQueryFile.'.sparql');
+
+            $maps = self::instance()->storeMapsFromSparqlQuery($sparqlQuery, $cacheFileName, $useCachedJson);
             $svgInfos = self::instance()->getCommonsInfos($maps);
 
             foreach ($svgInfos as $imageMapFullName => $imageMapUrlAndUploadDate) {
@@ -157,87 +140,26 @@ class Import {
     }
 
     /**
-     * @param string $sparqlEndpointName
-     * @param models\mariadb\CriteriaGroup $criteriaGroup
-     * @return array|null
-     */
-    function getSparqlRequestUrlParts($sparqlEndpointName, models\mariadb\CriteriaGroup $criteriaGroup) {
-        return $this->getSparqlRequestUrlPartsFromQuery($sparqlEndpointName, self::buildSparqlQuery($criteriaGroup));
-    }
-
-    /**
-     * @param models\mariadb\CriteriaGroup $criteriaGroup
-     * @return string
-     */
-    function buildSparqlQuery(models\mariadb\CriteriaGroup $criteriaGroup) {
-        $criteriaStrings = array();
-        $criteriaOptionalStrings = array();
-
-        foreach($criteriaGroup->getCriteria() as $key => $value) {
-            $criteriaStrings[]= implode(" ", array("?e", $key, $value));
-        }
-        foreach($criteriaGroup->getOptional() as $key => $value) {
-            $criteriaOptionalStrings[]= implode(" ", array("?e", $key, $value));
-        }
-
-        $query = "SELECT * WHERE "
-                ."{ "
-                .implode(" . ", $criteriaStrings);
-
-        if (count($criteriaOptionalStrings) > 0) {
-            $query.=" . OPTIONAL { ".implode(" . ", $criteriaOptionalStrings)." } ";
-        }
-
-        $query.="} ";
-
-        $sort = $criteriaGroup->getSort();
-        if (count($sort) > 0) {
-            $query.="ORDER BY ".implode(" ", $sort);
-        }
-
-        return $query;
-    }
-
-    /**
-     * Create Map object instances from the results of a criteria group
-     * @param models\mariadb\CriteriaGroup $criteriaGroup
-     * @param string $fileName|null Cache file name to put the results into
-     * @param boolean $getFromCachedJson If FALSE, the results will be queried online
-     * @return \geotime\models\mariadb\Map[]|null
-     */
-    public function storeMapsFromCriteriaGroup(models\mariadb\CriteriaGroup $criteriaGroup, $fileName = null, $getFromCachedJson = true) {
-        $pageAsJson = $this->getJsonDataFromSparqlQuery(
-            $this->buildSparqlQuery($criteriaGroup),
-            $fileName,
-            $getFromCachedJson
-        );
-        if (is_null($pageAsJson)) {
-            return null;
-        }
-        return $this->storeMapsFromSparqlResults($pageAsJson, $criteriaGroup);
-    }
-
-    /**
-     * Create Territory object instances from the results of a criteria group
-     * @param models\mariadb\CriteriaGroup $criteriaGroup
+     * Create Map object instances from the results of a Sparql query
+     * @param string $sparqlQuery
      * @param string $fileName |null Cache file name to put the results into
      * @param boolean $getFromCachedJson If FALSE, the results will be queried online
-     * @return models\mariadb\Territory[]|null
+     * @return models\mariadb\Map[]|null
      */
-    public function storeTerritoriesFromCriteriaGroup(models\mariadb\CriteriaGroup $criteriaGroup, $fileName = null, $getFromCachedJson = true) {
+    public function storeMapsFromSparqlQuery($sparqlQuery, $fileName = null, $getFromCachedJson = true) {
         $pageAsJson = $this->getJsonDataFromSparqlQuery(
-            $this->buildSparqlQuery($criteriaGroup),
+            $sparqlQuery,
             $fileName,
             $getFromCachedJson
         );
         if (is_null($pageAsJson)) {
             return null;
         }
-        return self::storeTerritoriesFromSparqlResults($pageAsJson);
+        return $this->storeMapsFromSparqlResults($pageAsJson);
     }
 
     /**
-     * Create Territory object instances from the results of a criteria group
+     * Create Territory object instances from the results of a Sparql query
      * @param string $sparqlQuery
      * @param string $fileName|null Cache file name to put the results into
      * @param boolean $getFromCachedJson If FALSE, the results will be queried online
@@ -256,7 +178,7 @@ class Import {
     }
 
     /**
-     * Create map object instances from the results of a criteria group
+     * Create map object instances from the results of a Sparql query
      * @param string $sparqlQuery
      * @param string $fileName|null Cache file name to put the results into
      * @param boolean $getFromCachedJson If FALSE, the results will be queried online
@@ -291,41 +213,31 @@ class Import {
 
     /**
      * @param \stdClass $result
-     * @param models\mariadb\CriteriaGroup $criteriaGroup
      * @return \stdClass Object with start and end dates
      */
-    public function getDatesFromSparqlResult($result, $criteriaGroup) {
-        switch($criteriaGroup->getName()) {
-            case 'Former empires':
-                $objectWithDates = new \stdClass();
-                if (isset($result->date1_precise)) {
-                    $objectWithDates->startDate = $result->date1_precise->value;
-                }
-                else {
-                    $objectWithDates->startDate = $result->date1->value;
-                }
-                if (isset($result->date2_precise)) {
-                    $objectWithDates->endDate = $result->date2_precise->value;
-                }
-                else {
-                    $objectWithDates->endDate = $result->date2->value;
-                }
-                return $objectWithDates;
-            break;
-
-            default:
-                self::$log->error('Invalid criteria group : '.$criteriaGroup->getName());
-                return null;
+    public function getDatesFromSparqlResult($result) {
+        $objectWithDates = new \stdClass();
+        if (isset($result->date1_precise)) {
+            $objectWithDates->startDate = $result->date1_precise->value;
         }
+        else {
+            $objectWithDates->startDate = $result->date1->value;
+        }
+        if (isset($result->date2_precise)) {
+            $objectWithDates->endDate = $result->date2_precise->value;
+        }
+        else {
+            $objectWithDates->endDate = $result->date2->value;
+        }
+        return $objectWithDates;
     }
 
     /**
      * Create Map object instances from a JSON-formatted SPARQL page
      * @param object $pageAsJson
-     * @param models\mariadb\CriteriaGroup $criteriaGroup
      * @return models\mariadb\Map[]
      */
-    public function storeMapsFromSparqlResults($pageAsJson, $criteriaGroup)
+    public function storeMapsFromSparqlResults($pageAsJson)
     {
         $maps = array();
         foreach ($pageAsJson->results->bindings as $result) {
@@ -333,7 +245,7 @@ class Import {
             if (strtolower(Util::getImageExtension($imageMapFullName)) === ".svg") {
                 $existingMap = MapHelper::findOneByFileName($imageMapFullName);
                 if (is_null($existingMap)) {
-                    $startAndEndDates = self::getDatesFromSparqlResult($result, $criteriaGroup);
+                    $startAndEndDates = self::getDatesFromSparqlResult($result);
                     if (is_null($startAndEndDates)) {
                         continue;
                     }

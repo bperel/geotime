@@ -5,7 +5,6 @@ namespace geotime;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\PersistentCollection;
 use geotime\helpers\CalibrationPointHelper;
-use geotime\helpers\CriteriaGroupHelper;
 use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
@@ -251,10 +250,6 @@ class Geotime {
 
             ModelHelper::getEm()->flush();
         }
-    }
-
-    public static function getCriteriaGroupsNumber() {
-        return CriteriaGroupHelper::count();
     }
 
     /**

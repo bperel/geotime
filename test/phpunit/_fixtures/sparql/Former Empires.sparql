@@ -1,0 +1,12 @@
+SELECT * WHERE {
+    ?e <http://purl.org/dc/terms/subject> <http://dbpedia.org/resource/Category:Former_empires>
+  . ?e <http://dbpedia.org/ontology/foundingYear> ?date1
+  . ?e <http://dbpedia.org/ontology/dissolutionYear> ?date2
+  . ?e <http://dbpedia.org/property/imageMap> ?imageMap
+  . OPTIONAL {
+        ?e <http://purl.org/dc/terms/subject> <http://dbpedia.org/resource/Category:Former_empires>
+      . ?e <http://dbpedia.org/ontology/foundingYear> ?date1
+      . ?e <http://dbpedia.org/ontology/dissolutionYear> ?date2
+      . ?e <http://dbpedia.org/property/imageMap> ?imageMap
+  }
+} ORDER BY ?date1_precise ?date1

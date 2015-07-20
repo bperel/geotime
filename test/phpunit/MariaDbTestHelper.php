@@ -42,37 +42,6 @@ abstract class MariaDbTestHelper extends \PHPUnit_Extensions_Database_TestCase {
         $tool->dropSchema($classes);
     }
 
-    /* Tests */
-/*
-    public function testImportFromJson() {
-        CriteriaGroup::drop();
-
-        $this->assertEquals(0, CriteriaGroup::count());
-        $nbImportedObjects = CriteriaGroup::importFromJson(self::$jsonSourceDir.'/criteriaGroups.json');
-        $this->assertEquals(2, CriteriaGroup::count());
-        $this->assertEquals(2, $nbImportedObjects);
-    }
-
-    public function testImportFromJsonInvalidFileName() {
-        try {
-            CriteriaGroup::importFromJson(self::$jsonSourceDir.'/criteriaGroups-1-.json');
-            $this->fail();
-        }
-        catch (\InvalidArgumentException $e) {
-            $this->assertStringStartsWith('Invalid file name for JSON import', $e->getMessage());
-        }
-    }
-
-    public function testImportFromJsonInexistentFile() {
-        try {
-            CriteriaGroup::importFromJson(self::$jsonSourceDir . '/criteriaGroups2.json');
-            $this->fail();
-        }
-        catch (\InvalidArgumentException $e) {
-            $this->assertStringStartsWith('Error on JSON import', $e->getMessage());
-        }
-    }
-*/
     /**
      * Returns the test database connection.
      *

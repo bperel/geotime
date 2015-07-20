@@ -1,14 +1,12 @@
 <?php
 namespace geotime\Test;
 
-use geotime\helpers\CriteriaGroupHelper;
 use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
 use geotime\helpers\SparqlEndpointHelper;
 use geotime\helpers\TerritoryHelper;
 use geotime\Import;
-use geotime\models\mariadb\CriteriaGroup;
 use geotime\models\mariadb\Map;
 use geotime\models\mariadb\Territory;
 use geotime\Test\Helper\MariaDbTestHelper;
@@ -31,6 +29,7 @@ class ImportTest extends MariaDbTestHelper {
 
         Util::$cache_dir_svg = "test/phpunit/cache/svg/";
         Util::$cache_dir_json = "test/phpunit/cache/json/";
+        Util::$data_dir_sparql = "test/phpunit/_fixtures/sparql/";
 
         copy("test/phpunit/_fixtures/json/Former Empires.json", Util::$cache_dir_json."Former Empires.json");
     }
@@ -51,14 +50,7 @@ class ImportTest extends MariaDbTestHelper {
 
         $this->import = new Import();
 
-        CriteriaGroupHelper::importFromJson("test/phpunit/_data/criteriaGroups.json");
         SparqlEndpointHelper::importFromJson("test/phpunit/_data/sparqlEndpoints.json");
-    }
-
-    public function tearDown() {
-        Import::$criteriaGroups = null;
-
-        parent::tearDown();
     }
 
     /* Fixtures */
@@ -90,33 +82,6 @@ class ImportTest extends MariaDbTestHelper {
     /* Util methods for tests */
 
     /**
-     * @param string $name
-     * @param string $type
-     * @return CriteriaGroup
-     */
-    private function generateSampleCriteriaGroup($name='Former empires', $type=CriteriaGroupHelper::Maps) {
-        $criteria = new \stdClass();
-        $criteria->field1 = 'value1';
-        $criteria->field2 = 'value2';
-
-        $optionalCriteria = new \stdClass();
-        $optionalCriteria->field3 = 'value3';
-
-        $c = new CriteriaGroup();
-        $c->setName($name);
-        $c->setType($type);
-        $c->setSort(array("field1", "field2"));
-        $c->setCriteria($criteria);
-        $c->setOptional($optionalCriteria);
-        $c->setOptional($optionalCriteria);
-
-        ModelHelper::getEm()->persist($c);
-        ModelHelper::getEm()->flush();
-
-        return CriteriaGroupHelper::findByName($name)[0];
-    }
-
-    /**
      * @param string $fileName
      * @param \DateTime $uploadDate
      * @return Map
@@ -139,57 +104,6 @@ class ImportTest extends MariaDbTestHelper {
         $this->assertEquals(new Import(), Import::instance());
     }
 
-    public function testInitCriteriaGroups() {
-        $this->assertEmpty(Import::$criteriaGroups);
-        Import::initCriteriaGroups();
-        $this->assertEquals(2, CriteriaGroupHelper::count());
-
-        $this->assertArrayHasKey(CriteriaGroupHelper::Maps, Import::$criteriaGroups);
-        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupHelper::Maps]));
-
-        $this->assertArrayHasKey(CriteriaGroupHelper::Territories, Import::$criteriaGroups);
-        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupHelper::Territories]));
-    }
-
-    public function testInitCriteriaGroupsAlreadyDone()
-    {
-        $this->assertEmpty(Import::$criteriaGroups);
-        Import::initCriteriaGroups();
-        Import::initCriteriaGroups();
-
-        $this->assertEquals(2, CriteriaGroupHelper::count());
-
-        $this->assertArrayHasKey(CriteriaGroupHelper::Maps, Import::$criteriaGroups);
-        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupHelper::Maps]));
-
-        $this->assertArrayHasKey(CriteriaGroupHelper::Territories, Import::$criteriaGroups);
-        $this->assertEquals(1, count(Import::$criteriaGroups[CriteriaGroupHelper::Territories]));
-    }
-
-    /* This test uses the live Dbpedia results */
-    /*
-    public function testGetSparqlLiveResults() {
-        $criteriaGroup = array(
-            "fields" => array(
-                "<http://purl.org/dc/terms/subject>"            => "<http://dbpedia.org/resource/Category:Former_empires>",
-                "<http://dbpedia.org/ontology/foundingDate>"    => "?date1",
-                "<http://dbpedia.org/ontology/dissolutionDate>" => "?date2",
-                "<http://dbpedia.org/property/imageMap>"        => "?imageMap"
-            ),
-            "sort" => array(
-                "DESC(?date1)"
-            )
-        );
-        $this->assertJson($this->import->getSparqlQueryResults($criteriaGroup));
-    }
-    */
-
-    public function testBuildSparqlQuery() {
-        $query = $this->import->buildSparqlQuery($this->generateSampleCriteriaGroup());
-
-        $this->assertEquals("SELECT * WHERE { ?e field1 value1 . ?e field2 value2 . OPTIONAL { ?e field3 value3 } } ORDER BY field1 field2", $query);
-    }
-
     public function testGetSparqlHttpParametersWithQuery() {
         $parameters = array(
             array('test' => 'value'),
@@ -204,64 +118,25 @@ class ImportTest extends MariaDbTestHelper {
         $this->assertEquals($expectedParametersWithQuery, $parametersWithQuery);
     }
 
-    public function testGetSparqlRequestUrlPartsInexistantEndpoint() {
-        $parts = $this->import->getSparqlRequestUrlParts('Inexisting endpoint', $this->generateSampleCriteriaGroup());
+    public function testGetMapsFromSparqlQueryCachedJson() {
+        $sparqlQuery = file_get_contents(Util::$data_dir_sparql.'Former Empires.sparql');
 
-        $this->assertEquals(0, count($parts));
-    }
-
-    public function testGetSparqlRequestUrlParts() {
-        $parts = $this->import->getSparqlRequestUrlParts('Dbpedia', $this->generateSampleCriteriaGroup());
-
-        // Root URL
-        $this->assertEquals('http://endPointTest/sparql', $parts[0]);
-        // Method
-        $this->assertEquals('POST', $parts[1]);
-        // Parameters
-        $parameter1Key = 'default-graph-uri';
-        $this->assertArrayHasKey($parameter1Key, $parts[2]);
-        $this->assertEquals('http://endPointTest', $parts[2][$parameter1Key]);
-
-        $parameter2Key = 'query';
-        $this->assertArrayHasKey($parameter2Key, $parts[2]);
-        $this->assertNotEmpty($parts[2][$parameter2Key]);
-
-        $parameter3Key = 'output';
-        $this->assertArrayHasKey($parameter3Key, $parts[2]);
-        $this->assertEquals('json', $parts[2][$parameter3Key]);
-    }
-
-    public function testGetMapsFromCriteriaGroupCachedJson() {
-        $criteriaGroup = new CriteriaGroup();
-        $criteriaGroup->setName('Former empires');
-
-        $maps = $this->mock->storeMapsFromCriteriaGroup(
-            $criteriaGroup,
+        $maps = $this->mock->storeMapsFromSparqlQuery(
+            $sparqlQuery,
             Util::$cache_dir_json."Former Empires.json"
         );
 
         $this->assertEquals(2, count($maps));
     }
 
-    public function testGetMapsFromCriteriaGroupInvalidJson() {
-        $this->setSparqlJsonFixture('invalid.json');
-
-        ob_start();
-        $maps = $this->mock->storeMapsFromCriteriaGroup(new CriteriaGroup());
-        $echoOutput = ob_get_clean();
-
-        $this->assertEmpty($maps);
-        $this->assertRegExp('# - ERROR - #', $echoOutput);
-    }
-
-    public function testGetMapsFromCriteriaGroupExistingMap() {
-        $criteriaGroup = $this->generateSampleCriteriaGroup();
+    public function testGetMapsFromSparqlQueryExistingMap() {
+        $sparqlQuery = file_get_contents(Util::$data_dir_sparql.'Former Empires.sparql');
 
         $this->setSparqlJsonFixture('Former Empires.json');
 
         $this->generateAndSaveSampleMap('German Empire 1914.svg', new \DateTime());
 
-        $maps = $this->mock->storeMapsFromCriteriaGroup($criteriaGroup);
+        $maps = $this->mock->storeMapsFromSparqlQuery($sparqlQuery);
         $this->assertEquals(2, count($maps));
 
         //   The first map already exists, that's why its ID is not null
@@ -269,12 +144,13 @@ class ImportTest extends MariaDbTestHelper {
         $this->assertNotNull($firstMap->getId());
     }
 
-    public function testGetMapsFromCriteriaGroup() {
-        $criteriaGroup = $this->generateSampleCriteriaGroup('Former empires', CriteriaGroupHelper::Maps);
+    public function testGetMapsFromSparqlQuery() {
+        $sparqlQuery = file_get_contents(Util::$data_dir_sparql.'Former Empires.sparql');
+
         $this->setSparqlJsonFixture('Former Empires.json');
         $this->setFetchSvgUrlsFixture();
 
-        $maps = $this->mock->storeMapsFromCriteriaGroup($criteriaGroup);
+        $maps = $this->mock->storeMapsFromSparqlQuery($sparqlQuery);
         $this->assertEquals(2, count($maps));
 
         $firstMap = current($maps);
@@ -298,50 +174,40 @@ class ImportTest extends MariaDbTestHelper {
         $this->assertEquals(new \DateTime('0843-01-01T00:00:00+02:00'), $territories[0]->getEndDate());
     }
 
-    public function testGetTerritoriesFromCriteriaGroup()
+    public function testStoreTerritoriesFromSparqlQuery()
     {
-        $criteriaGroup = $this->generateSampleCriteriaGroup('Former european countries', CriteriaGroupHelper::Territories);
+        $sparqlQuery = file_get_contents(Util::$data_dir_sparql.'Former Empires.sparql');
         $this->setSparqlJsonFixture('Former countries in Europe.json');
 
-        $territories = $this->mock->storeTerritoriesFromCriteriaGroup($criteriaGroup);
+        $territories = $this->mock->storeTerritoriesFromSparqlQuery($sparqlQuery);
         $this->assertEquals(1, count($territories));
 
         $this->assertEquals(1, TerritoryHelper::count());
     }
 
-    public function testGetAlreadyExistingTerritoriesFromCriteriaGroup()
+    public function testGetAlreadyExistingTerritoriesFromSparqlQuery()
     {
-        $criteriaGroup = $this->generateSampleCriteriaGroup('Former european countries', CriteriaGroupHelper::Territories);
+        $sparqlQuery = file_get_contents(Util::$data_dir_sparql.'Former Empires.sparql');
         $this->setSparqlJsonFixture('Former countries in Europe.json');
 
-        $territories = $this->mock->storeTerritoriesFromCriteriaGroup($criteriaGroup);
+        $territories = $this->mock->storeTerritoriesFromSparqlQuery($sparqlQuery);
         $this->assertEquals(1, count($territories));
         $this->assertEquals(1, TerritoryHelper::count());
 
-        $territories = $this->mock->storeTerritoriesFromCriteriaGroup($criteriaGroup);
+        $territories = $this->mock->storeTerritoriesFromSparqlQuery($sparqlQuery);
         $this->assertEquals(0, count($territories));
         $this->assertEquals(1, TerritoryHelper::count());
     }
 
-    public function testGetTerritoriesFromCriteriaGroupInvalidJson() {
+    public function testGetTerritoriesFromSparqlQueryInvalidQuery() {
         $this->setSparqlJsonFixture('invalid.json');
 
         ob_start();
-        $territories = $this->mock->storeTerritoriesFromCriteriaGroup(new CriteriaGroup());
+        $territories = $this->mock->storeTerritoriesFromSparqlQuery('');
         $echoOutput = ob_get_clean();
 
         $this->assertEmpty($territories);
         $this->assertRegExp('# - ERROR - #', $echoOutput);
-    }
-
-    function testGetDatesFromSparqlResultInvalidCriteriaGroup() {
-        $criteriaGroup = $this->generateSampleCriteriaGroup('Invalid criteria group name');
-
-        $this->setSparqlJsonFixture('Former Empires.json');
-
-        $maps = $this->mock->storeMapsFromCriteriaGroup($criteriaGroup);
-
-        $this->assertEquals(0, count($maps));
     }
 
     public function testGetInaccessibleImageURL()

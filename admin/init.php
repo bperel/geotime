@@ -3,7 +3,6 @@
 namespace geotime\admin;
 
 use DoctrineBootstrap;
-use geotime\helpers\CriteriaGroupHelper;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\SparqlEndpointHelper;
 use geotime\Import;
@@ -15,9 +14,6 @@ chdir("..");
 
 $entityManager = DoctrineBootstrap::getEntityManager();
 ModelHelper::setEm($entityManager);
-
-CriteriaGroupHelper::deleteAll();
-CriteriaGroupHelper::importFromJson();
 
 SparqlEndpointHelper::deleteAll();
 SparqlEndpointHelper::importFromJson();
