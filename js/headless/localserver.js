@@ -13,7 +13,7 @@ function create() {
         var pagePath = workingDirectory + cleanedUrl;
         var extension = pagePath.replace(/^.*\.(.*)$/,'$1');
         switch (extension) {
-            case 'xml':
+            case 'svg':
                 response.setHeader("Content-Type", "image/svg+xml");
             break;
         }
