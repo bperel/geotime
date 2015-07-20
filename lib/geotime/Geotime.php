@@ -212,7 +212,7 @@ class Geotime {
                 ModelHelper::getEm()->flush();
                 return MapHelper::find($mapId);
             }
-            return null;
+            return $map;
         }
     }
 

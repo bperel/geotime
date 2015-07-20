@@ -11,8 +11,13 @@ function create() {
             .replace(/\?.*$/g, '');
         //console.log('Requesting ' + request.url + ', loading ' + cleanedUrl);
         var pagePath = workingDirectory + cleanedUrl;
+        var extension = pagePath.replace(/^.*\.(.*)$/,'$1');
+        switch (extension) {
+            case 'xml':
+                response.setHeader("Content-Type", "image/svg+xml");
+            break;
+        }
         response.statusCode = 200;
-        response.setHeader("Content-Type", "image/svg+xml");
         try {
             response.write(fs.read(pagePath));
         } catch(err) {
