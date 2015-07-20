@@ -51,9 +51,11 @@ class GeotimeTest extends MariaDbTestHelper {
         $map->setUploadDate(new \DateTime());
 
         $referencedTerritory = ReferencedTerritoryHelper::buildAndCreate('A referenced territory');
-        $territory = TerritoryHelper::buildAndCreateWithReferencedTerritory($referencedTerritory);
+        $territory = TerritoryHelper::buildAndCreateWithReferencedTerritory($referencedTerritory, '1985-01-01', '1986-12-21');
+        $territory->setPolygon(new \stdClass());
         $map->addTerritory($territory);
         $territory->setMap($map);
+        TerritoryHelper::save($territory);
 
         ModelHelper::getEm()->persist($map);
         ModelHelper::getEm()->flush();
@@ -129,9 +131,13 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertEquals('1991', $periodsAndCoverage[0]->end);
         $this->assertEquals(0, $periodsAndCoverage[0]->coverage);
 
-        $this->assertEquals('2012', $periodsAndCoverage[1]->start);
-        $this->assertEquals('2012', $periodsAndCoverage[1]->end);
-        $this->assertEquals(array_sum(self::$neAreas), $periodsAndCoverage[1]->coverage);
+        $this->assertEquals('1985', $periodsAndCoverage[1]->start);
+        $this->assertEquals('1986', $periodsAndCoverage[1]->end);
+        $this->assertEquals(0, $periodsAndCoverage[0]->coverage);
+
+        $this->assertEquals('2012', $periodsAndCoverage[2]->start);
+        $this->assertEquals('2012', $periodsAndCoverage[2]->end);
+        $this->assertEquals(array_sum(self::$neAreas), $periodsAndCoverage[2]->coverage);
     }
 
     function testGetIncompleteMapInfoFound() {
