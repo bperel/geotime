@@ -1,6 +1,3 @@
-// Karma configuration
-// Generated on Sat Nov 29 2014 23:04:14 GMT+0100 (Paris, Madrid)
-
 module.exports = function(config) {
     config.set({
 
@@ -15,22 +12,25 @@ module.exports = function(config) {
 
         // list of files / patterns to load in the browser
         files: [
-            { pattern: 'map-placeholders.html', watched: false, included: false },
-            { pattern: 'test/phpunit/_data/*', watched: false, included: false },
-            { pattern: 'js/vendor/modernizr/modernizr.js', watched: false },
-            { pattern: 'js/vendor/d3/d3.min.js', watched: false },
-            { pattern: 'js/vendor/topojson/topojson.js', watched: false },
-            { pattern: 'js/vendor/jasmine/lib/jasmine-core/jasmine.js', watched: false },
-            { pattern: 'js/vendor/jquery/dist/jquery.min.js', watched: false },
-            { pattern: 'js/vendor/jasmine-jquery/lib/jasmine-jquery.js', watched: false },
-            { pattern: 'test/jasmine/mock-ajax.js', watched: false },
+            { pattern: 'test/**/_data/*.json', included: false },
+            { pattern: 'map-placeholders.html', included: false },
+            'js/vendor/modernizr/modernizr.js',
+            'js/vendor/d3/d3.min.js',
+            'js/vendor/topojson/topojson.js',
+            'js/vendor/jquery/dist/jquery.min.js',
+            'js/vendor/jasmine/lib/jasmine-core/jasmine.js',
+            'js/vendor/jquery/dist/jquery.min.js',
+            'js/vendor/jasmine-jquery/lib/jasmine-jquery.js',
             'js/*.js',
+            'test/jasmine/mock-ajax.js',
             'test/jasmine/*.spec.js'
         ],
 
 
         // list of files to exclude
         exclude: [
+            'js/main.js',
+            'js/main_headless.js'
         ],
 
 

@@ -1,5 +1,10 @@
 describe('Util tests', function() {
 
+    beforeEach(function() {
+        jasmine.getFixtures().fixturesPath = 'base';
+        loadFixtures("map-placeholders.html");
+    });
+
     describe('styleIntWithoutPx', function() {
         it('should return an integer', function() {
             d3.select('body').append('div').attr('id', 'styleGetterTest').style('height', '15px');
@@ -31,20 +36,12 @@ describe('Util tests', function() {
         });
 
         it('should return coordinates', function() {
+            resizeExternalMap();
+
             var pathCoordinates = d3.select('#myPath').getPathCoordinates();
             var pathLength = 2 * Math.ceil(Math.sqrt(Math.pow(width/2, 2) + Math.pow(mapHeight/2, 2)));
             expect(pathCoordinates.length).toEqual(pathLength);
             expect(pathCoordinates[0]).toEqual(projection.invert([0, 0]));
-        });
-
-        it('should throw an error if the projection is non-invertible', function() {
-            projection = d3.geo.orthographic()
-                .scale(width / 2 / Math.PI)
-                .precision(.01);
-
-            var pathCoordinates = d3.select('#myPath').getPathCoordinates();
-            expect(pathCoordinates[0]).toEqual([NaN, NaN]);
-            expect(pathCoordinates[pathCoordinates.length-1]).toEqual([NaN, NaN]);
         });
     });
 

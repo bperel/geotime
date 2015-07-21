@@ -13,7 +13,7 @@ function ajaxPost(options, callback) {
 d3.selection.prototype.getPathCoordinates = function() {
     var path = this.node();
     var len = path.getTotalLength();
-	var ratio = parseInt(svgMap.attr('width')) / svgMap.styleIntWithoutPx('width');
+	var ratio = parseInt(svgMap.attr('width')) / svgMap.datum().width;
 	var offset = getExternalMapOffsetToCenter();
 
     var coordinates = [];

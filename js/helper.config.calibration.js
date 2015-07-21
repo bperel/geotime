@@ -153,12 +153,12 @@ d3.selection.prototype.repositionCalibrationMarkers = function(type, forceEnter)
 	var filter = function(d) { return !type || d.type === type; };
 	var groupCalibrationPoints = markersSvg.selectAll('g.marker-group').filter(filter).selectAll('use');
 
-	var calibrationPointsElements = groupCalibrationPoints.data(calibrationPoints);
+	var calibrationPointsElements = groupCalibrationPoints.data(calibrationPoints.filter(filter));
 
 	calibrationPointsElements
 		.exit().remove();
 	if (forceEnter) {
-		groupCalibrationPoints.filter(filter)
+		groupCalibrationPoints
 			.each(positionCalibrationMarker);
 	}
 	else {

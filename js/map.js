@@ -237,14 +237,14 @@ function loadTerritoryMap(fileName, mapInfo, contentFromFileSystem, callback) {
     }
 }
 
-function loadRandomTerritoryMap() {
+function loadRandomTerritoryMap(noUi) {
 	if (!isLoading) {
 		isLoading = true;
 		ajaxPost(
 			{ getSvg: 1 },
 			function(error, incompleteMapInfo) {
 				if (!!incompleteMapInfo) {
-					loadTerritoryMap(incompleteMapInfo.fileName, incompleteMapInfo, false, loadUIConfig);
+					loadTerritoryMap(incompleteMapInfo.fileName, incompleteMapInfo, false, noUi ? function() {} : loadUIConfig);
 					initHelper(incompleteMapInfo.fileName, helperStepsData);
 				}
 				isLoading = false;
@@ -253,23 +253,29 @@ function loadRandomTerritoryMap() {
 	}
 }
 
-function loadUI() {
-	addCalibrationDefsMarkers();
-
-	projectionSelection = d3.select('#projectionSelection')
-		.on('change', function () {
-			applyProjection(getSelectedProjection(), projection.center(), projection.scale(), projection.rotate());
-		});
+function initProjectionSelect(options) {
+	projectionSelection = d3.select('#projectionSelection');
 
 	projectionSelection.selectAll('option')
-		.data([
-			{name: 'mercator'},
-			{name: 'equirectangular'},
-			{name: 'orthographic'}
-		])
+		.data(options)
 		.enter().append('option')
 		.text(function (d) {
 			return d.name;
+		});
+}
+
+function loadUI() {
+	addCalibrationDefsMarkers();
+
+	initProjectionSelect([
+		{name: 'mercator'},
+		{name: 'equirectangular'},
+		{name: 'orthographic'}
+	]);
+
+	projectionSelection
+		.on('change', function () {
+			applyProjection(getSelectedProjection(), projection.center(), projection.scale(), projection.rotate());
 		});
 
 	dragAction = d3.select('#dragActionContainer')

@@ -32,6 +32,7 @@ describe('Map tests', function() {
         });
 
         it('should load', function() {
+            initProjectionSelect([{name: 'mercator'}]);
             showBgMap("backgroundMap", getJSONFixture("test/phpunit/_data/countries.json"));
             expect(d3.select("#backgroundMap").empty()).toBeFalsy();
         })
@@ -78,7 +79,8 @@ describe('Map tests', function() {
         });
 
         it('should load', function() {
-            loadRandomTerritoryMap();
+            initProjectionSelect([{name: 'mercator'}]);
+            loadRandomTerritoryMap(true);
 
             var bgWidth = width;
             var bgHeight = mapHeight;
