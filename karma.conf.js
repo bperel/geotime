@@ -12,6 +12,8 @@ module.exports = function(config) {
 
         // list of files / patterns to load in the browser
         files: [
+            { pattern: 'test/**/_data/*.json', included: false },
+            { pattern: 'map-placeholders.html', included: false },
             'js/vendor/modernizr/modernizr.js',
             'js/vendor/d3/d3.min.js',
             'js/vendor/topojson/topojson.js',

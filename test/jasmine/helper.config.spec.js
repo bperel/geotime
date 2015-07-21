@@ -20,6 +20,8 @@ describe('Calibration tests', function() {
         jasmine.Ajax.install();
 
         initMapArea();
+        addCalibrationDefsMarkers();
+        initProjectionSelect([{name: 'mercator'}]);
         showBgMap("backgroundMap", getJSONFixture("test/phpunit/_data/countries.json"));
 
         spyOn(window, "ajaxPost").and.callFake(function(options, callback) {
@@ -72,7 +74,7 @@ describe('Calibration tests', function() {
         it('should add a calibration point when clicking on a map', function() {
             var markerRadius = 9;
 
-            loadRandomTerritoryMap();
+            loadRandomTerritoryMap(true);
 
             var calibrationPointsTexts = d3.select('#calibrationPoints').selectAll('.calibrationPoint');
 
@@ -87,30 +89,29 @@ describe('Calibration tests', function() {
             svg.clickOnMap(clickedPoint);
 
             expect(calibrationPoints.length).toBe(1);
-            expect(calibrationPoints[0].bgMap).toExist();
-            expect(calibrationPoints[0].fgMap).not.toExist();
-            expect(calibrationPoints[0].bgMap.x).toBe(clickedPoint.x - markerRadius);
-            expect(calibrationPoints[0].bgMap.y).toBe(clickedPoint.y - markerRadius);
+            expect(calibrationPoints[0].type).toEqual('bgMap');
+            expect(calibrationPoints[0].coordinates.x).toBe(clickedPoint.x - markerRadius);
+            expect(calibrationPoints[0].coordinates.y).toBe(clickedPoint.y - markerRadius);
             // Longitude and latitude are equal to 0 because we clicked on the middle of the map
-            expect(calibrationPoints[0].bgMap.lng).toBe(0);
-            expect(calibrationPoints[0].bgMap.lat).toBe(0);
+            expect(calibrationPoints[0].coordinates.lng).toBe(0);
+            expect(calibrationPoints[0].coordinates.lat).toBe(0);
 
             calibrationPointsTexts = d3.select('#calibrationPoints').selectAll('.calibrationPoint');
             expect(calibrationPointsTexts.size()).toBe(1);
             expect(markersSvg.selectAll('g.marker-group use').size()).toBe(1);
 
             expect(calibrationPointsTexts.text()).toStartWith(
-                'bg : '+JSON.stringify({x: calibrationPoints[0].bgMap.x, y: calibrationPoints[0].bgMap.y, lng: 0, lat: 0})
+                'bg : '+JSON.stringify({x: calibrationPoints[0].coordinates.x, y: calibrationPoints[0].coordinates.y, lng: 0, lat: 0})
             );
 
             // Fg point
             clickedPoint = {x: 55, y: 30};
             svgMap.clickOnMap(clickedPoint);
 
-            expect(calibrationPoints.length).toBe(1);
-            expect(calibrationPoints[0].fgMap).toExist();
-            expect(calibrationPoints[0].fgMap.x).toBe(clickedPoint.x - markerRadius);
-            expect(calibrationPoints[0].fgMap.y).toBe(clickedPoint.y - markerRadius);
+            expect(calibrationPoints.length).toBe(2);
+            expect(calibrationPoints[1].type).toEqual('fgMap');
+            expect(calibrationPoints[1].coordinates.x).toBe(clickedPoint.x - markerRadius);
+            expect(calibrationPoints[1].coordinates.y).toBe(clickedPoint.y - markerRadius);
 
             expect(d3.select('#calibrationPoints').selectAll('.calibrationPoint').size()).toBe(1);
             expect(markersSvg.selectAll('g.marker-group use').size()).toBe(2);
@@ -118,7 +119,7 @@ describe('Calibration tests', function() {
         });
 
         it('should remove a calibration point when clicking on the "Remove point" link', function() {
-            loadTerritoryMap();
+            loadRandomTerritoryMap(true);
             enableCalibrationPointSelection();
 
             var clickedPoint = {x: width/2, y: mapHeight/2 +10};
