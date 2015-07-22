@@ -8,7 +8,7 @@ use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
 
-class TerritoryHelper implements AbstractEntityHelper
+class TerritoryHelper extends AbstractEntityHelper
 {
     /** @var \integer */
     static $equatorialRadius = 6378137;
@@ -79,8 +79,8 @@ class TerritoryHelper implements AbstractEntityHelper
      */
     private static function buildAndSave($territory, $startDate = '', $endDate = '', $xpath = null) {
         if (!empty($startDate) && !empty($endDate)) {
-            $territory->setStartDate(new \DateTime($startDate));
-            $territory->setEndDate(new \DateTime($endDate));
+            $territory->setStartDate(Util::createDateTimeFromString($startDate));
+            $territory->setEndDate(Util::createDateTimeFromString($endDate));
         }
         if (!empty($xpath)) {
             $territory->setXpath($xpath);
@@ -250,8 +250,8 @@ class TerritoryHelper implements AbstractEntityHelper
      */
     public static function save($territory) {
         $territory->setArea(self::calculateArea($territory));
-        ModelHelper::getEm()->persist($territory);
-        ModelHelper::getEm()->flush();
+        self::persist($territory);
+        self::flush();
 
         return $territory;
     }

@@ -29,12 +29,6 @@ class ReferencedTerritory
     var $next;
 
     /**
-     * @Column(type="calibrationPoint", nullable= true)
-     * @var CalibrationPoint
-     */
-    private $calibrationPoint;
-
-    /**
      * ReferencedTerritory constructor.
      * @param $name
      * @param $previous
@@ -102,22 +96,6 @@ class ReferencedTerritory
     public function setNext($next)
     {
         $this->next = $next;
-    }
-
-    /**
-     * @return CalibrationPoint
-     */
-    public function getCalibrationPoint()
-    {
-        return $this->calibrationPoint;
-    }
-
-    /**
-     * @param CalibrationPoint $calibrationPoint
-     */
-    public function setCalibrationPoint($calibrationPoint)
-    {
-        $this->calibrationPoint = $calibrationPoint;
     }
     // @codeCoverageIgnoreEnd
 }

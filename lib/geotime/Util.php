@@ -223,6 +223,19 @@ class Util {
 
         return false;
     }
+
+    /**
+     * @param $str
+     * @return \DateTime|null
+     */
+    public static function createDateTimeFromString($str) {
+        try {
+            return new \DateTime($str);
+        }
+        catch (\Exception $e) {
+            return null;
+        }
+    }
 }
 
 Util::$log = Logger::getLogger("main");

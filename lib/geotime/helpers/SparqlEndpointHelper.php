@@ -4,7 +4,7 @@ namespace geotime\helpers;
 use geotime\models\mariadb\SparqlEndpoint;
 use geotime\Util;
 
-class SparqlEndpointHelper implements AbstractEntityHelper
+class SparqlEndpointHelper extends AbstractEntityHelper
 {
     static $cachePath = 'data/sparqlEndpoints.json';
 
@@ -23,10 +23,10 @@ class SparqlEndpointHelper implements AbstractEntityHelper
             $sparqlEndPoint->setMethod($object->method);
             $sparqlEndPoint->setParameters($object->parameters);
 
-            ModelHelper::getEm()->persist($sparqlEndPoint);
+            self::persist($sparqlEndPoint);
         });
 
-        ModelHelper::getEm()->flush();
+        self::flush();
     }
 
     /**

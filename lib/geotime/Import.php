@@ -2,6 +2,7 @@
 
 namespace geotime;
 
+use geotime\helpers\AbstractEntityHelper;
 use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
@@ -272,13 +273,51 @@ class Import {
     {
         $territories = array();
         $skippedTerritoriesCount = 0;
-        foreach ($pageAsJson->results->bindings as $result) {
+        $maps = array();
+        $skippedMapsCount = 0;
+
+        AbstractEntityHelper::setFlushMode(false);
+
+        foreach ($pageAsJson->results->bindings as $i=>$result) {
             $territoryName = $result->name->value;
 
-            if (is_null(ReferencedTerritoryHelper::findOneByName($territoryName))) {
+            if (is_null(ReferencedTerritoryHelper::findOneByName($territoryName)) || array_key_exists($territoryName, $territories)) {
                 $referencedTerritory = ReferencedTerritoryHelper::buildAndSaveFromObject($result);
                 $territory = TerritoryHelper::buildAndSaveFromObjectAndReferencedTerritory($referencedTerritory, $result);
                 $territories[$territoryName]=$territory;
+
+                if (isset($result->imageMap)) {
+                    $imageMapFullName = Util::cleanupImageName($result->imageMap->value);
+                    if (strtolower(Util::getImageExtension($imageMapFullName)) === ".svg") {
+                        $existingMap = MapHelper::findOneByFileName($imageMapFullName);
+                        if (is_null($existingMap) || array_key_exists($imageMapFullName, $maps)) {
+                            $startAndEndDates = self::getDatesFromSparqlResult($result);
+                            if (is_null($startAndEndDates)) {
+                                continue;
+                            }
+                            else {
+                                $map = MapHelper::generateAndSaveReferences($imageMapFullName, $startAndEndDates->startDate, $startAndEndDates->endDate);
+                                $imageMapUrlAndUploadDate = self::instance()->getCommonsImageInfos($map->getFileName());
+
+                                // The map image couldn't be retrieved => the Map object that we started to fill and its references are deleted
+                                if (is_null($imageMapUrlAndUploadDate)) {
+                                    MapHelper::deleteTerritories($map);
+                                }
+                                else {
+                                    $imageMapUrl = $imageMapUrlAndUploadDate['url'];
+                                    $imageMapUploadDate = $imageMapUrlAndUploadDate['uploadDate'];
+                                    self::fetchAndStoreImage($map, $imageMapFullName, $imageMapUploadDate, $imageMapUrl);
+                                }
+                            }
+                        }
+                        else {
+                            $map = $existingMap;
+                            self::$log->debug('Map '.$imageMapFullName.' already exists, skipping');
+                            $skippedMapsCount++;
+                        }
+                        $maps[$imageMapFullName] = $map;
+                    }
+                }
             }
             else {
                 self::$log->debug('Referenced territory '.$territoryName.' already exists, skipping');
@@ -286,10 +325,16 @@ class Import {
             }
         }
 
+        AbstractEntityHelper::flush(true);
+
         self::$log->info('Referenced territories importation done.');
         self::$log->info(count($territories). ' territories were stored.');
         if ($skippedTerritoriesCount > 0) {
             self::$log->info($skippedTerritoriesCount. ' territories were skipped because they already exist.');
+        }
+        self::$log->info(count($maps). ' maps were stored.');
+        if ($skippedMapsCount > 0) {
+            self::$log->info($skippedMapsCount. ' maps were skipped because they already exist.');
         }
         return $territories;
     }
@@ -378,6 +423,7 @@ class Import {
         if (is_null($imageMapUrl) || Util::fetchSvgWithThumbnail($imageMapUrl, $imageMapFullName, $map->getFileName())) {
             $map->setUploadDate($imageMapUploadDate);
             ModelHelper::getEm()->persist($map);
+            ModelHelper::getEm()->persist($map->getTerritories()[0]);
             ModelHelper::getEm()->flush();
         }
         return true;

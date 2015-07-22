@@ -3,11 +3,12 @@ namespace geotime\helpers;
 use geotime\models\mariadb\Map;
 use geotime\models\mariadb\Territory;
 
+use geotime\Util;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
 
-class MapHelper implements AbstractEntityHelper
+class MapHelper extends AbstractEntityHelper
 {
     /** @var \Logger */
     static $log;
@@ -22,14 +23,19 @@ class MapHelper implements AbstractEntityHelper
     {
         self::$log->debug('Generating references for map '.$imageMapFullName);
 
-        $territory = new Territory(null, true, new \stdClass(), 0, '', new \DateTime($startDateStr), new \DateTime($endDateStr));
+        $startDate = Util::createDateTimeFromString($startDateStr);
+        $endDate = Util::createDateTimeFromString($endDateStr);
+        $territory = new Territory(null, true, new \stdClass(), 0, '', $startDate, $endDate);
 
-        ModelHelper::getEm()->persist($territory);
-        ModelHelper::getEm()->flush();
+        self::persist($territory);
 
         $map = new Map();
         $map->setFileName($imageMapFullName);
         $map->setTerritories(array($territory));
+
+        self::persist($map);
+
+        ModelHelper::getEm()->flush($map);
 
         return $map;
     }
@@ -51,7 +57,7 @@ class MapHelper implements AbstractEntityHelper
         foreach($map->getTerritories() as $territory) {
             ModelHelper::getEm()->remove($territory);
         }
-        ModelHelper::getEm()->flush();
+        self::flush();
     }
 
     /**
@@ -107,7 +113,7 @@ class MapHelper implements AbstractEntityHelper
     public static function delete($mapId) {
         $map = self::find($mapId);
         ModelHelper::getEm()->remove($map);
-        ModelHelper::getEm()->flush();
+        self::flush();
     }
 
     /**
