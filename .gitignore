@@ -9,6 +9,7 @@
 /composer.phar
 /geotime.log
 /js/vendor/
+/lib/doctrine/geotime.sqlite
 /node_modules/
 /test/phpunit/cache/
 /vendor/

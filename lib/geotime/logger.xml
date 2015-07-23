@@ -7,16 +7,8 @@
         <param name="htmlLineBreaks" value="true" />
     </appender>
 
-    <appender name="myFileAppender" class="LoggerAppenderFile">
-        <layout class="LoggerLayoutPattern">
-            <param name="conversionPattern" value="%date{Y-m-d H:i:s,u} [%logger] %F(%M):%L - %message%newline" />
-        </layout>
-        <param name="file" value="geotime.log" />
-    </appender>
-
     <root>
         <level value="DEBUG" />
         <appender_ref ref="myEchoAppender" />
-        <appender_ref ref="myFileAppender" />
     </root>
 </configuration>
