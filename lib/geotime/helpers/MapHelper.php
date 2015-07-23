@@ -28,6 +28,7 @@ class MapHelper extends AbstractEntityHelper
         $territory = new Territory(null, true, new \stdClass(), 0, '', $startDate, $endDate);
 
         self::persist($territory);
+        ModelHelper::getEm()->flush($territory);
 
         $map = new Map();
         $map->setFileName($imageMapFullName);

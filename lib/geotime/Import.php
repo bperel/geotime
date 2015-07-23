@@ -431,5 +431,15 @@ class Import {
 }
 
 Import::$log = Logger::getLogger("main");
+$rootlogger = Import::$log->getParent();
+$fileAppenderName = "MyFileAppender";
+$appender = new \LoggerAppenderRollingFile($fileAppenderName);
+$appender->setFile("/var/www/html/geotime/geotime.log");
+$appenderlayout = new \LoggerLayoutPattern();
+$pattern = '%date{Y-m-d H:i:s,u} [%logger] %F(%M):%L - %message%newline';
+$appenderlayout->setConversionPattern($pattern);
+$appender->setLayout($appenderlayout);
+$appender->activateOptions();
 
+$rootlogger->addAppender($appender);
 ?>
