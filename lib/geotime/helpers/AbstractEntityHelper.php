@@ -21,10 +21,7 @@ class AbstractEntityHelper {
     }
 
     static function flush($force = false) {
-        if ($force) {
-            self::setFlushMode(true);
-        }
-        if (self::$flushMode) {
+        if (self::$flushMode || $force) {
             ModelHelper::getEm()->flush();
         }
     }

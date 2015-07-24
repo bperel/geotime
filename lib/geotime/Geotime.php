@@ -159,9 +159,7 @@ class Geotime {
         $map = $query->getOneOrNullResult(AbstractQuery::HYDRATE_OBJECT);
 
         if (!is_null($map)) {
-            /** @var PersistentCollection $mapTerritories */
-            $mapTerritories = $map->territories;
-            $map->territories = $mapTerritories->toArray();
+            $map->territories = $map->territories->toArray();
         }
         return $map;
     }
