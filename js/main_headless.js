@@ -1,5 +1,4 @@
 requirejs.config({
-	urlArgs: "v=" + (new Date()).getTime(),
 	"paths": {
 		"app": "../"
 	},

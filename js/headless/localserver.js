@@ -8,7 +8,8 @@ function create() {
     var serverCreated = server.listen(serverUrl, function (request, response) {
         var cleanedUrl = request.url
             .replace(/\//g, fs.separator)
-            .replace(/\?.*$/g, '');
+            .replace(/\?.*$/g, '')
+            .replace(/js\/js\//,'js/');
         //console.log('Requesting ' + request.url + ', loading ' + cleanedUrl);
         var pagePath = workingDirectory + cleanedUrl;
         var extension = pagePath.replace(/^.*\.(.*)$/,'$1');

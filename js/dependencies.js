@@ -2,7 +2,7 @@ var onLoad = function() {};
 
 var dependencies = [
 	'vendor/modernizr/modernizr',
-	'vendor/d3/d3.min',
+	'vendor/d3/d3',
 	'vendor/topojson/topojson',
 	'autocomplete',
 	'vendor/jquery/dist/jquery.min',
