@@ -3,7 +3,10 @@ SELECT DISTINCT
   (coalesce(?date1_precise, ?date1, ?date1_1) as ?date1)
   (coalesce(?date2_precise, ?date2, ?date2_1) as ?date2)
   (GROUP_CONCAT(distinct ?previous; separator="|") AS ?previous)
-  (GROUP_CONCAT(distinct ?next; separator="|") AS ?next) WHERE {
+  (GROUP_CONCAT(distinct ?next; separator="|") AS ?next)
+  ?imageMap
+
+  WHERE {
     ?e <http://www.w3.org/2000/01/rdf-schema#label> ?name
   . ?e <http://purl.org/dc/terms/subject> ?subject
   . ?e <http://dbpedia.org/property/yearStart> ?date1_1
@@ -33,6 +36,9 @@ SELECT DISTINCT
   }
   . OPTIONAL {
     ?e <http://dbpedia.org/property/s> ?next
+  }
+  . OPTIONAL {
+    ?e <http://dbpedia.org/property/imageMap> ?imageMap
   }
 }
 

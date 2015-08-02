@@ -2,6 +2,7 @@
 
 namespace geotime;
 
+use geotime\helpers\AbstractEntityHelper;
 use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
@@ -43,38 +44,6 @@ class Import {
     function importReferencedTerritoriesFromQuery($sparqlQuery, $fileName, $useCachedJson) {
         $fileNameWithPath = Util::$cache_dir_json . $fileName;
         $this->storeTerritoriesFromSparqlQuery($sparqlQuery, $fileNameWithPath, $useCachedJson);
-    }
-
-    static function importMaps($useCachedJson = true) {
-
-        $importStartTime = time();
-        self::$log->info('Starting SVG and JSON importation.');
-
-        $sparqlQueryFiles = array('formerEmpires');
-
-        foreach($sparqlQueryFiles as $sparqlQueryFile) {
-            $cacheFileName = Util::$cache_dir_json . $sparqlQueryFile . ".json";
-            $sparqlQuery = file_get_contents(Util::$data_dir_sparql.$sparqlQueryFile.'.sparql');
-
-            $maps = self::instance()->storeMapsFromSparqlQuery($sparqlQuery, $cacheFileName, $useCachedJson);
-            $svgInfos = self::instance()->getCommonsInfos($maps);
-
-            foreach ($svgInfos as $imageMapFullName => $imageMapUrlAndUploadDate) {
-                $currentMap = $maps[$imageMapFullName];
-
-                // The map image couldn't be retrieved => the Map object that we started to fill and its references are deleted
-                if (is_null($imageMapUrlAndUploadDate)) {
-                    MapHelper::deleteTerritories($currentMap);
-                }
-                else {
-                    $imageMapUrl = $imageMapUrlAndUploadDate['url'];
-                    $imageMapUploadDate = $imageMapUrlAndUploadDate['uploadDate'];
-                    self::fetchAndStoreImage($currentMap, $imageMapFullName, $imageMapUploadDate, $imageMapUrl);
-                }
-            }
-        }
-        $importEndTime = time();
-        self::$log->info('SVG and JSON importation done in '.($importEndTime-$importStartTime).'s.');
     }
 
     /**
@@ -138,26 +107,6 @@ class Import {
             self::getSparqlHttpParametersWithQuery($sparqlEndpoint->getParameters(), $sparqlQuery)
         );
     }
-
-    /**
-     * Create Map object instances from the results of a Sparql query
-     * @param string $sparqlQuery
-     * @param string $fileName |null Cache file name to put the results into
-     * @param boolean $getFromCachedJson If FALSE, the results will be queried online
-     * @return models\mariadb\Map[]|null
-     */
-    public function storeMapsFromSparqlQuery($sparqlQuery, $fileName = null, $getFromCachedJson = true) {
-        $pageAsJson = $this->getJsonDataFromSparqlQuery(
-            $sparqlQuery,
-            $fileName,
-            $getFromCachedJson
-        );
-        if (is_null($pageAsJson)) {
-            return null;
-        }
-        return $this->storeMapsFromSparqlResults($pageAsJson);
-    }
-
     /**
      * Create Territory object instances from the results of a Sparql query
      * @param string $sparqlQuery
@@ -212,27 +161,6 @@ class Import {
     }
 
     /**
-     * @param \stdClass $result
-     * @return \stdClass Object with start and end dates
-     */
-    public function getDatesFromSparqlResult($result) {
-        $objectWithDates = new \stdClass();
-        if (isset($result->date1_precise)) {
-            $objectWithDates->startDate = $result->date1_precise->value;
-        }
-        else {
-            $objectWithDates->startDate = $result->date1->value;
-        }
-        if (isset($result->date2_precise)) {
-            $objectWithDates->endDate = $result->date2_precise->value;
-        }
-        else {
-            $objectWithDates->endDate = $result->date2->value;
-        }
-        return $objectWithDates;
-    }
-
-    /**
      * Create Map object instances from a JSON-formatted SPARQL page
      * @param object $pageAsJson
      * @return models\mariadb\Map[]
@@ -245,9 +173,9 @@ class Import {
             if (strtolower(Util::getImageExtension($imageMapFullName)) === ".svg") {
                 $existingMap = MapHelper::findOneByFileName($imageMapFullName);
                 if (is_null($existingMap)) {
-                    $startAndEndDates = self::getDatesFromSparqlResult($result);
+                    $startAndEndDates = Util::getDatesFromSparqlResult($result);
                     if (is_null($startAndEndDates)) {
-                        continue;
+                        $map = MapHelper::generateAndSaveReferences($imageMapFullName);
                     }
                     else {
                         $map = MapHelper::generateAndSaveReferences($imageMapFullName, $startAndEndDates->startDate, $startAndEndDates->endDate);
@@ -272,13 +200,30 @@ class Import {
     {
         $territories = array();
         $skippedTerritoriesCount = 0;
-        foreach ($pageAsJson->results->bindings as $result) {
+        $maps = array();
+        $skippedMapsCount = 0;
+
+        AbstractEntityHelper::setFlushMode(false);
+
+        foreach ($pageAsJson->results->bindings as $i=>$result) {
             $territoryName = $result->name->value;
 
-            if (is_null(ReferencedTerritoryHelper::findOneByName($territoryName))) {
+            if (is_null(ReferencedTerritoryHelper::findOneByName($territoryName)) || array_key_exists($territoryName, $territories)) {
                 $referencedTerritory = ReferencedTerritoryHelper::buildAndSaveFromObject($result);
                 $territory = TerritoryHelper::buildAndSaveFromObjectAndReferencedTerritory($referencedTerritory, $result);
-                $territories[$territoryName]=$territory;
+                $territories[$territoryName] = $territory;
+
+                if (isset($result->imageMap)) {
+                    $map = MapHelper::findOneSvgByFileName($result);
+                    if (is_null($map)) {
+                        $map = MapHelper::buildAndSaveFromObject($result);
+                    }
+                    else {
+                        self::$log->debug('Map '.$map->getFileName().' already exists, skipping');
+                        $skippedMapsCount++;
+                    }
+                    $maps[$map->getFileName()]=$map;
+                }
             }
             else {
                 self::$log->debug('Referenced territory '.$territoryName.' already exists, skipping');
@@ -286,10 +231,17 @@ class Import {
             }
         }
 
+        AbstractEntityHelper::setFlushMode(true);
+        AbstractEntityHelper::flush();
+
         self::$log->info('Referenced territories importation done.');
         self::$log->info(count($territories). ' territories were stored.');
         if ($skippedTerritoriesCount > 0) {
             self::$log->info($skippedTerritoriesCount. ' territories were skipped because they already exist.');
+        }
+        self::$log->info(count($maps). ' maps were stored.');
+        if ($skippedMapsCount > 0) {
+            self::$log->info($skippedMapsCount. ' maps were skipped because they already exist.');
         }
         return $territories;
     }
@@ -385,5 +337,15 @@ class Import {
 }
 
 Import::$log = Logger::getLogger("main");
+$rootlogger = Import::$log->getParent();
+$fileAppenderName = "MyFileAppender";
+$appender = new \LoggerAppenderRollingFile($fileAppenderName);
+$appender->setFile("/var/www/html/geotime/geotime.log");
+$appenderlayout = new \LoggerLayoutPattern();
+$pattern = '%date{Y-m-d H:i:s,u} [%logger] %F(%M):%L - %message%newline';
+$appenderlayout->setConversionPattern($pattern);
+$appender->setLayout($appenderlayout);
+$appender->activateOptions();
 
+$rootlogger->addAppender($appender);
 ?>

@@ -223,6 +223,40 @@ class Util {
 
         return false;
     }
+
+    /**
+     * @param $str
+     * @return \DateTime|null
+     */
+    public static function createDateTimeFromString($str) {
+        try {
+            return new \DateTime($str);
+        }
+        catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * @param \stdClass $result
+     * @return \stdClass Object with start and end dates
+     */
+    public static function getDatesFromSparqlResult($result)
+    {
+        $objectWithDates = new \stdClass();
+        if (isset($result->date1_precise)) {
+            $objectWithDates->startDate = $result->date1_precise->value;
+        } else {
+            $objectWithDates->startDate = $result->date1->value;
+        }
+        if (isset($result->date2_precise)) {
+            $objectWithDates->endDate = $result->date2_precise->value;
+        } else {
+            $objectWithDates->endDate = $result->date2->value;
+        }
+
+        return $objectWithDates;
+    }
 }
 
 Util::$log = Logger::getLogger("main");

@@ -68,7 +68,7 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertEquals(2, count(array_keys($periodsAndTerritoriesCount)));
 
         $territoriesCountSvgData = $periodsAndTerritoriesCount[self::$customMapName];
-        $this->assertEquals(1, $territoriesCountSvgData['count']);
+        $this->assertEquals(2, $territoriesCountSvgData['count']);
         $this->assertEquals(0, $territoriesCountSvgData['area']);
 
         $territoriesCountNEData = $periodsAndTerritoriesCount[self::$neMapName];
@@ -83,7 +83,7 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertEquals(1, count(array_keys($periodsAndTerritoriesCount)));
 
         $territoriesCountSvgData = $periodsAndTerritoriesCount[self::$customMapName];
-        $this->assertEquals(1, $territoriesCountSvgData['count']);
+        $this->assertEquals(2, $territoriesCountSvgData['count']);
         $this->assertEquals(0, $territoriesCountSvgData['area']);
     }
 
@@ -146,10 +146,10 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertNotNull($incompleteMap);
         $this->assertEquals('testImage.svg', $incompleteMap->fileName);
 
-        $startDate = new \DateTime('1980-01-02');
+        $startDate = new \DateTime('1985-01-01');
         $this->assertEquals($startDate, $incompleteMap->territories[0]->startDate);
 
-        $endDate = new \DateTime('1991-02-03');
+        $endDate = new \DateTime('1986-12-21');
         $this->assertEquals($endDate, $incompleteMap->territories[0]->endDate);
     }
 
