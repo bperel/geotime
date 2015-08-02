@@ -160,12 +160,18 @@ class MapHelper extends AbstractEntityHelper
     }
 
     /**
+     * @param bool $withUploadDate
      * @return int
      */
-    public static function count() {
+    public static function count($withUploadDate = false) {
         $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb->select('count(map.id)');
         $qb->from(Map::CLASSNAME,'map');
+        if ($withUploadDate) {
+            $qb->where(
+                $qb->expr()->isNotNull('map.uploadDate')
+            );
+        }
 
         return $qb->getQuery()->getSingleScalarResult();
     }

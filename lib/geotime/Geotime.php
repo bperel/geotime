@@ -143,8 +143,11 @@ class Geotime {
      */
     public static function getIncompleteMapInfo()
     {
-        $qb = ModelHelper::getEm()->createQueryBuilder();
+        //Get the number of rows of the table
+        $rows = MapHelper::count(true);
+        $offset = max(0, rand(0, $rows));
 
+        $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb
             ->addSelect('map')
             ->from(models\mariadb\Map::CLASSNAME,'map')
@@ -152,6 +155,7 @@ class Geotime {
                 $qb->expr()->isNotNull('map.uploadDate')
             )
             ->setMaxResults(1)
+            ->setFirstResult($offset)
         ;
 
         $query = $qb->getQuery();
@@ -258,11 +262,8 @@ class Geotime {
         $connection = ModelHelper::getEm()->getConnection();
         $platform = $connection->getDatabasePlatform();
 
-        if (!$keepMaps) {
-            $connection->executeUpdate($platform->getTruncateTableSQL('maps', true));
-        }
-
         $connection->executeUpdate($platform->getTruncateTableSQL('territories', true));
+        $connection->executeQuery('DELETE FROM maps');
     }
 }
 

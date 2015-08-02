@@ -103,22 +103,6 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertEquals(0, MapHelper::count());
     }
 
-    public function testCleanKeepMaps() {
-
-        $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
-        $t = new Territory($referencedTerritory, true);
-        ModelHelper::getEm()->persist($t);
-        ModelHelper::getEm()->flush();
-
-        $this->assertNotEquals(0, TerritoryHelper::count());
-        $this->assertNotEquals(0, MapHelper::count());
-
-        Geotime::clean(true);
-
-        $this->assertEquals(0, TerritoryHelper::count());
-        $this->assertNotEquals(0, MapHelper::count());
-    }
-
     public function testGetPeriodsAndCoverage() {
         $coverageInfo = Geotime::getCoverageInfo();
 
