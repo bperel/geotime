@@ -11,6 +11,10 @@ class CalibrationPoint {
     /** @var $fgPoint CoordinateXY */
     var $fgPoint;
 
+    /**
+     * @param $bgPoint CoordinateLatLng
+     * @param $fgPoint CoordinateXY
+     */
     public function __construct($bgPoint, $fgPoint)
     {
         $this->bgPoint  = $bgPoint;

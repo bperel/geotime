@@ -66,16 +66,8 @@ class MapHelper extends AbstractEntityHelper
         else {
             $imageMapUrl = $imageMapUrlAndUploadDate['url'];
             $imageMapUploadDate = $imageMapUrlAndUploadDate['uploadDate'];
-            Import::instance()->fetchAndStoreImage($map, $imageMapFullName, $imageMapUploadDate, $imageMapUrl);
-            return $map;
-        }
-        return null;
-    }
-
-    public static function findOneSvgByFileName($imageMapFullName, $previouslyCreatedMaps = array()) {
-        if (strtolower(Util::getImageExtension($imageMapFullName)) === ".svg") {
-            $map = MapHelper::findOneByFileName($imageMapFullName);
-            if (is_null($map) || array_key_exists($imageMapFullName, $previouslyCreatedMaps)) {
+            $success = Import::instance()->fetchAndStoreImage($map, $imageMapFullName, $imageMapUploadDate, $imageMapUrl);
+            if ($success) {
                 return $map;
             }
         }
@@ -142,12 +134,18 @@ class MapHelper extends AbstractEntityHelper
     }
 
     /**
-     * @param $fileName
-     * @return Map|object
+     * @param string $imageMapFullName
+     * @param Map[] $previouslyCreatedMaps
+     * @return Map|null
      */
-    public static function findOneByFileName($fileName) {
-        return ModelHelper::getEm()->getRepository(Map::CLASSNAME)
-            ->findOneBy(array('fileName' => $fileName));
+    public static function findOneByFileName($imageMapFullName, $previouslyCreatedMaps = array()) {
+        if (array_key_exists($imageMapFullName, $previouslyCreatedMaps)) {
+            return $previouslyCreatedMaps[$imageMapFullName];
+        }
+        else {
+            return ModelHelper::getEm()->getRepository(Map::CLASSNAME)
+                ->findOneBy(array('fileName' => $imageMapFullName));
+        }
     }
 
     /**

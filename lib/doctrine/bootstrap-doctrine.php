@@ -22,7 +22,6 @@ class DoctrineBootstrap {
 
     private static function getEntityManagerFromConnectionParams($connectionParams) {
         $config = self::getMetadataConfig();
-        //$config->setSQLLogger(new \Doctrine\DBAL\Logging\EchoSQLLogger());
         $conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $config);
         $em = EntityManager::create($conn, $config);
 

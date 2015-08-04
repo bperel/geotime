@@ -214,15 +214,22 @@ class Import {
                 $territories[$territoryName] = $territory;
 
                 if (isset($result->imageMap)) {
-                    $map = MapHelper::findOneSvgByFileName($result);
-                    if (is_null($map)) {
-                        $map = MapHelper::buildAndSaveFromObject($result);
+                    $mapFileName = $result->imageMap->value;
+                    if (Util::isSvg($mapFileName)) {
+                        $map = MapHelper::findOneByFileName($mapFileName, $maps);
+                        if (is_null($map)) {
+                            $map = MapHelper::buildAndSaveFromObject($result);
+                            if (!is_null($map)) {
+                                $maps[$map->getFileName()] = $map;
+                            }
+                        } else {
+                            self::$log->debug('Map ' . $mapFileName . ' already exists, skipping');
+                            $skippedMapsCount++;
+                        }
                     }
                     else {
-                        self::$log->debug('Map '.$map->getFileName().' already exists, skipping');
-                        $skippedMapsCount++;
+                        self::$log->debug('Map ' . $mapFileName . ' is not an SVG, ignoring');
                     }
-                    $maps[$map->getFileName()]=$map;
                 }
             }
             else {
@@ -312,7 +319,7 @@ class Import {
      * @param string $imageMapFullName
      * @param \DateTime $imageMapUploadDate
      * @param string $imageMapUrl NULL if we want the Map object to be stored but not the file to be retrieved
-     * @return boolean TRUE if a new map has been stored, FALSE if we keep the existing one
+     * @return boolean TRUE if a new map has been stored, FALSE if we keep the existing one or if an error occurred
      */
     function fetchAndStoreImage($map, $imageMapFullName, $imageMapUploadDate, $imageMapUrl = null) {
         // Check if map exists in DB
@@ -327,12 +334,14 @@ class Import {
                 self::$log->info('SVG file is outdated and will be retrieved again : '.$map->getFileName());
             }
         }
-        if (is_null($imageMapUrl) || Util::fetchSvgWithThumbnail($imageMapUrl, $imageMapFullName, $map->getFileName())) {
+        $svgRetrievalSuccess = null;
+        if (is_null($imageMapUrl)
+         || ($svgRetrievalSuccess = Util::fetchSvgWithThumbnail($imageMapUrl, $imageMapFullName, $map->getFileName()))) {
             $map->setUploadDate($imageMapUploadDate);
             ModelHelper::getEm()->persist($map);
             ModelHelper::getEm()->flush();
         }
-        return true;
+        return is_null($svgRetrievalSuccess) || $svgRetrievalSuccess === true;
     }
 }
 

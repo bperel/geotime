@@ -256,9 +256,8 @@ class Geotime {
 
     /**
      * Removes maps, territories and periods from the DB
-     * @param bool $keepMaps
      */
-    public static function clean($keepMaps=false) {
+    public static function clean() {
         $connection = ModelHelper::getEm()->getConnection();
         $platform = $connection->getDatabasePlatform();
 

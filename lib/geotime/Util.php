@@ -257,6 +257,15 @@ class Util {
 
         return $objectWithDates;
     }
+
+    /**
+     * @param $fileName string
+     * @return bool
+     */
+    public static function isSvg($fileName)
+    {
+        return strtolower(Util::getImageExtension($fileName)) === ".svg";
+    }
 }
 
 Util::$log = Logger::getLogger("main");
