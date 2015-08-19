@@ -267,7 +267,7 @@ class ImportTest extends MariaDbTestHelper {
 
     public function testFetchAndStoreImageNewMap() {
         $mapFileName = 'testImage.svg';
-        $map = MapHelper::generateAndSaveReferences('testImage.svg', '1980-01-02', '1991-02-03');
+        $map = MapHelper::generateAndSave('testImage.svg', '1980-01-02', '1991-02-03');
         $hasCreatedMap = $this->import->fetchAndStoreImage($map, $mapFileName, new \DateTime('2013-07-25T17:33:40Z'));
 
         $this->assertTrue($hasCreatedMap);

@@ -20,12 +20,13 @@ class MapHelper extends AbstractEntityHelper
      * @param $endDateStr
      * @return Map
      */
-    public static function generateAndSaveReferences($imageMapFullName, $startDateStr = null, $endDateStr = null)
+    public static function generateAndSave($imageMapFullName, $startDateStr = null, $endDateStr = null)
     {
         self::$log->debug('Generating references for map '.$imageMapFullName);
 
         $map = new Map();
         $map->setFileName($imageMapFullName);
+        self::persist($map);
 
         if (!is_null($startDateStr)) {
             $startDate = Util::createDateTimeFromString($startDateStr);
@@ -44,26 +45,42 @@ class MapHelper extends AbstractEntityHelper
     }
 
     /**
-     * @param $result \stdClass
-     * @return Map|null
+     * @param $imageMapFullName string
+     * @param $territory Territory
+     * @return Map
      */
-    public static function buildAndSaveFromObject($result)
+    public static function generateAndSaveWithTerritory($imageMapFullName, $territory)
     {
-        $imageMapFullName = Util::cleanupImageName($result->imageMap->value);
-        $startAndEndDates = Util::getDatesFromSparqlResult($result);
-        if (is_null($startAndEndDates)) {
-            $map = MapHelper::generateAndSaveReferences($imageMapFullName);
-        }
-        else {
-            $map = MapHelper::generateAndSaveReferences($imageMapFullName, $startAndEndDates->startDate, $startAndEndDates->endDate);
-        }
-        $imageMapUrlAndUploadDate = Import::instance()->getCommonsImageInfos($map->getFileName());
+        self::$log->debug('Associating a territory to new map '.$imageMapFullName);
 
-        // The map image couldn't be retrieved => the Map object that we started to fill and its references are deleted
-        if (is_null($imageMapUrlAndUploadDate)) {
-            MapHelper::deleteTerritories($map);
-        }
-        else {
+        $map = new Map();
+        $map->setFileName($imageMapFullName);
+        ModelHelper::getEm()->flush();
+
+        $territory->setMap($map);
+        $map->setTerritories(array($territory));
+        ModelHelper::getEm()->flush();
+        self::persist($territory);
+
+        ModelHelper::getEm()->flush();
+
+        return $map;
+    }
+
+    /**
+     * @param $mapFileName string
+     * @param $territory Territory
+     * @return false|Map Returns FALSE if an error occurred while retrieving the SVG image
+     */
+    public static function buildAndSaveFromObject($mapFileName, $territory)
+    {
+        $imageMapFullName = Util::cleanupImageName($mapFileName);
+        $imageMapUrlAndUploadDate = Import::instance()->getCommonsImageInfos($imageMapFullName);
+
+        if (!is_null($imageMapUrlAndUploadDate)) {
+            $map = MapHelper::generateAndSaveWithTerritory($imageMapFullName, $territory);
+            $imageMapUrlAndUploadDate = Import::instance()->getCommonsImageInfos($map->getFileName());
+
             $imageMapUrl = $imageMapUrlAndUploadDate['url'];
             $imageMapUploadDate = $imageMapUrlAndUploadDate['uploadDate'];
             $success = Import::instance()->fetchAndStoreImage($map, $imageMapFullName, $imageMapUploadDate, $imageMapUrl);
@@ -71,7 +88,7 @@ class MapHelper extends AbstractEntityHelper
                 return $map;
             }
         }
-        return null;
+        return false;
     }
 
     /**
@@ -135,12 +152,13 @@ class MapHelper extends AbstractEntityHelper
 
     /**
      * @param string $imageMapFullName
-     * @param Map[] $previouslyCreatedMaps
+     * @param Map[] $previouslyProcessedMaps array of maps.
+     * Can contain NULL values when the map corresponding to the file name couldn't be retrieved previously
      * @return Map|null
      */
-    public static function findOneByFileName($imageMapFullName, $previouslyCreatedMaps = array()) {
-        if (array_key_exists($imageMapFullName, $previouslyCreatedMaps)) {
-            return $previouslyCreatedMaps[$imageMapFullName];
+    public static function findOneByFileName($imageMapFullName, $previouslyProcessedMaps = array()) {
+        if (array_key_exists($imageMapFullName, $previouslyProcessedMaps)) {
+            return $previouslyProcessedMaps[$imageMapFullName];
         }
         else {
             return ModelHelper::getEm()->getRepository(Map::CLASSNAME)

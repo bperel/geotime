@@ -263,6 +263,7 @@ class Geotime {
 
         $connection->executeUpdate($platform->getTruncateTableSQL('territories', true));
         $connection->executeQuery('DELETE FROM maps');
+        $connection->executeQuery('DELETE FROM referencedTerritories');
     }
 }
 

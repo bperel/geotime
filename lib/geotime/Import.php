@@ -161,37 +161,6 @@ class Import {
     }
 
     /**
-     * Create Map object instances from a JSON-formatted SPARQL page
-     * @param object $pageAsJson
-     * @return models\mariadb\Map[]
-     */
-    public function storeMapsFromSparqlResults($pageAsJson)
-    {
-        $maps = array();
-        foreach ($pageAsJson->results->bindings as $result) {
-            $imageMapFullName = Util::cleanupImageName($result->imageMap->value);
-            if (strtolower(Util::getImageExtension($imageMapFullName)) === ".svg") {
-                $existingMap = MapHelper::findOneByFileName($imageMapFullName);
-                if (is_null($existingMap)) {
-                    $startAndEndDates = Util::getDatesFromSparqlResult($result);
-                    if (is_null($startAndEndDates)) {
-                        $map = MapHelper::generateAndSaveReferences($imageMapFullName);
-                    }
-                    else {
-                        $map = MapHelper::generateAndSaveReferences($imageMapFullName, $startAndEndDates->startDate, $startAndEndDates->endDate);
-                    }
-                }
-                else {
-                    $map = $existingMap;
-                }
-                $maps[$imageMapFullName]=$map;
-            }
-        }
-
-        return $maps;
-    }
-
-    /**
      * Create Territory object instances from a JSON-formatted SPARQL page
      * @param object $pageAsJson
      * @return models\mariadb\Territory[]
@@ -208,21 +177,20 @@ class Import {
         foreach ($pageAsJson->results->bindings as $i=>$result) {
             $territoryName = $result->name->value;
 
-            if (is_null(ReferencedTerritoryHelper::findOneByName($territoryName)) || array_key_exists($territoryName, $territories)) {
+            if (is_null(ReferencedTerritoryHelper::findOneByName($territoryName)) || in_array($territoryName, $territories)) {
                 $referencedTerritory = ReferencedTerritoryHelper::buildAndSaveFromObject($result);
                 $territory = TerritoryHelper::buildAndSaveFromObjectAndReferencedTerritory($referencedTerritory, $result);
-                $territories[$territoryName] = $territory;
+                $territories[] = $territoryName;
 
                 if (isset($result->imageMap)) {
                     $mapFileName = $result->imageMap->value;
                     if (Util::isSvg($mapFileName)) {
                         $map = MapHelper::findOneByFileName($mapFileName, $maps);
                         if (is_null($map)) {
-                            $map = MapHelper::buildAndSaveFromObject($result);
-                            if (!is_null($map)) {
-                                $maps[$map->getFileName()] = $map;
-                            }
-                        } else {
+                            $map = MapHelper::buildAndSaveFromObject($mapFileName, $territory);
+                            $maps[$mapFileName] = $map;
+                        }
+                        else if ($map !== false) { // If FALSE, an error occurred for this map
                             self::$log->debug('Map ' . $mapFileName . ' already exists, skipping');
                             $skippedMapsCount++;
                         }
@@ -324,7 +292,7 @@ class Import {
     function fetchAndStoreImage($map, $imageMapFullName, $imageMapUploadDate, $imageMapUrl = null) {
         // Check if map exists in DB
         // If the retrieved image upload date is the same as the stored map, we keep the map in DB
-        if (!is_null($map->getId())) {
+        if (!is_null($imageMapUploadDate)) {
             if ($map->getUploadDate() === $imageMapUploadDate)
             {
                 self::$log->info('SVG file is already in cache : '.$map->getFileName());

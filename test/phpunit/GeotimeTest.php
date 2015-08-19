@@ -47,7 +47,7 @@ class GeotimeTest extends MariaDbTestHelper {
         $neImport = new NaturalEarthImporter();
         $neImport->import(self::$neMapName);
 
-        $map = MapHelper::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
+        $map = MapHelper::generateAndSave(self::$customMapName, '1980-01-02', '1991-02-03');
         $map->setUploadDate(new \DateTime());
 
         $referencedTerritory = ReferencedTerritoryHelper::buildAndCreate('A referenced territory');
@@ -164,7 +164,7 @@ class GeotimeTest extends MariaDbTestHelper {
     }
 
     function testUpdateMapInexisting() {
-        $map = MapHelper::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
+        $map = MapHelper::generateAndSave(self::$customMapName, '1980-01-02', '1991-02-03');
 
         ModelHelper::getEm()->persist($map);
         ModelHelper::getEm()->flush();
@@ -178,7 +178,7 @@ class GeotimeTest extends MariaDbTestHelper {
     }
 
     function testUpdateMap() {
-        $map = MapHelper::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
+        $map = MapHelper::generateAndSave(self::$customMapName, '1980-01-02', '1991-02-03');
         $map->setProjection('mercator');
 
         ModelHelper::getEm()->persist($map);
@@ -202,7 +202,7 @@ class GeotimeTest extends MariaDbTestHelper {
     }
 
     function testUpdateMapMissingData() {
-        $map = MapHelper::generateAndSaveReferences(self::$customMapName, '1980-01-02', '1991-02-03');
+        $map = MapHelper::generateAndSave(self::$customMapName, '1980-01-02', '1991-02-03');
         $map->setProjection('mercator');
 
         ModelHelper::getEm()->persist($map);
@@ -217,7 +217,7 @@ class GeotimeTest extends MariaDbTestHelper {
     }
 
     function testAddLocatedTerritory() {
-        $map = MapHelper::generateAndSaveReferences(self::$simpleMapName, '1980-01-02', '1991-02-03');
+        $map = MapHelper::generateAndSave(self::$simpleMapName, '1980-01-02', '1991-02-03');
         $map->setProjection('mercator');
         $map->setCenter(array(0,0));
         $map->setScale(700);

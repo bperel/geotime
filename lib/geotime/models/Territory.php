@@ -40,8 +40,8 @@ class Territory {
     var $endDate;
 
     /**
-     * @ManyToOne(targetEntity="Map", cascade={"persist"})
-     * @JoinColumn(name="map", referencedColumnName="id")
+     * @ManyToOne(targetEntity="Map", inversedBy="territories", cascade={"persist"})
+     * @JoinColumn(nullable=false, name="map", referencedColumnName="id")
      **/
     var $map;
 

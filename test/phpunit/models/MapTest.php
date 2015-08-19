@@ -29,7 +29,7 @@ class MapTest extends EntityTestHelper {
         $date2Str = '2013-07-15';
         $imageFileName = 'testImage.svg';
 
-        $map = MapHelper::generateAndSaveReferences($imageFileName, $date1Str, $date2Str);
+        $map = MapHelper::generateAndSave($imageFileName, $date1Str, $date2Str);
         $this->assertNotNull($map);
         $this->assertEquals($imageFileName, $map->getFileName());
 
@@ -43,7 +43,7 @@ class MapTest extends EntityTestHelper {
         $date2Str = '2013-07-15';
         $imageFileName = 'testImage.svg';
 
-        $map = MapHelper::generateAndSaveReferences($imageFileName, $date1Str, $date2Str);
+        $map = MapHelper::generateAndSave($imageFileName, $date1Str, $date2Str);
         $map->setUploadDate(new \DateTime());
 
         ModelHelper::getEm()->persist($map);

@@ -85,7 +85,8 @@ class TerritoryHelper extends AbstractEntityHelper
         if (!empty($xpath)) {
             $territory->setXpath($xpath);
         }
-        return self::save($territory);
+        $territory->setArea(self::calculateArea($territory));
+        return $territory;
     }
 
     /**
