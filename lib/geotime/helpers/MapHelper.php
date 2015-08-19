@@ -78,11 +78,10 @@ class MapHelper extends AbstractEntityHelper
         $imageMapUrlAndUploadDate = Import::instance()->getCommonsImageInfos($imageMapFullName);
 
         if (!is_null($imageMapUrlAndUploadDate)) {
-            $map = MapHelper::generateAndSaveWithTerritory($imageMapFullName, $territory);
-            $imageMapUrlAndUploadDate = Import::instance()->getCommonsImageInfos($map->getFileName());
-
             $imageMapUrl = $imageMapUrlAndUploadDate['url'];
             $imageMapUploadDate = $imageMapUrlAndUploadDate['uploadDate'];
+
+            $map = MapHelper::generateAndSaveWithTerritory($imageMapFullName, $territory);
             $success = Import::instance()->fetchAndStoreImage($map, $imageMapFullName, $imageMapUploadDate, $imageMapUrl);
             if ($success) {
                 return $map;
