@@ -293,13 +293,16 @@ class Import {
         // Check if map exists in DB
         // If the retrieved image upload date is the same as the stored map, we keep the map in DB
         if (!is_null($imageMapUploadDate)) {
-            if ($map->getUploadDate() === $imageMapUploadDate)
+            if (is_null($map->getUploadDate()))
             {
-                self::$log->info('SVG file is already in cache : '.$map->getFileName());
-                return false;
+                self::$log->info('SVG file is not in cache and will be retrieved : '.$map->getFileName());
+            }
+            else if ($map->getUploadDate() !== $imageMapUploadDate) {
+                self::$log->info('SVG file is already in cache but outdated, it will be retrieved again : ' . $map->getFileName());
             }
             else {
-                self::$log->info('SVG file is outdated and will be retrieved again : '.$map->getFileName());
+                self::$log->info('SVG file is already in cache and up-to-date : '.$map->getFileName());
+                return false;
             }
         }
         $svgRetrievalSuccess = null;

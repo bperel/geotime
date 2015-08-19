@@ -101,5 +101,17 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
         $success = Util::importFromJson(self::$fixtures_dir_json . '/nonexisting.json', function ($o) {});
         $this->assertFalse($success);
     }
+
+    public function testCreateDateTimeFromStringSimple() {
+        $this->assertEquals(new \DateTime('1234-01-01'), Util::createDateTimeFromString('1234'));
+        $this->assertEquals(new \DateTime('1500-02-01'), Util::createDateTimeFromString('1500-02'));
+        $this->assertEquals(new \DateTime('2000-01-01'), Util::createDateTimeFromString('2000-01-01'));
+    }
+
+    public function testCreateDateTimeFromStringOldDates() {
+        $this->assertEquals(new \DateTime('0123-01-01'), Util::createDateTimeFromString('123'));
+        $this->assertEquals(new \DateTime('-0246-01-01'), Util::createDateTimeFromString('-246'));
+        $this->assertEquals(new \DateTime('-0001-01-01'), Util::createDateTimeFromString('-1'));
+    }
 }
  

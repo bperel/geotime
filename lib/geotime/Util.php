@@ -230,6 +230,13 @@ class Util {
      */
     public static function createDateTimeFromString($str) {
         try {
+            $str = preg_replace_callback('#^(-)?([0-9]{1,4})(-[0-9]{2})?(-[0-9]{2})?$#', function($strDate) {
+               return
+                   $strDate[1]
+                  .str_pad($strDate[2], 4, '0', STR_PAD_LEFT)
+                   .(empty($strDate[3]) ? '-01' : $strDate[3])
+                   .(empty($strDate[4]) ? '-01' : $strDate[4]);
+            }, $str);
             return new \DateTime($str);
         }
         catch (\Exception $e) {
