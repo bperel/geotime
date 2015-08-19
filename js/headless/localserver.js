@@ -6,10 +6,10 @@ var workingDirectory = fs.workingDirectory.replace(/\//g, fs.separator);
 
 function create() {
     var serverCreated = server.listen(serverUrl, function (request, response) {
-        var cleanedUrl = request.url
+        var cleanedUrl = decodeURIComponent(request.url
             .replace(/\//g, fs.separator)
             .replace(/\?.*$/g, '')
-            .replace(/js\/js\//,'js/');
+            .replace(/js\/js\//,'js/'));
         //console.log('Requesting ' + request.url + ', loading ' + cleanedUrl);
         var pagePath = workingDirectory + cleanedUrl;
         var extension = pagePath.replace(/^.*\.(.*)$/,'$1');
