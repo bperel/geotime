@@ -158,12 +158,10 @@ class Geotime {
             ->setFirstResult($offset)
         ;
 
-        $query = $qb->getQuery();
-
-        $map = $query->getOneOrNullResult(AbstractQuery::HYDRATE_OBJECT);
+        $map = $qb->getQuery()->getOneOrNullResult(AbstractQuery::HYDRATE_SIMPLEOBJECT);
 
         if (!is_null($map)) {
-            $map->territories = $map->territories->toArray();
+            $map->territories = MapHelper::getTerritories($map);
         }
         return $map;
     }
