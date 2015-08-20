@@ -17,8 +17,11 @@ $object = new \stdClass();
 if (isset($_POST['getCoverage'])) {
     $object = Geotime::getCoverageInfo();
 }
-elseif (isset($_POST['getMaps'])) {
+elseif (isset($_POST['getMapsStats'])) {
     $object = Geotime::getMapsAndLocalizedTerritoriesCount(true);
+}
+elseif (isset($_POST['getMaps'])) {
+    $object = Geotime::getMaps();
 }
 elseif (isset($_POST['getImportedTerritories'])) {
     $object->count = Geotime::getImportedTerritoriesCount();
@@ -27,7 +30,7 @@ elseif (isset($_POST['getTerritories'])) {
     $object = Geotime::getReferencedTerritories(isset($_POST['startingWith']) ? $_POST['startingWith'] : null);
 }
 elseif (isset($_POST['getSvg'])) {
-    $object = Geotime::getIncompleteMapInfo();
+    $object = Geotime::getIncompleteMapInfo($_POST['fileName']);
 }
 elseif (isset($_POST['locateMap'])) {
     $mapId = $_POST['mapId'];

@@ -1,6 +1,6 @@
 function showMapData() {
     ajaxPost(
-        {getMaps: true},
+        {getMapsStats: true},
         function(error, data) {
             var gallery = $('#lightGallery');
             var thumbTemplate = gallery.find('li.template');
