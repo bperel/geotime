@@ -9,6 +9,7 @@ use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
 use geotime\helpers\TerritoryHelper;
+use geotime\models\mariadb\CalibrationPoint;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
@@ -227,10 +228,21 @@ class Geotime {
                 $map->setScale($mapScale);
             }
             if (!empty($calibrationPoints)) {
-                $calibrationPoints = array_map(function (&$calibrationPoint) {
-                    return CalibrationPointHelper::generateFromStrings(json_decode(json_encode($calibrationPoint)));
+                $newCalibrationPoints = array();
+                $calibrationPoints = array_map(function($calibrationPoint) {
+                    return json_decode(json_encode($calibrationPoint));
                 }, $calibrationPoints);
-                $map->setCalibrationPoints($calibrationPoints);
+                foreach($calibrationPoints as $calibrationPoint) {
+                    if (!array_key_exists($calibrationPoint->pointId, $newCalibrationPoints)) {
+                        $newCalibrationPoints[$calibrationPoint->pointId] = new CalibrationPoint();
+                    }
+                    CalibrationPointHelper::addCoordinatesForCalibrationPoint(
+                        $newCalibrationPoints[$calibrationPoint->pointId],
+                        $calibrationPoint->type,
+                        $calibrationPoint->coordinates
+                    );
+                }
+                $map->setCalibrationPoints($newCalibrationPoints);
             }
             if (!empty($mapProjection) && !empty($mapCenter) && !empty($mapScale)) {
                 ModelHelper::getEm()->persist($map);

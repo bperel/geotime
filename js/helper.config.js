@@ -173,7 +173,7 @@ function saveMapPosition() {
             rotation: projection.rotate(),
             scale: projection.scale(),
             projection: getSelectedProjection(),
-            calibrationPoints: calibrationPoints.map(removeBgMapProjectedCoordinates)
+            calibrationPoints: calibrationPoints
         };
         return d;
     };

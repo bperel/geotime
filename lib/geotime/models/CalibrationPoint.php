@@ -15,10 +15,14 @@ class CalibrationPoint {
      * @param $bgPoint CoordinateLatLng
      * @param $fgPoint CoordinateXY
      */
-    public function __construct($bgPoint, $fgPoint)
+    public function __construct($bgPoint = null, $fgPoint = null)
     {
-        $this->bgPoint  = $bgPoint;
-        $this->fgPoint = $fgPoint;
+        if (!is_null($bgPoint)) {
+            $this->bgPoint = $bgPoint;
+        }
+        if (!is_null($fgPoint)) {
+            $this->fgPoint = $fgPoint;
+        }
     }
 
     // @codeCoverageIgnoreStart

@@ -23,6 +23,19 @@ class CalibrationPointHelper
 
         return new CalibrationPoint($bgPointCoordinates, $fgPointCoordinates);
     }
+
+    /**
+     * @param $calibrationPoint CalibrationPoint
+     * @param $coordinates \stdClass
+     */
+    public static function addCoordinatesForCalibrationPoint(&$calibrationPoint, $type, $coordinates) {
+        if ($type === 'fgMap') {
+            $calibrationPoint->setFgPoint(new CoordinateXY($coordinates->x, $coordinates->y));
+        }
+        else if ($type === 'bgMap') {
+            $calibrationPoint->setBgPoint(new CoordinateLatLng($coordinates->lng, $coordinates->lat));
+        }
+    }
 }
 
 CalibrationPointHelper::$log = Logger::getLogger("main");
