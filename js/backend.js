@@ -7,7 +7,7 @@ function showMapData() {
             $.each(data, function(mapFileName, territoriesData) {
                 var thumb = thumbTemplate.clone(true).removeClass('template')
                     .attr({'data-src': '../cache/svg/'+mapFileName, 'data-html': mapFileName});
-                thumb.find('img').attr({src: '../cache/thumbnails/'+mapFileName+'.png'});
+                thumb.find('img').attr({src: '../cache/thumbnails/'+mapFileName+'.png', 'title': mapFileName});
                 thumbTemplate.after(thumb);
             });
             gallery.lightGallery();
