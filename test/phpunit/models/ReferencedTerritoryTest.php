@@ -94,4 +94,4 @@ class ReferencedTerritoryTest extends EntityTestHelper {
         $this->assertEquals(0, count($newReferencedTerritory->getNext()));
     }
 }
- 
+

@@ -55,4 +55,4 @@ class CalibrationPoint {
     }
     // @codeCoverageIgnoreEnd
 
-} 
+}

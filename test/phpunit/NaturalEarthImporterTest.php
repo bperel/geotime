@@ -87,4 +87,4 @@ class NaturalEarthImporterTest extends MariaDbTestHelper {
         $japan = TerritoryHelper::findOneByReferencedTerritoryId($referencedTerritoryJapan->getId());
         $this->assertEquals(12 + 37 + 16, $this->getCoordinatesCount($japan)); // Japan is made up, in the map, of 3 islands => 12 + 37 + 16 coordinates.
     }
-} 
+}

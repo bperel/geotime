@@ -114,4 +114,4 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(new \DateTime('-0001-01-01'), Util::createDateTimeFromString('-1'));
     }
 }
- 
+

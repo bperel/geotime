@@ -18,4 +18,4 @@ class DatabaseTest extends MariaDbTestHelper {
         }
     }
 }
- 
+
