@@ -121,6 +121,19 @@ class MapHelper extends AbstractEntityHelper
     }
 
     /**
+     * @param mixed $map
+     * @return \stdClass
+     */
+    public static function getTerritories($map)
+    {
+        $territories = $map->territories->toArray();
+        foreach($territories as $territory) {
+            unset($territory->map);
+        }
+        return $territories;
+    }
+
+    /**
      * @return object
      */
     public function __toSimplifiedObject() {

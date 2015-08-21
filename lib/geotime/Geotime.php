@@ -136,9 +136,29 @@ class Geotime {
     }
 
     /**
-     * @return \geotime\models\mariadb\Map|null
+     * @return \string[]
      */
-    public static function getIncompleteMapInfo()
+    public static function getMaps()
+    {
+        $qb = ModelHelper::getEm()->createQueryBuilder();
+        $qb
+            ->addSelect('map.fileName')
+            ->from(models\mariadb\Map::CLASSNAME,'map')
+            ->where(
+                $qb->expr()->isNotNull('map.uploadDate')
+            )
+            ->orderBy('map.fileName')
+        ;
+
+        return $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
+    }
+
+    /**
+     * @param string $fileName
+     * @return models\mariadb\Map|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public static function getIncompleteMapInfo($fileName = null)
     {
         //Get the number of rows of the table
         $rows = MapHelper::count(true);
@@ -150,17 +170,21 @@ class Geotime {
             ->from(models\mariadb\Map::CLASSNAME,'map')
             ->where(
                 $qb->expr()->isNotNull('map.uploadDate')
-            )
-            ->setMaxResults(1)
-            ->setFirstResult($offset)
-        ;
+            );
 
-        $query = $qb->getQuery();
+        if (!is_null($fileName)) {
+            $qb->andWhere($qb->expr()->eq('map.fileName', $qb->expr()->literal($fileName)));
+        }
+        else {
+            $qb
+                ->setMaxResults(1)
+                ->setFirstResult($offset);
+        }
 
-        $map = $query->getOneOrNullResult(AbstractQuery::HYDRATE_OBJECT);
+        $map = $qb->getQuery()->getOneOrNullResult(AbstractQuery::HYDRATE_SIMPLEOBJECT);
 
         if (!is_null($map)) {
-            $map->territories = $map->territories->toArray();
+            $map->territories = MapHelper::getTerritories($map);
         }
         return $map;
     }

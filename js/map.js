@@ -9,6 +9,7 @@ var hoveredTerritory;
 var selectedTerritory;
 
 var projectionSelection;
+var mapSelection;
 var dragAction;
 var dragMode = 'pan';
 
@@ -178,6 +179,21 @@ function initExternalSvgMap(mapFileName) {
 	isLoading = false;
 }
 
+function loadMaps() {
+	ajaxPost(
+		{ getMaps: 1 },
+		function(error, maps) {
+			mapSelection = d3.select('#maps');
+			mapSelection.selectAll('option')
+				.data(maps)
+				.enter().append('option')
+				.text(function (d) {
+					return d.fileName;
+				});
+		}
+	);
+}
+
 function loadTerritoryMapFromSvgElement(mapFileName, mapInfo) {
 	svgMap
 		.attr("name", mapFileName)
@@ -237,11 +253,11 @@ function loadTerritoryMap(fileName, mapInfo, contentFromFileSystem, callback) {
     }
 }
 
-function loadRandomTerritoryMap(noUi) {
+function loadRandomTerritoryMap(noUi, fileName) {
 	if (!isLoading) {
 		isLoading = true;
 		ajaxPost(
-			{ getSvg: 1 },
+			{ getSvg: 1, fileName: fileName },
 			function(error, incompleteMapInfo) {
 				if (!!incompleteMapInfo) {
 					loadTerritoryMap(incompleteMapInfo.fileName, incompleteMapInfo, false, noUi ? function() {} : loadUIConfig);

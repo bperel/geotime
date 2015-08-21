@@ -21,7 +21,8 @@ a {
     opacity: 0.5;
 }
 
-#loadRandomTerritoryMap {
+#loadRandomTerritoryMap,
+#selectMap {
     position: fixed;
     top: 0;
     right: 0;
