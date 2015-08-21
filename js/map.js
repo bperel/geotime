@@ -369,15 +369,7 @@ function validateTerritories(mapId, territoriesData) {
 			mapId: mapId,
 			territories: territoriesData
 
-        },
-		function(error) {
-			if (error) {
-				alert(error);
-			}
-			else {
-				location.reload();
-			}
-		}
+        }
 	);
 }
 

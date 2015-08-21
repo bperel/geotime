@@ -259,7 +259,7 @@ class Geotime {
      * @param $xpath string
      * @param $territoryPeriodStart string
      * @param $territoryPeriodEnd string
-     * @return null
+     * @return bool success
      */
     public static function saveLocatedTerritory($mapId, $territoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
     {
@@ -274,20 +274,23 @@ class Geotime {
             return null;
         }
 
-        $territory = TerritoryHelper::buildAndCreateWithReferencedTerritory(
+        $territory = TerritoryHelper::buildWithReferencedTerritory(
             $referencedTerritory, $territoryPeriodStart, $territoryPeriodEnd, $xpath
         );
         $geocoordinates = TerritoryHelper::calculateCoordinates($territory, $map);
 
         if (!is_null($geocoordinates)) {
             $territory->setPolygon(json_decode(json_encode(array(array($geocoordinates)))));
+            $territory->setMap($map);
             TerritoryHelper::save($territory);
 
             $map->addTerritory($territory);
             ModelHelper::getEm()->persist($map);
 
             ModelHelper::getEm()->flush();
+            return true;
         }
+        return false;
     }
 
     /**

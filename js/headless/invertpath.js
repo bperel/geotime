@@ -51,7 +51,7 @@ if (system.args.length < 7) {
 					scale: projectionScale,
 					rotation: projectionRotation
 				}, svgContent, function () {
-					return d3.select('svg path#' + pathId).getPathCoordinates();
+					return d3.select('svg path[id="' + pathId+'"]').getPathCoordinates();
 				});
 			}, system.args, fs.read(svgPath));
 
