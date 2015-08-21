@@ -13,9 +13,7 @@ class SparqlEndpointHelper extends AbstractEntityHelper
             $fileName = self::$cachePath;
         }
 
-        $tableName = self::getTableName();
-
-        Util::importFromJson($fileName, function ($object) use ($tableName) {
+        Util::importFromJson($fileName, function ($object) {
             $sparqlEndPoint = new SparqlEndpoint();
             $sparqlEndPoint->setName($object->name);
             $sparqlEndPoint->setRootUrl($object->rootUrl);

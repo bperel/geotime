@@ -56,4 +56,4 @@ class MapTest extends EntityTestHelper {
         $this->assertEquals(0, count($map->getTerritories()));
     }
 }
- 
+

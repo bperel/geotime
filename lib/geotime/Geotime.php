@@ -3,7 +3,6 @@
 namespace geotime;
 
 use Doctrine\ORM\AbstractQuery;
-use Doctrine\ORM\PersistentCollection;
 use geotime\helpers\CalibrationPointHelper;
 use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
@@ -46,8 +45,6 @@ class Geotime {
         }
 
         $query = $qb->getQuery();
-
-        $sql = $query->getSQL();
 
         /** @var models\mariadb\Map[] $maps */
         $mapsAndTerritoryInfo = $query->getResult();

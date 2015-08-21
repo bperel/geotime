@@ -32,4 +32,4 @@ class SparqlEndpointTest extends EntityTestHelper {
         $this->assertEquals(1, $count);
     }
 }
- 
+

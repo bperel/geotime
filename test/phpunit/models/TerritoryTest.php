@@ -75,4 +75,4 @@ class TerritoryTest extends EntityTestHelper {
         $this->assertEquals(0, TerritoryHelper::countForPeriod(new \DateTime('2006-01-02'),new \DateTime('2010-01-01')));
     }
 }
- 
+
