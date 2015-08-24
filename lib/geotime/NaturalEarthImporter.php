@@ -2,6 +2,7 @@
 
 namespace geotime;
 
+use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
 use geotime\helpers\TerritoryHelper;
@@ -67,6 +68,7 @@ class NaturalEarthImporter {
             $referencedTerritory = ReferencedTerritoryHelper::buildAndCreate($countryName);
             $t = TerritoryHelper::buildAndCreateFromNEData($referencedTerritory, $coordinates);
             $t->setMap($map);
+            TerritoryHelper::save($t);
             $territories[] = $t;
         }
 

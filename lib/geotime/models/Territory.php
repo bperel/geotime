@@ -200,4 +200,16 @@ class Territory {
         $this->map = $map;
     }
     // @codeCoverageIgnoreEnd
+    /**
+     * The __toString method allows a class to decide how it will react when it is converted to a string.
+     *
+     * @return string
+     * @link http://php.net/manual/en/language.oop5.magic.php#language.oop5.magic.tostring
+     */
+    function __toString()
+    {
+        return $this->getReferencedTerritory()->getName().' on map '.$this->getMap()->getFileName();
+    }
+
+
 }

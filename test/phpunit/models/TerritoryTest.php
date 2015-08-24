@@ -3,6 +3,7 @@
 namespace geotime\Test;
 
 use Doctrine\ORM\EntityRepository;
+use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\TerritoryHelper;
 use geotime\models\mariadb\ReferencedTerritory;
@@ -61,10 +62,15 @@ class TerritoryTest extends EntityTestHelper {
     }
 
     public function testCountForPeriod() {
+        $map = MapHelper::generateAndSave('map.svg', '1980-01-02', '1991-02-03');
+
+
         $territory = new Territory(null, true, null, 0, null, new \DateTime('2000-01-01'), new \DateTime('2004-12-31'));
+        $territory->setMap($map);
         ModelHelper::getEm()->persist($territory);
 
         $territory2 = new Territory(null, true, null, 0, null, new \DateTime('2003-01-01'), new \DateTime('2006-01-01'));
+        $territory2->setMap($map);
         ModelHelper::getEm()->persist($territory2);
 
         ModelHelper::getEm()->flush();
