@@ -72,7 +72,7 @@ class MapHelper extends AbstractEntityHelper
      * @param $territory Territory
      * @return false|Map Returns FALSE if an error occurred while retrieving the SVG image
      */
-    public static function buildAndSaveFromObject($mapFileName, $territory)
+    public static function buildAndSaveWithTerritoryFromObject($mapFileName, $territory)
     {
         $imageMapFullName = Util::cleanupImageName($mapFileName);
         $imageMapUrlAndUploadDate = Import::instance()->getCommonsImageInfos($imageMapFullName);

@@ -31,7 +31,10 @@ class ImportTest extends MariaDbTestHelper {
         Util::$cache_dir_json = "test/phpunit/cache/json/";
         Util::$data_dir_sparql = "test/phpunit/_fixtures/sparql/";
 
-        copy("test/phpunit/_fixtures/json/Former Empires.json", Util::$cache_dir_json."Former Empires.json");
+        $jsonsToCopy = array('Former Empires.json', 'Former Empires with previous and next.json', 'Former countries in Europe.json' );
+        foreach($jsonsToCopy as $jsonToCopy) {
+            copy("test/phpunit/_fixtures/json/$jsonToCopy", Util::$cache_dir_json.$jsonToCopy);
+        }
     }
 
     static function tearDownAfterClass() {
@@ -45,8 +48,10 @@ class ImportTest extends MariaDbTestHelper {
         parent::setUp();
 
         $this->mock = $this->getMockBuilder('geotime\Import')
-            ->setMethods(array('getCommonsImageXMLInfo', 'getSparqlQueryResultsFromQuery'))
+            ->setMethods(array('getCommonsImageXMLInfo', 'getSparqlQueryResultsFromQuery','isSvgToBeDownloaded'))
             ->getMock();
+
+        Import::$instance = $this->mock;
 
         $this->import = new Import();
 
@@ -63,20 +68,18 @@ class ImportTest extends MariaDbTestHelper {
             ->will($this->returnValue($response));
     }
 
-    private function setFetchSvgUrlsFixture() {
-        $urls = json_decode(file_get_contents('test/phpunit/_fixtures/urls.json'));
-
-        $this->mock->expects($this->any())
-            ->method('getCommonsURLs')
-            ->will($this->returnValue($urls));
-    }
-
     private function setSparqlJsonFixture($fixtureFilename) {
         $response = file_get_contents('test/phpunit/_fixtures/json/'.$fixtureFilename);
 
         $this->mock->expects($this->any())
             ->method('getSparqlQueryResultsFromQuery')
             ->will($this->returnValue($response));
+    }
+
+    private function setIsSvgToBeDownloadedFixture() {
+        $this->mock->expects($this->any())
+            ->method('isSvgToBeDownloaded')
+            ->will($this->returnValue(false));
     }
 
     /* Util methods for tests */
@@ -100,10 +103,6 @@ class ImportTest extends MariaDbTestHelper {
 
     /* Tests */
 
-    public function testGetInstance() {
-        $this->assertEquals(new Import(), Import::instance());
-    }
-
     public function testGetSparqlHttpParametersWithQuery() {
         $parameters = array(
             array('test' => 'value'),
@@ -117,63 +116,12 @@ class ImportTest extends MariaDbTestHelper {
         );
         $this->assertEquals($expectedParametersWithQuery, $parametersWithQuery);
     }
-/*
-    public function testGetMapsFromSparqlQueryCachedJson() {
-        $sparqlQuery = file_get_contents(Util::$data_dir_sparql.'Former Empires.sparql');
 
-        $maps = $this->mock->storeMapsFromSparqlQuery(
-            $sparqlQuery,
-            Util::$cache_dir_json."Former Empires.json"
-        );
-
-        $this->assertEquals(2, count($maps));
-    }
-
-    public function testGetMapsFromSparqlQueryExistingMap() {
-        $sparqlQuery = file_get_contents(Util::$data_dir_sparql.'Former Empires.sparql');
-
-        $this->setSparqlJsonFixture('Former Empires.json');
-
-        $this->generateAndSaveSampleMap('German Empire 1914.svg', new \DateTime());
-
-        $maps = $this->mock->storeMapsFromSparqlQuery($sparqlQuery);
-        $this->assertEquals(2, count($maps));
-
-        //   The first map already exists, that's why its ID is not null
-        $firstMap = $maps[key($maps)];
-        $this->assertNotNull($firstMap->getId());
-    }
-
-    public function testGetMapsFromSparqlQuery() {
-        $sparqlQuery = file_get_contents(Util::$data_dir_sparql.'Former Empires.sparql');
-
-        $this->setSparqlJsonFixture('Former Empires.json');
-        $this->setFetchSvgUrlsFixture();
-
-        $maps = $this->mock->storeMapsFromSparqlQuery($sparqlQuery);
-        $this->assertEquals(2, count($maps));
-
-        $firstMap = current($maps);
-        $this->assertNull($firstMap->getId());
-        $this->assertEquals('German Empire 1914.svg', $firstMap->getFileName());
-        $this->assertEquals(1, count($firstMap->getTerritories()));
-
-        $territories = $firstMap->getTerritories();
-        $this->assertEquals(new \DateTime('1871-01-18'), $territories[0]->getStartDate());
-        $this->assertEquals(new \DateTime('1918-11-18'), $territories[0]->getEndDate());
-
-        $secondMap = next($maps);
-        $this->assertNull($secondMap->getId());
-        $this->assertEquals('Frankish Empire 481 to 814-en.svg', $secondMap->getFileName());
-        $this->assertEquals(1, count($secondMap->getTerritories()));
-
-        $territories = $secondMap->getTerritories();
-        $this->assertEquals(new \DateTime('0003-01-01T00:00:00+02:00'), $territories[0]->getStartDate());
-        $this->assertEquals(new \DateTime('0843-01-01T00:00:00+02:00'), $territories[0]->getEndDate());
-    }
-*/
     public function testStoreTerritoriesFromSparqlQuery()
     {
+        $this->setCommonsXMLFixture('Wiki-commons.png.xml');
+        $this->setIsSvgToBeDownloadedFixture();
+
         $sparqlQuery = file_get_contents(Util::$data_dir_sparql.'Former Empires.sparql');
         $this->setSparqlJsonFixture('Former countries in Europe.json');
 
@@ -181,10 +129,14 @@ class ImportTest extends MariaDbTestHelper {
         $this->assertEquals(1, count($territories));
 
         $this->assertEquals(1, TerritoryHelper::count());
+        $this->assertEquals(1, MapHelper::count());
     }
 
     public function testGetAlreadyExistingTerritoriesFromSparqlQuery()
     {
+        $this->setCommonsXMLFixture('Wiki-commons.png.xml');
+        $this->setIsSvgToBeDownloadedFixture();
+
         $sparqlQuery = file_get_contents(Util::$data_dir_sparql.'Former Empires.sparql');
         $this->setSparqlJsonFixture('Former countries in Europe.json');
 
@@ -309,9 +261,10 @@ class ImportTest extends MariaDbTestHelper {
     public function testImportTerritoriesFromSparqlQuery() {
         $resultFile = 'Former Empires with previous and next.json';
         $this->setSparqlJsonFixture($resultFile);
+        $this->setCommonsXMLFixture('Wiki-commons.png.xml');
         $this->mock->importReferencedTerritoriesFromQuery($resultFile.'.sparql', $resultFile, true);
 
-        $this->assertEquals(12, ReferencedTerritoryHelper::count());
+        $this->assertEquals(11, ReferencedTerritoryHelper::count());
 
         /** @var Territory[] $initialTerritories */
         $initialTerritories = TerritoryHelper::findWithPeriod();

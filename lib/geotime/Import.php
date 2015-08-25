@@ -8,6 +8,7 @@ use geotime\helpers\ModelHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
 use geotime\helpers\SparqlEndpointHelper;
 use geotime\helpers\TerritoryHelper;
+use geotime\models\mariadb\Map;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
@@ -18,6 +19,9 @@ class Import {
 
     /** @var \Logger */
     static $log;
+
+    /** @var Import */
+    static $instance = null;
 
     static $sparqlEndpoints = array(
         'dbpedia' => array(
@@ -30,7 +34,10 @@ class Import {
      * @return Import
      */
     public static function instance() {
-        return new Import();
+        if (is_null(self::$instance)) {
+            self::$instance = new Import();
+        }
+        return self::$instance;
     }
 
     function importReferencedTerritories($contentName, $useCachedJson = true) {
@@ -179,7 +186,7 @@ class Import {
 
             if (is_null(ReferencedTerritoryHelper::findOneByName($territoryName)) || in_array($territoryName, $territories)) {
                 $referencedTerritory = ReferencedTerritoryHelper::buildAndSaveFromObject($result);
-                $territory = TerritoryHelper::buildAndSaveFromObjectAndReferencedTerritory($referencedTerritory, $result);
+                $territory = TerritoryHelper::buildFromObjectAndReferencedTerritory($referencedTerritory, $result);
                 $territories[] = $territoryName;
 
                 if (isset($result->imageMap)) {
@@ -187,7 +194,7 @@ class Import {
                     if (Util::isSvg($mapFileName)) {
                         $map = MapHelper::findOneByFileName($mapFileName, $maps);
                         if (is_null($map)) {
-                            $map = MapHelper::buildAndSaveFromObject($mapFileName, $territory);
+                            $map = MapHelper::buildAndSaveWithTerritoryFromObject($mapFileName, $territory);
                             $maps[$mapFileName] = $map;
                         }
                         else if ($map !== false) { // If FALSE, an error occurred for this map
@@ -283,6 +290,26 @@ class Import {
     }
 
     /**
+     * @param $imageUploadDate \DateTime
+     * @param $existingMap Map
+     * @return bool
+     */
+    function isSvgToBeDownloaded($imageUploadDate, $existingMap) {
+        if (is_null($existingMap->getUploadDate())) {
+            self::$log->info('SVG file is not in cache and will be retrieved : '.$existingMap->getFileName());
+            return true;
+        }
+        else if ($existingMap->getUploadDate() !== $imageUploadDate) {
+            self::$log->info('SVG file is already in cache but outdated, it will be retrieved again : ' . $existingMap->getFileName());
+            return true;
+        }
+        else {
+            self::$log->info('SVG file is already in cache and up-to-date : '.$existingMap->getFileName());
+            return false;
+        }
+    }
+
+    /**
      * @param \geotime\models\mariadb\Map $map
      * @param string $imageMapFullName
      * @param \DateTime $imageMapUploadDate
@@ -293,15 +320,7 @@ class Import {
         // Check if map exists in DB
         // If the retrieved image upload date is the same as the stored map, we keep the map in DB
         if (!is_null($imageMapUploadDate)) {
-            if (is_null($map->getUploadDate()))
-            {
-                self::$log->info('SVG file is not in cache and will be retrieved : '.$map->getFileName());
-            }
-            else if ($map->getUploadDate() !== $imageMapUploadDate) {
-                self::$log->info('SVG file is already in cache but outdated, it will be retrieved again : ' . $map->getFileName());
-            }
-            else {
-                self::$log->info('SVG file is already in cache and up-to-date : '.$map->getFileName());
+            if (!$this->isSvgToBeDownloaded($imageMapUploadDate, $map)) {
                 return false;
             }
         }

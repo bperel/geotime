@@ -36,6 +36,11 @@
                 "next": {
                     "type": "literal",
                     "value": "Aghlabids|Emirate of Cordoba|Fatimid Caliphate|Mongol Empire|Tahirid dynasty"
+                },
+                "imageMap": {
+                    "type": "literal",
+                    "xml:lang": "en",
+                    "value": "Abbasids850.svg"
                 }
             },
             {
@@ -61,6 +66,11 @@
                 "next": {
                     "type": "literal",
                     "value": "Mongol Empire"
+                },
+                "imageMap": {
+                    "type": "literal",
+                    "xml:lang": "en",
+                    "value": "Alania 10 12.svg"
                 }
             }
         ]

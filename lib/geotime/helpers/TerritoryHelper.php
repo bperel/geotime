@@ -29,7 +29,7 @@ class TerritoryHelper extends AbstractEntityHelper
      * @param $object \stdClass
      * @return Territory
      */
-    public static function buildAndSaveFromObjectAndReferencedTerritory($referencedTerritory, $object) {
+    public static function buildFromObjectAndReferencedTerritory($referencedTerritory, $object) {
         $fields = array(
             'startDate' => 'date1',
             'endDate' => 'date2'

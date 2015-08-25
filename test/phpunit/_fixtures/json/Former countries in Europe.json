@@ -19,7 +19,12 @@
                     "type": "literal",
                     "xml:lang": "en",
                     "value": "Corsican Republic"
-                }
+                },
+                "imageMap": {
+				  	"type": "literal",
+				  	"xml:lang": "en",
+				  	"value": "Corsica 1757.svg"
+				}
             }
         ]
     }

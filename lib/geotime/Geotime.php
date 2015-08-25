@@ -163,7 +163,7 @@ class Geotime {
     {
         //Get the number of rows of the table
         $rows = MapHelper::count(true);
-        $offset = max(0, rand(0, $rows));
+        $offset = max(0, rand(0, $rows-1));
 
         $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb
