@@ -30,9 +30,11 @@
                     });
                 });
                 d3.select('#loadRandomTerritoryMap').on('click', loadTerritoryMap);
-                d3.select('#loadTerritoryMap').on('click', function() {
+                d3.select('#maps').on('change', function() {
                     var selectedMapFileName = d3.select(mapSelection.node().options[mapSelection.node().selectedIndex]).datum().fileName;
-                    loadTerritoryMap(false, selectedMapFileName);
+                    if (selectedMapFileName !== null) {
+                        loadTerritoryMap(false, selectedMapFileName);
+                    }
                 });
             };
         </script>
@@ -43,7 +45,7 @@
         <div id="map-placeholders"></div>
         <!--<a href="javascript:void(0)" id="loadTerritoryMap">Load a random territory</a>-->
         <div id="selectMap">
-            <select id="maps"></select>&nbsp;<a href="javascript:void(0)" id="loadTerritoryMap">Load map</a>
+            <select id="maps"></select>
         </div>
     </body>
 </html>

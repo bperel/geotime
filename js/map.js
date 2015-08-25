@@ -183,12 +183,14 @@ function loadMaps() {
 	ajaxPost(
 		{ getMaps: 1 },
 		function(error, maps) {
+			maps.unshift({fileName: null});
+
 			mapSelection = d3.select('#maps');
 			mapSelection.selectAll('option')
 				.data(maps)
 				.enter().append('option')
 				.text(function (d) {
-					return d.fileName;
+					return d.fileName || 'Select a map';
 				});
 		}
 	);
