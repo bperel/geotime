@@ -1,14 +1,16 @@
 requirejs.config({
-	urlArgs: "v=" + (new Date()).getTime(),
 	"paths": {
-		"js": "js"
+		"jquery": "vendor/jquery/dist/jquery.min",
+		"bootstrap.min": "vendor/bootstrap/dist/js/bootstrap.min",
+		"d3": "vendor/d3/d3.min"
 	},
 	"shim": {
-		"d3.xpath": ["vendor/d3/d3.min"],
-		"helper": ["vendor/d3/d3.min"],
+		"d3.xpath": ["d3"],
+		"helper": ["d3"],
 		"helper.config.calibration": ["helper"],
-		"util": ["vendor/d3/d3.min"],
-		"map": ["vendor/d3/d3.min"]
+		"util": ["d3"],
+		"map": ["d3"],
+		"bootstrap.min": ["jquery"]
 	}
 });
 

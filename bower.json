@@ -1,32 +1,33 @@
 {
-    "name": "geotime",
-    "version": "0.1.0",
-    "homepage": "https://github.com/bperel/geotime",
-    "authors": [
-        "Bruno Pérel <brunoperel@gmail.com>"
-    ],
-    "description": "Kingdoms though time.",
-    "moduleType": [
-        "globals"
-    ],
-    "license": "CC-BY-SA-2.0",
-    "private": true,
-    "ignore": [
-        "**/.*",
-        "node_modules",
-        "bower_components",
-        "test",
-        "tests"
-    ],
-    "dependencies": {
-        "d3": "~3.5.5",
-        "jquery": "~2.1.1",
-        "lightgallery": "~1.1.4",
-        "modernizr": "~2.6.2",
-        "topojson": "~1.5.1",
-        "requirejs": "~2.1.15"
-    },
-    "devDependencies": {
-        "socket.io-client-fixed": "~1.2.1"
-    }
+  "name": "geotime",
+  "version": "0.1.0",
+  "homepage": "https://github.com/bperel/geotime",
+  "authors": [
+    "Bruno Pérel <brunoperel@gmail.com>"
+  ],
+  "description": "Kingdoms though time.",
+  "moduleType": [
+    "globals"
+  ],
+  "license": "CC-BY-SA-2.0",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "~3.5.5",
+    "jquery": "~2.1.1",
+    "lightgallery": "~1.1.4",
+    "modernizr": "~2.6.2",
+    "topojson": "~1.5.1",
+    "requirejs": "~2.1.15"
+  },
+  "devDependencies": {
+    "socket.io-client-fixed": "~1.2.1",
+    "bootstrap": "~3.3.5"
+  }
 }
