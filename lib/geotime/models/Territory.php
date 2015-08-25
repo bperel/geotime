@@ -16,7 +16,7 @@ class Territory {
     var $id;
 
     /**
-     * @ManyToOne(targetEntity="ReferencedTerritory")
+     * @ManyToOne(targetEntity="ReferencedTerritory", fetch="EAGER")
      * @JoinColumn(name="referenced_territory", referencedColumnName="id")
      **/
     var $referencedTerritory;

@@ -273,7 +273,7 @@ function showLocatedTerritories() {
 }
 
 function checkSelectedTerritory() {
-	var isSelectedTerritory = !svgMap.select('path.selected').empty();
+	var isSelectedTerritory = locatedTerritories.length;
 	if (!isSelectedTerritory) {
 		alert('No territory has been selected');
 	}

@@ -44,7 +44,7 @@ if (system.args.length < 7) {
 					.rotate(projectionRotation)
 					.precision(.01);
 
-				return loadTerritoryMap(svgFileName, {
+				return loadTerritoryMapData(svgFileName, {
 					id: 'externalSvg',
 					projection: projectionName,
 					center: projectionCenter,

@@ -80,7 +80,7 @@ describe('Map tests', function() {
 
         it('should load', function() {
             initProjectionSelect([{name: 'mercator'}]);
-            loadRandomTerritoryMap(true);
+            loadTerritoryMap(true);
 
             var bgWidth = width;
             var bgHeight = mapHeight;

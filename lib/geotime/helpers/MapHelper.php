@@ -127,6 +127,7 @@ class MapHelper extends AbstractEntityHelper
     public static function getTerritories($map)
     {
         $territories = $map->territories->toArray();
+        /** @var Territory $territory */
         foreach($territories as $territory) {
             unset($territory->map);
         }

@@ -29,10 +29,10 @@
                         loadMaps();
                     });
                 });
-                d3.select('#loadRandomTerritoryMap').on('click', loadRandomTerritoryMap);
+                d3.select('#loadRandomTerritoryMap').on('click', loadTerritoryMap);
                 d3.select('#loadTerritoryMap').on('click', function() {
                     var selectedMapFileName = d3.select(mapSelection.node().options[mapSelection.node().selectedIndex]).datum().fileName;
-                    loadRandomTerritoryMap(false, selectedMapFileName);
+                    loadTerritoryMap(false, selectedMapFileName);
                 });
             };
         </script>
@@ -41,7 +41,7 @@
     </head>
     <body>
         <div id="map-placeholders"></div>
-        <!--<a href="javascript:void(0)" id="loadRandomTerritoryMap">Load a random territory</a>-->
+        <!--<a href="javascript:void(0)" id="loadTerritoryMap">Load a random territory</a>-->
         <div id="selectMap">
             <select id="maps"></select>&nbsp;<a href="javascript:void(0)" id="loadTerritoryMap">Load map</a>
         </div>

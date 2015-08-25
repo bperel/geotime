@@ -228,7 +228,7 @@ function loadTerritoryMapFromSvgElement(mapFileName, mapInfo) {
 	}
 }
 
-function loadTerritoryMap(fileName, mapInfo, contentFromFileSystem, callback) {
+function loadTerritoryMapData(fileName, mapInfo, contentFromFileSystem, callback) {
 	var mapFileName = fileName;
 	if (mapFileName) {
 		if (!svgMap || svgMap.datum().fileName !== mapFileName) {
@@ -253,14 +253,14 @@ function loadTerritoryMap(fileName, mapInfo, contentFromFileSystem, callback) {
     }
 }
 
-function loadRandomTerritoryMap(noUi, fileName) {
+function loadTerritoryMap(noUi, fileName) {
 	if (!isLoading) {
 		isLoading = true;
 		ajaxPost(
 			{ getSvg: 1, fileName: fileName },
 			function(error, incompleteMapInfo) {
 				if (!!incompleteMapInfo) {
-					loadTerritoryMap(incompleteMapInfo.fileName, incompleteMapInfo, false, noUi ? function() {} : loadUIConfig);
+					loadTerritoryMapData(incompleteMapInfo.fileName, incompleteMapInfo, false, noUi ? function() {} : loadUIConfig);
 					initHelper(incompleteMapInfo.fileName, helperStepsData);
 				}
 				isLoading = false;
@@ -368,8 +368,15 @@ function validateTerritories(mapId, territoriesData) {
 			addTerritories: 1,
 			mapId: mapId,
 			territories: territoriesData
-
-        }
+        },
+		function(error) {
+			if (error) {
+				alert(error);
+			}
+			else {
+				alert('Done');
+			}
+		}
 	);
 }
 

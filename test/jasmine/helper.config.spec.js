@@ -74,7 +74,7 @@ describe('Calibration tests', function() {
         it('should add a calibration point when clicking on a map', function() {
             var markerRadius = 9;
 
-            loadRandomTerritoryMap(true);
+            loadTerritoryMap(true);
 
             var calibrationPointsTexts = d3.select('#calibrationPoints').selectAll('.calibrationPoint');
 
@@ -119,7 +119,7 @@ describe('Calibration tests', function() {
         });
 
         it('should remove a calibration point when clicking on the "Remove point" link', function() {
-            loadRandomTerritoryMap(true);
+            loadTerritoryMap(true);
             enableCalibrationPointSelection();
 
             var clickedPoint = {x: width/2, y: mapHeight/2 +10};
