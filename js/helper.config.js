@@ -14,8 +14,18 @@ function loadHelperConfig() {
 		}
 	];
 
+	helperProcessesData = [
+		{
+			name: 'mapLocation',
+			default: true
+		}, {
+			name: 'territoryIdentification'
+		}
+	];
+
 	helperStepsData = [
 		{
+			process: 'mapLocation',
 			step: 1, content: ['Select at least 4 points on the maps.',
 							   'Click on the background map to add a point, then click on the foreground map at the corresponding location.' +
                                '<br /><span id="calibrationPointsLength">0</span>&nbsp;<label for="calibrationPointsLength">selected points.</label>'
@@ -26,12 +36,14 @@ function loadHelperConfig() {
 			dataUpdate: saveMapProjection,
 			buttons: ['done', 'skip', 'cancel']
 		}, {
+			process: 'mapLocation',
 			step: 2, content: ['If necessary, move the superimposed map so that it corresponds to the background borders.'],
 			onLoad: [enableMapDragResize],
 			dataUpdate: saveMapPosition,
 			onUnload: [disableMapDragResize, persistMapLocation],
 			buttons: ['done', 'skip', 'cancel']
 		}, {
+			process: 'territoryIdentification',
 			step: 3, content: ['Locate territories.',
 							   'Located territories : <span id="locatedTerritoriesNumber"></span>' +
                                '<div id="locatedTerritories"></div>' +

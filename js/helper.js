@@ -2,6 +2,7 @@ var helper = d3.select('nothing');
 var helperButtonsData = [];
 var helperSteps;
 var helperStepsData = [];
+var helperProcessesData = [];
 var resizeHandle;
 var territoryId;
 var territoryName;
@@ -22,13 +23,20 @@ function initHelper(mapFileName, helperStepsData) {
 	helper = d3.select("#mapHelper")
 		.datum({ activeStep: 0});
 
-	helperSteps = helper.select('ul').selectAll('.helperStep');
+	helper.select('#processTabs').selectAll('li')
+		.data(helperProcessesData).enter().append('li')
+			.classed('active', function(d) { return d.default; })
+				.append('a')
+					.attr('href', '#')
+					.html(function(d) { return d.name});
+
+	helperSteps = helper.select('ul#helperStepsContainer').selectAll('.helperStep');
 	helperSteps.data(helperStepsData).enter().append('li')
 		.classed('helperStep', true)
 		.html(function(d) { return '<div>'+d.content[0]+'</div><div class="if-active">'+ d.content.slice(1)+'</div>'; });
 
 	// Refresh with the created elements
-	helperSteps = helper.select('ul').selectAll('.helperStep');
+	helperSteps = helper.select('ul#helperStepsContainer').selectAll('.helperStep');
 }
 
 function activateHelperNextStep(stepElement, skipUnloadAction) {
@@ -72,7 +80,7 @@ function activateHelperNextStep(stepElement, skipUnloadAction) {
 					});
 				})
 				.attr('class', function (d) {
-					return d.cssClass;
+					return ['btn', 'btn-default', d.cssClass].join(' ');
 				})
 				.text(function (d) {
 					return d.text;
