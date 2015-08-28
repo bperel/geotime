@@ -126,26 +126,34 @@ class Util {
     }
 
     /**
-     * @param $svgFileName
-     * @param $pathId
-     * @param $projectionName
-     * @param $projectionCenter
-     * @param $projectionScale
-     * @param $projectionRotation
+     * @param $svgFileName string
+     * @param $pathId string
+     * @param $projectionName string
+     * @param $projectionCenter integer[]
+     * @param $projectionScale integer
+     * @param $projectionRotation integer[]
      * @return array|null
      */
     static function calculatePathCoordinates($svgFileName, $pathId, $projectionName, $projectionCenter, $projectionScale, $projectionRotation) {
-        $command = implode(' ', array(
-            "'".self::getPhantomJsPath()."'",
-            "'".self::$invertpath_script_path."'",
-            "'".self::$cache_dir_svg.$svgFileName."'",
-            "'".$pathId."'",
-            $projectionName,
-            implode(',',$projectionCenter),
-            $projectionScale,
-            implode(',',$projectionRotation),
-            '2>&1'
-        ));
+        $command = implode(' ',
+            array_merge(
+                array_map(
+                    function($argument) { return '"'.$argument.'"'; },
+                    array(
+                        self::getPhantomJsPath(),
+                        self::$invertpath_script_path,
+                        self::$cache_dir_svg.$svgFileName,
+                        $pathId
+                    )
+                ), array(
+                    $projectionName,
+                    implode(',',$projectionCenter),
+                    $projectionScale,
+                    implode(',',$projectionRotation),
+                    '2>&1'
+                )
+            )
+        );
         $result = shell_exec($command);
         return json_decode($result);
     }

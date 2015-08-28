@@ -172,11 +172,11 @@ class GeotimeTest extends MariaDbTestHelper {
         ModelHelper::getEm()->persist($this->map);
         ModelHelper::getEm()->flush();
 
-        $this->mapId = $this->map->getId();
+        $mapId = $this->map->getId();
 
-        MapHelper::delete($this->mapId);
+        MapHelper::delete($mapId);
 
-        $updatedMap = Geotime::updateMap($this->mapId, 'mercator', array('0', '0', '0'), array(array('0', '10')), 200);
+        $updatedMap = Geotime::updateMap($mapId, 'mercator', array('0', '0', '0'), array(array('0', '10')), 200);
         $this->assertNull($updatedMap);
     }
 
@@ -187,10 +187,10 @@ class GeotimeTest extends MariaDbTestHelper {
         ModelHelper::getEm()->persist($this->map);
         ModelHelper::getEm()->flush();
 
-        $this->mapId = $this->map->getId();
+        $mapId = $this->map->getId();
 
         $updatedMap = Geotime::updateMap(
-            $this->mapId, 'mercator2', array('10', '20', '30'), array('5', '5'), 200,
+            $mapId, 'mercator2', array('10', '20', '30'), array('5', '5'), 200,
             array(
                 array('pointId' => 0,
                       'type' => 'bgMap',
@@ -219,9 +219,9 @@ class GeotimeTest extends MariaDbTestHelper {
         ModelHelper::getEm()->persist($this->map);
         ModelHelper::getEm()->flush();
 
-        $this->mapId = $this->map->getId();
+        $mapId = $this->map->getId();
 
-        $updatedMap = Geotime::updateMap($this->mapId, null);
+        $updatedMap = Geotime::updateMap($mapId, null);
         $this->assertNotNull($updatedMap);
         $this->assertEquals($updatedMap->getFileName(), $this->map->getFileName());
         $this->assertEquals($updatedMap->getProjection(), $this->map->getProjection());
@@ -237,7 +237,7 @@ class GeotimeTest extends MariaDbTestHelper {
         ModelHelper::getEm()->persist($this->map);
         ModelHelper::getEm()->flush();
 
-        $this->mapId = $this->map->getId();
+        $mapId = $this->map->getId();
 
         $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
 
@@ -245,7 +245,7 @@ class GeotimeTest extends MariaDbTestHelper {
         $territoryPeriodStart = '1980-01-02';
         $territoryPeriodEnd = '1991-04-06';
 
-        Geotime::saveLocatedTerritory($this->mapId, $referencedTerritory->getId(), $xpath, $territoryPeriodStart, $territoryPeriodEnd);
+        Geotime::saveLocatedTerritory($mapId, $referencedTerritory->getId(), $xpath, $territoryPeriodStart, $territoryPeriodEnd);
 
         $createdTerritory = TerritoryHelper::findOneByXpath($xpath);
         $this->assertNotEmpty($createdTerritory);
@@ -256,9 +256,9 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertEquals(new \DateTime($territoryPeriodEnd), $createdTerritory->getEndDate());
         $this->assertGreaterThan(0, $createdTerritory->getArea());
 
-        /** @var Map $this->mapWithTerritory */
-        $this->mapWithTerritory = MapHelper::find($this->mapId);
-        $this->assertEquals(count($this->mapWithTerritory->getTerritories()), 1);
+        /** @var Map $mapWithTerritory */
+        $mapWithTerritory = MapHelper::find($mapId);
+        $this->assertEquals(count($mapWithTerritory->getTerritories()), 1);
 
         $this->assertEquals(Geotime::getImportedTerritoriesCount(), 3);
     }
