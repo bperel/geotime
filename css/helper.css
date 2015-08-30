@@ -12,14 +12,17 @@
 }
 
 #mapHelper {
-    position: fixed;
+    position: absolute;
     right: 0;
     top: 50px;
+    bottom: 50px;
+    width: 500px;
     padding: 5px;
     background: white;
     border: 1px solid black;
     font-size: 12px;
     text-align: left;
+    overflow: auto;
 }
 
 #mapHelper #mapTitle {
@@ -82,6 +85,7 @@
 .helperStep .removeLocatedTerritory {
     cursor: pointer;
     color: red;
+    float: right;
 }
 
 .helperStep #territoryId {
