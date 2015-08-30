@@ -29,7 +29,7 @@ function loadHelperConfig() {
 			process: 'mapLocation',
 			step: 1, content: ['Select at least 4 points on the maps.',
 							   'Click on the background map to add a point, then click on the foreground map at the corresponding location.' +
-                               '<br /><span class="badge" id="calibrationPointsLength">0</span>&nbsp;<label for="calibrationPointsLength">selected points.</label>'
+                               '<br /><span class="badge" id="calibrationPointsLength">0</span><label for="calibrationPointsLength">selected points.</label>'
 							  +'<ul class="list-group" id="calibrationPoints"></ul>'],
 			onLoad: [enableCalibrationPointSelection],
 			validate: checkCalibrationPoints,
@@ -111,6 +111,21 @@ function addCalibrationPoint(mapType, clickedPoint) {
 	showCalibrationPoints();
 }
 
+function removeCalibrationPoint(d, pointId) {
+	var toDelete = [];
+	calibrationPoints.forEach(function(calibrationPoint, i) {
+		if (calibrationPoint.pointId === pointId) {
+			toDelete.push(i);
+		}
+	});
+	toDelete.reverse().forEach(function(calibrationPointIndex) {
+		calibrationPoints.splice(calibrationPointIndex, 1);
+	});
+
+	showCalibrationPoints();
+	markersSvg.repositionCalibrationMarkers();
+}
+
 function showCalibrationPoints() {
 	var groupedCalibrationPoints = getGroupedCalibrationPoints();
 
@@ -118,29 +133,36 @@ function showCalibrationPoints() {
 	calibrationPointsElements.enter().append('li').classed({calibrationPoint: true, 'list-group-item': true});
 
 	calibrationPointsElements
-		.html(function (d) {
-			var textParts = [];
-			if (d.bgMap) { textParts.push('<button class="btn btn-default" type="button"><span class="badge">Background point</span>&nbsp;'+JSON.stringify(d.bgMap)+'</button>'); }
-			if (d.fgMap) { textParts.push('<button class="btn btn-primary" type="button"><span class="badge">Foreground point</span>&nbsp;'+JSON.stringify(d.fgMap)+'</button>'); }
-			return textParts.join('<br />');
-		})
 		.append("span")
 			.classed('removeCalibrationPoint', true)
-			.html('<button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>&nbsp;Remove point</button>')
-			.on('click', function(d, pointId) {
-				var toDelete = [];
-				calibrationPoints.forEach(function(calibrationPoint, i) {
-					if (calibrationPoint.pointId === pointId) {
-						toDelete.push(i);
-					}
-				});
-				toDelete.reverse().forEach(function(calibrationPointIndex) {
-					calibrationPoints.splice(calibrationPointIndex, 1);
-				});
+			.on('click', removeCalibrationPoint)
+			.append('button')
+				.attr('type', 'button')
+				.classed('btn btn-default btn-xs', true)
+				.append('span')
+					.classed('glyphicon glyphicon-remove', true);
 
-				showCalibrationPoints();
-                markersSvg.repositionCalibrationMarkers();
-			});
+	var calibrationPointTypes = [{
+		text: 'Background point',
+		property: 'bgMap',
+		buttonClass: 'btn-info'
+	}, {
+		text: 'Foreground point',
+		property: 'fgMap',
+		buttonClass: 'btn-primary'
+	}];
+
+	calibrationPointsElements.each(function(calibrationPointData) {
+		d3.select(this).append('div')
+			.selectAll('span.badge').data(calibrationPointTypes)
+			.enter().append('span')
+				.attr('class', function(d) { return d.property; })
+				.classed('badge', true)
+				.html(function(d) { return d.text; })
+				.append('span')
+					.classed('glyphicon glyphicon-ok', true)
+					.attr('title', function(d) { return JSON.stringify(calibrationPointData[d.property]);});
+	});
 
 	calibrationPointsElements.exit().remove();
 

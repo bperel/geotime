@@ -3,12 +3,32 @@
     stroke-width:1;
 }
 
+.badge {
+    color: white;
+    font-weight: normal;
+    margin: 0 10px;
+    background-color: #bbb !important;
+}
+
+.badge.bgMap .glyphicon,
+.badge.fgMap .glyphicon {
+    margin-left: 5px;
+}
+
 #markers .bgMap {
     stroke: #ff0000;
 }
 
+.badge.bgMap .glyphicon {
+    color: #ff0000;
+}
+
 #markers .fgMap {
     stroke: #0000ff;
+}
+
+.badge.fgMap .glyphicon {
+    color: #0000ff;
 }
 
 #mapHelper {
