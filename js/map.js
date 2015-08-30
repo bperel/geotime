@@ -263,7 +263,6 @@ function loadTerritoryMap(noUi, fileName) {
 			function(error, incompleteMapInfo) {
 				if (!!incompleteMapInfo) {
 					loadTerritoryMapData(incompleteMapInfo.fileName, incompleteMapInfo, false, noUi ? function() {} : loadUIConfig);
-					initHelper(incompleteMapInfo.fileName, helperStepsData);
 				}
 				isLoading = false;
 			}
@@ -328,21 +327,23 @@ function loadUIConfig(mapInfo) {
 	}
 
 	if (mapInfo.center && mapInfo.center.length) {
-		helper.datum().activeStep = 2;
-		activateHelperNextStep(null, true);
+		initHelper(mapInfo.fileName, helperStepsData, 'territoryIdentification');
+		activateHelperNextStep(true);
 	}
 	else {
+		initHelper(mapInfo.fileName, helperStepsData, 'mapLocation');
 		activateHelperNextStep();
-
-		if (mapInfo.calibrationPoints) {
-			for (var i = 0; i < mapInfo.calibrationPoints.length; i++) {
-				var calibrationPoint = mapInfo.calibrationPoints[i];
-				addCalibrationMarker("fgMap", calibrationPoint.fgPoint);
-				addCalibrationMarker("bgMap", calibrationPoint.bgPoint);
-			}
-		}
-		showCalibrationPoints();
 	}
+	calibrationPoints = [];
+	if (mapInfo.calibrationPoints) {
+		for (var i = 0; i < mapInfo.calibrationPoints.length; i++) {
+			var calibrationPoint = mapInfo.calibrationPoints[i];
+			addCalibrationMarker("fgMap", calibrationPoint.fgPoint);
+			addCalibrationMarker("bgMap", calibrationPoint.bgPoint);
+		}
+	}
+	showCalibrationPoints();
+	markersSvg.repositionCalibrationMarkers();
 }
 
 function validateMapLocation(mapData) {

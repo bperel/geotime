@@ -7,7 +7,7 @@ var resizeHandle;
 var territoryId;
 var territoryName;
 
-function initHelper(mapFileName, helperStepsData) {
+function initHelper(mapFileName, helperStepsData, activeProcess) {
 
 	resizeHandle = d3.select('#resizeHandle');
 	resizeHandle
@@ -21,16 +21,23 @@ function initHelper(mapFileName, helperStepsData) {
 	d3.select('#mapTitle').text(mapFileName);
 
 	helper = d3.select("#mapHelper")
-		.datum({ activeStep: 0});
+		.datum({ activeProcess: activeProcess, activeStep: 0});
+
+	helperProcessesData.forEach(function(processDatum) {
+		processDatum.active = processDatum.name === activeProcess;
+	});
+
+	helper.select('#processTabs').selectAll('li').remove();
 
 	helper.select('#processTabs').selectAll('li')
 		.data(helperProcessesData).enter().append('li')
-			.classed('active', function(d) { return d.default; })
+			.classed('active', function(d) { return d.active; })
 				.append('a')
 					.attr('href', '#')
-					.html(function(d) { return d.name});
+					.html(function(d) { return d.text});
 
 	helperSteps = helper.select('ul#helperStepsContainer').selectAll('.helperStep');
+	helperSteps.data(helperStepsData).exit();
 	helperSteps.data(helperStepsData).enter().append('li')
 		.classed('helperStep', true)
 		.html(function(d) { return '<div>'+d.content[0]+'</div><div class="if-active">'+ d.content.slice(1)+'</div>'; });
@@ -39,7 +46,7 @@ function initHelper(mapFileName, helperStepsData) {
 	helperSteps = helper.select('ul#helperStepsContainer').selectAll('.helperStep');
 }
 
-function activateHelperNextStep(stepElement, skipUnloadAction) {
+function activateHelperNextStep(skipUnloadAction) {
 	if (helper.datum().activeStep > 0 && !skipUnloadAction) {
 		helperSteps
 			.filter(isActiveStepFilter)

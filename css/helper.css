@@ -83,6 +83,7 @@
 .helperStep .removeLocatedTerritory {
     cursor: pointer;
     color: red;
+    float: right;
 }
 
 .helperStep #territoryId {

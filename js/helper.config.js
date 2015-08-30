@@ -17,9 +17,10 @@ function loadHelperConfig() {
 	helperProcessesData = [
 		{
 			name: 'mapLocation',
-			default: true
+			text: 'Map location'
 		}, {
-			name: 'territoryIdentification'
+			name: 'territoryIdentification',
+			text: 'Territory identification'
 		}
 	];
 
@@ -28,8 +29,8 @@ function loadHelperConfig() {
 			process: 'mapLocation',
 			step: 1, content: ['Select at least 4 points on the maps.',
 							   'Click on the background map to add a point, then click on the foreground map at the corresponding location.' +
-                               '<br /><span id="calibrationPointsLength">0</span>&nbsp;<label for="calibrationPointsLength">selected points.</label>'
-							  +'<span id="calibrationPoints"></span>'],
+                               '<br /><span class="badge" id="calibrationPointsLength">0</span>&nbsp;<label for="calibrationPointsLength">selected points.</label>'
+							  +'<ul class="list-group" id="calibrationPoints"></ul>'],
 			onLoad: [enableCalibrationPointSelection],
 			validate: checkCalibrationPoints,
 			onUnload: [disableCalibrationPointSelection],
@@ -96,11 +97,14 @@ function addCalibrationPoint(mapType, clickedPoint) {
 		y: clickedPoint.y - mapOffset.y
 	};
 
-	var coordinates = clickedPoint;
+	var coordinates = {};
 	if (mapType === 'bgMap') {
 		var latLngCoordinates = projection.invert([clickedPoint.x, clickedPoint.y]);
 		coordinates.lng = latLngCoordinates[0].round10pow(6);
 		coordinates.lat = latLngCoordinates[1].round10pow(6);
+	}
+	else {
+		coordinates = clickedPoint;
 	}
 
 	addCalibrationMarker(mapType, coordinates);
@@ -111,18 +115,18 @@ function showCalibrationPoints() {
 	var groupedCalibrationPoints = getGroupedCalibrationPoints();
 
 	var calibrationPointsElements = d3.select('#calibrationPoints').selectAll('.calibrationPoint').data(groupedCalibrationPoints);
-	calibrationPointsElements.enter().append('div').classed('calibrationPoint', true);
+	calibrationPointsElements.enter().append('li').classed({calibrationPoint: true, 'list-group-item': true});
 
 	calibrationPointsElements
-		.text(function (d) {
+		.html(function (d) {
 			var textParts = [];
-			if (d.bgMap) { textParts.push('bg : '+JSON.stringify(d.bgMap)); }
-			if (d.fgMap) { textParts.push('fg : '+JSON.stringify(d.fgMap)); }
-			return textParts.join(' - ');
+			if (d.bgMap) { textParts.push('<button class="btn btn-default" type="button"><span class="badge">Background point</span>&nbsp;'+JSON.stringify(d.bgMap)+'</button>'); }
+			if (d.fgMap) { textParts.push('<button class="btn btn-primary" type="button"><span class="badge">Foreground point</span>&nbsp;'+JSON.stringify(d.fgMap)+'</button>'); }
+			return textParts.join('<br />');
 		})
 		.append("span")
 			.classed('removeCalibrationPoint', true)
-			.html("&nbsp;X Remove point")
+			.html('<button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>&nbsp;Remove point</button>')
 			.on('click', function(d, pointId) {
 				var toDelete = [];
 				calibrationPoints.forEach(function(calibrationPoint, i) {

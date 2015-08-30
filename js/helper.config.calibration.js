@@ -178,6 +178,10 @@ function getGroupedCalibrationPoints() {
 			shownCalibrationPoints[d.pointId] = {};
 		}
 		shownCalibrationPoints[d.pointId][d.type] = d.coordinates;
+		if (d.type === 'bgMap') {
+			delete shownCalibrationPoints[d.pointId][d.type].x;
+			delete shownCalibrationPoints[d.pointId][d.type].y;
+		}
 	});
 
 	return d3.values(shownCalibrationPoints);
