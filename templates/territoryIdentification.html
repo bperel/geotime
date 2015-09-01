@@ -1,0 +1,27 @@
+Located territories : <span id="locatedTerritoriesNumber"></span>
+<div id="locatedTerritories"></div>
+<br />
+<div id="addTerritorySection" class="section">
+    <div class="title">Add territory location</div>
+    Currently selected territory : <span id="territoryId">None</span>
+    <br />
+    <div id="currentTerritory" class="hidden">
+        <table>
+            <tr>
+                <td>
+                    <label for="territoryName">Name :</label>
+                </td>
+                <td>
+                    <input type="text" id="territoryName" />
+                </td>
+            </tr>
+        </table>
+        <br />had these borders
+        <label for="territoryPeriodStart">from </label>
+        <input type="number" id="territoryPeriodStart" />
+        <label for="territoryPeriodEnd"  > to  </label>
+        <input type="number" id="territoryPeriodEnd" />
+
+        <input type="button" id="addTerritory" class="validate" value="Add territory"/>
+    </div>
+</div>

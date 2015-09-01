@@ -27,10 +27,7 @@ function loadHelperConfig() {
 	helperStepsData = [
 		{
 			process: 'mapLocation',
-			step: 1, content: ['Select at least 4 points on the maps.',
-							   'Click on the background map to add a point, then click on the foreground map at the corresponding location.' +
-                               '<br /><span class="badge" id="calibrationPointsLength">0</span><label for="calibrationPointsLength">selected points.</label>'
-							  +'<ul class="list-group" id="calibrationPoints"></ul>'],
+			step: 1, title: 'Select locations on both maps',
 			onLoad: [enableCalibrationPointSelection],
 			validate: checkCalibrationPoints,
 			onUnload: [disableCalibrationPointSelection],
@@ -38,25 +35,14 @@ function loadHelperConfig() {
 			buttons: ['done', 'skip', 'cancel']
 		}, {
 			process: 'mapLocation',
-			step: 2, content: ['If necessary, move the superimposed map so that it corresponds to the background borders.'],
+			step: 2, title: 'Adjust the map calibration',
 			onLoad: [enableMapDragResize],
 			dataUpdate: saveMapPosition,
 			onUnload: [disableMapDragResize, persistMapLocation],
 			buttons: ['done', 'skip', 'cancel']
 		}, {
 			process: 'territoryIdentification',
-			step: 3, content: ['Locate territories.',
-							   'Located territories : <span id="locatedTerritoriesNumber"></span>' +
-                               '<div id="locatedTerritories"></div>' +
-                               '<br /><div id="addTerritorySection" class="section"><div class="title">Add territory location</div>' +
-                               'Currently selected territory : <span id="territoryId">None</span>' +
-                               '<br /><div id="currentTerritory" class="hidden">' +
-                               '<table><tr><td><label for="territoryName">Name :</label></td>' +
-                               '<td><input type="text" id="territoryName" /></td></tr></table>' +
-                               '<br />had these borders ' +
-                               '<label for="territoryPeriodStart">from </label><input type="number" id="territoryPeriodStart" />' +
-                               '<label for="territoryPeriodEnd"  > to  </label><input type="number" id="territoryPeriodEnd" />' +
-                               '<input type="button" id="addTerritory" class="validate" value="Add territory"/></div>'],
+			step: 3, title: 'Locate territories',
 			onLoad: [enableTerritorySelection,initTerritoryAutocomplete,showLocatedTerritories],
             validate: checkSelectedTerritory,
             dataUpdate: saveTerritoriesPosition,

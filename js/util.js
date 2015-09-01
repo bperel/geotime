@@ -58,3 +58,23 @@ Number.prototype.round10pow = function(p) {
     p = p || 0;
     return Math.round(this * Math.pow(10, p)) / Math.pow(10, p);
 };
+
+d3.selection.prototype.loadTemplate = function(title, processName) {
+    var element = this;
+    var html =
+        '<h5 class="if-active">'+title+'</h5>' +
+        '<div class="if-active">[content]</div>';
+    if (templates[processName]) {
+        element.html(html.replace('[content]', templates[processName]));
+    }
+    d3.text('templates/'+processName+'.html', function(error, templateHtml) {
+        if (error) {
+            console.log('Could not load template : '+processName+'.html');
+        }
+        else {
+            element.html(
+                html.replace('[content]', templates[processName] = templateHtml)
+            );
+        }
+    });
+};

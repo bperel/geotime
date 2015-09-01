@@ -327,11 +327,11 @@ function loadUIConfig(mapInfo) {
 	}
 
 	if (mapInfo.center && mapInfo.center.length) {
-		initHelper(mapInfo.fileName, helperStepsData, 'territoryIdentification');
+		initHelper(mapInfo.fileName, 'territoryIdentification');
 		activateHelperNextStep(true);
 	}
 	else {
-		initHelper(mapInfo.fileName, helperStepsData, 'mapLocation');
+		initHelper(mapInfo.fileName, 'mapLocation');
 		activateHelperNextStep();
 	}
 	calibrationPoints = [];

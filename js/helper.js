@@ -3,11 +3,12 @@ var helperButtonsData = [];
 var helperSteps;
 var helperStepsData = [];
 var helperProcessesData = [];
+var templates = [];
 var resizeHandle;
 var territoryId;
 var territoryName;
 
-function initHelper(mapFileName, helperStepsData, activeProcess) {
+function initHelper(mapFileName, activeProcess) {
 
 	resizeHandle = d3.select('#resizeHandle');
 	resizeHandle
@@ -40,7 +41,9 @@ function initHelper(mapFileName, helperStepsData, activeProcess) {
 	helperSteps.data(helperStepsData).exit();
 	helperSteps.data(helperStepsData).enter().append('li')
 		.classed('helperStep', true)
-		.html(function(d) { return '<div>'+d.content[0]+'</div><div class="if-active">'+ d.content.slice(1)+'</div>'; });
+		.each(function(d) {
+			d3.select(this).loadTemplate(d.title, d.process);
+		});
 
 	// Refresh with the created elements
 	helperSteps = helper.select('ul#helperStepsContainer').selectAll('.helperStep');
