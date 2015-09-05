@@ -28,25 +28,32 @@ function initHelper(mapFileName, activeProcess) {
 		processDatum.active = processDatum.name === activeProcess;
 	});
 
-	helper.select('#processTabs').selectAll('li').remove();
+	var helperProcessTabs = helper.select('#processTabs').selectAll('li')
+		.data(helperProcessesData);
 
-	helper.select('#processTabs').selectAll('li')
-		.data(helperProcessesData).enter().append('li')
-			.classed('active', function(d) { return d.active; })
-				.append('a')
-					.attr('href', '#')
-					.html(function(d) { return d.text});
+	helperProcessTabs.enter().append('li')
+		.append('a')
+			.attr('href', '#')
+			.html(function(d) { return d.text});
+	helperProcessTabs.classed('active', function(d) { return d.active; });
+	helperProcessTabs.exit().remove();
 
-	helperSteps = helper.select('ul#helperStepsContainer').selectAll('.helperStep');
-	helperSteps.data(helperStepsData).exit();
-	helperSteps.data(helperStepsData).enter().append('li')
-		.classed('helperStep', true)
-		.each(function(d) {
-			d3.select(this).loadTemplate(d.title, d.process);
-		});
+
+	helperSteps = helper.select('div#helperStepsContainer').selectAll('.helperStep');
+	var helperStepsForProcess = helperSteps.data(helperStepsData);
+
+	helperStepsForProcess.enter()
+		.append('div')
+			.classed('helperStep list-group-item', true)
+			.each(function(d) {
+				d3.select(this).loadTemplate(d.title, d.process, d.process === activeProcess);
+			});
 
 	// Refresh with the created elements
-	helperSteps = helper.select('ul#helperStepsContainer').selectAll('.helperStep');
+	helperSteps = helper.select('div#helperStepsContainer').selectAll('.helperStep');
+
+	helperStepsForProcess.classed('hidden', function(d) { return d.process !== activeProcess; });
+	helperStepsForProcess.exit().remove();
 }
 
 function activateHelperNextStep(skipUnloadAction) {
@@ -67,11 +74,10 @@ function activateHelperNextStep(skipUnloadAction) {
 		helperSteps
 			.classed("active", isActiveStepFilter)
 			.filter(isActiveStepFilter)
-			.call(function() {
-				(this.datum().onLoad || []).forEach(function(onLoadAction) {
+			.each(function(d) {
+				(d.onLoad || []).forEach(function(onLoadAction) {
 					onLoadAction();
 				});
-				this.datum().dataInit && this.datum(this.datum().dataInit());
 			})
 			.selectAll('button').data(helperButtonsData).enter().append('button')
 				.each(function () {

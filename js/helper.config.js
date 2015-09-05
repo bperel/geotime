@@ -42,7 +42,7 @@ function loadHelperConfig() {
 			buttons: ['done', 'skip', 'cancel']
 		}, {
 			process: 'territoryIdentification',
-			step: 3, title: 'Locate territories',
+			step: 1, title: 'Locate territories',
 			onLoad: [enableTerritorySelection,initTerritoryAutocomplete,showLocatedTerritories],
             validate: checkSelectedTerritory,
             dataUpdate: saveTerritoriesPosition,

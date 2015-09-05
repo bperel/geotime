@@ -59,10 +59,10 @@ Number.prototype.round10pow = function(p) {
     return Math.round(this * Math.pow(10, p)) / Math.pow(10, p);
 };
 
-d3.selection.prototype.loadTemplate = function(title, processName) {
+d3.selection.prototype.loadTemplate = function(title, processName, activateStep) {
     var element = this;
     var html =
-        '<h5 class="if-active">'+title+'</h5>' +
+        '<h5>'+title+'</h5>' +
         '<div class="if-active">[content]</div>';
     if (templates[processName]) {
         element.html(html.replace('[content]', templates[processName]));
@@ -75,6 +75,9 @@ d3.selection.prototype.loadTemplate = function(title, processName) {
             element.html(
                 html.replace('[content]', templates[processName] = templateHtml)
             );
+            if (activateStep) {
+                activateHelperNextStep();
+            }
         }
     });
 };
