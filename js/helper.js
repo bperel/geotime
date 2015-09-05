@@ -8,21 +8,23 @@ var resizeHandle;
 var territoryId;
 var territoryName;
 
-function initHelper(mapFileName, activeProcess) {
-
+function initResizeHandle() {
 	resizeHandle = d3.select('#resizeHandle');
 	resizeHandle
 		.classed("hidden", true)
 		.attr("width", resizeHandleSize)
 		.attr("height", resizeHandleSize)
 		.select("rect")
-			.attr("width", resizeHandleSize)
-			.attr("height", resizeHandleSize);
+		.attr("width", resizeHandleSize)
+		.attr("height", resizeHandleSize);
+}
+
+function initHelper(mapFileName, activeProcess) {
 
 	d3.select('#mapTitle').text(mapFileName);
 
 	helper = d3.select("#mapHelper")
-		.datum({ activeProcess: activeProcess, activeStep: 0});
+		.datum({ activeProcess: activeProcess, activeStep: 0 });
 
 	helperProcessesData.forEach(function(processDatum) {
 		processDatum.active = processDatum.name === activeProcess;
@@ -34,7 +36,7 @@ function initHelper(mapFileName, activeProcess) {
 	helperProcessTabs.enter().append('li')
 		.append('a')
 			.attr('href', '#')
-			.html(function(d) { return d.text});
+			.html(function(d) { return d.text; });
 	helperProcessTabs.classed('active', function(d) { return d.active; });
 	helperProcessTabs.exit().remove();
 
@@ -46,7 +48,8 @@ function initHelper(mapFileName, activeProcess) {
 		.append('div')
 			.classed('helperStep list-group-item', true)
 			.each(function(d) {
-				d3.select(this).loadTemplate(d.title, d.process, d.process === activeProcess);
+				var callback = d.process === activeProcess ? activateHelperNextStep : noop;
+				d3.select(this).loadTemplate(d.process, d.title, callback);
 			});
 
 	// Refresh with the created elements
@@ -56,8 +59,8 @@ function initHelper(mapFileName, activeProcess) {
 	helperStepsForProcess.exit().remove();
 }
 
-function activateHelperNextStep(skipUnloadAction) {
-	if (helper.datum().activeStep > 0 && !skipUnloadAction) {
+function activateHelperNextStep() {
+	if (helper.datum().activeStep > 0) {
 		helperSteps
 			.filter(isActiveStepFilter)
 			.call(function () {

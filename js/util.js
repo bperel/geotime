@@ -1,4 +1,5 @@
 var gatewayUrl = 'gateway.php';
+var noop = function() {};
 
 function ajaxPost(options, callback) {
     d3.json(gatewayUrl)
@@ -59,10 +60,10 @@ Number.prototype.round10pow = function(p) {
     return Math.round(this * Math.pow(10, p)) / Math.pow(10, p);
 };
 
-d3.selection.prototype.loadTemplate = function(title, processName, activateStep) {
+d3.selection.prototype.loadTemplate = function (processName, title, callback) {
     var element = this;
     var html =
-        '<h5>'+title+'</h5>' +
+        (title ? ('<h5>'+title+'</h5>') : '') +
         '<div class="if-active">[content]</div>';
     if (templates[processName]) {
         element.html(html.replace('[content]', templates[processName]));
@@ -75,8 +76,8 @@ d3.selection.prototype.loadTemplate = function(title, processName, activateStep)
             element.html(
                 html.replace('[content]', templates[processName] = templateHtml)
             );
-            if (activateStep) {
-                activateHelperNextStep();
+            if (callback) {
+                callback(element);
             }
         }
     });

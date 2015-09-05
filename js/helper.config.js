@@ -43,7 +43,7 @@ function loadHelperConfig() {
 		}, {
 			process: 'territoryIdentification',
 			step: 1, title: 'Locate territories',
-			onLoad: [enableTerritorySelection,initTerritoryAutocomplete,showLocatedTerritories],
+			onLoad: [showLocatedTerritories,initTerritorySelectionAndAutocomplete],
             validate: checkSelectedTerritory,
             dataUpdate: saveTerritoriesPosition,
 			onUnload: [disableTerritorySelection, persistTerritoriesPosition],
@@ -240,15 +240,22 @@ function enableTerritorySelection() {
     });
 }
 
-function initTerritoryAutocomplete() {
-    territoryName = d3.select('#territoryName');
-    territoryName.node().focus();
+function initTerritorySelectionAndAutocomplete() {
 
-    autocomplete(d3.select('#territoryName').node())
-        .dataField("name")
-        .width(960)
-        .height(500)
-        .render();
+	d3.select('#locatedTerritories')
+		.append('li').classed('addLocatedTerritory list-group-item', true)
+		.loadTemplate('addLocatedTerritory', '', function() {
+			territoryName = d3.select('#territoryName');
+			territoryName.node().focus();
+
+			autocomplete(d3.select('#territoryName').node())
+				.dataField("name")
+				.width(960)
+				.height(500)
+				.render();
+
+			enableTerritorySelection();
+		});
 }
 
 function disableTerritorySelection() {
@@ -277,19 +284,19 @@ function updateTerritoryId() {
 
 function showLocatedTerritories() {
     var locatedTerritoriesElements = d3.select('#locatedTerritories').selectAll('.locatedTerritory').data(locatedTerritories);
-    locatedTerritoriesElements.enter().append('div').classed('locatedTerritory', true);
+    locatedTerritoriesElements.enter()
+		.append('li')
+		.classed('locatedTerritory list-group-item', true)
+			.loadTemplate('locatedTerritory', '', function(element) {
 
-    locatedTerritoriesElements
-        .text(function (d) {
-            return d.referencedTerritory.name;
-        })
-        .append("span")
-            .classed('removeLocatedTerritory', true)
-            .html("&nbsp;X Remove")
-            .on('click', function(d, i) {
-            locatedTerritories.splice(i, 1);
-                showLocatedTerritories()
-            });
+			element.select('.territoryName')
+					.text(function (d) { return d.referencedTerritory.name; });
+				element.select('.removeLocatedTerritory')
+					.on('click', function (d, i) {
+						locatedTerritories.splice(i, 1);
+						showLocatedTerritories()
+					});
+			});
 
     locatedTerritoriesElements.exit().remove();
 

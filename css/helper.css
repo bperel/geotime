@@ -92,7 +92,7 @@
 
 .helperStep .section .title {
     font-weight: bold;
-    color: dimgray;
+    display: block;
 }
 
 .helperStep .section .validate {
@@ -104,7 +104,6 @@
 .helperStep .removeCalibrationPoint,
 .helperStep .removeLocatedTerritory {
     cursor: pointer;
-    color: red;
     float: right;
 }
 
@@ -118,4 +117,14 @@
 
 .helperStep #locatedTerritories {
     margin-left: 10px;
+}
+
+.helperStep #locatedTerritories .locatedTerritory,
+.helperStep #locatedTerritories .addLocatedTerritory {
+    color: black;
+    text-shadow: none;
+}
+
+.helperStep #locatedTerritories .removeLocatedTerritory {
+    margin-right: 0;
 }

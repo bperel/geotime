@@ -326,6 +326,7 @@ function loadUIConfig(mapInfo) {
 		});
 	}
 
+	initResizeHandle();
 	if (mapInfo.center && mapInfo.center.length) {
 		initHelper(mapInfo.fileName, 'territoryIdentification');
 	}
