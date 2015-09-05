@@ -116,7 +116,7 @@ function showCalibrationPoints() {
 	var groupedCalibrationPoints = getGroupedCalibrationPoints();
 
 	var calibrationPointsElements = d3.select('#calibrationPoints').selectAll('.calibrationPoint').data(groupedCalibrationPoints);
-	calibrationPointsElements.enter().append('li').classed({calibrationPoint: true, 'list-group-item': true});
+	calibrationPointsElements.enter().append('li').classed('calibrationPoint list-group-item', true);
 
 	calibrationPointsElements
 		.append("span")
