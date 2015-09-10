@@ -97,10 +97,10 @@ function addCalibrationPoint(mapType, clickedPoint) {
 	showCalibrationPoints();
 }
 
-function removeCalibrationPoint(d, pointId) {
+function removeCalibrationPoint(d) {
 	var toDelete = [];
 	calibrationPoints.forEach(function(calibrationPoint, i) {
-		if (calibrationPoint.pointId === pointId) {
+		if (calibrationPoint.pointId === d.pointId) {
 			toDelete.push(i);
 		}
 	});
@@ -125,33 +125,33 @@ function showCalibrationPoints() {
 		buttonClass: 'btn-primary'
 	}];
 
-	var calibrationPointsElements = d3.select('#calibrationPoints').selectAll('.calibrationPoint').data(groupedCalibrationPoints);
+	var calibrationPointsElements = d3.select('#calibrationPoints').selectAll('.calibrationPointContainer').data(groupedCalibrationPoints);
 	calibrationPointsElements.enter()
-		.append('li').classed('calibrationPoint list-group-item', true)
-			.append("span")
-				.classed('removeCalibrationPoint', true)
-				.on('click', removeCalibrationPoint)
-				.append('button')
-					.attr('type', 'button')
-					.classed('btn btn-default btn-xs', true)
-					.append('span')
-						.classed('glyphicon glyphicon-remove', true);
+		.append('div')
+			.classed('calibrationPointContainer', true);
 
-	calibrationPointsElements.each(function(calibrationPointData) {
-		var badges = d3.select(this).selectAll('span.badge').data(
-			calibrationPointTypes.filter(function(calibrationPointType) {
-				return !!calibrationPointData[calibrationPointType.property];
-			})
-		);
-		badges.enter();
-		badges.append('span')
-			.attr('class', function(d) { debugger;return d.property; })
-			.classed('badge', true)
-			.html(function(d) { return d.text; })
-				.append('span')
-					.classed('glyphicon glyphicon-ok', true)
-					.attr('title', function(d) { return JSON.stringify(calibrationPointData[d.property]);});
-	});
+	calibrationPointsElements
+		.each(function() {
+			d3.select(this).loadTemplate('calibrationPoints', '', function(calibrationPointsItem) {
+				var calibrationPointData = calibrationPointsItem.datum();
+
+				calibrationPointsItem.select('.removeCalibrationPoint')
+					.on('click', removeCalibrationPoint);
+
+				calibrationPointsItem.select('li').selectAll('span.badge').data(
+					calibrationPointTypes.filter(function(calibrationPointType) {
+						return !!calibrationPointData[calibrationPointType.property];
+					})
+				)
+					.enter().append('span')
+						.attr('title', function(d) { return JSON.stringify(calibrationPointData[d.property]); })
+						.attr('class', function(d) { return d.property; })
+						.classed('badge', true)
+						.html(function(d) { return d.text; })
+							.append('span')
+								.classed('glyphicon glyphicon-ok', true);
+			});
+		});
 
 	calibrationPointsElements.exit().remove();
 

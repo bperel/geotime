@@ -8,6 +8,7 @@
     font-weight: normal;
     margin: 0 10px;
     background-color: #bbb !important;
+    float: left !important;
 }
 
 .badge.bgMap .glyphicon,
@@ -99,6 +100,10 @@
     bottom: 0;
     right: 0;
     position: absolute;
+}
+
+.helperStep li.calibrationPoint  {
+    height: 42px;
 }
 
 .helperStep .removeCalibrationPoint,

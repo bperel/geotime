@@ -177,7 +177,9 @@ function getGroupedCalibrationPoints() {
 	var shownCalibrationPoints = {};
 	calibrationPoints.forEach(function(d) {
 		if (!(shownCalibrationPoints[d.pointId])) {
-			shownCalibrationPoints[d.pointId] = {};
+			shownCalibrationPoints[d.pointId] = {
+				pointId: d.pointId
+			};
 		}
 		shownCalibrationPoints[d.pointId][d.type] = d.coordinates;
 		if (d.type === 'bgMap') {
