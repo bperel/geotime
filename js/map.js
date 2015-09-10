@@ -64,7 +64,7 @@ function drawPaths() {
 	d3.select('#projectionCenter').text(projection.center().map(function(val) { return parseInt(val*10)/10; }));
 	d3.select('#projectionRotation').text(projection.rotate().map(function(val) { return parseInt(val*10)/10; }));
 
-	if (markersSvg.size() > 0) {
+	if (markersSvg.size() > 0 && helper.size() && helper.datum().activeProcess === 'locateMap') {
 		markersSvg.repositionCalibrationMarkers('bgMap', true);
 	}
 }
@@ -337,12 +337,10 @@ function loadUIConfig(mapInfo) {
 	if (mapInfo.calibrationPoints) {
 		for (var i = 0; i < mapInfo.calibrationPoints.length; i++) {
 			var calibrationPoint = mapInfo.calibrationPoints[i];
-			addCalibrationMarker("fgMap", calibrationPoint.fgPoint);
-			addCalibrationMarker("bgMap", calibrationPoint.bgPoint);
+			addCalibrationMarker("fgMap", calibrationPoint.fgPoint, false);
+			addCalibrationMarker("bgMap", calibrationPoint.bgPoint, false);
 		}
 	}
-	showCalibrationPoints();
-	markersSvg.repositionCalibrationMarkers();
 }
 
 function validateMapLocation(mapData) {

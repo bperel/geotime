@@ -93,7 +93,7 @@ function addCalibrationPoint(mapType, clickedPoint) {
 		coordinates = clickedPoint;
 	}
 
-	addCalibrationMarker(mapType, coordinates);
+	addCalibrationMarker(mapType, coordinates, true);
 	showCalibrationPoints();
 }
 
@@ -115,19 +115,6 @@ function removeCalibrationPoint(d, pointId) {
 function showCalibrationPoints() {
 	var groupedCalibrationPoints = getGroupedCalibrationPoints();
 
-	var calibrationPointsElements = d3.select('#calibrationPoints').selectAll('.calibrationPoint').data(groupedCalibrationPoints);
-	calibrationPointsElements.enter().append('li').classed('calibrationPoint list-group-item', true);
-
-	calibrationPointsElements
-		.append("span")
-			.classed('removeCalibrationPoint', true)
-			.on('click', removeCalibrationPoint)
-			.append('button')
-				.attr('type', 'button')
-				.classed('btn btn-default btn-xs', true)
-				.append('span')
-					.classed('glyphicon glyphicon-remove', true);
-
 	var calibrationPointTypes = [{
 		text: 'Background point',
 		property: 'bgMap',
@@ -138,13 +125,29 @@ function showCalibrationPoints() {
 		buttonClass: 'btn-primary'
 	}];
 
+	var calibrationPointsElements = d3.select('#calibrationPoints').selectAll('.calibrationPoint').data(groupedCalibrationPoints);
+	calibrationPointsElements.enter()
+		.append('li').classed('calibrationPoint list-group-item', true)
+			.append("span")
+				.classed('removeCalibrationPoint', true)
+				.on('click', removeCalibrationPoint)
+				.append('button')
+					.attr('type', 'button')
+					.classed('btn btn-default btn-xs', true)
+					.append('span')
+						.classed('glyphicon glyphicon-remove', true);
+
 	calibrationPointsElements.each(function(calibrationPointData) {
-		d3.select(this).append('div')
-			.selectAll('span.badge').data(calibrationPointTypes)
-			.enter().append('span')
-				.attr('class', function(d) { return d.property; })
-				.classed('badge', true)
-				.html(function(d) { return d.text; })
+		var badges = d3.select(this).selectAll('span.badge').data(
+			calibrationPointTypes.filter(function(calibrationPointType) {
+				return !!calibrationPointData[calibrationPointType.property];
+			})
+		);
+		badges.enter();
+		badges.append('span')
+			.attr('class', function(d) { debugger;return d.property; })
+			.classed('badge', true)
+			.html(function(d) { return d.text; })
 				.append('span')
 					.classed('glyphicon glyphicon-ok', true)
 					.attr('title', function(d) { return JSON.stringify(calibrationPointData[d.property]);});
@@ -289,14 +292,15 @@ function showLocatedTerritories() {
 		.classed('locatedTerritory list-group-item', true)
 			.loadTemplate('locatedTerritory', '', function(element) {
 
-			element.select('.territoryName')
-					.text(function (d) { return d.referencedTerritory.name; });
-				element.select('.removeLocatedTerritory')
-					.on('click', function (d, i) {
-						locatedTerritories.splice(i, 1);
-						showLocatedTerritories()
-					});
-			});
+			element
+				.select('.territoryName')
+				.text(function (d) { return d.referencedTerritory.name; });
+			element.select('.removeLocatedTerritory')
+				.on('click', function (d, i) {
+					locatedTerritories.splice(i, 1);
+					showLocatedTerritories()
+				});
+		});
 
     locatedTerritoriesElements.exit().remove();
 

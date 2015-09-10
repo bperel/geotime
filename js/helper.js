@@ -1,6 +1,6 @@
 var helper = d3.select('nothing');
 var helperButtonsData = [];
-var helperSteps;
+var helperStepsForProcess = [];
 var helperStepsData = [];
 var helperProcessesData = [];
 var templates = [];
@@ -24,7 +24,8 @@ function initHelper(mapFileName, activeProcess) {
 	d3.select('#mapTitle').text(mapFileName);
 
 	helper = d3.select("#mapHelper")
-		.datum({ activeProcess: activeProcess, activeStep: 0 });
+		.datum({ activeProcess: activeProcess, activeStep: 0 })
+		.classed("hidden", false);
 
 	helperProcessesData.forEach(function(processDatum) {
 		processDatum.active = processDatum.name === activeProcess;
@@ -41,27 +42,28 @@ function initHelper(mapFileName, activeProcess) {
 	helperProcessTabs.exit().remove();
 
 
-	helperSteps = helper.select('div#helperStepsContainer').selectAll('.helperStep');
-	var helperStepsForProcess = helperSteps.data(helperStepsData);
+	helperStepsForProcess = helper.select('div#helperStepsContainer').selectAll('.helperStep')
+		.data(
+			helperStepsData.filter(function(d) { return d.process === activeProcess; })
+		);
 
-	helperStepsForProcess.enter()
+	helperStepsForProcess
+		.enter()
 		.append('div')
-			.classed('helperStep list-group-item', true)
-			.each(function(d) {
-				var callback = d.process === activeProcess ? activateHelperNextStep : noop;
-				d3.select(this).loadTemplate(d.process, d.title, callback);
-			});
+			.classed('helperStep list-group-item', true);
 
-	// Refresh with the created elements
-	helperSteps = helper.select('div#helperStepsContainer').selectAll('.helperStep');
+	helperStepsForProcess.each(function(d) {
+		var callback = d.process === activeProcess && d.step === 1 ? activateHelperNextStep : noop;
+		d3.select(this).loadTemplate(d.process, d.title, callback);
+	});
 
-	helperStepsForProcess.classed('hidden', function(d) { return d.process !== activeProcess; });
 	helperStepsForProcess.exit().remove();
+
 }
 
 function activateHelperNextStep() {
 	if (helper.datum().activeStep > 0) {
-		helperSteps
+		helperStepsForProcess
 			.filter(isActiveStepFilter)
 			.call(function () {
 				(this.datum().onUnload || []).forEach(function (onUnloadAction) {
@@ -72,9 +74,8 @@ function activateHelperNextStep() {
 
 	var newStep = ++helper.datum().activeStep;
 
-	if (newStep <= helperSteps.data().length) {
-		helper.classed("hidden", false);
-		helperSteps
+	if (newStep <= helperStepsForProcess.data().length) {
+		helperStepsForProcess
 			.classed("active", isActiveStepFilter)
 			.filter(isActiveStepFilter)
 			.each(function(d) {
@@ -85,7 +86,7 @@ function activateHelperNextStep() {
 			.selectAll('button').data(helperButtonsData).enter().append('button')
 				.each(function () {
 					d3.select(this).on('click', function (btnData) {
-						var stepElement = helperSteps
+						var stepElement = helperStepsForProcess
 							.filter(isActiveStepFilter)
 							.filter(function (d) {
 								return btnData.name !== 'done' || isValidStepFilter(d);
@@ -105,7 +106,7 @@ function activateHelperNextStep() {
 					return d.text;
 				})
 				.classed('hidden', function (d) {
-					var stepNumber = helperSteps.data().length;
+					var stepNumber = helperStepsForProcess.data().length;
 					return d.name === 'skip' && newStep === stepNumber;
 				});
 	}

@@ -67,18 +67,24 @@ d3.selection.prototype.loadTemplate = function (processName, title, callback) {
         '<div class="if-active">[content]</div>';
     if (templates[processName]) {
         element.html(html.replace('[content]', templates[processName]));
+
+        if (callback) {
+            callback(element);
+        }
     }
-    d3.text('templates/'+processName+'.html', function(error, templateHtml) {
-        if (error) {
-            console.log('Could not load template : '+processName+'.html');
-        }
-        else {
-            element.html(
-                html.replace('[content]', templates[processName] = templateHtml)
-            );
-            if (callback) {
-                callback(element);
+    else {
+        d3.text('templates/'+processName+'.html', function(error, templateHtml) {
+            if (error) {
+                console.log('Could not load template : '+processName+'.html');
             }
-        }
-    });
+            else {
+                element.html(
+                    html.replace('[content]', templates[processName] = templateHtml)
+                );
+                if (callback) {
+                    callback(element);
+                }
+            }
+        });
+    }
 };

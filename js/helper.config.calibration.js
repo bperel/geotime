@@ -135,7 +135,7 @@ function addCalibrationDefsMarkers() {
 		.attr('d', function(d) { return d.d; });
 }
 
-function addCalibrationMarker(type, coordinates) {
+function addCalibrationMarker(type, coordinates, showMarkers) {
 
 	var pointId = 0;
 	calibrationPoints.forEach(function(calibrationPoint) {
@@ -146,7 +146,9 @@ function addCalibrationMarker(type, coordinates) {
 
 	calibrationPoints.push({pointId: pointId, type: type, coordinates: coordinates});
 
-	markersSvg.repositionCalibrationMarkers(type);
+	if (showMarkers) {
+		markersSvg.repositionCalibrationMarkers(type);
+	}
 }
 
 d3.selection.prototype.repositionCalibrationMarkers = function(type, forceEnter) {
