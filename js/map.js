@@ -171,7 +171,7 @@ function getAndShowBgMap(id, filePath, callback) {
 var svgMap = null;
 var isLoading = false;
 
-function initExternalSvgMap(mapFileName) {
+function initExternalSvgMap() {
 	$('#externalSvg').remove();
 	if (svgMap) {
 		svgMap = null;

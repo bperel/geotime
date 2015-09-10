@@ -1,4 +1,5 @@
 var helper = d3.select('nothing');
+var helperProcessTabs = d3.selectAll('nothing');
 var helperButtonsData = [];
 var helperStepsForProcess = [];
 var helperStepsData = [];
@@ -15,37 +16,42 @@ function initResizeHandle() {
 		.attr("width", resizeHandleSize)
 		.attr("height", resizeHandleSize)
 		.select("rect")
-		.attr("width", resizeHandleSize)
-		.attr("height", resizeHandleSize);
+			.attr("width", resizeHandleSize)
+			.attr("height", resizeHandleSize);
 }
 
 function initHelper(mapFileName, activeProcess) {
-
 	d3.select('#mapTitle').text(mapFileName);
 
 	helper = d3.select("#mapHelper")
-		.datum({ activeProcess: activeProcess, activeStep: 0 })
 		.classed("hidden", false);
 
-	helperProcessesData.forEach(function(processDatum) {
-		processDatum.active = processDatum.name === activeProcess;
-	});
-
-	var helperProcessTabs = helper.select('#processTabs').selectAll('li')
+	helperProcessTabs = helper.select('#processTabs').selectAll('li')
 		.data(helperProcessesData);
 
-	helperProcessTabs.enter().append('li')
-		.append('a')
-			.attr('href', '#')
-			.html(function(d) { return d.text; });
-	helperProcessTabs.classed('active', function(d) { return d.active; });
+	helperProcessTabs
+		.enter().append('li')
+			.append('a')
+				.attr('href', '#')
+				.html(function(d) { return d.text; });
 	helperProcessTabs.exit().remove();
 
+	loadProcess(activeProcess);
+}
+
+function loadProcess(processName) {
+	helper.datum({ activeProcess: processName, activeStep: 0 });
+
+	helperProcessesData.forEach(function(processDatum) {
+		processDatum.active = processDatum.name === processName;
+	});
+
+	helperProcessTabs
+		.data(helperProcessesData)
+		.classed('active', function(d) { return d.active; });
 
 	helperStepsForProcess = helper.select('div#helperStepsContainer').selectAll('.helperStep')
-		.data(
-			helperStepsData.filter(function(d) { return d.process === activeProcess; })
-		);
+		.data(helperStepsData.filter(function(d) { return d.process === processName; }));
 
 	helperStepsForProcess
 		.enter()
@@ -53,12 +59,11 @@ function initHelper(mapFileName, activeProcess) {
 			.classed('helperStep list-group-item', true);
 
 	helperStepsForProcess.each(function(d) {
-		var callback = d.process === activeProcess && d.step === 1 ? activateHelperNextStep : noop;
+		var callback = d.process === processName && d.step === 1 ? activateHelperNextStep : noop;
 		d3.select(this).loadTemplate(d.process, d.title, callback);
 	});
 
 	helperStepsForProcess.exit().remove();
-
 }
 
 function activateHelperNextStep() {
