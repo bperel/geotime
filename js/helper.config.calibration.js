@@ -65,19 +65,22 @@ function calibrateMapCenter() {
         directions = getDirections(groupedCalibrationPoints[0].bgMap, groupedCalibrationPoints[0].fgMap);
     }
 
+	currentCenter[0]+=directions.x;
+	currentCenter[1]+=directions.y;
+
     applyProjection(getSelectedProjection(), currentCenter, projection.scale(), projection.rotate());
 }
 
 function getCalibrationPointsDistanceDiffsValue() { // distance diff-based value. Smaller is better
 	var pxDistanceSums = {bgMap: 0, fgMap: 0, ratios: [], latitudeRatios: []};
-	var groupedCalibrationPoints = getGroupedCalibrationPoints();
+	var groupedCalibrationPoints = getGroupedCalibrationPoints(true);
 
 	groupedCalibrationPoints.forEach(function(point1, i) {
-		var bgMapPoint1 = [point1.bgMap.lng, point1.bgMap.lat];
+		var bgMapPoint1 = [point1.bgMap.x, point1.bgMap.y];
 		var fgMapPoint1 = [point1.fgMap.x, point1.fgMap.y];
 		groupedCalibrationPoints.forEach(function(point2, j) {
 			if (i < j) {
-				var bgMapPoint2 = [point2.bgMap.lng, point2.bgMap.lat];
+				var bgMapPoint2 = [point2.bgMap.x, point2.bgMap.y];
 				var fgMapPoint2 = [point2.fgMap.x, point2.fgMap.y];
 				var bgMapDistance = Math.sqrt(Math.pow(bgMapPoint1[0] - bgMapPoint2[0], 2) + Math.pow(bgMapPoint1[1] - bgMapPoint2[1], 2));
 				var fgMapDistance = Math.sqrt(Math.pow(fgMapPoint1[0] - fgMapPoint2[0], 2) + Math.pow(fgMapPoint1[1] - fgMapPoint2[1], 2));
@@ -174,7 +177,7 @@ d3.selection.prototype.repositionCalibrationMarkers = function(type) {
 	return this;
 };
 
-function getGroupedCalibrationPoints() {
+function getGroupedCalibrationPoints(withProjectedCoords) {
 	var shownCalibrationPoints = {};
 	calibrationPoints.forEach(function(d) {
 		if (!(shownCalibrationPoints[d.pointId])) {
@@ -183,7 +186,7 @@ function getGroupedCalibrationPoints() {
 			};
 		}
 		shownCalibrationPoints[d.pointId][d.type] = d.coordinates;
-		if (d.type === 'bgMap') {
+		if (d.type === 'bgMap' && !withProjectedCoords) {
 			delete shownCalibrationPoints[d.pointId][d.type].x;
 			delete shownCalibrationPoints[d.pointId][d.type].y;
 		}
@@ -282,7 +285,7 @@ function calibrateMapRotation() {
 		if (calibrationResults.min < bestProjectionResult.min) {
 			bestProjectionResult = JSON.parse(JSON.stringify(calibrationResults));
 		}
-		console.log('Result : '+JSON.stringify(calibrationResults));
+		console.log('Result for projection ' + projectionName + ': '+JSON.stringify(calibrationResults));
 	});
 
 	if (bestProjectionResult.projection) {
