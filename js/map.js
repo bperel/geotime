@@ -224,10 +224,6 @@ function loadTerritoryMapFromSvgElement(mapFileName, mapInfo) {
 
 	resizeExternalMap();
 	centerExternalMap();
-
-	if (mapInfo.projection) {
-		applyProjection(mapInfo.projection, mapInfo.center, mapInfo.scale, mapInfo.rotation);
-	}
 }
 
 function loadTerritoryMapData(fileName, mapInfo, contentFromFileSystem, callback) {
@@ -319,6 +315,13 @@ function loadUI() {
 
 function loadUIConfig(mapInfo) {
 	d3.select('#externalSvg').datum(mapInfo);
+
+	if (mapInfo.projection) {
+		applyProjection(mapInfo.projection, mapInfo.center, mapInfo.scale, mapInfo.rotation);
+	}
+	else {
+		applyProjection('mercator', 0, 0, [0, 0, 0]);
+	}
 
 	displaySelectedProjection(mapInfo.projection);
 
