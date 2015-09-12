@@ -151,25 +151,26 @@ function addCalibrationMarker(type, coordinates, showMarkers) {
 	}
 }
 
-d3.selection.prototype.repositionCalibrationMarkers = function(type, forceEnter) {
+d3.selection.prototype.repositionCalibrationMarkers = function(type) {
 	var filter = function(d) { return !type || d.type === type; };
-	var groupCalibrationPoints = markersSvg.selectAll('g.marker-group').filter(filter).selectAll('use');
 
-	var calibrationPointsElements = groupCalibrationPoints.data(calibrationPoints.filter(filter));
+	var groups = markersSvg.selectAll('g.marker-group').filter(filter);
+	groups.each(function(groupData) {
+		var groupCalibrationPoints = d3.select(this).selectAll('use')
+			.data(calibrationPoints.filter(function(d) { return d.type === groupData.type; }));
 
-	calibrationPointsElements
-		.exit().remove();
-	if (forceEnter) {
 		groupCalibrationPoints
-			.each(positionCalibrationMarker);
-	}
-	else {
-		calibrationPointsElements
+			.exit().remove();
+
+		groupCalibrationPoints
 			.enter().append('use')
 			.filter(filter)
-			.attr('xlink:href', '#crosshair-marker')
+			.attr('xlink:href', '#crosshair-marker');
+
+		groupCalibrationPoints
 			.each(positionCalibrationMarker);
-	}
+	});
+
 	return this;
 };
 
@@ -193,12 +194,15 @@ function getGroupedCalibrationPoints() {
 
 function positionCalibrationMarker(d) {
 	if (d.coordinates.lng !== undefined) {
-		var xyCoordinates = projection([d.coordinates.lng, d.coordinates.lat]);
+		var xyCoordinates = projection([d.coordinates.lat, d.coordinates.lng]);
 		d.coordinates.x = xyCoordinates[0].round10pow(6);
 		d.coordinates.y = xyCoordinates[1].round10pow(6);
 	}
-	d.coordinates.x -= markerRadius;
-	d.coordinates.y -= markerRadius;
+
+	if (d.type === 'bgMap') {
+		d.coordinates.x -= markerRadius;
+		d.coordinates.y -= markerRadius;
+	}
 
 	d3.select(this)
 		.attr("x", d.coordinates.x)

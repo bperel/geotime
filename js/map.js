@@ -64,8 +64,8 @@ function drawPaths() {
 	d3.select('#projectionCenter').text(projection.center().map(function(val) { return parseInt(val*10)/10; }));
 	d3.select('#projectionRotation').text(projection.rotate().map(function(val) { return parseInt(val*10)/10; }));
 
-	if (markersSvg.size() > 0 && helper.size() && helper.datum().activeProcess === 'locateMap') {
-		markersSvg.repositionCalibrationMarkers('bgMap', true);
+	if (markersSvg.size() > 0 && helper.size() && helper.datum().activeProcess === 'mapLocation') {
+		markersSvg.repositionCalibrationMarkers('bgMap');
 	}
 }
 
@@ -108,8 +108,8 @@ function bgMapDragMove(d) {
 }
 
 function dragmove(d) {
-	d.x += d3.event ? d3.event.dx || 0 : 0;
-	d.y += d3.event ? d3.event.dy || 0 : 0;
+	d.x = (d.x || 0) + (d3.event ? d3.event.dx || 0 : 0);
+	d.y = (d.y || 0) + (d3.event ? d3.event.dy || 0 : 0);
 	loadExternalMapPosition(d);
 }
 
