@@ -60,26 +60,31 @@ Number.prototype.round10pow = function(p) {
     return Math.round(this * Math.pow(10, p)) / Math.pow(10, p);
 };
 
-d3.selection.prototype.loadTemplate = function (processName, title, callback) {
+d3.selection.prototype.loadTemplate = function (args) {
+    var title       = args.title,
+        callback    = args.callback,
+        templatePath = 'templates/' + (args.process || '') + '/' + args.name +'.html';
+
     var element = this;
     var html =
         (title ? ('<h5>'+title+'</h5>') : '') +
         '<div class="if-active">[content]</div>';
-    if (templates[processName]) {
-        element.html(html.replace('[content]', templates[processName]));
+
+    if (templates[templatePath]) {
+        element.html(html.replace('[content]', templates[templatePath]));
 
         if (callback) {
             callback(element);
         }
     }
     else {
-        d3.text('templates/'+processName+'.html', function(error, templateHtml) {
+        d3.text(templatePath, function(error, templateHtml) {
             if (error) {
-                console.log('Could not load template : '+processName+'.html');
+                console.log('Could not load template : '+templatePath);
             }
             else {
                 element.html(
-                    html.replace('[content]', templates[processName] = templateHtml)
+                    html.replace('[content]', templates[templatePath] = templateHtml)
                 );
                 if (callback) {
                     callback(element);

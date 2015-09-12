@@ -64,8 +64,14 @@ function loadProcess(processName) {
 			.classed('helperStep list-group-item', true);
 
 	helperStepsForProcess.each(function(d) {
-		var callback = d.process === processName && d.step === 1 ? activateHelperNextStep : noop;
-		d3.select(this).loadTemplate(d.process, d.title, callback);
+		var callback = d.process === processName && d.order === 1 ? activateHelperNextStep : noop;
+
+		d3.select(this).loadTemplate({
+			process: d.process,
+			name: d.step,
+			title: d.title,
+			callback: callback
+		});
 	});
 
 	helperStepsForProcess.exit().remove();
@@ -126,7 +132,7 @@ function activateHelperNextStep() {
 
 function isActiveStepFilter(d) {
 	return helper.datum()
-		&& helper.datum().activeStep === d.step
+		&& helper.datum().activeStep === d.order
 		&& helper.datum().activeProcess === d.process;
 }
 
@@ -134,9 +140,9 @@ function isValidStepFilter(d) {
 	return !d.validate || d.validate();
 }
 
-function getHelperStepData(step) {
-    step = step || helper.datum().activeStep;
-    return helperSteps.data().filter(function(d) { return d.step === step; })[0];
+function getHelperStepData(order) {
+	order = order || helper.datum().activeStep;
+    return helperSteps.data().filter(function(d) { return d.order === order; })[0];
 }
 
 function empty() { return {}; }

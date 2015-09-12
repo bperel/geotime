@@ -27,7 +27,8 @@ function loadHelperConfig() {
 	helperStepsData = [
 		{
 			process: 'mapLocation',
-			step: 1, title: 'Select locations on both maps',
+			order: 1, step: 'select-calibration-points',
+			title: 'Select locations on both maps',
 			onLoad: [enableCalibrationPointSelection, loadCalibrationPoints],
 			validate: checkCalibrationPoints,
 			onUnload: [disableCalibrationPointSelection, unloadCalibrationPoints],
@@ -35,7 +36,8 @@ function loadHelperConfig() {
 			buttons: ['done', 'skip', 'cancel']
 		}, {
 			process: 'mapLocation',
-			step: 2, title: 'Adjust the map calibration',
+			order: 2, step: 'adjust',
+			title: 'Adjust the map calibration',
 			onLoad: [enableMapDragResize],
 			dataUpdate: saveMapPosition,
 			onUnload: [disableMapDragResize],
@@ -43,7 +45,8 @@ function loadHelperConfig() {
 			buttons: ['done', 'skip', 'cancel']
 		}, {
 			process: 'territoryIdentification',
-			step: 1, title: 'Locate territories',
+			order: 1, step: 'locate-territories',
+			title: 'Locate territories',
 			onLoad: [loadLocatedTerritories, showLocatedTerritories, initTerritorySelectionAndAutocomplete],
             validate: checkSelectedTerritory,
             dataUpdate: saveTerritoriesPosition,
@@ -153,24 +156,27 @@ function showCalibrationPoints() {
 
 	calibrationPointsElements
 		.each(function() {
-			d3.select(this).loadTemplate('calibrationPoints', '', function(calibrationPointsItem) {
-				var calibrationPointData = calibrationPointsItem.datum();
+			d3.select(this).loadTemplate({
+				name: 'calibrationPoints',
+				callback: function(calibrationPointsItem) {
+					var calibrationPointData = calibrationPointsItem.datum();
 
-				calibrationPointsItem.select('.removeCalibrationPoint')
-					.on('click', removeCalibrationPoint);
+					calibrationPointsItem.select('.removeCalibrationPoint')
+						.on('click', removeCalibrationPoint);
 
-				calibrationPointsItem.select('li').selectAll('span.badge').data(
-					calibrationPointTypes.filter(function(calibrationPointType) {
-						return !!calibrationPointData[calibrationPointType.property];
-					})
-				)
-					.enter().append('span')
-						.attr('title', function(d) { return JSON.stringify(calibrationPointData[d.property]); })
-						.attr('class', function(d) { return d.property; })
-						.classed('badge', true)
-						.html(function(d) { return d.text; })
-							.append('span')
-								.classed('glyphicon glyphicon-ok', true);
+					calibrationPointsItem.select('li').selectAll('span.badge').data(
+						calibrationPointTypes.filter(function(calibrationPointType) {
+							return !!calibrationPointData[calibrationPointType.property];
+						})
+					)
+						.enter().append('span')
+							.attr('title', function(d) { return JSON.stringify(calibrationPointData[d.property]); })
+							.attr('class', function(d) { return d.property; })
+							.classed('badge', true)
+							.html(function(d) { return d.text; })
+								.append('span')
+									.classed('glyphicon glyphicon-ok', true);
+				}
 			});
 		});
 
@@ -268,17 +274,20 @@ function initTerritorySelectionAndAutocomplete() {
 
 	d3.select('#locatedTerritories')
 		.append('li').classed('addLocatedTerritory list-group-item', true)
-		.loadTemplate('addLocatedTerritory', '', function() {
-			territoryName = d3.select('#territoryName');
-			territoryName.node().focus();
+		.loadTemplate({
+			name: 'addLocatedTerritory',
+			callback: function() {
+				territoryName = d3.select('#territoryName');
+				territoryName.node().focus();
 
-			autocomplete(d3.select('#territoryName').node())
-				.dataField("name")
-				.width(960)
-				.height(500)
-				.render();
+				autocomplete(d3.select('#territoryName').node())
+					.dataField("name")
+					.width(960)
+					.height(500)
+					.render();
 
-			enableTerritorySelection();
+				enableTerritorySelection();
+			}
 		});
 }
 
@@ -319,16 +328,18 @@ function showLocatedTerritories() {
     locatedTerritoriesElements.enter()
 		.append('li')
 		.classed('locatedTerritory list-group-item', true)
-			.loadTemplate('locatedTerritory', '', function(element) {
-
-			element
-				.select('.territoryName')
-				.text(function (d) { return d.referencedTerritory.name; });
-			element.select('.removeLocatedTerritory')
-				.on('click', function (d, i) {
-					locatedTerritories.splice(i, 1);
-					showLocatedTerritories()
-				});
+		.loadTemplate({
+			name: 'locatedTerritory',
+			callback: function(element) {
+				element
+					.select('.territoryName')
+					.text(function (d) { return d.referencedTerritory.name; });
+				element.select('.removeLocatedTerritory')
+					.on('click', function (d, i) {
+						locatedTerritories.splice(i, 1);
+						showLocatedTerritories()
+					});
+			}
 		});
 
     locatedTerritoriesElements.exit().remove();
