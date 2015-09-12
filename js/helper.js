@@ -33,13 +33,18 @@ function initHelper(mapFileName, activeProcess) {
 		.enter().append('li')
 			.append('a')
 				.attr('href', '#')
-				.html(function(d) { return d.text; });
+				.html(function(d) { return d.text; })
+				.on('click', function(d) {
+					loadProcess(d.name);
+				});
 	helperProcessTabs.exit().remove();
 
 	loadProcess(activeProcess);
 }
 
 function loadProcess(processName) {
+	unloadCurrentStep();
+
 	helper.datum({ activeProcess: processName, activeStep: 0 });
 
 	helperProcessesData.forEach(function(processDatum) {
@@ -66,16 +71,18 @@ function loadProcess(processName) {
 	helperStepsForProcess.exit().remove();
 }
 
-function activateHelperNextStep() {
-	if (helper.datum().activeStep > 0) {
-		helperStepsForProcess
-			.filter(isActiveStepFilter)
-			.call(function () {
-				(this.datum().onUnload || []).forEach(function (onUnloadAction) {
-					onUnloadAction();
-				});
-			});
+function unloadCurrentStep() {
+	var activeStep = helperStepsData
+		.filter(isActiveStepFilter);
+
+	if (activeStep.length > 0) {
+		(activeStep[0].onUnload || []).forEach(function (onUnloadAction) {
+			onUnloadAction();
+		});
 	}
+}
+
+function activateHelperNextStep() {
 
 	var newStep = ++helper.datum().activeStep;
 
@@ -85,7 +92,7 @@ function activateHelperNextStep() {
 			.filter(isActiveStepFilter)
 			.each(function(d) {
 				(d.onLoad || []).forEach(function(onLoadAction) {
-					onLoadAction();
+					onLoadAction(d3.select('#externalSvg').datum());
 				});
 			})
 			.selectAll('button').data(helperButtonsData).enter().append('button')
@@ -118,7 +125,9 @@ function activateHelperNextStep() {
 }
 
 function isActiveStepFilter(d) {
-	return d.step === helper.datum().activeStep;
+	return helper.datum()
+		&& helper.datum().activeStep === d.step
+		&& helper.datum().activeProcess === d.process;
 }
 
 function isValidStepFilter(d) {

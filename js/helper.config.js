@@ -28,9 +28,9 @@ function loadHelperConfig() {
 		{
 			process: 'mapLocation',
 			step: 1, title: 'Select locations on both maps',
-			onLoad: [enableCalibrationPointSelection],
+			onLoad: [enableCalibrationPointSelection, loadCalibrationPoints],
 			validate: checkCalibrationPoints,
-			onUnload: [disableCalibrationPointSelection],
+			onUnload: [disableCalibrationPointSelection, unloadCalibrationPoints],
 			dataUpdate: saveMapProjection,
 			buttons: ['done', 'skip', 'cancel']
 		}, {
@@ -38,21 +38,23 @@ function loadHelperConfig() {
 			step: 2, title: 'Adjust the map calibration',
 			onLoad: [enableMapDragResize],
 			dataUpdate: saveMapPosition,
-			onUnload: [disableMapDragResize, persistMapLocation],
+			onUnload: [disableMapDragResize],
+			afterValidate: [persistMapLocation],
 			buttons: ['done', 'skip', 'cancel']
 		}, {
 			process: 'territoryIdentification',
 			step: 1, title: 'Locate territories',
-			onLoad: [showLocatedTerritories,initTerritorySelectionAndAutocomplete],
+			onLoad: [loadLocatedTerritories, showLocatedTerritories, initTerritorySelectionAndAutocomplete],
             validate: checkSelectedTerritory,
             dataUpdate: saveTerritoriesPosition,
-			onUnload: [disableTerritorySelection, persistTerritoriesPosition],
+			afterValidate: [persistTerritoriesPosition],
+			onUnload: [disableTerritorySelection],
 			buttons: ['done', 'skip', 'cancel']
 		}
 	];
 }
 
-// Step 1
+// Process 1, step 1
 function enableCalibrationPointSelection() {
 	svg.on('click', function() {
 		if (bgMapDragState !== 'drag') {
@@ -68,9 +70,28 @@ function enableCalibrationPointSelection() {
 	.call(svgmap_drag);
 }
 
+function loadCalibrationPoints(mapDatum) {
+	calibrationPoints = [];
+	if (mapDatum.calibrationPoints) {
+		for (var i = 0; i < mapDatum.calibrationPoints.length; i++) {
+			var calibrationPoint = mapDatum.calibrationPoints[i];
+			addCalibrationMarker("fgMap", calibrationPoint.fgPoint, false);
+			addCalibrationMarker("bgMap", calibrationPoint.bgPoint, false);
+		}
+	}
+	markersSvg
+		.repositionCalibrationMarkers()
+		.classed('hidden', false);
+	showCalibrationPoints();
+}
+
 function disableCalibrationPointSelection() {
 	svg.on('click', null);
 	svgMap.on('click', null);
+}
+
+function unloadCalibrationPoints() {
+	markersSvg.classed('hidden', true);
 }
 
 function addCalibrationPoint(mapType, clickedPoint) {
@@ -184,7 +205,7 @@ function saveMapProjection() {
 	};
 }
 
-// Step 2
+// Process 1, step 2
 function enableMapDragResize() {
 	svgMap.call(svgmap_drag);
 	resizeHandle
@@ -217,7 +238,7 @@ function persistMapLocation() {
     validateMapLocation(getHelperStepData(2).map);
 }
 
-// Step 3
+// Process 2, step 1
 function enableTerritorySelection() {
 	territoryId = d3.select('#territoryId');
 
@@ -283,6 +304,14 @@ function updateTerritoryId() {
 	territoryId
 		.classed('clicked', !!selectedTerritory && (!hoveredTerritory || hoveredTerritory.node() === selectedTerritory.node()))
 		.text(id);
+}
+
+function loadLocatedTerritories(mapDatum) {
+	if (mapDatum.territories) {
+		locatedTerritories = mapDatum.territories.filter(function (d) {
+			return d.referencedTerritory && d.area;
+		});
+	}
 }
 
 function showLocatedTerritories() {

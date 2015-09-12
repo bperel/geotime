@@ -318,13 +318,9 @@ function loadUI() {
 }
 
 function loadUIConfig(mapInfo) {
-	displaySelectedProjection(mapInfo.projection);
+	d3.select('#externalSvg').datum(mapInfo);
 
-	if (mapInfo.territories) {
-		locatedTerritories = mapInfo.territories.filter(function (d) {
-			return d.referencedTerritory && d.area;
-		});
-	}
+	displaySelectedProjection(mapInfo.projection);
 
 	initResizeHandle();
 	if (mapInfo.center && mapInfo.center.length) {
@@ -332,14 +328,6 @@ function loadUIConfig(mapInfo) {
 	}
 	else {
 		initHelper(mapInfo.fileName, 'mapLocation');
-	}
-	calibrationPoints = [];
-	if (mapInfo.calibrationPoints) {
-		for (var i = 0; i < mapInfo.calibrationPoints.length; i++) {
-			var calibrationPoint = mapInfo.calibrationPoints[i];
-			addCalibrationMarker("fgMap", calibrationPoint.fgPoint, false);
-			addCalibrationMarker("bgMap", calibrationPoint.bgPoint, false);
-		}
 	}
 }
 
