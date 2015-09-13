@@ -38,7 +38,7 @@ function loadHelperConfig() {
 			process: 'mapLocation',
 			order: 2, step: 'adjust',
 			title: 'Adjust the map calibration',
-			onLoad: [enableMapDragResize],
+			onLoad: [enableMapDragResize,initProjectionSelect],
 			dataUpdate: saveMapPosition,
 			onUnload: [disableMapDragResize],
 			afterValidate: [persistMapLocation],
@@ -214,9 +214,23 @@ function saveMapProjection() {
 // Process 1, step 2
 function enableMapDragResize() {
 	svgMap.call(svgmap_drag);
-	resizeHandle
-		.call(svgmap_resize)
-		.classed("hidden", false);
+}
+
+function initProjectionSelect(mapDatum) {
+	projectionSelection = d3.select('#projectionSelection');
+
+	projectionSelection.selectAll('option')
+		.data(projections.map(function(projectionName) {
+			return { name: projectionName };
+		}))
+		.enter().append('option')
+		.text(function (d) {
+			return d.name;
+		})
+		.attr('selected', function(d) { return mapDatum && mapDatum.projection === d.name ? 'selected' : null; })
+		.on('change', function () {
+			applyProjection(getSelectedProjection(), projection.center(), projection.scale(), projection.rotate());
+		});
 }
 
 function saveMapPosition() {
@@ -235,9 +249,6 @@ function saveMapPosition() {
 
 function disableMapDragResize() {
 	svgMap.on('mousedown.drag', null);
-	resizeHandle
-		.on('mousedown.drag', null)
-		.classed("hidden", true);
 }
 
 function persistMapLocation() {

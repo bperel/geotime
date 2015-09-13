@@ -1,6 +1,7 @@
 describe('Map tests', function() {
     beforeEach(function(){
         gatewayUrl = '../../gateway.php';
+        projections = ['mercator'];
 
         jasmine.getJSONFixtures().fixturesPath = 'base';
         loadJSONFixtures("test/phpunit/_data/countries.json");
@@ -32,7 +33,7 @@ describe('Map tests', function() {
         });
 
         it('should load', function() {
-            initProjectionSelect([{name: 'mercator'}]);
+            initProjectionSelect();
             showBgMap("backgroundMap", getJSONFixture("test/phpunit/_data/countries.json"));
             expect(d3.select("#backgroundMap").empty()).toBeFalsy();
         })
@@ -79,7 +80,7 @@ describe('Map tests', function() {
         });
 
         it('should load', function() {
-            initProjectionSelect([{name: 'mercator'}]);
+            initProjectionSelect();
             loadTerritoryMap(true);
 
             var bgWidth = width;

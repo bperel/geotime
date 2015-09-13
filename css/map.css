@@ -16,7 +16,7 @@
     fill: none;
 }
 
-#map, #externalSvg, #resizeHandle, #markers {
+#map, #externalSvg, #markers {
     position: absolute;
     left: 200px;
 }
@@ -27,9 +27,4 @@
 
 .selected {
     fill: black !important;
-}
-
-#resizeHandle rect {
-    cursor: se-resize;
-    fill:gray;
 }

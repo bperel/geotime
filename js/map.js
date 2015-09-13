@@ -1,14 +1,19 @@
 var width = 960;
 var mapHeight= 480;
 var mapPadding = 200;
-var resizeHandleSize = 16;
 var maxExternalMapSizePercentage = 80;
 var svg;
 var markersSvg = d3.selectAll('nothing');
 var hoveredTerritory;
 var selectedTerritory;
 
-var projectionSelection;
+var projections = [
+	'mercator',
+	'equirectangular',
+	'orthographic'
+];
+
+var projectionSelection = d3.selectAll('nothing');
 var mapSelection;
 var dragAction;
 var dragMode = 'pan';
@@ -34,11 +39,6 @@ var bgSvgmap_drag = d3.behavior.drag()
 	.origin(function(d) { return d; })
 	.on("dragstart", bgMapDragStarted)
 	.on("drag", bgMapDragMove);
-
-
-var svgmap_resize = d3.behavior.drag()
-	.on("dragstart", dragresizestarted)
-	.on("drag", dragresize);
 
 function applyProjection(name, center, scale, rotation) {
 	projection = d3.geo[name]()
@@ -132,7 +132,9 @@ function initMapArea() {
 }
 
 function getSelectedProjection() {
-	return d3.select(projectionSelection.node().options[projectionSelection.node().selectedIndex]).datum().name;
+	return (projectionSelection.size() > 0)
+		? d3.select(projectionSelection.node().options[projectionSelection.node().selectedIndex]).datum().name
+		: 'mercator';
 }
 
 function displaySelectedProjection(projectionName) {
@@ -266,30 +268,8 @@ function loadTerritoryMap(noUi, fileName) {
 	}
 }
 
-function initProjectionSelect(options) {
-	projectionSelection = d3.select('#projectionSelection');
-
-	projectionSelection.selectAll('option')
-		.data(options)
-		.enter().append('option')
-		.text(function (d) {
-			return d.name;
-		});
-}
-
 function loadUI() {
 	addCalibrationDefsMarkers();
-
-	initProjectionSelect([
-		{name: 'mercator'},
-		{name: 'equirectangular'},
-		{name: 'orthographic'}
-	]);
-
-	projectionSelection
-		.on('change', function () {
-			applyProjection(getSelectedProjection(), projection.center(), projection.scale(), projection.rotate());
-		});
 
 	dragAction = d3.select('#dragActionContainer')
 		.selectAll('input')
@@ -325,7 +305,6 @@ function loadUIConfig(mapInfo) {
 
 	displaySelectedProjection(mapInfo.projection);
 
-	initResizeHandle();
 	if (mapInfo.center && mapInfo.center.length) {
 		initHelper(mapInfo.fileName, 'territoryIdentification');
 	}
@@ -474,25 +453,6 @@ function onHoveredTerritoryClick() {
 	}
 	updateTerritoryId();
     d3.select('#currentTerritory').classed('hidden', false);
-}
-
-function dragresizestarted() {
-	d3.event.sourceEvent.stopPropagation();
-}
-
-function dragresize(){
-	var newWidth = svgMap.datum().width;
-	var newHeight = svgMap.datum().height;
-	if (d3.event) {
-		newWidth += d3.event.dx;
-		newHeight += d3.event.dy;
-	}
-
-	var widthHeight = resizeExternalMap(newWidth, newHeight);
-
-	resizeHandle
-		.style("left", (mapPadding + widthHeight.width  - resizeHandleSize)+"px")
-		.style("top",  (             widthHeight.height - resizeHandleSize)+"px");
 }
 
 d3.selection.prototype.mapOffset = function() {

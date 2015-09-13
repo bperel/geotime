@@ -273,8 +273,7 @@ function calibrateMapRotation() {
 	var currentProjection = projection;
 
 	var bestProjectionResult = {min: Infinity};
-	projectionSelection.selectAll('option').data().forEach(function(d) {
-		var projectionName = d.name;
+	projections.forEach(function(projectionName) {
 
 		projection = d3.geo[projectionName]()
 			.center(currentProjection.center())

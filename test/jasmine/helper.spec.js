@@ -52,7 +52,6 @@ describe('Helper tests', function() {
             initHelper('myMap.svg', testHelperSteps);
 
             expect(d3.select('#mapTitle').text()).toEqual('myMap.svg');
-            expect(d3.select('#resizeHandle').classed('hidden')).toBeTruthy();
             expect(helperSteps.size()).toEqual(2);
 
             var firstStep = helperSteps.filter(function(d) { return d.step === 1; });

@@ -4,21 +4,9 @@ var helperButtonsData = [];
 var helperStepsForProcess = [];
 var helperStepsData = [];
 var helperProcessesData = [];
-var templates = [];
-var resizeHandle;
+var templates = []
 var territoryId;
 var territoryName;
-
-function initResizeHandle() {
-	resizeHandle = d3.select('#resizeHandle');
-	resizeHandle
-		.classed("hidden", true)
-		.attr("width", resizeHandleSize)
-		.attr("height", resizeHandleSize)
-		.select("rect")
-			.attr("width", resizeHandleSize)
-			.attr("height", resizeHandleSize);
-}
 
 function initHelper(mapFileName, activeProcess) {
 	d3.select('#mapTitle').text(mapFileName);

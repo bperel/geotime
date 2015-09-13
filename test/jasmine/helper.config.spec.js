@@ -10,6 +10,7 @@ describe('Calibration tests', function() {
     beforeEach(function(){
 
         gatewayUrl = '../../gateway.php';
+        projections = ['mercator'];
 
         jasmine.getJSONFixtures().fixturesPath = 'base';
         loadJSONFixtures("test/phpunit/_data/countries.json");
@@ -21,7 +22,7 @@ describe('Calibration tests', function() {
 
         initMapArea();
         addCalibrationDefsMarkers();
-        initProjectionSelect([{name: 'mercator'}]);
+        initProjectionSelect();
         showBgMap("backgroundMap", getJSONFixture("test/phpunit/_data/countries.json"));
 
         spyOn(window, "ajaxPost").and.callFake(function(options, callback) {
