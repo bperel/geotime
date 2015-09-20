@@ -9,7 +9,7 @@ function create() {
         var cleanedUrl = decodeURIComponent(request.url
             .replace(/\//g, fs.separator)
             .replace(/\?.*$/g, '')
-            .replace(/js\/js\//,'js/'));
+            .replace(['js','js'].join(''+fs.separator),'js'));
         //console.log('Requesting ' + request.url + ', loading ' + cleanedUrl);
         var pagePath = workingDirectory + cleanedUrl;
         var extension = pagePath.replace(/^.*\.(.*)$/,'$1');
