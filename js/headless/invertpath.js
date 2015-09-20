@@ -25,7 +25,8 @@ if (system.args.length < 7) {
 					return projectionName;
 				};
 
-				initMapArea();
+				initBackgroundMap();
+				resizeBackgroundMap(widthSuperimposed, mapHeight);
 
 				var svgFileName = args[1];
 				var pathId = args[2];

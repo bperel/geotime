@@ -25,7 +25,8 @@ describe('Map tests', function() {
 
     describe('Background map', function() {
         beforeEach(function(){
-            initMapArea();
+            initBackgroundMap();
+            resizeBackgroundMap(widthSuperimposed, mapHeight);
         });
 
         it('should get instanciated', function() {
@@ -52,7 +53,9 @@ describe('Map tests', function() {
                 buttons: []
             }];
 
-            initMapArea();
+            initBackgroundMap();
+            resizeBackgroundMap(widthSuperimposed, mapHeight);
+
             showBgMap("backgroundMap", getJSONFixture("test/phpunit/_data/countries.json"));
 
             spyOn(window, "ajaxPost").and.callFake(function(options, callback) {

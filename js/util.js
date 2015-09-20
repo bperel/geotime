@@ -51,9 +51,19 @@ d3.selection.prototype.styleIntWithoutPx = function(property) {
     if (!property) {
         return null;
     }
-    var value = this.style(property);
-    return value && parseInt(value.replace(/px$/,''));
+    return intWithoutPx(this.style(property));
 };
+
+d3.selection.prototype.attrIntWithoutPx = function(attr) {
+    if (!attr) {
+        return null;
+    }
+    return intWithoutPx(this.style(attr));
+};
+
+function intWithoutPx(value) {
+    return value && parseInt(value.replace(/px$/,''));
+}
 
 Number.prototype.round10pow = function(p) {
     p = p || 0;

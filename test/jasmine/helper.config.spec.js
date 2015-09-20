@@ -20,7 +20,8 @@ describe('Calibration tests', function() {
 
         jasmine.Ajax.install();
 
-        initMapArea();
+        initBackgroundMap();
+        resizeBackgroundMap(widthSuperimposed, mapHeight);
         addCalibrationDefsMarkers();
         initProjectionSelect();
         showBgMap("backgroundMap", getJSONFixture("test/phpunit/_data/countries.json"));

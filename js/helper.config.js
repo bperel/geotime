@@ -29,7 +29,7 @@ function loadHelperConfig() {
 			process: 'mapLocation',
 			order: 1, step: 'select-calibration-points',
 			title: 'Select locations on both maps',
-			onLoad: [enableCalibrationPointSelection, loadCalibrationPoints],
+			onLoad: [enableCalibrationPointSelection, loadCalibrationPoints, showMapsSideBySide],
 			validate: checkCalibrationPoints,
 			onUnload: [disableCalibrationPointSelection, unloadCalibrationPoints],
 			dataUpdate: saveMapProjection,
@@ -47,7 +47,7 @@ function loadHelperConfig() {
 			process: 'territoryIdentification',
 			order: 1, step: 'locate-territories',
 			title: 'Locate territories',
-			onLoad: [loadLocatedTerritories, showLocatedTerritories, initTerritorySelectionAndAutocomplete],
+			onLoad: [loadLocatedTerritories, showLocatedTerritories, initTerritorySelectionAndAutocomplete, showMapsSuperimposed],
             validate: checkSelectedTerritory,
             dataUpdate: saveTerritoriesPosition,
 			afterValidate: [persistTerritoriesPosition],
@@ -86,6 +86,16 @@ function loadCalibrationPoints(mapDatum) {
 		.repositionCalibrationMarkers()
 		.classed('hidden', false);
 	showCalibrationPoints();
+}
+
+function showMapsSideBySide(mapDatum) {
+	resizeBackgroundMap(widthSideBySide, mapHeight);
+	positionExternalMap(mapDatum.center);
+}
+
+function showMapsSuperimposed(mapDatum) {
+	resizeBackgroundMap(widthSuperimposed, mapHeight);
+	positionExternalMap(mapDatum.center);
 }
 
 function disableCalibrationPointSelection() {

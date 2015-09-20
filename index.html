@@ -24,7 +24,9 @@
         <script type="text/javascript">
             onLoad = function() {
                 initMapPlaceHolders(function() {
-                    initMapArea();
+                    initBackgroundMap();
+                    resizeBackgroundMap(widthSuperimposed, mapHeight);
+
                     loadUI();
                     loadHelperConfig();
                     getAndShowBgMap("backgroundMap", "data/external/ne_110m_coastline.json", function() {

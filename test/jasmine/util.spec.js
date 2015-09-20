@@ -36,8 +36,6 @@ describe('Util tests', function() {
         });
 
         it('should return coordinates', function() {
-            resizeExternalMap();
-
             var pathCoordinates = d3.select('#myPath').getPathCoordinates();
             var pathLength = 2 * Math.ceil(Math.sqrt(Math.pow(width/2, 2) + Math.pow(mapHeight/2, 2)));
             expect(pathCoordinates.length).toEqual(pathLength);
