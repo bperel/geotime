@@ -89,12 +89,12 @@ function loadCalibrationPoints(mapDatum) {
 
 function showMapsSideBySide(mapDatum) {
 	resizeBackgroundMap(widthSideBySide, mapHeight);
-	positionExternalMap(mapDatum.center);
+	positionExternalMap(true);
 }
 
 function showMapsSuperimposed(mapDatum) {
 	resizeBackgroundMap(widthSuperimposed, mapHeight);
-	positionExternalMap(mapDatum.center);
+	positionExternalMap(false);
 }
 
 function disableCalibrationPointSelection() {

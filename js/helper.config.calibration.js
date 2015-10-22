@@ -104,7 +104,6 @@ var markerRadius = 9;
 function addCalibrationDefsMarkers() {
 	markersSvg = d3.select("#mapArea")
 		.insert("svg", ":first-child").attr("id", "markers")
-		.attr("width", width)
 		.attr("height", mapHeight);
 
 	markersSvg.selectAll('g')

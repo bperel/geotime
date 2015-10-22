@@ -4,7 +4,6 @@ var widthSideBySide = 480;
 var width = widthSuperimposed;
 
 var mapHeight= 480;
-var mapPadding = 200;
 var maxExternalMapSizePercentage = 80;
 var svg;
 var markersSvg = d3.selectAll('nothing');
@@ -301,7 +300,7 @@ function loadUI() {
 }
 
 function loadUIConfig(mapInfo) {
-	d3.select('#externalSvg').datum(mapInfo);
+	svgMap.datum(mapInfo);
 
 	if (mapInfo.projection) {
 		applyProjection(mapInfo.projection, mapInfo.center, mapInfo.scale, mapInfo.rotation);
@@ -371,11 +370,11 @@ function getExternalMapOffsetToCenter() {
     };
 }
 
-function positionExternalMap(center) {
+function positionExternalMap(sideBySide) {
 	loadExternalMapPosition(
-        center.length
-			? getExternalMapOffsetToCenter()
-			: getExternalMapOffsetToRight()
+		sideBySide
+			? getExternalMapOffsetToRight()
+			: getExternalMapOffsetToCenter()
     );
 }
 
@@ -385,12 +384,14 @@ function loadExternalMapPosition(projectedLeftTop) {
 		d.y = projectedLeftTop.y;
 		return d;
 	});
-	d3.select("#externalSvg")
+	svgMap
 		.style("margin-left", projectedLeftTop.x+"px")
 		.style("margin-top",+ projectedLeftTop.y +"px");
 
-	markersSvg.selectAll("g.fgMap")
-		.attr("transform", "translate("+[projectedLeftTop.x, projectedLeftTop.y].join(" ")+")");
+	markersSvg
+		.attr("width", projectedLeftTop.x + svgMap.attrIntWithoutPx("width"))
+		.selectAll("g.fgMap")
+			.attr("transform", "translate("+[projectedLeftTop.x, projectedLeftTop.y].join(" ")+")")
 }
 
 function resizeExternalMap(forcedWidth, forcedHeight) {
