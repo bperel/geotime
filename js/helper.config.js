@@ -38,7 +38,7 @@ function loadHelperConfig() {
 			process: 'mapLocation',
 			order: 2, step: 'adjust',
 			title: 'Adjust the map calibration',
-			onLoad: [enableMapDragResize,initProjectionSelect],
+			onLoad: [initProjectionSelect],
 			dataUpdate: saveMapPosition,
 			onUnload: [disableMapDragResize],
 			afterValidate: [persistMapLocation],
@@ -69,8 +69,7 @@ function enableCalibrationPointSelection() {
 		if (!d3.event.defaultPrevented) {
 			addCalibrationPoint('fgMap', d3.event);
 		}
-	})
-	.call(svgmap_drag);
+	});
 }
 
 function loadCalibrationPoints(mapDatum) {
@@ -125,6 +124,8 @@ function addCalibrationPoint(mapType, clickedPoint) {
 	}
 	else {
 		coordinates = clickedPoint;
+		coordinates.x -= markerRadius;
+		coordinates.y -= markerRadius;
 	}
 
 	addCalibrationMarker(mapType, coordinates, true);
@@ -222,9 +223,6 @@ function saveMapProjection() {
 }
 
 // Process 1, step 2
-function enableMapDragResize() {
-	svgMap.call(svgmap_drag);
-}
 
 function initProjectionSelect(mapDatum) {
 	projectionSelection = d3.select('#projectionSelection');

@@ -111,8 +111,7 @@ function addCalibrationDefsMarkers() {
 		.data([{type: 'bgMap'}, {type: 'fgMap'}])
 		.enter()
 		.append('g')
-		.attr('class', function(d) { return 'marker-group '+d.type; })
-		.attr('transform', function(d) { return 'translate('+(d.type === 'bgMap' ? 0 : -mapPadding)+' 0)'; });
+		.attr('class', function(d) { return 'marker-group '+d.type; });
 
 	var defs = markersSvg.append('defs');
 	var marker = defs.append('svg:g').attr('id','crosshair-marker');
@@ -197,7 +196,7 @@ function getGroupedCalibrationPoints(withProjectedCoords) {
 
 function positionCalibrationMarker(d) {
 	if (d.coordinates.lng !== undefined) {
-		var xyCoordinates = projection([d.coordinates.lat, d.coordinates.lng]);
+		var xyCoordinates = projection([d.coordinates.lng, d.coordinates.lat]);
 		d.coordinates.x = xyCoordinates[0].round10pow(6);
 		d.coordinates.y = xyCoordinates[1].round10pow(6);
 	}

@@ -18,7 +18,6 @@
 
 #map, #externalSvg, #markers {
     position: absolute;
-    left: 200px;
 }
 
 .hovered {

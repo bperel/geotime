@@ -34,11 +34,6 @@ var projection,
 			drawPaths();
 		});
 
-var svgmap_drag = d3.behavior.drag()
-	.origin(function(d) { return d; })
-	.on("dragstart", dragstarted)
-	.on("drag", dragmove);
-
 var bgSvgmap_drag = d3.behavior.drag()
 	.origin(function(d) { return d; })
 	.on("dragstart", bgMapDragStarted)
@@ -212,7 +207,11 @@ function loadTerritoryMapFromSvgElement(mapFileName, mapInfo) {
 		.attr("name", mapFileName)
 		.attr("id", "externalSvg")
 		.classed("externalSvg", true)
-		.attr("preserveAspectRatio", "xMinYMin meet");
+		.attr("preserveAspectRatio", "xMinYMin meet")
+		.call(
+			d3.behavior.drag()
+				.origin(function(d) { return d; })
+		);
 
 	var svgMapWidth = svgMap.attrIntWithoutPx("width");
 	var svgMapHeight = svgMap.attrIntWithoutPx("height");
@@ -474,7 +473,7 @@ function onHoveredTerritoryClick() {
 
 d3.selection.prototype.mapOffset = function() {
 	return {
-		x: this.styleIntWithoutPx("margin-left") + mapPadding,
+		x: this.styleIntWithoutPx("margin-left"),
 		y: this.styleIntWithoutPx("margin-top")
 	};
 };

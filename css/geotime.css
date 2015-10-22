@@ -19,6 +19,12 @@ a {
     opacity: 0.5;
 }
 
+#dragActionContainer {
+    z-index: 10;
+    position: absolute;
+    background: white;
+}
+
 #loadRandomTerritoryMap,
 #selectMap {
     position: fixed;
