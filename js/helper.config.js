@@ -47,7 +47,7 @@ function loadHelperConfig() {
 			process: 'territoryIdentification',
 			order: 1, step: 'locate-territories',
 			title: 'Locate territories',
-			onLoad: [loadLocatedTerritories, showLocatedTerritories, initTerritorySelectionAndAutocomplete],
+			onLoad: [loadLocatedTerritories, showLocatedTerritories, showMapsSuperimposed, initTerritorySelectionAndAutocomplete],
             validate: checkSelectedTerritory,
             dataUpdate: saveTerritoriesPosition,
 			afterValidate: [persistTerritoriesPosition],

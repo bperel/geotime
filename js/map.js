@@ -250,7 +250,7 @@ function loadTerritoryMapData(fileName, mapInfo, contentFromFileSystem, callback
 			}
 			else {
 				d3.xml("cache/svg/" + mapFileName, "image/svg+xml", function (svgDocument) {
-					svgMap = d3.select(d3.select("#mapArea").node().appendChild(document.importNode(svgDocument.documentElement, true)));
+					svgMap = d3.select(d3.select("#mapArea").node().insertBefore(document.importNode(svgDocument.documentElement, true), svg.node()));
 					loadTerritoryMapFromSvgElement(mapFileName, mapInfo);
 					callback(mapInfo);
 				});

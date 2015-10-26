@@ -31,6 +31,8 @@ function initHelper(mapFileName, activeProcess) {
 }
 
 function loadProcess(processName) {
+	unloadCurrentStep();
+
 	helper.datum({ activeProcess: processName, activeStep: 0 });
 
 	helperProcessesData.forEach(function(processDatum) {
@@ -64,7 +66,7 @@ function loadProcess(processName) {
 }
 
 function unloadCurrentStep() {
-	((helperStepsData.filter(isActiveStepFilter) || [{}])[0]
+	((helperStepsData.filter(isActiveStepFilter)[0] || {})
 		.onUnload || []
 	)
 	.forEach(function (onUnloadAction) {
