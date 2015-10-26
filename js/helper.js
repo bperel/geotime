@@ -31,8 +31,6 @@ function initHelper(mapFileName, activeProcess) {
 }
 
 function loadProcess(processName) {
-	unloadCurrentStep();
-
 	helper.datum({ activeProcess: processName, activeStep: 0 });
 
 	helperProcessesData.forEach(function(processDatum) {
@@ -66,14 +64,12 @@ function loadProcess(processName) {
 }
 
 function unloadCurrentStep() {
-	var activeStep = helperStepsData
-		.filter(isActiveStepFilter);
-
-	if (activeStep.length > 0) {
-		(activeStep[0].onUnload || []).forEach(function (onUnloadAction) {
-			onUnloadAction();
-		});
-	}
+	((helperStepsData.filter(isActiveStepFilter) || [{}])[0]
+		.onUnload || []
+	)
+	.forEach(function (onUnloadAction) {
+		onUnloadAction();
+	});
 }
 
 function activateHelperNextStep() {
@@ -98,8 +94,11 @@ function activateHelperNextStep() {
 								return btnData.name !== 'done' || isValidStepFilter(d);
 							});
 						if (!stepElement.empty()) {
-							if (btnData.name === 'done' && stepElement.datum().dataUpdate) {
-								stepElement.datum(stepElement.datum().dataUpdate());
+							if (btnData.name === 'done') {
+								if (stepElement.datum().dataUpdate) {
+									stepElement.datum(stepElement.datum().dataUpdate());
+								}
+								unloadCurrentStep();
 							}
 							btnData.click(stepElement);
 						}
