@@ -59,8 +59,6 @@ function autocomplete(parent) {
                 .attr("height", __height);
 
             var input = d3.select(this)
-                .attr("class", "form-control")
-                .attr("type","text")
                 .on("keyup",onKeyUp);
 
             var dropDown=container.append("div").attr("class","bp-autocomplete-dropdown");

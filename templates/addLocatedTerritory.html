@@ -6,22 +6,34 @@
     Currently selected territory : <span id="territoryId">None</span>
     <br />
     <div id="currentTerritory" class="hidden">
-        <table>
-            <tr>
-                <td>
-                    <label for="territoryName">Name :</label>
-                </td>
-                <td>
-                    <input type="text" id="territoryName" />
-                </td>
-            </tr>
-        </table>
-        <br />had these borders
-        <label for="territoryPeriodStart">from </label>
-        <input type="number" id="territoryPeriodStart" />
-        <label for="territoryPeriodEnd"  > to  </label>
-        <input type="number" id="territoryPeriodEnd" />
+        <div class="row">
+            <div class="col-md-4">
+                <label for="territoryName">Territory</label>
+            </div>
+            <div class="col-md-8">
+                <input class="form-control" type="text" id="territoryName" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">had these borders</div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <label for="territoryPeriodStart">from</label>
+            </div>
+            <div class="col-md-8">
+                <input class="form-control" type="text" id="territoryPeriodStart" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <label for="territoryPeriodEnd">to</label>
+            </div>
+            <div class="col-md-8">
+                <input class="form-control" type="text" id="territoryPeriodEnd" />
+            </div>
+        </div>
 
-        <input type="button" id="addTerritory" class="validate btn btn-default" value="Add territory"/>
+        <input type="button" id="addTerritory" class="col-md-12 btn btn-default" value="Add territory"/>
     </div>
 </div>

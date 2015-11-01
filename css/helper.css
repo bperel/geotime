@@ -88,18 +88,12 @@
 .helperStep .section {
     position: relative;
     border: 1px dashed gray;
-    padding: 5px 5px 25px;
+    padding: 5px 5px 50px;
 }
 
 .helperStep .section .title {
     font-weight: bold;
     display: block;
-}
-
-.helperStep .section .validate {
-    bottom: 0;
-    right: 0;
-    position: absolute;
 }
 
 .helperStep li.calibrationPoint  {
@@ -128,6 +122,10 @@
 .helperStep #locatedTerritories .addLocatedTerritory {
     color: black;
     text-shadow: none;
+}
+
+.helperStep #locatedTerritories .addLocatedTerritory label[for^="territoryPeriod"] {
+    display: block;
 }
 
 .helperStep #locatedTerritories .removeLocatedTerritory {
