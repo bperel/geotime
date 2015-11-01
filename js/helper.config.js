@@ -268,10 +268,11 @@ function enableTerritorySelection() {
 	territoryId = d3.select('#territoryId');
 
 	svgMap
+		.classed("onTop", true)
 		.selectAll("path")
-		.on("mouseover", onTerritoryMouseover)
-		.on("mouseout",  onTerritoryMouseout)
-		.on("click",     onHoveredTerritoryClick);
+			.on("mouseover", onTerritoryMouseover)
+			.on("mouseout",  onTerritoryMouseout)
+			.on("click",     onHoveredTerritoryClick);
 
     d3.select('#addTerritory').on('click', function() {
         locatedTerritories.push({
@@ -312,10 +313,11 @@ function initTerritorySelectionAndAutocomplete() {
 
 function disableTerritorySelection() {
 	svgMap
+		.classed("onTop", false)
 		.selectAll("path")
-		.on("mouseover", null)
-		.on("mouseout",  null)
-		.on("click",     null);
+			.on("mouseover", null)
+			.on("mouseout",  null)
+			.on("click",     null);
 }
 
 function updateTerritoryId() {

@@ -20,6 +20,10 @@
     position: absolute;
 }
 
+#externalSvg.onTop {
+    z-index: 20;
+}
+
 .hovered {
     fill: red !important;
 }
