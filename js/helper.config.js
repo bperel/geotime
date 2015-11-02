@@ -47,11 +47,11 @@ function loadHelperConfig() {
 			process: 'territoryIdentification',
 			order: 1, step: 'locate-territories',
 			title: 'Locate territories',
-			onLoad: [loadLocatedTerritories, showLocatedTerritories, showMapsSuperimposed, initTerritorySelectionAndAutocomplete],
+			onLoad: [loadLocatedTerritories, showLocatedTerritories, hideBackgroundMapIfNotCalibrated, showMapsSuperimposed, initTerritorySelectionAndAutocomplete],
             validate: checkSelectedTerritory,
             dataUpdate: saveTerritoriesPosition,
 			afterValidate: [persistTerritoriesPosition],
-			onUnload: [disableTerritorySelection],
+			onUnload: [disableTerritorySelection, showBackgroundMap],
 			buttons: ['done', 'skip', 'cancel']
 		}
 	];
@@ -87,14 +87,22 @@ function loadCalibrationPoints(mapDatum) {
 	showCalibrationPoints();
 }
 
-function showMapsSideBySide(mapDatum) {
+function showMapsSideBySide() {
 	resizeBackgroundMap(widthSideBySide, mapHeight);
 	positionExternalMap(true);
 }
 
-function showMapsSuperimposed(mapDatum) {
+function showMapsSuperimposed() {
 	resizeBackgroundMap(widthSuperimposed, mapHeight);
 	positionExternalMap(false);
+}
+
+function hideBackgroundMapIfNotCalibrated(mapDatum) {
+	svg.classed('hidden', !mapDatum.projection);
+}
+
+function showBackgroundMap() {
+	svg.classed('hidden', false);
 }
 
 function disableCalibrationPointSelection() {
@@ -265,7 +273,7 @@ function persistMapLocation() {
 
 // Process 2, step 1
 function enableTerritorySelection() {
-	territoryId = d3.select('#territoryId');
+	selectedTerritory = d3.select('nothing');
 
 	svgMap
 		.classed("onTop", true)
@@ -288,15 +296,22 @@ function enableTerritorySelection() {
         });
         showLocatedTerritories();
     });
+
+	d3.select('#cancelTerritory').on('click', function() {
+		d3.select('#locatedTerritories').select('.addLocatedTerritory').remove();
+		initTerritorySelectionAndAutocomplete();
+	});
 }
 
 function initTerritorySelectionAndAutocomplete() {
+	clearHoveredAndSelectedTerritories();
 
 	d3.select('#locatedTerritories')
 		.append('li').classed('addLocatedTerritory list-group-item', true)
 		.loadTemplate({
 			name: 'addLocatedTerritory',
 			callback: function() {
+				territoryId = d3.select('#territoryId');
 				territoryName = d3.select('#territoryName');
 				territoryName.node().focus();
 
@@ -318,28 +333,37 @@ function disableTerritorySelection() {
 			.on("mouseover", null)
 			.on("mouseout",  null)
 			.on("click",     null);
+	clearHoveredAndSelectedTerritories();
+}
+
+function clearHoveredAndSelectedTerritories() {
+	hoveredTerritory.classed("hovered", false);
+	hoveredTerritory = d3.select('nothing');
+
+	selectedTerritory.classed("selected", false);
+	selectedTerritory = d3.select('nothing');
 }
 
 function updateTerritoryId() {
 	var id;
-	if (hoveredTerritory) {
+	if (!hoveredTerritory.empty()) {
 		id = hoveredTerritory.attr('id');
 	}
-	else if (selectedTerritory) {
+	else if (!selectedTerritory.empty()) {
 		id = selectedTerritory.attr('id');
 	}
 	else {
 		id = 'None';
 	}
 	territoryId
-		.classed('clicked', !!selectedTerritory && (!hoveredTerritory || hoveredTerritory.node() === selectedTerritory.node()))
+		.classed('clicked', !selectedTerritory.empty() && (hoveredTerritory.empty() || hoveredTerritory.node() === selectedTerritory.node()))
 		.text(id);
 }
 
 function loadLocatedTerritories(mapDatum) {
 	if (mapDatum.territories) {
 		locatedTerritories = mapDatum.territories.filter(function (d) {
-			return d.referencedTerritory && d.area;
+			return d.referencedTerritory;
 		});
 	}
 }

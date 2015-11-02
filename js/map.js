@@ -7,8 +7,8 @@ var mapHeight= 480;
 var maxExternalMapSizePercentage = 80;
 var svg;
 var markersSvg = d3.selectAll('nothing');
-var hoveredTerritory;
-var selectedTerritory;
+var hoveredTerritory = d3.select('nothing');
+var selectedTerritory = d3.select('nothing');
 
 var projections = [
 	'mercator',
@@ -304,14 +304,14 @@ function loadUIConfig(mapInfo) {
 
 	if (mapInfo.projection) {
 		applyProjection(mapInfo.projection, mapInfo.center, mapInfo.scale, mapInfo.rotation);
+		displaySelectedProjection(mapInfo.projection);
 	}
 	else {
 		applyProjection('mercator', 0, 0, [0, 0, 0]);
 	}
 
-	displaySelectedProjection(mapInfo.projection);
 
-	if (mapInfo.center && mapInfo.center.length) {
+	if (mapInfo.projection || mapInfo.territories.length) {
 		initHelper(mapInfo.fileName, 'territoryIdentification');
 	}
 	else {
@@ -448,21 +448,19 @@ function onTerritoryMouseover() {
 
 function onTerritoryMouseout() {
 	hoveredTerritory.classed("hovered", false);
-	hoveredTerritory = null;
+	hoveredTerritory = d3.select('nothing');
 	updateTerritoryId();
 }
 
 function onHoveredTerritoryClick() {
-	var hoveredTerritoryIsSelected =
-		hoveredTerritory && selectedTerritory
-	 && hoveredTerritory.node() === selectedTerritory.node();
+	var hoveredTerritoryIsSelected = hoveredTerritory.node() === selectedTerritory.node();
 
-	if (selectedTerritory) {
+	if (!selectedTerritory.empty()) {
 		selectedTerritory.classed("selected", false);
 	}
 
 	if (hoveredTerritoryIsSelected) {
-		selectedTerritory = null;
+		selectedTerritory = d3.select('nothing');
 	}
 	else {
 		selectedTerritory = hoveredTerritory;
