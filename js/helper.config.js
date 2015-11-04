@@ -132,8 +132,8 @@ function addCalibrationPoint(mapType, clickedPoint) {
 	}
 	else {
 		coordinates = clickedPoint;
-		coordinates.x -= markerRadius;
-		coordinates.y -= markerRadius;
+		coordinates.x -= markerSide;
+		coordinates.y -= markerSide;
 	}
 
 	addCalibrationMarker(mapType, coordinates, true);

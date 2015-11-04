@@ -100,8 +100,10 @@ function getCalibrationPointsDistanceDiffsValue() { // distance diff-based value
     };
 }
 
-var markerRadius = 9;
+var markerSide = 9;
 function addCalibrationDefsMarkers() {
+	var markerCircleRadius = markerSide * 2 / 3;
+
 	markersSvg = d3.select("#mapArea")
 		.insert("svg", ":first-child").attr("id", "markers")
 		.attr("height", mapHeight);
@@ -116,19 +118,19 @@ function addCalibrationDefsMarkers() {
 	var marker = defs.append('svg:g').attr('id','crosshair-marker');
 
 	marker.selectAll('circle')
-		.data([{stroke: '#000000', r: 6}, {stroke: 'inherit', r: 7}])
+		.data([{stroke: '#000000', r: markerCircleRadius}, {stroke: 'inherit', r: markerCircleRadius + 1}])
 		.enter().append('circle')
 		.attr('style', function(d) { return 'stroke:'+d.stroke; })
-		.attr('cx', 9)
-		.attr('cy', 9)
+		.attr('cx', markerSide)
+		.attr('cy', markerSide)
 		.attr('r', function(d) { return d.r; });
 
 	marker.selectAll('path')
 		.data([
-			{id: 'up', 	  d: 'M 9,6 L 9,0 z'},
-			{id: 'down',  d: 'M 9,12 L 9,18 z'},
-			{id: 'left',  d: 'M 6,9 L 0,9 z'},
-			{id: 'right', d: 'M 12,9 L 18,9 z'}
+			{id: 'up', 	  d: 'M '+[markerSide, markerCircleRadius  ].join(',')+' L '+[markerSide, 0           ].join(',')+' z'},
+			{id: 'down',  d: 'M '+[markerSide, markerCircleRadius*2].join(',')+' L '+[markerSide, markerSide*2].join(',')+' z'},
+			{id: 'left',  d: 'M '+[markerCircleRadius, markerSide  ].join(',')+' L '+[0, markerSide           ].join(',')+' z'},
+			{id: 'right', d: 'M '+[markerCircleRadius*2, markerSide].join(',')+' L '+[markerSide*2, markerSide].join(',')+' z'}
 		])
 		.enter().append('path')
 		.attr('style', 'stroke-width:1')
@@ -201,8 +203,8 @@ function positionCalibrationMarker(d) {
 	}
 
 	if (d.type === 'bgMap') {
-		d.coordinates.x -= markerRadius;
-		d.coordinates.y -= markerRadius;
+		d.coordinates.x -= markerSide;
+		d.coordinates.y -= markerSide;
 	}
 
 	d3.select(this)
