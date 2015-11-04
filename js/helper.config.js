@@ -7,10 +7,6 @@ function loadHelperConfig() {
 		{
 			name: 'skip', cssClass: 'helperStepSkip', text: 'Skip this step',
 			click: activateHelperNextStep
-		},
-		{
-			name: 'cancel', cssClass: 'helperStepCancel', text: 'Switch to another map',
-			click: empty
 		}
 	];
 
@@ -33,7 +29,7 @@ function loadHelperConfig() {
 			validate: checkCalibrationPoints,
 			onUnload: [disableCalibrationPointSelection, unloadCalibrationPoints],
 			dataUpdate: saveMapProjection,
-			buttons: ['done', 'skip', 'cancel']
+			buttons: ['done', 'skip']
 		}, {
 			process: 'mapLocation',
 			order: 2, step: 'adjust',
@@ -42,7 +38,7 @@ function loadHelperConfig() {
 			dataUpdate: saveMapPosition,
 			onUnload: [disableMapDragResize],
 			afterValidate: [persistMapLocation],
-			buttons: ['done', 'skip', 'cancel']
+			buttons: ['done', 'skip']
 		}, {
 			process: 'territoryIdentification',
 			order: 1, step: 'locate-territories',
@@ -52,7 +48,7 @@ function loadHelperConfig() {
             dataUpdate: saveTerritoriesPosition,
 			afterValidate: [persistTerritoriesPosition],
 			onUnload: [disableTerritorySelection, showBackgroundMap],
-			buttons: ['done', 'skip', 'cancel']
+			buttons: ['done', 'skip']
 		}
 	];
 }
