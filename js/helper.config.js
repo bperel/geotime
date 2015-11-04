@@ -83,14 +83,18 @@ function loadCalibrationPoints(mapDatum) {
 	showCalibrationPoints();
 }
 
-function showMapsSideBySide() {
+function showMapsSideBySide(mapDatum) {
 	resizeBackgroundMap(widthSideBySide, mapHeight);
 	positionExternalMap(true);
+
+	svgMap.classed('semi-transparent', false);
 }
 
-function showMapsSuperimposed() {
+function showMapsSuperimposed(mapDatum) {
 	resizeBackgroundMap(widthSuperimposed, mapHeight);
 	positionExternalMap(false);
+
+	svgMap.classed('semi-transparent', !!mapDatum.projection);
 }
 
 function hideBackgroundMapIfNotCalibrated(mapDatum) {

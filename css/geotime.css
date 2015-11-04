@@ -15,7 +15,7 @@ a {
     margin: 10px;
 }
 
-.externalSvg {
+.externalSvg.semi-transparent {
     opacity: 0.5;
 }
 
