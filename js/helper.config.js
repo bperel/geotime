@@ -295,12 +295,15 @@ function enableTerritorySelection() {
             }
         });
         showLocatedTerritories();
+		hideNewTerritoryForm();
     });
 
-	d3.select('#cancelTerritory').on('click', function() {
-		d3.select('#locatedTerritories').select('.addLocatedTerritory').remove();
-		initTerritorySelectionAndAutocomplete();
-	});
+	d3.select('#cancelTerritory').on('click', hideNewTerritoryForm);
+}
+
+function hideNewTerritoryForm() {
+	d3.select('#locatedTerritories').select('.addLocatedTerritory').remove();
+	initTerritorySelectionAndAutocomplete();
 }
 
 function initTerritorySelectionAndAutocomplete() {
