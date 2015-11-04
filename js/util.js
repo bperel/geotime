@@ -71,14 +71,15 @@ Number.prototype.round10pow = function(p) {
 };
 
 d3.selection.prototype.loadTemplate = function (args) {
-    var title       = args.title,
-        callback    = args.callback,
+    var title             = args.title,
+        callback          = args.callback,
+        noConditionalShow = args.noConditionalShow,
         templatePath = 'templates/' + (args.process || '') + '/' + args.name +'.html';
 
     var element = this;
     var html =
         (title ? ('<h5>'+title+'</h5>') : '') +
-        '<div class="if-active">[content]</div>';
+        (noConditionalShow ? '[content]' : '<div class="if-active">[content]</div>');
 
     if (templates[templatePath]) {
         element.html(html.replace('[content]', templates[templatePath]));

@@ -201,6 +201,21 @@ function loadMaps() {
 	);
 }
 
+d3.selection.prototype.addStripedPatternAndMaskDefs = function() {
+	var defs = this.select('defs');
+	if (defs.empty()) {
+		defs = this.append('defs');
+	}
+	defs
+		.append('g')
+			.attr('id', 'geotime-stripe-pattern')
+			.loadTemplate({
+				process: 'territoryIdentification',
+				name: 	 'striped-pattern-defs',
+				noConditionalShow: true
+			});
+};
+
 function loadTerritoryMapFromSvgElement(mapFileName, mapInfo) {
 	svgMap
 		.attr("name", mapFileName)
@@ -210,7 +225,8 @@ function loadTerritoryMapFromSvgElement(mapFileName, mapInfo) {
 		.call(
 			d3.behavior.drag()
 				.origin(function(d) { return d; })
-		);
+		)
+		.addStripedPatternAndMaskDefs();
 
 	var svgMapWidth = svgMap.attrIntWithoutPx("width");
 	var svgMapHeight = svgMap.attrIntWithoutPx("height");
