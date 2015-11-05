@@ -103,4 +103,6 @@ d3.selection.prototype.loadTemplate = function (args) {
             }
         });
     }
+
+    return this;
 };

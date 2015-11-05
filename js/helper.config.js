@@ -277,7 +277,7 @@ function enableTerritorySelection() {
 
 	svgMap
 		.classed("onTop", true)
-		.selectAll("path")
+		.selectAll("path:not(.already-identified)")
 			.on("mouseover", onTerritoryMouseover)
 			.on("mouseout",  onTerritoryMouseout)
 			.on("click",     onHoveredTerritoryClick);
@@ -388,6 +388,17 @@ function showLocatedTerritories() {
 						showLocatedTerritories()
 					});
 			}
+		})
+		.each(function(d) {
+			if (d.xpath) {
+				var territoryElement = svgMap.xpathForSvgChild(d.xpath);
+				if (territoryElement.empty()) {
+					console.warn('Could not locate territory with XPath '+ d.xpath);
+				}
+				else {
+					territoryElement.classed('already-identified', true);
+				}
+			}
 		});
 
     locatedTerritoriesElements.exit().remove();
@@ -407,7 +418,7 @@ function saveTerritoriesPosition() {
 	return function(d) {
 		d.territories = locatedTerritories.map(function(locatedTerritory) {
 			if (!locatedTerritory.id) {
-				locatedTerritory.xpath = locatedTerritory.element.xpath();
+				locatedTerritory.xpath = locatedTerritory.element.xpathForSvgChild();
 			}
             delete locatedTerritory.element;
 
