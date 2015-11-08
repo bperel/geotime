@@ -277,7 +277,7 @@ function enableTerritorySelection() {
 
 	svgMap
 		.classed("onTop", true)
-		.selectAll("path:not(.already-identified)")
+		.selectAll("path")
 			.on("mouseover", onTerritoryMouseover)
 			.on("mouseout",  onTerritoryMouseout)
 			.on("click",     onHoveredTerritoryClick);

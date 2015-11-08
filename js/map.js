@@ -459,7 +459,9 @@ function resizeExternalMap(forcedWidth, forcedHeight) {
 function onTerritoryMouseover() {
 	hoveredTerritory = d3.select(this);
 	hoveredTerritory.classed("hovered", true);
-	updateTerritoryId();
+	if (!hoveredTerritory.classed('already-identified')) {
+		updateTerritoryId();
+	}
 }
 
 function onTerritoryMouseout() {
