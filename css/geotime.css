@@ -11,6 +11,10 @@ a {
     display: none;
 }
 
+.bold {
+    font-weight: bold;
+}
+
 #mapConfigContainer {
     margin: 10px;
 }

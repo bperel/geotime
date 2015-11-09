@@ -7,7 +7,8 @@ requirejs.config({
 	"shim": {
 		"d3.xpath": ["d3"],
 		"helper": ["d3"],
-		"helper.config.calibration": ["helper"],
+		"helper.config": ["helper"],
+		"helper.config.calibration": ["helper.config"],
 		"util": ["d3"],
 		"map": ["d3"],
 		"bootstrap.min": ["jquery"]

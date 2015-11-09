@@ -272,14 +272,17 @@ function persistMapLocation() {
 }
 
 // Process 2, step 1
+
+var locatedTerritoriesElements;
+
 function enableTerritorySelection() {
 	selectedTerritory = d3.select('nothing');
 
 	svgMap
 		.classed("onTop", true)
 		.selectAll("path")
-			.on("mouseover", onTerritoryMouseover)
-			.on("mouseout",  onTerritoryMouseout)
+			.on("mouseover", function() { d3.select(this).toggleTerritoryHighlight(true); })
+			.on("mouseout",  function() { d3.select(this).toggleTerritoryHighlight(false); })
 			.on("click",     onHoveredTerritoryClick);
 
     d3.select('#addTerritory').on('click', function() {
@@ -347,7 +350,7 @@ function clearHoveredAndSelectedTerritories() {
 	selectedTerritory = d3.select('nothing');
 }
 
-function updateTerritoryId() {
+function updateTerritoryLabel() {
 	var id;
 	if (!hoveredTerritory.empty()) {
 		id = hoveredTerritory.attr('id');
@@ -372,7 +375,7 @@ function loadLocatedTerritories(mapDatum) {
 }
 
 function showLocatedTerritories() {
-    var locatedTerritoriesElements = d3.select('#locatedTerritories').selectAll('.locatedTerritory').data(locatedTerritories);
+    locatedTerritoriesElements = d3.select('#locatedTerritories').selectAll('.locatedTerritory').data(locatedTerritories);
     locatedTerritoriesElements.enter()
 		.append('li')
 		.classed('locatedTerritory list-group-item', true)
@@ -382,6 +385,9 @@ function showLocatedTerritories() {
 				element
 					.select('.territoryName')
 					.text(function (d) { return d.referencedTerritory.name; });
+				element
+					.select('.notLocated')
+					.classed('hidden', function(d) { return !!d.polygon; });
 				element.select('.removeLocatedTerritory')
 					.on('click', function (d, i) {
 						locatedTerritories.splice(i, 1);
@@ -396,7 +402,9 @@ function showLocatedTerritories() {
 					console.warn('Could not locate territory with XPath '+ d.xpath);
 				}
 				else {
-					territoryElement.classed('already-identified', true);
+					territoryElement
+						.classed('already-identified', true)
+						.datum({id: d.id});
 				}
 			}
 		});
@@ -404,6 +412,51 @@ function showLocatedTerritories() {
     locatedTerritoriesElements.exit().remove();
 
     d3.select('#locatedTerritoriesNumber').text(locatedTerritories.length);
+}
+
+d3.selection.prototype.toggleTerritoryHighlight = function(toggle) {
+	hoveredTerritory = this
+		.classed("hovered", toggle)
+		.toggleTerritoryLabelHighlight(toggle);
+
+	if (!toggle) {
+		hoveredTerritory = d3.select('nothing');
+	}
+
+	var isAlreadyIdentified = !hoveredTerritory.empty() && hoveredTerritory.datum() && hoveredTerritory.datum().id;
+	if (!isAlreadyIdentified) {
+		updateTerritoryLabel();
+	}
+
+	return this;
+};
+
+d3.selection.prototype.toggleTerritoryLabelHighlight = function(toggle) {
+	var territoryDbId = this.datum() && this.datum().id;
+	locatedTerritoriesElements
+		.filter(function(d) { return territoryDbId === d.id; })
+			.select('.territoryName')
+			.classed('bold', toggle);
+
+	return this;
+};
+
+function onHoveredTerritoryClick() {
+	var hoveredTerritoryIsSelected = hoveredTerritory.node() === selectedTerritory.node();
+
+	if (!selectedTerritory.empty()) {
+		selectedTerritory.classed("selected", false);
+	}
+
+	if (hoveredTerritoryIsSelected) {
+		selectedTerritory = d3.select('nothing');
+	}
+	else {
+		selectedTerritory = hoveredTerritory;
+		selectedTerritory.classed("selected", true);
+	}
+	updateTerritoryLabel();
+	d3.select('#currentTerritory').classed('hidden', false);
 }
 
 function checkSelectedTerritory() {

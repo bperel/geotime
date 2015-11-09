@@ -456,38 +456,6 @@ function resizeExternalMap(forcedWidth, forcedHeight) {
 	return { width: forcedWidth, height: forcedHeight };
 }
 
-function onTerritoryMouseover() {
-	hoveredTerritory = d3.select(this);
-	hoveredTerritory.classed("hovered", true);
-	if (!hoveredTerritory.classed('already-identified')) {
-		updateTerritoryId();
-	}
-}
-
-function onTerritoryMouseout() {
-	hoveredTerritory.classed("hovered", false);
-	hoveredTerritory = d3.select('nothing');
-	updateTerritoryId();
-}
-
-function onHoveredTerritoryClick() {
-	var hoveredTerritoryIsSelected = hoveredTerritory.node() === selectedTerritory.node();
-
-	if (!selectedTerritory.empty()) {
-		selectedTerritory.classed("selected", false);
-	}
-
-	if (hoveredTerritoryIsSelected) {
-		selectedTerritory = d3.select('nothing');
-	}
-	else {
-		selectedTerritory = hoveredTerritory;
-		selectedTerritory.classed("selected", true);
-	}
-	updateTerritoryId();
-    d3.select('#currentTerritory').classed('hidden', false);
-}
-
 d3.selection.prototype.mapOffset = function() {
 	return {
 		x: this.styleIntWithoutPx("margin-left"),
