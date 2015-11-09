@@ -7,8 +7,6 @@ var mapHeight= 480;
 var maxExternalMapSizePercentage = 80;
 var svg;
 var markersSvg = d3.selectAll('nothing');
-var hoveredTerritory = d3.select('nothing');
-var selectedTerritory = d3.select('nothing');
 
 var projections = [
 	'mercator',
@@ -67,10 +65,6 @@ function drawPaths() {
 	}
 }
 
-function dragstarted() {
-	d3.event.sourceEvent.stopPropagation();
-}
-
 function bgMapDragStarted() {
 	bgMapDragState = 'inactive';
 }
@@ -103,12 +97,6 @@ function bgMapDragMove(d) {
 		projection.rotate([lambda(d.x), phi(d.y)]);
 	}
 	drawPaths();
-}
-
-function dragmove(d) {
-	d.x = (d.x || 0) + (d3.event ? d3.event.dx || 0 : 0);
-	d.y = (d.y || 0) + (d3.event ? d3.event.dy || 0 : 0);
-	loadExternalMapPosition(d);
 }
 
 function initMapPlaceHolders(callback) {

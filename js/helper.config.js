@@ -274,6 +274,8 @@ function persistMapLocation() {
 // Process 2, step 1
 
 var locatedTerritoriesElements;
+var hoveredTerritory = d3.select('nothing');
+var selectedTerritory = d3.select('nothing');
 
 function enableTerritorySelection() {
 	selectedTerritory = d3.select('nothing');

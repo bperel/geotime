@@ -133,5 +133,3 @@ function getHelperStepData(order) {
 	order = order || helper.datum().activeStep;
     return helperSteps.data().filter(function(d) { return d.order === order; })[0];
 }
-
-function empty() { return {}; }
