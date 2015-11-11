@@ -306,6 +306,15 @@ function enableTerritorySelection() {
 	d3.select('#cancelTerritory').on('click', hideNewTerritoryForm);
 }
 
+function editTerritory(datum) {
+	var form = d3.select('#addTerritorySection');
+	form.select('#territoryName').property('value', datum.referencedTerritory.name);
+	form.select('#territoryPeriodStart').property('value', datum.startDate.date);
+	form.select('#terrritoryName').property('value', datum.endDate.date);
+
+	d3.select('#currentTerritory').classed('hidden', false);
+}
+
 function hideNewTerritoryForm() {
 	d3.select('#addTerritorySection').remove();
 	initTerritorySelectionAndAutocomplete();
@@ -392,10 +401,14 @@ function showLocatedTerritories() {
 				element
 					.select('.notLocated')
 					.classed('hidden', function(d) { return !!d.polygon; });
+				element.select('.editLocatedTerritory')
+					.on('click', function (d, i) {
+						editTerritory(d);
+					});
 				element.select('.removeLocatedTerritory')
 					.on('click', function (d, i) {
 						locatedTerritories.splice(i, 1);
-						showLocatedTerritories()
+						showLocatedTerritories();
 					});
 			}
 		})
