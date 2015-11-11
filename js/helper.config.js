@@ -307,7 +307,7 @@ function enableTerritorySelection() {
 }
 
 function hideNewTerritoryForm() {
-	d3.select('#locatedTerritories').select('.addLocatedTerritory').remove();
+	d3.select('#addTerritorySection').remove();
 	initTerritorySelectionAndAutocomplete();
 }
 
@@ -315,23 +315,25 @@ function initTerritorySelectionAndAutocomplete() {
 	clearHoveredAndSelectedTerritories();
 
 	d3.select('#locatedTerritories')
-		.append('li').classed('addLocatedTerritory list-group-item', true)
-		.loadTemplate({
-			name: 'addLocatedTerritory',
-			callback: function() {
-				territoryId = d3.select('#territoryId');
-				territoryName = d3.select('#territoryName');
-				territoryName.node().focus();
+		.append('li')
+			.attr('id', 'addTerritorySection')
+			.classed('list-group-item', true)
+			.loadTemplate({
+				name: 'addLocatedTerritory',
+				callback: function() {
+					territoryId = d3.select('#territoryId');
+					territoryName = d3.select('#territoryName');
+					territoryName.node().focus();
 
-				autocomplete(d3.select('#territoryName').node())
-					.dataField("name")
-					.width(960)
-					.height(500)
-					.render();
+					autocomplete(d3.select('#territoryName').node())
+							.dataField("name")
+							.width(960)
+							.height(500)
+							.render();
 
-				enableTerritorySelection();
-			}
-		});
+					enableTerritorySelection();
+				}
+			});
 }
 
 function disableTerritorySelection() {

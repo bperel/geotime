@@ -1,45 +1,42 @@
-<div id="addTerritorySection" class="section">
-    <div class="title">
-        <span class="glyphicon glyphicon-plus"></span>
-        &nbsp;Add territory location
-    </div>
-    Currently selected territory : <span id="territoryId">None</span>
+<div class="editTerritoryText">
+    Click on a territory on the map to identify it
     <br />
-    <div id="currentTerritory" class="hidden">
-        <div class="row">
-            <div class="col-md-4">
-                <label for="territoryName">Territory</label>
-            </div>
-            <div class="col-md-8">
-                <input class="form-control" type="text" id="territoryName" />
-            </div>
+    Currently selected : <span id="territoryId">None</span>
+</div>
+<div id="currentTerritory" class="hidden">
+    <div class="row">
+        <div class="col-md-4">
+            <label for="territoryName">Territory</label>
         </div>
-        <div class="row">
-            <div class="col-md-12">had these borders</div>
+        <div class="col-md-8">
+            <input class="form-control" type="text" id="territoryName" />
         </div>
-        <div class="row">
-            <div class="col-md-4">
-                <label for="territoryPeriodStart">from</label>
-            </div>
-            <div class="col-md-8">
-                <input class="form-control" type="text" id="territoryPeriodStart" />
-            </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">had these borders</div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <label for="territoryPeriodStart">from</label>
         </div>
-        <div class="row">
-            <div class="col-md-4">
-                <label for="territoryPeriodEnd">to</label>
-            </div>
-            <div class="col-md-8">
-                <input class="form-control" type="text" id="territoryPeriodEnd" />
-            </div>
+        <div class="col-md-8">
+            <input class="form-control" type="text" id="territoryPeriodStart" />
         </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <label for="territoryPeriodEnd">to</label>
+        </div>
+        <div class="col-md-8">
+            <input class="form-control" type="text" id="territoryPeriodEnd" />
+        </div>
+    </div>
 
-        <div class="clearfix">
-            <input type="button" id="addTerritory" class="col-md-12 btn btn-success" value="Add territory"/>
-        </div>
+    <div class="clearfix">
+        <input type="button" id="addTerritory" class="col-md-12 btn btn-success" value="Save"/>
+    </div>
 
-        <div class="clearfix">
-            <input type="button" id="cancelTerritory" class="col-md-12 btn btn-default" value="Cancel"/>
-        </div>
+    <div class="clearfix">
+        <input type="button" id="cancelTerritory" class="col-md-12 btn btn-default" value="Cancel"/>
     </div>
 </div>

@@ -101,6 +101,7 @@
 }
 
 .helperStep .removeCalibrationPoint,
+.helperStep .editLocatedTerritory,
 .helperStep .removeLocatedTerritory {
     cursor: pointer;
     float: right;
@@ -119,17 +120,24 @@
 }
 
 .helperStep #locatedTerritories .locatedTerritory,
-.helperStep #locatedTerritories .addLocatedTerritory {
+.helperStep #locatedTerritories #addTerritorySection {
     color: black;
     text-shadow: none;
 }
 
-.helperStep #locatedTerritories .addLocatedTerritory label[for^="territoryPeriod"] {
+.helperStep #locatedTerritories #addTerritorySection label[for^="territoryPeriod"] {
     display: block;
 }
 
+.helperStep #locatedTerritories .editLocatedTerritory,
 .helperStep #locatedTerritories .removeLocatedTerritory {
+    margin-left: 10px;
     margin-right: 0;
+}
+
+.helperStep #locatedTerritories .editTerritoryText {
+    font-style: italic;
+    text-align: center;
 }
 
 /* Territory selection */
