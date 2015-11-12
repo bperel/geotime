@@ -130,6 +130,8 @@ class MapHelper extends AbstractEntityHelper
         /** @var Territory $territory */
         foreach($territories as $territory) {
             unset($territory->map);
+            $territory->startDate = date_format($territory->getStartDate(),'Y-m-d');
+            $territory->endDate = date_format($territory->getEndDate(),'Y-m-d');
         }
         return $territories;
     }

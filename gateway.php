@@ -47,8 +47,8 @@ elseif (isset($_POST['addTerritories'])) {
         if (!array_key_exists('id', $territory)) {
             $referencedTerritoryId = $territory['referencedTerritory']['id'];
             $xpath = $territory['xpath'];
-            $territoryPeriodStart = $territory['period']['start'].'-01-01';
-            $territoryPeriodEnd = $territory['period']['end'].'-01-01';
+            $territoryPeriodStart = $territory['startDate'].'-01-01';
+            $territoryPeriodEnd = $territory['endDate'].'-01-01';
             $success = Geotime::saveLocatedTerritory($mapId, $referencedTerritoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
             if (!$success) {
                 $object = new \stdClass();

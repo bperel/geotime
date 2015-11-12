@@ -288,17 +288,29 @@ function enableTerritorySelection() {
 			.on("click",     onHoveredTerritoryClick);
 
     d3.select('#addTerritory').on('click', function() {
-        locatedTerritories.push({
+        var editTerritory = {
             element: selectedTerritory,
-            period: {
-                start: d3.select('#territoryPeriodStart').node().value,
-                end: d3.select('#territoryPeriodEnd').node().value
-            },
+            startDate: d3.select('#territoryPeriodStart').node().value,
+			endDate: d3.select('#territoryPeriodEnd').node().value,
             referencedTerritory: {
                 id: territoryName.datum().territoryId,
                 name: territoryName.datum().territoryName
             }
-        });
+        };
+
+		var isUpdate = false;
+		locatedTerritories.forEach(function(locatedTerritory, index) {
+			if (locatedTerritory.referencedTerritory.id === editTerritory.referencedTerritory.id) {
+				locatedTerritories[index].element = editTerritory.element;
+				locatedTerritories[index].startDate = editTerritory.startDate;
+				locatedTerritories[index].endDate = editTerritory.endDate;
+				locatedTerritories[index].referencedTerritory = editTerritory.referencedTerritory;
+				isUpdate = true;
+			}
+		});
+		if (!isUpdate) {
+			locatedTerritories.push(editTerritory);
+		}
         showLocatedTerritories();
 		hideNewTerritoryForm();
     });
@@ -308,11 +320,18 @@ function enableTerritorySelection() {
 
 function editTerritory(datum) {
 	var form = d3.select('#addTerritorySection');
-	form.select('#territoryName').property('value', datum.referencedTerritory.name);
-	form.select('#territoryPeriodStart').property('value', datum.startDate.date);
-	form.select('#terrritoryName').property('value', datum.endDate.date);
+	form.select('#territoryName')
+		.datum(function() { return {territoryId: datum.referencedTerritory.id, territoryName: datum.referencedTerritory.name }; })
+		.property('value', function(d) { return d.territoryName; });
+	form.select('#territoryPeriodStart').property('value', datum.startDate);
+	form.select('#territoryPeriodEnd').property('value', datum.endDate);
 
 	d3.select('#currentTerritory').classed('hidden', false);
+}
+
+function removeTerritory(datum, index) {
+	locatedTerritories.splice(index, 1);
+	showLocatedTerritories();
 }
 
 function hideNewTerritoryForm() {
@@ -387,28 +406,26 @@ function showLocatedTerritories() {
     locatedTerritoriesElements = d3.select('#locatedTerritories').selectAll('.locatedTerritory').data(locatedTerritories);
     locatedTerritoriesElements.enter()
 		.append('li')
-		.classed('locatedTerritory list-group-item', true)
-		.loadTemplate({
-			name: 'locatedTerritory',
-			callback: function(element) {
-				element
-					.select('.territoryName')
-					.text(function (d) { return d.referencedTerritory.name; });
-				element
-					.select('.notLocated')
-					.classed('hidden', function(d) { return !!d.polygon; });
-				element.select('.editLocatedTerritory')
-					.on('click', function (d, i) {
-						editTerritory(d);
-					});
-				element.select('.removeLocatedTerritory')
-					.on('click', function (d, i) {
-						locatedTerritories.splice(i, 1);
-						showLocatedTerritories();
-					});
-			}
-		})
+			.classed('locatedTerritory list-group-item', true);
+
+	locatedTerritoriesElements
 		.each(function(d) {
+			d3.select(this).loadTemplate({
+				name: 'locatedTerritory',
+				callback: function(element) {
+					element.select('.territoryName')
+						.text(function (d) { return d.referencedTerritory.name; });
+
+					element.select('.notLocated')
+						.classed('hidden', function(d) { return !!d.polygon; });
+
+					element.select('.editLocatedTerritory')
+						.on('click', editTerritory);
+
+					element.select('.removeLocatedTerritory')
+						.on('click', removeTerritory);
+				}
+			});
 			if (d.xpath) {
 				var territoryElement = svgMap.xpathForSvgChild(d.xpath);
 				if (territoryElement.empty()) {
