@@ -364,18 +364,14 @@ function clearHoveredAndSelectedTerritories() {
 }
 
 function updateTerritoryLabel() {
-	var id;
-	if (!hoveredTerritory.empty()) {
-		id = hoveredTerritory.attr('id');
-	}
-	else if (!selectedTerritory.empty()) {
-		id = selectedTerritory.attr('id');
-	}
-	else {
-		id = 'None';
-	}
+	var id = (!hoveredTerritory.empty()  && hoveredTerritory.attr('id'))
+		  || (!selectedTerritory.empty() && selectedTerritory.attr('id'))
+		  || 'None';
+
 	territoryId
-		.classed('clicked', !selectedTerritory.empty() && (hoveredTerritory.empty() || hoveredTerritory.node() === selectedTerritory.node()))
+		.classed('clicked',
+				!selectedTerritory.empty()
+			 && (hoveredTerritory.empty() || hoveredTerritory.node() === selectedTerritory.node()))
 		.text(id);
 }
 
