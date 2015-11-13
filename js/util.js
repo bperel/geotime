@@ -1,5 +1,6 @@
 var gatewayUrl = 'gateway.php';
 var noop = function() {};
+var templates = [];
 
 function ajaxPost(options, callback) {
     d3.json(gatewayUrl)

@@ -15,7 +15,7 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
     static $wikimediaLogoLocation = "https://upload.wikimedia.org/wikipedia/commons/8/81/Wikimedia-logo.svg";
     static $wikimediaLogoFileName = "logo.svg";
 
-    static $simpleSvgFileName = "simple.svg";
+    static $simpleSvgFileName = "simpleMap.svg";
 
     static function setUpBeforeClass() {
         Util::$log->info(__CLASS__." tests started");
@@ -71,7 +71,7 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
     }
 */
     public function testStoreSvgInvalidPath() {
-        $svg = file_get_contents(self::$fixtures_dir_svg.'simple.svg');
+        $svg = file_get_contents(self::$fixtures_dir_svg.self::$simpleSvgFileName);
         $success = Util::storeSvgWithThumbnail($svg, 'lo/go.svg');
 
         $this->assertFalse($success);
@@ -81,7 +81,7 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
         $old_cache_dir = Util::$cache_dir_svg;
         Util::$cache_dir_svg = self::$fixtures_dir_svg;
 
-        $result = Util::calculatePathCoordinates('simpleMap.svg', 'simplePath', 'mercator', array(0,0,0), 500, array(0,0,0));
+        $result = Util::calculatePathCoordinates(self::$simpleSvgFileName, 'simplePath', 'mercator', array(0,0,0), 500, array(0,0,0));
         $this->assertInternalType('array', $result);
 
         Util::$cache_dir_svg = $old_cache_dir;

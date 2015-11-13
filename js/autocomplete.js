@@ -130,7 +130,7 @@ function autocomplete(parent) {
 
             function search(callback) {
                 ajaxPost(
-                    {getTerritories: 1, startingWith: _searchTerm},
+                    {getTerritories: 1, like: _searchTerm},
                     callback
                 );
             }

@@ -65,26 +65,26 @@ class Geotime {
     }
 
     /**
-     * @param $startingWith
+     * @param $like string
      * @return array|string
      */
-    public static function getReferencedTerritories($startingWith)
+    public static function getReferencedTerritories($like)
     {
-        if (is_null($startingWith) || strlen($startingWith) === 0) {
-            return 'At least the first letter of the territory name must me given.';
+        if (is_null($like) || strlen($like) === 0) {
+            return 'At least one letter of the territory name must me given.';
         }
 
         $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb
             ->select('referencedTerritory')
-            ->from(\geotime\models\mariadb\ReferencedTerritory::CLASSNAME, 'referencedTerritory')
+            ->from(models\mariadb\ReferencedTerritory::CLASSNAME, 'referencedTerritory')
             ->where($qb->expr()->like('referencedTerritory.name', ':prefix'))
-            ->setParameter('prefix', $startingWith . '%');
+            ->setParameter('prefix', '%' . $like . '%');
 
         $results = $qb->getQuery()->getResult();
 
         return array_map(
-            function (\geotime\models\mariadb\ReferencedTerritory $referencedTerritory) {
+            function (models\mariadb\ReferencedTerritory $referencedTerritory) {
                 return array(
                     'id' => $referencedTerritory->getId(),
                     'name' => $referencedTerritory->getName()

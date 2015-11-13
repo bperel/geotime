@@ -27,7 +27,7 @@ elseif (isset($_POST['getImportedTerritories'])) {
     $object->count = Geotime::getImportedTerritoriesCount();
 }
 elseif (isset($_POST['getTerritories'])) {
-    $object = Geotime::getReferencedTerritories(isset($_POST['startingWith']) ? $_POST['startingWith'] : null);
+    $object = Geotime::getReferencedTerritories(isset($_POST['like']) ? $_POST['like'] : null);
 }
 elseif (isset($_POST['getSvg'])) {
     $object = Geotime::getIncompleteMapInfo($_POST['fileName']);

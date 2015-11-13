@@ -155,10 +155,10 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertNotNull($incompleteMap);
         $this->assertEquals('testImage.svg', $incompleteMap->fileName);
 
-        $startDate = new \DateTime('1985-01-01');
+        $startDate = '1985-01-01';
         $this->assertEquals($startDate, $incompleteMap->territories[0]->startDate);
 
-        $endDate = new \DateTime('1986-12-21');
+        $endDate = '1986-12-21';
         $this->assertEquals($endDate, $incompleteMap->territories[0]->endDate);
     }
 
@@ -168,10 +168,10 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertNotNull($incompleteMap);
         $this->assertEquals('testImage.svg', $incompleteMap->fileName);
 
-        $startDate = new \DateTime('1985-01-01');
+        $startDate = '1985-01-01';
         $this->assertEquals($startDate, $incompleteMap->territories[0]->startDate);
 
-        $endDate = new \DateTime('1986-12-21');
+        $endDate = '1986-12-21';
         $this->assertEquals($endDate, $incompleteMap->territories[0]->endDate);
     }
 
@@ -190,6 +190,7 @@ class GeotimeTest extends MariaDbTestHelper {
 
     function testGetTerritories() {
         $this->assertEquals(1, count(Geotime::getReferencedTerritories('Fr')));
+        $this->assertEquals(2, count(Geotime::getReferencedTerritories('an')));
 
         $this->assertEquals(1, count(Geotime::getReferencedTerritories('J')));
         $this->assertEquals(0, count(Geotime::getReferencedTerritories('K')));

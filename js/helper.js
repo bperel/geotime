@@ -4,7 +4,6 @@ var helperButtonsData = [];
 var helperStepsForProcess = [];
 var helperStepsData = [];
 var helperProcessesData = [];
-var templates = []
 var territoryId;
 var territoryName;
 
