@@ -59,7 +59,8 @@ function autocomplete(parent) {
                 .attr("height", __height);
 
             var input = d3.select(this)
-                .on("keyup",onKeyUp);
+                .on("keyup",onKeyUp)
+                .on("blur", hideDropDown);
 
             var dropDown=container.append("div").attr("class","bp-autocomplete-dropdown");
 
@@ -105,7 +106,7 @@ function autocomplete(parent) {
                     return d[_dataField];});
                 results.enter()
                     .append("div").attr("class","bp-autocomplete-row")
-                    .on("click",function (d) { row_onClick(d); })
+                    .on("mousedown",function (d) { row_onClick(d); })
                     .append("div").attr("class","bp-autocomplete-title")
                     .html(function (d) {
                         var re = new RegExp(_searchTerm, 'i');
