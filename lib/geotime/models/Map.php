@@ -1,6 +1,7 @@
 <?php
 
 namespace geotime\models\mariadb;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\PersistentCollection;
 
 /**
@@ -21,6 +22,7 @@ class Map {
     var $uploadDate;
 
     /**
+     * @var ArrayCollection
      * @OneToMany(targetEntity="Territory", mappedBy="map")
      **/
     var $territories;
@@ -39,6 +41,11 @@ class Map {
 
     /** @Column(type="json_array", nullable=true) **/
     var $calibrationPoints;
+
+    public function __construct()
+    {
+        $this->territories = new ArrayCollection();
+    }
 
     // @codeCoverageIgnoreStart
 
@@ -103,10 +110,7 @@ class Map {
      * @param $territory Territory
      */
     public function addTerritory($territory) {
-        if (!is_array($this->territories)) {
-            $this->territories = array();
-        }
-        $this->territories[] = $territory;
+        $this->territories->add($territory);
     }
 
     /**

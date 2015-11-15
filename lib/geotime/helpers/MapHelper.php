@@ -130,30 +130,18 @@ class MapHelper extends AbstractEntityHelper
         /** @var Territory $territory */
         foreach($territories as $territory) {
             unset($territory->map);
-            $territory->startDate = date_format($territory->getStartDate(),'Y-m-d');
-            $territory->endDate = date_format($territory->getEndDate(),'Y-m-d');
+            if (is_null($territory->getStartDate())) {
+                $territory->startDate = null;
+            } else {
+                $territory->startDate = date_format($territory->getStartDate(),'Y-m-d');
+            }
+            if (is_null($territory->getEndDate())) {
+                $territory->endDate = null;
+            } else {
+                $territory->endDate = date_format($territory->getEndDate(),'Y-m-d');
+            }
         }
         return $territories;
-    }
-
-    /**
-     * @return object
-     */
-    public function __toSimplifiedObject() {
-        // TODO
-        /*
-        $territories = $this->getTerritories();
-        $simplifiedTerritories = array();
-        foreach($territories as $territory) {
-            $territory->loadReferencedTerritory();
-            $simplifiedTerritories[] = $territory->__toSimplifiedObject(true);
-        }
-
-        $simplifiedMap = parent::__toSimplifiedObject();
-        $simplifiedMap->territories = $simplifiedTerritories;
-
-        return $simplifiedMap;
-        */
     }
 
     /**

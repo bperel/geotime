@@ -52,11 +52,20 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->map->setUploadDate(new \DateTime());
 
         $referencedTerritory = ReferencedTerritoryHelper::buildAndCreate('A referenced territory');
-        $territory = TerritoryHelper::buildWithReferencedTerritory($referencedTerritory, '1985-01-01', '1986-12-21');
+        $territory = TerritoryHelper::buildWithReferencedTerritory($referencedTerritory, '1984-01-01', '1986-12-21');
         $territory->setPolygon(new \stdClass());
+
         $this->map->addTerritory($territory);
         $territory->setMap($this->map);
         TerritoryHelper::save($territory);
+
+        $referencedTerritory2 = ReferencedTerritoryHelper::buildAndCreate('Second referenced territory');
+        $territory2 = TerritoryHelper::buildWithReferencedTerritory($referencedTerritory2);
+        $territory2->setPolygon(new \stdClass());
+
+        $this->map->addTerritory($territory2);
+        $territory2->setMap($this->map);
+        TerritoryHelper::save($territory2);
 
         ModelHelper::getEm()->persist($this->map);
         ModelHelper::getEm()->flush();
@@ -92,7 +101,7 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertEquals(2, count(array_keys($periodsAndTerritoriesCount)));
 
         $territoriesCountSvgData = $periodsAndTerritoriesCount[self::$customMapName];
-        $this->assertEquals(2, $territoriesCountSvgData['count']);
+        $this->assertEquals(3, $territoriesCountSvgData['count']);
         $this->assertEquals(0, $territoriesCountSvgData['area']);
 
         $territoriesCountNEData = $periodsAndTerritoriesCount[self::$neMapName];
@@ -107,7 +116,7 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertEquals(1, count(array_keys($periodsAndTerritoriesCount)));
 
         $territoriesCountSvgData = $periodsAndTerritoriesCount[self::$customMapName];
-        $this->assertEquals(2, $territoriesCountSvgData['count']);
+        $this->assertEquals(3, $territoriesCountSvgData['count']);
         $this->assertEquals(0, $territoriesCountSvgData['area']);
     }
 
@@ -140,7 +149,7 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertEquals('1991', $periodsAndCoverage[0]->end);
         $this->assertEquals(0, $periodsAndCoverage[0]->coverage);
 
-        $this->assertEquals('1985', $periodsAndCoverage[1]->start);
+        $this->assertEquals('1984', $periodsAndCoverage[1]->start);
         $this->assertEquals('1986', $periodsAndCoverage[1]->end);
         $this->assertEquals(0, $periodsAndCoverage[0]->coverage);
 
@@ -155,10 +164,9 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertNotNull($incompleteMap);
         $this->assertEquals('testImage.svg', $incompleteMap->fileName);
 
-        $startDate = '1985-01-01';
+        $startDate = '1980-01-02';
         $this->assertEquals($startDate, $incompleteMap->territories[0]->startDate);
-
-        $endDate = '1986-12-21';
+        $endDate = '1991-02-03';
         $this->assertEquals($endDate, $incompleteMap->territories[0]->endDate);
     }
 
@@ -168,11 +176,18 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertNotNull($incompleteMap);
         $this->assertEquals('testImage.svg', $incompleteMap->fileName);
 
-        $startDate = '1985-01-01';
+        $startDate = '1980-01-02';
         $this->assertEquals($startDate, $incompleteMap->territories[0]->startDate);
-
-        $endDate = '1986-12-21';
+        $endDate = '1991-02-03';
         $this->assertEquals($endDate, $incompleteMap->territories[0]->endDate);
+
+        $startDate = '1984-01-01';
+        $this->assertEquals($startDate, $incompleteMap->territories[1]->startDate);
+        $endDate = '1986-12-21';
+        $this->assertEquals($endDate, $incompleteMap->territories[1]->endDate);
+
+        $this->assertNull($incompleteMap->territories[2]->startDate);
+        $this->assertNull($incompleteMap->territories[2]->endDate);
     }
 
     function testGetIncompleteMapInfoNotFound() {
@@ -265,8 +280,12 @@ class GeotimeTest extends MariaDbTestHelper {
 
     function testAddLocatedTerritory() {
         $mapId = $this->createAndPersistCompleteMap();
-        $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
 
+        /** @var Map $mapWithTerritory */
+        $mapWithTerritory = MapHelper::find($mapId);
+        $this->assertEquals(count($mapWithTerritory->getTerritories()), 1);
+
+        $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
         $xpath = '//path[id="simplePath"]';
         $territoryPeriodStart = '1980-01-02';
         $territoryPeriodEnd = '1991-04-06';
@@ -284,7 +303,7 @@ class GeotimeTest extends MariaDbTestHelper {
 
         /** @var Map $mapWithTerritory */
         $mapWithTerritory = MapHelper::find($mapId);
-        $this->assertEquals(count($mapWithTerritory->getTerritories()), 1);
+        $this->assertEquals(count($mapWithTerritory->getTerritories()), 2);
 
         $this->assertEquals(Geotime::getImportedTerritoriesCount(), 3);
     }

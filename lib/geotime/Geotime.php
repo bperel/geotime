@@ -112,6 +112,16 @@ class Geotime {
         $qb
             ->select('territory.startDate, territory.endDate, territory.userMade, sum(territory.area) as areaSum')
             ->from(models\mariadb\Territory::CLASSNAME,'territory')
+            ->where(
+                $qb->expr()->orX(
+                    $qb->expr()->eq('territory.userMade', 'false'),
+                    $qb->expr()->andX(
+                        $qb->expr()->eq('territory.userMade', 'true'),
+                        $qb->expr()->isNotNull('territory.startDate'),
+                        $qb->expr()->isNotNull('territory.endDate')
+                    )
+                )
+            )
             ->groupBy('territory.startDate, territory.endDate, territory.userMade')
             ->orderBy('territory.userMade DESC, territory.startDate, territory.endDate');
 
