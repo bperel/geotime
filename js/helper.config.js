@@ -453,10 +453,7 @@ d3.selection.prototype.toggleTerritoryHighlight = function(toggle) {
 		hoveredTerritory = d3.select('nothing');
 	}
 
-	var isAlreadyIdentified = !hoveredTerritory.empty() && hoveredTerritory.datum() && hoveredTerritory.datum().id;
-	if (!isAlreadyIdentified) {
-		updateTerritoryLabel();
-	}
+	updateTerritoryLabel();
 
 	return this;
 };
@@ -472,21 +469,24 @@ d3.selection.prototype.toggleTerritoryLabelHighlight = function(toggle) {
 };
 
 function onHoveredTerritoryClick() {
-	var hoveredTerritoryIsSelected = hoveredTerritory.node() === selectedTerritory.node();
+	var isAlreadyIdentified = !hoveredTerritory.empty() && hoveredTerritory.datum() && hoveredTerritory.datum().id;
+	if (!isAlreadyIdentified) {
+		var hoveredTerritoryIsSelected = hoveredTerritory.node() === selectedTerritory.node();
 
-	if (!selectedTerritory.empty()) {
-		selectedTerritory.classed("selected", false);
-	}
+		if (!selectedTerritory.empty()) {
+			selectedTerritory.classed("selected", false);
+		}
 
-	if (hoveredTerritoryIsSelected) {
-		selectedTerritory = d3.select('nothing');
+		if (hoveredTerritoryIsSelected) {
+			selectedTerritory = d3.select('nothing');
+		}
+		else {
+			selectedTerritory = hoveredTerritory;
+			selectedTerritory.classed("selected", true);
+		}
+		updateTerritoryLabel();
+		d3.select('#currentTerritory').classed('hidden', false);
 	}
-	else {
-		selectedTerritory = hoveredTerritory;
-		selectedTerritory.classed("selected", true);
-	}
-	updateTerritoryLabel();
-	d3.select('#currentTerritory').classed('hidden', false);
 }
 
 function checkSelectedTerritory() {
