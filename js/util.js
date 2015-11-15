@@ -1,4 +1,6 @@
 var gatewayUrl = 'gateway.php';
+var templateRoot = 'templates/';
+
 var noop = function() {};
 var templates = [];
 
@@ -75,7 +77,7 @@ d3.selection.prototype.loadTemplate = function (args) {
     var title             = args.title,
         callback          = args.callback,
         noConditionalShow = args.noConditionalShow,
-        templatePath = 'templates/' + (args.process || '') + '/' + args.name +'.html';
+        templatePath = templateRoot + (args.process || '') + '/' + args.name +'.html';
 
     var element = this;
     var html =

@@ -1,5 +1,6 @@
+var testHelperProcesses;
 var testHelperSteps;
-var testButtonData;
+var testButtons;
 
 var testValue;
 
@@ -8,6 +9,9 @@ describe('Helper tests', function() {
 
     beforeEach(function(){
         jasmine.getFixtures().fixturesPath = 'base';
+
+        templateRoot = 'test/jasmine/templates/';
+
         loadFixtures("map-placeholders.html");
 
         callbacks = {
@@ -23,46 +27,62 @@ describe('Helper tests', function() {
                     return d;
                 };
             },
-            clickOnSkipTest: function () { },
             clickOnDoneTest: function () { }
         };
 
+        testHelperProcesses = [
+            {
+                name: 'process-1',
+                text: 'Process 1'
+            }
+        ];
+
         testHelperSteps = [{
-            step: 1, content: ['Step 1 description', 'This is shown when the step is active'],
+            process: 'process-1',
+            order: 1, step: 'step-1',
             onLoad: [callbacks.myOnLoad],
             onUnload: [callbacks.myOnUnload],
             dataUpdate: callbacks.dataUpdate,
             buttons: ['done', 'skip']
         },{
-            step: 2, content: ['Step 2 description'],
+            process: 'process-1',
+            order: 2, step: 'step-2',
             buttons: ['done']
         }];
 
-        testButtonData = [
-            { name: 'done',   cssClass: 'helperStepDone', text: 'Done !', click: callbacks.clickOnDoneTest },
-            { name: 'skip',   cssClass: 'helperStepSkip', text: 'Skip', click: callbacks.clickOnSkipTest }
+        testButtons = [
+            { name: 'done',   cssClass: 'helperStepDone', text: 'Done !', click: callbacks.clickOnDoneTest }
         ];
 
-        helperButtonsData = testButtonData;
+        helperButtonsData = testButtons;
+        helperProcessesData = testHelperProcesses;
+        helperStepsData = testHelperSteps;
+
         testValue = null;
+
+        spyOn(d3, 'text').and.callFake(function(path, callback) {
+            callback(null, jasmine.getFixtures().read(path));
+        });
     });
 
     describe('Helper behaviour', function() {
         it('should load the helper', function() {
-            initHelper(testHelperSteps);
+            initHelper('process-1');
 
-            expect(helperSteps.size()).toEqual(2);
+            expect(helperStepsForProcess.size()).toEqual(2);
 
-            var firstStep = helperSteps.filter(function(d) { return d.step === 1; });
-            var secondStep = helperSteps.filter(function(d) { return d.step === 2; });
+            var firstStep = helperStepsForProcess.filter(function(d) { return d.order === 1; });
+            var secondStep = helperStepsForProcess.filter(function(d) { return d.order === 2; });
 
+            var step1TemplateContent = jasmine.getFixtures().read(templateRoot+'process-1/step-1.html');
             expect(firstStep.size()).toEqual(1);
-            expect(firstStep.text()).toEqual('Step 1 descriptionThis is shown when the step is active');
-            expect(firstStep.select('.if-active').text()).toEqual('This is shown when the step is active');
+            expect(firstStep.text()).toEqual(step1TemplateContent + 'Done !');
+            expect(firstStep.select('.if-active').text()).toEqual(step1TemplateContent);
 
+            var step2TemplateContent = jasmine.getFixtures().read(templateRoot+'process-1/step-2.html');
             expect(secondStep.size()).toEqual(1);
-            expect(secondStep.text()).toEqual('Step 2 description');
-            expect(secondStep.select('.if-active').text()).toEqual('');
+            expect(secondStep.text()).toEqual(step2TemplateContent);
+            expect(secondStep.select('.if-active').text()).toEqual(step2TemplateContent);
 
             expect(testValue).toEqual(null);
         });
@@ -74,8 +94,8 @@ describe('Helper tests', function() {
             activateHelperNextStep();
             expect(testValue).toEqual('loaded');
 
-            var firstStep = helperSteps.filter(function(d) { return d.step === 1; });
-            var secondStep = helperSteps.filter(function(d) { return d.step === 2; });
+            var firstStep = helperStepsForProcess.filter(function(d) { return d.order === 1; });
+            var secondStep = helperStepsForProcess.filter(function(d) { return d.order === 2; });
 
             expect(firstStep.classed('active')).toBeTruthy();
             var firstStepButtons = firstStep.selectAll('button:not(.hidden)');
@@ -98,7 +118,7 @@ describe('Helper tests', function() {
             initHelper(testHelperSteps);
             activateHelperNextStep();
 
-            var firstStep = helperSteps.filter(function(d) { return d.step === 1; });
+            var firstStep = helperStepsForProcess.filter(function(d) { return d.order === 1; });
 
             // Click on the 'done' button
             var doneButton = firstStep.selectAll('button').filter(function(d) { return d.name === 'done'; });

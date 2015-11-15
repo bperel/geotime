@@ -2,6 +2,7 @@ describe('Util tests', function() {
 
     beforeEach(function() {
         jasmine.getFixtures().fixturesPath = 'base';
+        templateRoot = 'test/jasmine/templates/';
         loadFixtures("map-placeholders.html");
     });
 

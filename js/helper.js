@@ -81,7 +81,9 @@ function activateHelperNextStep() {
 			.filter(isActiveStepFilter)
 			.each(function(d) {
 				(d.onLoad || []).forEach(function(onLoadAction) {
-					onLoadAction(d3.select('#externalSvg').datum());
+					if (svgMap) {
+						onLoadAction(svgMap.datum());
+					}
 				});
 			})
 			.selectAll('button').data(helperButtonsData).enter().append('button')
@@ -128,5 +130,5 @@ function isValidStepFilter(d) {
 
 function getHelperStepData(order) {
 	order = order || helper.datum().activeStep;
-    return helperSteps.data().filter(function(d) { return d.order === order; })[0];
+    return helperStepsForProcess.data().filter(function(d) { return d.order === order; })[0];
 }

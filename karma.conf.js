@@ -21,7 +21,8 @@ module.exports = function(config) {
             'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
             'js/*.js',
             'test/jasmine/mock-ajax.js',
-            'test/jasmine/*.spec.js'
+            'test/jasmine/*.spec.js',
+            'test/jasmine/templates/process-1/*.html'
         ],
 
 

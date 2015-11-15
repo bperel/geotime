@@ -1,6 +1,7 @@
 describe('Map tests', function() {
     beforeEach(function(){
         gatewayUrl = '../../gateway.php';
+        templateRoot = 'test/jasmine/templates/';
         projections = ['mercator'];
 
         jasmine.getJSONFixtures().fixturesPath = 'base';
