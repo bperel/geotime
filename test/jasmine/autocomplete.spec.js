@@ -97,7 +97,7 @@ describe('Autocomplete tests', function() {
 
             var firstResult = d3.select('.bp-autocomplete-row:not(:empty)');
 
-            firstResult.on('click')(firstResult.datum());
+            firstResult.on('mousedown')(firstResult.datum());
 
             expect(d3.select('.bp-autocomplete-dropdown').style('display')).toEqual('none');
             expect(territoryName.datum().territoryId).toEqual('afg');
