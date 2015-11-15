@@ -316,10 +316,10 @@ function loadUIConfig(mapInfo) {
 
 
 	if (mapInfo.projection || mapInfo.territories.length) {
-		initHelper(mapInfo.fileName, 'territoryIdentification');
+		initHelper('territoryIdentification');
 	}
 	else {
-		initHelper(mapInfo.fileName, 'mapLocation');
+		initHelper('mapLocation');
 	}
 }
 

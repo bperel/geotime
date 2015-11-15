@@ -24,6 +24,14 @@
         <script type="text/javascript">
             onLoad = function() {
                 initMapPlaceHolders(function() {
+                    d3.select('#loadRandomTerritoryMap').on('click', loadTerritoryMap);
+                    d3.select('#maps').on('change', function() {
+                        var selectedMapFileName = d3.select(mapSelection.node().options[mapSelection.node().selectedIndex]).datum().fileName;
+                        if (selectedMapFileName !== null) {
+                            loadTerritoryMap(false, selectedMapFileName);
+                        }
+                    });
+
                     initBackgroundMap();
                     resizeBackgroundMap(widthSuperimposed, mapHeight);
 
@@ -34,13 +42,6 @@
                         loadMaps();
                     });
                 });
-                d3.select('#loadRandomTerritoryMap').on('click', loadTerritoryMap);
-                d3.select('#maps').on('change', function() {
-                    var selectedMapFileName = d3.select(mapSelection.node().options[mapSelection.node().selectedIndex]).datum().fileName;
-                    if (selectedMapFileName !== null) {
-                        loadTerritoryMap(false, selectedMapFileName);
-                    }
-                });
             };
         </script>
         <script data-main="js/main" src="js/vendor/requirejs/require.js"></script>
@@ -48,9 +49,5 @@
     </head>
     <body>
         <div id="map-placeholders"></div>
-        <!--<a href="javascript:void(0)" id="loadTerritoryMap">Load a random territory</a>-->
-        <div id="selectMap">
-            <select class="form-control" id="maps"></select>
-        </div>
     </body>
 </html>

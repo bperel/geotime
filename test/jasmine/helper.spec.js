@@ -49,9 +49,8 @@ describe('Helper tests', function() {
 
     describe('Helper behaviour', function() {
         it('should load the helper', function() {
-            initHelper('myMap.svg', testHelperSteps);
+            initHelper(testHelperSteps);
 
-            expect(d3.select('#mapTitle').text()).toEqual('myMap.svg');
             expect(helperSteps.size()).toEqual(2);
 
             var firstStep = helperSteps.filter(function(d) { return d.step === 1; });
@@ -69,7 +68,7 @@ describe('Helper tests', function() {
         });
 
         it('should load a helper step', function() {
-            initHelper('myMap.svg', testHelperSteps);
+            initHelper(testHelperSteps);
 
             expect(testValue).toEqual(null);
             activateHelperNextStep();
@@ -96,7 +95,7 @@ describe('Helper tests', function() {
         });
 
         it('should execute an action on a button click', function() {
-            initHelper('myMap.svg', testHelperSteps);
+            initHelper(testHelperSteps);
             activateHelperNextStep();
 
             var firstStep = helperSteps.filter(function(d) { return d.step === 1; });

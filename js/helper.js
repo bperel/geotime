@@ -7,9 +7,7 @@ var helperProcessesData = [];
 var territoryId;
 var territoryName;
 
-function initHelper(mapFileName, activeProcess) {
-	d3.select('#mapTitle').text(mapFileName);
-
+function initHelper(activeProcess) {
 	helper = d3.select("#mapHelper")
 		.classed("hidden", false);
 

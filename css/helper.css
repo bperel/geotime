@@ -35,8 +35,8 @@
 #mapHelper {
     position: absolute;
     right: 0;
-    top: 50px;
-    bottom: 50px;
+    top: 0;
+    bottom: 0;
     width: 500px;
     padding: 5px;
     background: white;
@@ -44,13 +44,6 @@
     font-size: 12px;
     text-align: left;
     overflow: auto;
-}
-
-#mapHelper #mapTitle {
-    text-align: center;
-    border-top: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
-    margin: 0;
 }
 
 #mapHelper a.active {

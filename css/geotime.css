@@ -31,9 +31,6 @@ a {
 
 #loadRandomTerritoryMap,
 #selectMap {
-    position: fixed;
-    top: 0;
-    right: 0;
     padding: 5px;
     font-size: 12px;
 }
