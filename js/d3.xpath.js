@@ -35,6 +35,9 @@ d3.selection.prototype.xpathForSvgChild = function(path) {
                     xname += "[" + idx + "]";
 
                 tpath = "/" + xname + tpath;
+                if (elt.tagName === 'svg') {
+                    break;
+                }
             }
             if (tpath.length) {
                 path = tpath;
