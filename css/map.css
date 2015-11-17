@@ -20,6 +20,14 @@
     position: absolute;
 }
 
+#externalSvg * {
+    pointer-events: none;
+}
+
+#externalSvg path[d$="z"] {
+    pointer-events: all;
+}
+
 #externalSvg.onTop {
     z-index: 20;
 }

@@ -148,8 +148,7 @@
 
 .hovered,
 .selected {
-    mask: url(#mask-stripe) !important;
-    animation-duration: 3s;
+    animation-duration: 1s;
     animation-iteration-count: infinite;
     fill-opacity: inherit !important;
 }
@@ -188,6 +187,5 @@
 
 .already-identified {
     fill: rgb(64,64,64) !important;
-    mask: url(#mask-stripe) !important;
     animation-name: hovered-already-selected;
 }
