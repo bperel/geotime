@@ -26,9 +26,11 @@ function calibrateMapScale(min, max, inc) {
         }
     }
 
-    if (inc > 10) {
-        calibrateMapScale(bestScale.scale - inc, bestScale.scale + inc, inc / 10);
-        console.log('=> Calibrated scale = '+bestScale.scale+', final offset : ' + bestScale.ratio);
+	console.log('=> Calibrated scale = '+bestScale.scale+', final offset : ' + bestScale.ratio);
+
+	var new_inc = inc / 10;
+    if (new_inc >= 2) {
+        calibrateMapScale(bestScale.scale - inc/2, bestScale.scale + inc/2, new_inc);
     }
     else {
 		applyProjection(getSelectedProjection(), projection.center(), bestScale.scale, projection.rotate());
