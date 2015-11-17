@@ -99,10 +99,12 @@ function showMapsSuperimposed(mapDatum) {
 
 function hideBackgroundMapIfNotCalibrated(mapDatum) {
 	svg.classed('hidden', !mapDatum.projection);
+	dragAction.classed('hidden', !mapDatum.projection);
 }
 
 function showBackgroundMap() {
 	svg.classed('hidden', false);
+	dragAction.classed('hidden', false);
 }
 
 function disableCalibrationPointSelection() {
