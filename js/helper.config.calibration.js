@@ -127,10 +127,10 @@ function addCalibrationDefsMarkers() {
 
 	marker.selectAll('path')
 		.data([
-			{id: 'up', 	  d: 'M '+[markerSide, markerCircleRadius  ].join(',')+' L '+[markerSide, 0           ].join(',')+' z'},
-			{id: 'down',  d: 'M '+[markerSide, markerCircleRadius*2].join(',')+' L '+[markerSide, markerSide*2].join(',')+' z'},
-			{id: 'left',  d: 'M '+[markerCircleRadius, markerSide  ].join(',')+' L '+[0, markerSide           ].join(',')+' z'},
-			{id: 'right', d: 'M '+[markerCircleRadius*2, markerSide].join(',')+' L '+[markerSide*2, markerSide].join(',')+' z'}
+			{id: 'up', 	  d: 'M'+[markerSide, markerCircleRadius  ].join(',')+' L'+[markerSide, 0           ].join(',')+' z'},
+			{id: 'down',  d: 'M'+[markerSide, markerCircleRadius*2].join(',')+' L'+[markerSide, markerSide*2].join(',')+' z'},
+			{id: 'left',  d: 'M'+[markerCircleRadius, markerSide  ].join(',')+' L'+[0, markerSide           ].join(',')+' z'},
+			{id: 'right', d: 'M'+[markerCircleRadius*2, markerSide].join(',')+' L'+[markerSide*2, markerSide].join(',')+' z'}
 		])
 		.enter().append('path')
 		.attr('style', 'stroke-width:1')
