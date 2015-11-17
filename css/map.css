@@ -31,3 +31,7 @@
 #externalSvg.onTop {
     z-index: 20;
 }
+
+#markers {
+    pointer-events: none;
+}
