@@ -321,13 +321,16 @@ function enableTerritorySelection() {
 }
 
 function editTerritory(datum) {
-	var form = d3.select('#addTerritorySection');
-	form.select('#territoryName')
-		.datum(function() { return {territoryId: datum.referencedTerritory.id, territoryName: datum.referencedTerritory.name }; })
-		.property('value', function(d) { return d.territoryName; });
-	form.select('#territoryPeriodStart').property('value', datum.startDate);
-	form.select('#territoryPeriodEnd').property('value', datum.endDate);
+	hideNewTerritoryForm();
 
+	if (datum && datum.id) {
+		var form = d3.select('#addTerritorySection');
+		form.select('#territoryName')
+			.datum(function() { return {territoryId: datum.referencedTerritory.id, territoryName: datum.referencedTerritory.name }; })
+			.property('value', function(d) { return d.territoryName; });
+		form.select('#territoryPeriodStart').property('value', datum.startDate);
+		form.select('#territoryPeriodEnd').property('value', datum.endDate);
+	}
 	d3.select('#currentTerritory').classed('hidden', false);
 }
 
@@ -436,7 +439,7 @@ function showLocatedTerritories() {
 				else {
 					territoryElement
 						.classed('already-identified', true)
-						.datum({id: d.id});
+						.datum(d);
 				}
 			}
 		});
@@ -499,8 +502,8 @@ d3.selection.prototype.toggleTerritoryLabelHighlight = function(toggle) {
 };
 
 function onHoveredTerritoryClick() {
-	var isAlreadyIdentified = !hoveredTerritory.empty() && hoveredTerritory.datum() && hoveredTerritory.datum().id;
-	if (!isAlreadyIdentified) {
+	var territoryDatum = !hoveredTerritory.empty() && hoveredTerritory.datum();
+	if (!(territoryDatum && territoryDatum.id)) {
 		var hoveredTerritoryIsSelected = hoveredTerritory.node() === selectedTerritory.node();
 
 		if (!selectedTerritory.empty()) {
@@ -514,9 +517,9 @@ function onHoveredTerritoryClick() {
 			selectedTerritory = hoveredTerritory;
 			selectedTerritory.animateTerritoryPathOn('in', 500);
 		}
-		updateTerritoryLabel();
-		d3.select('#currentTerritory').classed('hidden', false);
 	}
+	updateTerritoryLabel();
+	editTerritory(territoryDatum);
 }
 
 function checkSelectedTerritory() {
