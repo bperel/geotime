@@ -470,7 +470,11 @@ d3.selection.prototype.toggleTerritoryHighlight = function(toggle) {
 
 		if (toggle) {
 			this
-				.datum({ initialFill: d3.rgb(this.style('fill')) })
+				.datum(function(d) {
+					d = d || {};
+					d.initialFill = d3.rgb(d3.select(this).style('fill'));
+					return d;
+				})
 				.animateTerritoryPathOn('in', 1000);
 		}
 		else {
