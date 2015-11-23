@@ -133,46 +133,6 @@
     text-align: center;
 }
 
-/* Territory selection */
-@keyframes hovered {
-    0% {
-        fill: rgb(0,198,0);
-    }
-    50% {
-        fill: rgb(0,127,0);
-    }
-    100% {
-        fill: rgb(0,198,0);
-    }
-}
-
-.hovered,
-.selected {
-    animation-duration: 1s;
-    animation-iteration-count: infinite;
-    fill-opacity: inherit !important;
-}
-
-.hovered {
-    animation-name: hovered;
-}
-
-@keyframes selected {
-    0% {
-        fill: rgb(64,64,64);
-    }
-    50% {
-        fill: rgb(128,128,128);
-    }
-    100% {
-        fill: rgb(64,64,64);
-    }
-}
-
-.selected {
-    animation-name: selected;
-}
-
 @keyframes hovered-already-selected {
     0% {
         fill: rgb(64,64,64)

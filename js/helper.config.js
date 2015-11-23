@@ -377,10 +377,10 @@ function disableTerritorySelection() {
 }
 
 function clearHoveredAndSelectedTerritories() {
-	hoveredTerritory.classed("hovered", false);
+	hoveredTerritory.animateTerritoryPathOff();
 	hoveredTerritory = d3.select('nothing');
 
-	selectedTerritory.classed("selected", false);
+	selectedTerritory.animateTerritoryPathOff();
 	selectedTerritory = d3.select('nothing');
 }
 
@@ -446,13 +446,37 @@ function showLocatedTerritories() {
     d3.select('#locatedTerritoriesNumber').text(locatedTerritories.length);
 }
 
-d3.selection.prototype.toggleTerritoryHighlight = function(toggle) {
-	hoveredTerritory = this
-		.classed("hovered", toggle)
-		.toggleTerritoryLabelHighlight(toggle);
+d3.selection.prototype.animateTerritoryPathOn = function(direction, duration) {
+	this
+		.filter(function(d) { return d.initialFill.toString() !== '#000000'; })
+			.transition().duration(duration)
+			.style('fill', function(d) { return d.initialFill[direction === 'in' ? 'brighter' : 'darker'](1.5); })
+			.each("end", function() { d3.select(this).animateTerritoryPathOn(direction === 'in' ? 'out' : 'in', duration); });
+	return this;
+};
 
-	if (!toggle) {
-		hoveredTerritory = d3.select('nothing');
+d3.selection.prototype.animateTerritoryPathOff = function() {
+	this
+		.filter(function(d) { return d.initialFill.toString() !== '#000000'; })
+			.transition().duration(0)
+			.style('fill', function(d) { return d.initialFill.toString(); });
+	return this;
+};
+
+d3.selection.prototype.toggleTerritoryHighlight = function(toggle) {
+	if (selectedTerritory.empty()) {
+		hoveredTerritory = this
+			.toggleTerritoryLabelHighlight(toggle);
+
+		if (toggle) {
+			this
+				.datum({ initialFill: d3.rgb(this.style('fill')) })
+				.animateTerritoryPathOn('in', 1000);
+		}
+		else {
+			this.animateTerritoryPathOff();
+			hoveredTerritory = d3.select('nothing');
+		}
 	}
 
 	updateTerritoryLabel();
@@ -476,7 +500,7 @@ function onHoveredTerritoryClick() {
 		var hoveredTerritoryIsSelected = hoveredTerritory.node() === selectedTerritory.node();
 
 		if (!selectedTerritory.empty()) {
-			selectedTerritory.classed("selected", false);
+			selectedTerritory.animateTerritoryPathOff();
 		}
 
 		if (hoveredTerritoryIsSelected) {
@@ -484,7 +508,7 @@ function onHoveredTerritoryClick() {
 		}
 		else {
 			selectedTerritory = hoveredTerritory;
-			selectedTerritory.classed("selected", true);
+			selectedTerritory.animateTerritoryPathOn('in', 500);
 		}
 		updateTerritoryLabel();
 		d3.select('#currentTerritory').classed('hidden', false);
