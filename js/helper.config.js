@@ -321,8 +321,6 @@ function enableTerritorySelection() {
 }
 
 function editTerritory(datum) {
-	hideNewTerritoryForm();
-
 	if (datum && datum.id) {
 		var form = d3.select('#addTerritorySection');
 		form.select('#territoryName')
@@ -341,11 +339,12 @@ function removeTerritory(datum, index) {
 
 function hideNewTerritoryForm() {
 	d3.select('#addTerritorySection').remove();
+	selectedTerritory.animateTerritoryPathOff();
+	clearHoveredAndSelectedTerritories();
 	initTerritorySelectionAndAutocomplete();
 }
 
 function initTerritorySelectionAndAutocomplete() {
-	clearHoveredAndSelectedTerritories();
 
 	d3.select('#locatedTerritories')
 		.append('li')
@@ -452,7 +451,7 @@ function showLocatedTerritories() {
 d3.selection.prototype.animateTerritoryPathOn = function(direction, duration) {
 	this
 		.filter(function(d) { return d.initialFill.toString() !== '#000000'; })
-			.transition().duration(duration)
+			.transition().duration(duration).ease('linear')
 			.style('fill', function(d) { return d.initialFill[direction === 'in' ? 'brighter' : 'darker'](1.5); })
 			.each("end", function() { d3.select(this).animateTerritoryPathOn(direction === 'in' ? 'out' : 'in', duration); });
 	return this;
@@ -461,7 +460,7 @@ d3.selection.prototype.animateTerritoryPathOn = function(direction, duration) {
 d3.selection.prototype.animateTerritoryPathOff = function() {
 	this
 		.filter(function(d) { return d.initialFill.toString() !== '#000000'; })
-			.transition().duration(0)
+			.transition().duration(0).ease('linear')
 			.style('fill', function(d) { return d.initialFill.toString(); });
 	return this;
 };
@@ -484,9 +483,8 @@ d3.selection.prototype.toggleTerritoryHighlight = function(toggle) {
 			this.animateTerritoryPathOff();
 			hoveredTerritory = d3.select('nothing');
 		}
+		updateTerritoryLabel();
 	}
-
-	updateTerritoryLabel();
 
 	return this;
 };
@@ -494,32 +492,19 @@ d3.selection.prototype.toggleTerritoryHighlight = function(toggle) {
 d3.selection.prototype.toggleTerritoryLabelHighlight = function(toggle) {
 	var territoryDbId = this.datum() && this.datum().id;
 	locatedTerritoriesElements
-		.filter(function(d) { return territoryDbId === d.id; })
-			.select('.territoryName')
-			.classed('bold', toggle);
+		.select('.territoryName')
+			.classed('hovered', function(d) { return toggle && territoryDbId === d.id; });
 
 	return this;
 };
 
 function onHoveredTerritoryClick() {
-	var territoryDatum = !hoveredTerritory.empty() && hoveredTerritory.datum();
-	if (!(territoryDatum && territoryDatum.id)) {
-		var hoveredTerritoryIsSelected = hoveredTerritory.node() === selectedTerritory.node();
+	if (selectedTerritory.empty()) {
+		selectedTerritory = hoveredTerritory;
+		selectedTerritory.animateTerritoryPathOn('in', 500);
 
-		if (!selectedTerritory.empty()) {
-			selectedTerritory.animateTerritoryPathOff();
-		}
-
-		if (hoveredTerritoryIsSelected) {
-			selectedTerritory = d3.select('nothing');
-		}
-		else {
-			selectedTerritory = hoveredTerritory;
-			selectedTerritory.animateTerritoryPathOn('in', 500);
-		}
+		editTerritory(selectedTerritory.datum());
 	}
-	updateTerritoryLabel();
-	editTerritory(territoryDatum);
 }
 
 function checkSelectedTerritory() {

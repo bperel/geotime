@@ -133,19 +133,6 @@
     text-align: center;
 }
 
-@keyframes hovered-already-selected {
-    0% {
-        fill: rgb(64,64,64)
-    }
-    50% {
-        fill: rgb(127,127,127);
-    }
-    100% {
-        fill: rgb(64,64,64)
-    }
-}
-
-.already-identified {
-    fill: rgb(64,64,64) !important;
-    animation-name: hovered-already-selected;
+.helperStep #locatedTerritories .territoryName.hovered {
+    font-weight: bold;
 }
