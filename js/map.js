@@ -230,9 +230,7 @@ function loadTerritoryMapData(fileName, mapInfo, contentFromFileSystem, callback
 			if (!!contentFromFileSystem) {
 				var svgWrapper = document.createElement('div');
 				svgWrapper.innerHTML = contentFromFileSystem;
-				var mapArea = d3.select("#mapArea");
-				mapArea.node().appendChild(svgWrapper);
-				svgMap = mapArea.select('svg');
+				svgMap = d3.select(d3.select("#mapArea").node().insertBefore(d3.select(svgWrapper).select('svg').node(), svg.node()));
 				loadTerritoryMapFromSvgElement(mapFileName, mapInfo);
 				return callback(mapInfo);
 			}
@@ -418,14 +416,7 @@ function resizeExternalMap(forcedWidth, forcedHeight) {
 
 	svgMap
 		.style("width",  forcedWidth +"px")
-		.style("height", forcedHeight+"px")
-		.datum(function(d) {
-			d.width = forcedWidth;
-			d.height = forcedHeight;
-			return d;
-		});
-
-	return { width: forcedWidth, height: forcedHeight };
+		.style("height", forcedHeight+"px");
 }
 
 d3.selection.prototype.mapOffset = function() {

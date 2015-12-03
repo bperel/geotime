@@ -7,18 +7,18 @@ d3.selection.prototype.xpathForSvgChild = function(path) {
             document,
             function lookupNamespaceURI (prefix) {
                 switch (prefix) {
-                    case 'svg': return 'http://www.w3.org/2000/svg';
-                    default: return ''
+                    case "svg": return "http://www.w3.org/2000/svg";
+                    default: return ""
                 }
             },
             XPathResult.FIRST_ORDERED_NODE_TYPE,
             null
         );
-        return (result && d3.select(result.singleNodeValue)) || d3.select('nothing');
+        return (result && d3.select(result.singleNodeValue)) || d3.select("nothing");
     }
     else {
         if (elt && elt.id) {
-            path = '//svg:' + elt.tagName.toLowerCase() + '[@id="' + elt.id + '"]';
+            path = "//svg:" + elt.tagName.toLowerCase() + "[@id='" + elt.id + "']";
         } else {
             var tpath = "";
             for (; elt && elt.nodeType == 1; elt = elt.parentNode) {
@@ -29,7 +29,7 @@ d3.selection.prototype.xpathForSvgChild = function(path) {
                     }
                 }
 
-                var xname = 'svg:' + elt.tagName.toLowerCase();
+                var xname = "svg:" + elt.tagName.toLowerCase();
 
                 if (idx > 1)
                     xname += "[" + idx + "]";

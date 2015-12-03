@@ -29,7 +29,7 @@ if (system.args.length < 7) {
 				resizeBackgroundMap(widthSuperimposed, mapHeight);
 
 				var svgFileName = args[1];
-				var pathId = args[2];
+				var xpath = args[2];
 				var projectionName = args[3];
 				var projectionCenter = args[4].split(',').map(function (value) {
 					return parseInt(value);
@@ -52,7 +52,7 @@ if (system.args.length < 7) {
 					scale: projectionScale,
 					rotation: projectionRotation
 				}, svgContent, function () {
-					return d3.select('svg path[id="' + pathId+'"]').getPathCoordinates();
+					return svgMap.xpathForSvgChild(xpath).getPathCoordinates();
 				});
 			}, system.args, fs.read(svgPath));
 
