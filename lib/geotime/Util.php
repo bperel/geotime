@@ -155,7 +155,11 @@ class Util {
             )
         );
         $result = shell_exec($command);
-        return json_decode($result);
+        $coordinates = json_decode($result);
+        if (is_null($coordinates)) {
+            self::$log->error('Cannot decode JSON-formatted coordinates : "'.$result.'""');
+        }
+        return $coordinates;
     }
 
     static function resizeImage($thumbnailPath, $size) {

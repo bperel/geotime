@@ -286,7 +286,7 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertEquals(count($mapWithTerritory->getTerritories()), 1);
 
         $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
-        $xpath = '//path[id="simplePath"]';
+        $xpath = '//svg:path[@id=\'simplePath\']';
         $territoryPeriodStart = '1980-01-02';
         $territoryPeriodEnd = '1991-04-06';
 
@@ -311,7 +311,7 @@ class GeotimeTest extends MariaDbTestHelper {
     function testAddLocatedTerritoryNoMap() {
         $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
 
-        $xpath = '//path[id="simplePath"]';
+        $xpath = '//svg:path[@id=\'simplePath\']';
         $territoryPeriodStart = '1980-01-02';
         $territoryPeriodEnd = '1991-04-06';
 
@@ -325,7 +325,7 @@ class GeotimeTest extends MariaDbTestHelper {
         $mapId = $this->createAndPersistCompleteMap();
         $referencedTerritoryId = 1234589;
 
-        $xpath = '//path[id="simplePath"]';
+        $xpath = '//svg:path[@id=\'simplePath\']';
         $territoryPeriodStart = '1980-01-02';
         $territoryPeriodEnd = '1991-04-06';
 
@@ -348,7 +348,7 @@ class GeotimeTest extends MariaDbTestHelper {
 
         $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
 
-        $xpath = '//path[id="simplePath"]';
+        $xpath = '//svg:path[@id=\'simplePath\']';
         $territoryPeriodStart = '1980-01-02';
         $territoryPeriodEnd = '1991-04-06';
 

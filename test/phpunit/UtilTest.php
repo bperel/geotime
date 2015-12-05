@@ -78,13 +78,13 @@ class UtilTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testInvertPath() {
+
         $old_cache_dir = Util::$cache_dir_svg;
         Util::$cache_dir_svg = self::$fixtures_dir_svg;
-
-        $result = Util::calculatePathCoordinates(self::$simpleSvgFileName, 'simplePath', 'mercator', array(0,0,0), 500, array(0,0,0));
-        $this->assertInternalType('array', $result);
-
+        $result = Util::calculatePathCoordinates(self::$simpleSvgFileName, '//svg:path[@id=\'simplePath\']', 'mercator', array(0,0,0), 500, array(0,0,0));
         Util::$cache_dir_svg = $old_cache_dir;
+
+        $this->assertInternalType('array', $result);
     }
 
     public function testImportFromJson() {
