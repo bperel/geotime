@@ -2,7 +2,6 @@
 
 namespace geotime;
 
-use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
 use geotime\helpers\TerritoryHelper;
@@ -10,10 +9,6 @@ use geotime\models\mariadb\Map;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
-
-include_once('Territory.php');
-include_once('Map.php');
-include_once('Util.php');
 
 class NaturalEarthImporter {
 

@@ -1,5 +1,10 @@
 <?php
 namespace geotime\models\mariadb;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\ManyToMany;
+use Doctrine\ORM\Mapping\JoinTable;
 
 /**
  * @Entity @Table(name="referencedTerritories")

@@ -16,7 +16,7 @@
 		"psr/log": "1.0.0",
 		"apache/log4php": "2.3.0",
 		"jakoch/phantomjs-installer": "1.9.*",
-		"doctrine/orm": "2.4.*",
+		"doctrine/orm": "2.5.*",
 		"symfony/yaml": "2.*"
 	},
 	"autoload": {

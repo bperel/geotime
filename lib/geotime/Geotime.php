@@ -6,7 +6,6 @@ use Doctrine\ORM\AbstractQuery;
 use geotime\helpers\CalibrationPointHelper;
 use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
-use geotime\helpers\ReferencedTerritoryHelper;
 use geotime\helpers\TerritoryHelper;
 use geotime\models\mariadb\CalibrationPoint;
 use Logger;
