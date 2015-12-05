@@ -34,7 +34,7 @@ function loadHelperConfig() {
 			process: 'mapLocation',
 			order: 2, step: 'adjust',
 			title: 'Adjust the map calibration',
-			onLoad: [initProjectionSelect, showMapsSuperimposed],
+			onLoad: [initProjectionSelect, showMapsSuperimposed, enableMapDragResize],
 			dataUpdate: saveMapPosition,
 			onUnload: [disableMapDragResize],
 			afterValidate: [persistMapLocation],
@@ -265,8 +265,14 @@ function saveMapPosition() {
     };
 }
 
+function enableMapDragResize() {
+	svg
+		.call(bgSvgmap_drag)
+		.call(zoom);
+}
+
 function disableMapDragResize() {
-	svgMap.on('mousedown.drag', null);
+	svg.on('mousedown.drag', null);
 }
 
 function persistMapLocation() {

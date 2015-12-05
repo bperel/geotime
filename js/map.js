@@ -146,9 +146,6 @@ function showBgMap(id, data, error) {
 				.append("path")
 				.attr("class", "subunit-boundary subunit");
 
-		svg
-			.call(bgSvgmap_drag)
-			.call(zoom);
 		applyProjection(getSelectedProjection());
 	}
 }
@@ -194,11 +191,7 @@ function loadTerritoryMapFromSvgElement(mapFileName, mapInfo) {
 		.attr("name", mapFileName)
 		.attr("id", "externalSvg")
 		.classed("externalSvg", true)
-		.attr("preserveAspectRatio", "xMinYMin meet")
-		.call(
-			d3.behavior.drag()
-				.origin(function(d) { return d; })
-		);
+		.attr("preserveAspectRatio", "xMinYMin meet");
 
 	var svgMapWidth = svgMap.attrIntWithoutPx("width");
 	var svgMapHeight = svgMap.attrIntWithoutPx("height");
