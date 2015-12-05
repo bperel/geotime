@@ -18,14 +18,6 @@ class TerritoryHelper extends AbstractEntityHelper
 
     /**
      * @param ReferencedTerritory $referencedTerritory
-     * @return array
-     */
-    public static function getReferencedTerritoryFilter($referencedTerritory) {
-        // TODO
-    }
-
-    /**
-     * @param ReferencedTerritory $referencedTerritory
      * @param $object \stdClass
      * @return Territory
      */
@@ -77,7 +69,7 @@ class TerritoryHelper extends AbstractEntityHelper
      * @param $xpath string
      * @return Territory
      */
-    private static function build($territory, $startDate = '', $endDate = '', $xpath = null) {
+    public static function build($territory, $startDate = '', $endDate = '', $xpath = null) {
         if (!empty($startDate) && !empty($endDate)) {
             $territory->setStartDate(Util::createDateTimeFromString($startDate));
             $territory->setEndDate(Util::createDateTimeFromString($endDate));
@@ -107,7 +99,7 @@ class TerritoryHelper extends AbstractEntityHelper
     {
         return Util::calculatePathCoordinates(
             $map->getFileName(),
-            self::getElementIdFromPath($territory),
+            $territory->getXpath(),
             $map->getProjection(),
             $map->getCenter(),
             $map->getScale(),
@@ -201,6 +193,15 @@ class TerritoryHelper extends AbstractEntityHelper
         unset($simplifiedTerritory->polygon);
         return $simplifiedTerritory;
         */
+    }
+
+    /**
+     * @param $id integer
+     * @return null|Territory
+     */
+    public static function findOneById($id) {
+        return ModelHelper::getEm()->getRepository(Territory::CLASSNAME)
+            ->findOneBy(array('id' => $id));
     }
 
     /**

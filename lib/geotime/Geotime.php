@@ -261,14 +261,15 @@ class Geotime {
     }
 
     /**
-     * @param $mapId string
-     * @param $territoryId string
+     * @param $mapId integer
+     * @param $referencedTerritoryId integer
      * @param $xpath string
      * @param $territoryPeriodStart string
      * @param $territoryPeriodEnd string
+     * @param $territoryId integer
      * @return bool success
      */
-    public static function saveLocatedTerritory($mapId, $territoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
+    public static function saveLocatedTerritory($mapId, $referencedTerritoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd, $territoryId = null)
     {
         /** @var \geotime\models\mariadb\Map $map */
         $map = MapHelper::find($mapId);
@@ -276,14 +277,22 @@ class Geotime {
             return null;
         }
 
-        $referencedTerritory = ReferencedTerritoryHelper::find($territoryId);
-        if (is_null($referencedTerritory)) {
-            return null;
-        }
+        if (is_null($territoryId)) {
+            $referencedTerritory = ReferencedTerritoryHelper::find($referencedTerritoryId);
+            if (is_null($referencedTerritory)) {
+                return null;
+            }
 
-        $territory = TerritoryHelper::buildWithReferencedTerritory(
-            $referencedTerritory, $territoryPeriodStart, $territoryPeriodEnd, $xpath
-        );
+            $territory = TerritoryHelper::buildWithReferencedTerritory(
+                $referencedTerritory, $territoryPeriodStart, $territoryPeriodEnd, $xpath
+            );
+        }
+        else {
+            $oldTerritory = TerritoryHelper::findOneById($territoryId);
+            $territory = TerritoryHelper::build(
+                $oldTerritory, $territoryPeriodStart, $territoryPeriodEnd, $xpath
+            );
+        }
         $geocoordinates = TerritoryHelper::calculateCoordinates($territory, $map);
 
         if (!is_null($geocoordinates)) {
@@ -291,7 +300,7 @@ class Geotime {
             $territory->setMap($map);
             TerritoryHelper::save($territory);
 
-            $map->addTerritory($territory);
+            $map->addOrUpdateTerritory($territory);
             ModelHelper::getEm()->persist($map);
 
             ModelHelper::getEm()->flush();

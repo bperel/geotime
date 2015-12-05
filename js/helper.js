@@ -97,6 +97,11 @@ function activateHelperNextStep() {
 								if (stepElement.datum().dataUpdate) {
 									stepElement.datum(stepElement.datum().dataUpdate());
 								}
+								(stepElement.datum().afterValidate || [] )
+									.forEach(function (afterValidateAction) {
+										afterValidateAction(stepElement.datum());
+									});
+
 								unloadCurrentStep();
 							}
 							btnData.click(stepElement);
@@ -126,7 +131,8 @@ function isValidStepFilter(d) {
 	return !d.validate || d.validate();
 }
 
-function getHelperStepData(order) {
+function getHelperStepData(process, order) {
+	process = process || helper.datum().activeProcess;
 	order = order || helper.datum().activeStep;
-    return helperSteps.data().filter(function(d) { return d.order === order; })[0];
+    return helperStepsData.filter(function(d) { return d.order === order && d.process === process; })[0];
 }

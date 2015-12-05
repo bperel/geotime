@@ -127,14 +127,14 @@ class Util {
 
     /**
      * @param $svgFileName string
-     * @param $pathId string
+     * @param $territoryXpath string
      * @param $projectionName string
      * @param $projectionCenter integer[]
      * @param $projectionScale integer
      * @param $projectionRotation integer[]
      * @return array|null
      */
-    static function calculatePathCoordinates($svgFileName, $pathId, $projectionName, $projectionCenter, $projectionScale, $projectionRotation) {
+    static function calculatePathCoordinates($svgFileName, $territoryXpath, $projectionName, $projectionCenter, $projectionScale, $projectionRotation) {
         $command = implode(' ',
             array_merge(
                 array_map(
@@ -143,7 +143,7 @@ class Util {
                         self::getPhantomJsPath(),
                         self::$invertpath_script_path,
                         self::$cache_dir_svg.$svgFileName,
-                        $pathId
+                        $territoryXpath
                     )
                 ), array(
                     $projectionName,

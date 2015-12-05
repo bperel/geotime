@@ -95,7 +95,7 @@ class MapHelper extends AbstractEntityHelper
      * @param $territory Territory
      */
     public static function addTerritory($map, $territory) {
-        $map->addTerritory($territory);
+        $map->addOrUpdateTerritory($territory);
     }
 
     /**

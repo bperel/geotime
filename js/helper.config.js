@@ -270,7 +270,7 @@ function disableMapDragResize() {
 }
 
 function persistMapLocation() {
-    validateMapLocation(getHelperStepData(2).map);
+    validateMapLocation(getHelperStepData(helper.datum().activeProcess, 2).map);
 }
 
 // Process 2, step 1
@@ -518,11 +518,11 @@ function checkSelectedTerritory() {
 function saveTerritoriesPosition() {
 	return function(d) {
 		d.territories = locatedTerritories.map(function(locatedTerritory) {
-			if (!locatedTerritory.id) {
+			if (locatedTerritory.element && !locatedTerritory.element.empty()) {
 				locatedTerritory.xpath = locatedTerritory.element.xpathForSvgChild();
+				delete locatedTerritory.element;
 			}
-            delete locatedTerritory.element;
-
+			delete locatedTerritory.polygon;
             return locatedTerritory;
         });
 		return d;

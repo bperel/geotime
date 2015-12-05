@@ -109,7 +109,10 @@ class Map {
     /**
      * @param $territory Territory
      */
-    public function addTerritory($territory) {
+    public function addOrUpdateTerritory($territory) {
+        if (!is_null($territory->getId())) {
+            $this->territories->remove($territory->getId());
+        }
         $this->territories->add($territory);
     }
 

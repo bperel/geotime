@@ -55,7 +55,7 @@ class GeotimeTest extends MariaDbTestHelper {
         $territory = TerritoryHelper::buildWithReferencedTerritory($referencedTerritory, '1984-01-01', '1986-12-21');
         $territory->setPolygon(new \stdClass());
 
-        $this->map->addTerritory($territory);
+        $this->map->addOrUpdateTerritory($territory);
         $territory->setMap($this->map);
         TerritoryHelper::save($territory);
 
@@ -63,7 +63,7 @@ class GeotimeTest extends MariaDbTestHelper {
         $territory2 = TerritoryHelper::buildWithReferencedTerritory($referencedTerritory2);
         $territory2->setPolygon(new \stdClass());
 
-        $this->map->addTerritory($territory2);
+        $this->map->addOrUpdateTerritory($territory2);
         $territory2->setMap($this->map);
         TerritoryHelper::save($territory2);
 
