@@ -271,42 +271,12 @@ class Geotime {
      */
     public static function saveLocatedTerritory($mapId, $referencedTerritoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd, $territoryId = null)
     {
-        /** @var \geotime\models\mariadb\Map $map */
         $map = MapHelper::find($mapId);
         if (is_null($map)) {
             return null;
         }
 
-        if (is_null($territoryId)) {
-            $referencedTerritory = ReferencedTerritoryHelper::find($referencedTerritoryId);
-            if (is_null($referencedTerritory)) {
-                return null;
-            }
-
-            $territory = TerritoryHelper::buildWithReferencedTerritory(
-                $referencedTerritory, $territoryPeriodStart, $territoryPeriodEnd, $xpath
-            );
-        }
-        else {
-            $oldTerritory = TerritoryHelper::findOneById($territoryId);
-            $territory = TerritoryHelper::build(
-                $oldTerritory, $territoryPeriodStart, $territoryPeriodEnd, $xpath
-            );
-        }
-        $geocoordinates = TerritoryHelper::calculateCoordinates($territory, $map);
-
-        if (!is_null($geocoordinates)) {
-            $territory->setPolygon(json_decode(json_encode(array(array($geocoordinates)))));
-            $territory->setMap($map);
-            TerritoryHelper::save($territory);
-
-            $map->addOrUpdateTerritory($territory);
-            ModelHelper::getEm()->persist($map);
-
-            ModelHelper::getEm()->flush();
-            return true;
-        }
-        return false;
+        return TerritoryHelper::saveLocatedTerritory($territoryId, $map, $referencedTerritoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
     }
 
     /**

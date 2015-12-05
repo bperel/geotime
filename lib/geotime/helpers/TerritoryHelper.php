@@ -82,6 +82,48 @@ class TerritoryHelper extends AbstractEntityHelper
     }
 
     /**
+     * @param $territoryId integer
+     * @param $map Map
+     * @param $referencedTerritoryId integer
+     * @param $xpath string
+     * @param $territoryPeriodStart string
+     * @param $territoryPeriodEnd string
+     * @return bool|null
+     */
+    public static function saveLocatedTerritory($territoryId, $map, $referencedTerritoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
+    {
+        if (is_null($territoryId)) {
+            $referencedTerritory = ReferencedTerritoryHelper::find($referencedTerritoryId);
+            if (is_null($referencedTerritory)) {
+                return null;
+            }
+
+            $territory = self::buildWithReferencedTerritory(
+                $referencedTerritory, $territoryPeriodStart, $territoryPeriodEnd, $xpath
+            );
+        } else {
+            $oldTerritory = self::findOneById($territoryId);
+            $territory = self::build(
+                $oldTerritory, $territoryPeriodStart, $territoryPeriodEnd, $xpath
+            );
+        }
+        $geocoordinates = self::calculateCoordinates($territory, $map);
+
+        if (!is_null($geocoordinates)) {
+            $territory->setPolygon(json_decode(json_encode(array(array($geocoordinates)))));
+            $territory->setMap($map);
+            TerritoryHelper::save($territory);
+
+            $map->addOrUpdateTerritory($territory);
+            ModelHelper::getEm()->persist($map);
+
+            ModelHelper::getEm()->flush();
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * @param $territory Territory
      * @return string
      */
