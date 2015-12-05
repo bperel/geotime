@@ -49,8 +49,7 @@ describe('Map tests', function() {
             jasmine.getFixtures().fixturesPath = 'base';
             helperStepsData = [{
                 step: 1, content: ['Step 1 description'],
-                dataUpdate: function() {},
-                buttons: []
+                dataUpdate: function() {}
             }];
 
             initBackgroundMap();

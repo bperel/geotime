@@ -31,16 +31,13 @@ describe('Helper tests', function() {
             step: 1, content: ['Step 1 description', 'This is shown when the step is active'],
             onLoad: [callbacks.myOnLoad],
             onUnload: [callbacks.myOnUnload],
-            dataUpdate: callbacks.dataUpdate,
-            buttons: ['done', 'skip']
+            dataUpdate: callbacks.dataUpdate
         },{
-            step: 2, content: ['Step 2 description'],
-            buttons: ['done']
+            step: 2, content: ['Step 2 description']
         }];
 
         testButtonData = [
-            { name: 'done',   cssClass: 'helperStepDone', text: 'Done !', click: callbacks.clickOnDoneTest },
-            { name: 'skip',   cssClass: 'helperStepSkip', text: 'Skip', click: callbacks.clickOnSkipTest }
+            { name: 'done',   cssClass: 'helperStepDone', text: 'Done !', click: callbacks.clickOnDoneTest }
         ];
 
         helperButtonsData = testButtonData;

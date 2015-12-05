@@ -3,10 +3,6 @@ function loadHelperConfig() {
 		{
 			name: 'done', cssClass: 'helperStepDone', text: 'Done !',
 			click: activateHelperNextStep
-		},
-		{
-			name: 'skip', cssClass: 'helperStepSkip', text: 'Skip this step',
-			click: activateHelperNextStep
 		}
 	];
 
@@ -28,8 +24,7 @@ function loadHelperConfig() {
 			onLoad: [enableCalibrationPointSelection, loadCalibrationPoints, showMapsSideBySide],
 			validate: checkCalibrationPoints,
 			onUnload: [disableCalibrationPointSelection, unloadCalibrationPoints],
-			dataUpdate: saveMapProjection,
-			buttons: ['done', 'skip']
+			dataUpdate: saveMapProjection
 		}, {
 			process: 'mapLocation',
 			order: 2, step: 'adjust',
@@ -37,8 +32,7 @@ function loadHelperConfig() {
 			onLoad: [initProjectionSelect, showMapsSuperimposed, enableMapDragResize],
 			dataUpdate: saveMapPosition,
 			onUnload: [disableMapDragResize],
-			afterValidate: [persistMapLocation],
-			buttons: ['done', 'skip']
+			afterValidate: [persistMapLocation]
 		}, {
 			process: 'territoryIdentification',
 			order: 1, step: 'locate-territories',
@@ -47,8 +41,7 @@ function loadHelperConfig() {
             validate: checkSelectedTerritory,
             dataUpdate: saveTerritoriesPosition,
 			afterValidate: [persistTerritoriesPosition],
-			onUnload: [disableTerritorySelection, showBackgroundMap],
-			buttons: ['done', 'skip']
+			onUnload: [disableTerritorySelection, showBackgroundMap]
 		}
 	];
 }
