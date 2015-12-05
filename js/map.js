@@ -256,8 +256,8 @@ function loadTerritoryMap(noUi, fileName) {
 function loadUI() {
 	addCalibrationDefsMarkers();
 
-	dragAction = d3.select('#dragActionContainer')
-		.selectAll('input')
+	dragAction = d3.select('#dragActionContainer');
+	dragAction.selectAll('input')
 		.data([
 			{name: 'pan', text: 'Pan on drag'},
 			{name: 'rotate', text: 'Rotate on drag'}

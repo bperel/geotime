@@ -99,12 +99,10 @@ function showMapsSuperimposed(mapDatum) {
 
 function hideBackgroundMapIfNotCalibrated(mapDatum) {
 	svg.classed('hidden', !mapDatum.projection);
-	dragAction.classed('hidden', !mapDatum.projection);
 }
 
 function showBackgroundMap() {
 	svg.classed('hidden', false);
-	dragAction.classed('hidden', false);
 }
 
 function disableCalibrationPointSelection() {
@@ -269,10 +267,12 @@ function enableMapDragResize() {
 	svg
 		.call(bgSvgmap_drag)
 		.call(zoom);
+	dragAction.classed('hidden', false);
 }
 
 function disableMapDragResize() {
 	svg.on('mousedown.drag', null);
+	dragAction.classed('hidden', true);
 }
 
 function persistMapLocation() {
