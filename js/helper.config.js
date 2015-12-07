@@ -420,7 +420,7 @@ function showLocatedTerritories() {
 						.text(function (d) { return d.referencedTerritory.name; });
 
 					element.select('.notLocated')
-						.classed('hidden', function(d) { return !!d.polygon; });
+						.classed('hidden', function(d) { return !!d.xpath; });
 
 					element.select('.editLocatedTerritory')
 						.on('click', editTerritory);
