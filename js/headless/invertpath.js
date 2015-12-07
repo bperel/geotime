@@ -52,7 +52,7 @@ if (system.args.length < 7) {
 					scale: projectionScale,
 					rotation: projectionRotation
 				}, svgContent, function () {
-					return svgMap.xpathForSvgChild(xpath).getPathCoordinates();
+					return svgMap.xpath(xpath).getPathCoordinates();
 				});
 			}, system.args, fs.read(svgPath));
 

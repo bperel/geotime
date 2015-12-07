@@ -1,4 +1,4 @@
-d3.selection.prototype.xpathForSvgChild = function(path) {
+d3.selection.prototype.xpath = function(path) {
     var elt = this.node();
 
     if (path) {
@@ -30,6 +30,10 @@ d3.selection.prototype.xpathForSvgChild = function(path) {
                 }
 
                 var xname = "svg:" + elt.tagName.toLowerCase();
+
+                if (xname === 'svg:svg' && elt.id) {
+                    break;
+                }
 
                 if (idx > 1)
                     xname += "[" + idx + "]";

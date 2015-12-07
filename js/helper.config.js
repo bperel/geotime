@@ -386,8 +386,8 @@ function clearHoveredAndSelectedTerritories() {
 }
 
 function updateTerritoryLabel() {
-	var id = (!hoveredTerritory.empty()  && hoveredTerritory.attr('id'))
-		  || (!selectedTerritory.empty() && selectedTerritory.attr('id'))
+	var id = (!hoveredTerritory.empty()  && ( hoveredTerritory.attr('id') ||  hoveredTerritory.xpath()))
+		  || (!selectedTerritory.empty() && (selectedTerritory.attr('id') || selectedTerritory.xpath()))
 		  || 'None';
 
 	territoryId
@@ -430,7 +430,7 @@ function showLocatedTerritories() {
 				}
 			});
 			if (d.xpath) {
-				var territoryElement = svgMap.xpathForSvgChild(d.xpath);
+				var territoryElement = svgMap.xpath(d.xpath);
 				if (territoryElement.empty()) {
 					console.warn('Could not locate territory with XPath '+ d.xpath);
 				}
@@ -518,7 +518,7 @@ function saveTerritoriesPosition() {
 	return function(d) {
 		d.territories = locatedTerritories.map(function(locatedTerritory) {
 			if (locatedTerritory.element && !locatedTerritory.element.empty()) {
-				locatedTerritory.xpath = locatedTerritory.element.xpathForSvgChild();
+				locatedTerritory.xpath = locatedTerritory.element.xpath();
 				delete locatedTerritory.element;
 			}
 			delete locatedTerritory.polygon;
