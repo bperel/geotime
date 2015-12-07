@@ -55,5 +55,25 @@ class MapTest extends EntityTestHelper {
         $map = $this->getRepository()->findOneBy(array());
         $this->assertEquals(0, count($map->getTerritories()));
     }
+
+    public function testIsCalibratedMap() {
+        $map = new Map();
+        $this->assertFalse(MapHelper::isCalibratedMap($map));
+
+        $map->setProjection('mercator');
+        $this->assertFalse(MapHelper::isCalibratedMap($map));
+
+        $map->setCenter(array(0,0));
+        $this->assertFalse(MapHelper::isCalibratedMap($map));
+
+        $map->setScale(100);
+        $this->assertFalse(MapHelper::isCalibratedMap($map));
+
+        $map->setRotation(array(0,0,0));
+        $this->assertTrue(MapHelper::isCalibratedMap($map));
+
+        $map->setRotation(array());
+        $this->assertFalse(MapHelper::isCalibratedMap($map));
+    }
 }
 

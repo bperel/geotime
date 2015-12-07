@@ -73,20 +73,24 @@ class GeotimeTest extends MariaDbTestHelper {
 
     /**
      * @param $mapFileName string
+     * @param bool $hasUploadDate
+     * @param bool $calibrated
      * @return int
      */
-    function createAndPersistCompleteMap($mapFileName = null, $hasUploadDate = true) {
+    function createAndPersistCompleteMap($mapFileName = null, $hasUploadDate = true, $calibrated = true) {
         if (is_null($mapFileName)) {
             $mapFileName = self::$simpleMapName;
         }
         $map = MapHelper::generateAndSave($mapFileName, '1980-01-02', '1991-02-03');
-        $map->setProjection('mercator');
-        $map->setCenter(array(0,0));
-        $map->setScale(700);
+        if ($calibrated) {
+            $map->setProjection('mercator');
+            $map->setCenter(array(0,0));
+            $map->setScale(700);
+            $map->setRotation(array(0,0,0));
+        }
         if ($hasUploadDate) {
             $map->setUploadDate(new \DateTime());
         }
-        $map->setRotation(array(0,0,0));
 
         ModelHelper::getEm()->persist($map);
         ModelHelper::getEm()->flush();
@@ -292,20 +296,7 @@ class GeotimeTest extends MariaDbTestHelper {
 
         Geotime::saveLocatedTerritory($mapId, $referencedTerritory->getId(), $xpath, $territoryPeriodStart, $territoryPeriodEnd);
 
-        $createdTerritory = TerritoryHelper::findOneByXpath($xpath);
-        $this->assertNotEmpty($createdTerritory);
-        $this->assertEquals($createdTerritory->getUserMade(), true);
-        $this->assertEquals($xpath, $createdTerritory->getXpath());
-        $this->assertInternalType('array', $createdTerritory->getPolygon()[0][0]);
-        $this->assertEquals(new \DateTime($territoryPeriodStart), $createdTerritory->getStartDate());
-        $this->assertEquals(new \DateTime($territoryPeriodEnd), $createdTerritory->getEndDate());
-        $this->assertGreaterThan(0, $createdTerritory->getArea());
-
-        /** @var Map $mapWithTerritory */
-        $mapWithTerritory = MapHelper::find($mapId);
-        $this->assertEquals(count($mapWithTerritory->getTerritories()), 2);
-
-        $this->assertEquals(Geotime::getImportedTerritoriesCount(), 3);
+        $this->assertTerritoriesCreated($mapId, $xpath, $territoryPeriodStart, $territoryPeriodEnd, true);
     }
 
     function testAddLocatedTerritoryNoMap() {
@@ -317,7 +308,7 @@ class GeotimeTest extends MariaDbTestHelper {
 
         $result = Geotime::saveLocatedTerritory(123456789, $referencedTerritory->getId(), $xpath, $territoryPeriodStart, $territoryPeriodEnd);
 
-        $this->assertNull($result);
+        $this->assertFalse($result);
         $this->assertNull(TerritoryHelper::findOneByXpath($xpath));
     }
 
@@ -331,7 +322,7 @@ class GeotimeTest extends MariaDbTestHelper {
 
         $result = Geotime::saveLocatedTerritory($mapId, $referencedTerritoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd);
 
-        $this->assertNull($result);
+        $this->assertFalse($result);
         $this->assertNull(TerritoryHelper::findOneByXpath($xpath));
 
         $map = MapHelper::find($mapId);
@@ -361,12 +352,54 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertEquals(1, $map->getTerritories()->count());
     }
 
+    function testAddLocatedTerritoryOnNonCalibratedMap() {
+        $mapId = $this->createAndPersistCompleteMap(null, true, false);
+
+        /** @var Map $mapWithTerritory */
+        $mapWithTerritory = MapHelper::find($mapId);
+        $this->assertEquals(count($mapWithTerritory->getTerritories()), 1);
+
+        $referencedTerritory = ReferencedTerritoryHelper::findOneByName('France');
+        $xpath = '//svg:path[@id=\'simplePath\']';
+        $territoryPeriodStart = '1980-01-02';
+        $territoryPeriodEnd = '1991-04-06';
+
+        Geotime::saveLocatedTerritory($mapId, $referencedTerritory->getId(), $xpath, $territoryPeriodStart, $territoryPeriodEnd);
+
+        $this->assertTerritoriesCreated($mapId, $xpath, $territoryPeriodStart, $territoryPeriodEnd, false);
+    }
+
     function testGetMaps() {
         $this->createAndPersistCompleteMap('A map.svg');
 
         $this->assertEquals(3, count(MapHelper::findAll()));
         $this->assertEquals(2, count(Geotime::getMaps()));
 
+    }
+
+    private function assertTerritoriesCreated($mapId, $xpath, $territoryPeriodStart, $territoryPeriodEnd, $withPolygon) {
+
+        $createdTerritory = TerritoryHelper::findOneByXpath($xpath);
+        $this->assertNotEmpty($createdTerritory);
+        $this->assertEquals($createdTerritory->getUserMade(), true);
+        $this->assertEquals($xpath, $createdTerritory->getXpath());
+        $this->assertEquals(new \DateTime($territoryPeriodStart), $createdTerritory->getStartDate());
+        $this->assertEquals(new \DateTime($territoryPeriodEnd), $createdTerritory->getEndDate());
+
+        if ($withPolygon) {
+            $this->assertInternalType('array', $createdTerritory->getPolygon()[0][0]);
+            $this->assertGreaterThan(0, $createdTerritory->getArea());
+        }
+        else {
+            $this->assertNull($createdTerritory->getPolygon()[0][0]);
+            $this->assertEquals(0, $createdTerritory->getArea());
+        }
+
+        /** @var Map $mapWithTerritory */
+        $mapWithTerritory = MapHelper::find($mapId);
+        $this->assertEquals(count($mapWithTerritory->getTerritories()), 2);
+
+        $this->assertEquals(Geotime::getImportedTerritoriesCount(), 3);
     }
 
 }

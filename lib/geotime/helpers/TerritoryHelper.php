@@ -88,14 +88,14 @@ class TerritoryHelper extends AbstractEntityHelper
      * @param $xpath string
      * @param $territoryPeriodStart string
      * @param $territoryPeriodEnd string
-     * @return bool|null
+     * @return bool
      */
     public static function saveLocatedTerritory($territoryId, $map, $referencedTerritoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd)
     {
         if (is_null($territoryId)) {
             $referencedTerritory = ReferencedTerritoryHelper::find($referencedTerritoryId);
             if (is_null($referencedTerritory)) {
-                return null;
+                return false;
             }
 
             $territory = self::buildWithReferencedTerritory(
@@ -107,10 +107,18 @@ class TerritoryHelper extends AbstractEntityHelper
                 $oldTerritory, $territoryPeriodStart, $territoryPeriodEnd, $xpath
             );
         }
-        $geocoordinates = self::calculateCoordinates($territory, $map);
 
-        if (!is_null($geocoordinates)) {
-            $territory->setPolygon(json_decode(json_encode(array(array($geocoordinates)))));
+        $isCalibratedMap = MapHelper::isCalibratedMap($map);
+        $geocoordinates = null;
+
+        if ($isCalibratedMap) {
+            $geocoordinates = self::calculateCoordinates($territory, $map);
+            if (!is_null($geocoordinates)) {
+                $territory->setPolygon(json_decode(json_encode(array(array($geocoordinates)))));
+            }
+        }
+
+        if ($geocoordinates || !$isCalibratedMap) {
             $territory->setMap($map);
             TerritoryHelper::save($territory);
 
@@ -134,18 +142,18 @@ class TerritoryHelper extends AbstractEntityHelper
 
     /**
      * @param $territory Territory
-     * @param $map Map
-     * @return string
+     * @param $calibratedMap Map
+     * @return string|null
      */
-    public static function calculateCoordinates($territory, $map)
+    public static function calculateCoordinates($territory, $calibratedMap)
     {
         return Util::calculatePathCoordinates(
-            $map->getFileName(),
+            $calibratedMap->getFileName(),
             $territory->getXpath(),
-            $map->getProjection(),
-            $map->getCenter(),
-            $map->getScale(),
-            $map->getRotation()
+            $calibratedMap->getProjection(),
+            $calibratedMap->getCenter(),
+            $calibratedMap->getScale(),
+            $calibratedMap->getRotation()
         );
     }
 

@@ -272,7 +272,7 @@ class Geotime {
     {
         $map = MapHelper::find($mapId);
         if (is_null($map)) {
-            return null;
+            return false;
         }
 
         return TerritoryHelper::saveLocatedTerritory($territoryId, $map, $referencedTerritoryId, $xpath, $territoryPeriodStart, $territoryPeriodEnd);

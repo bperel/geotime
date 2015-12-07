@@ -201,6 +201,21 @@ class MapHelper extends AbstractEntityHelper
         return ModelHelper::getEm()->getClassMetadata(Map::CLASSNAME)->getTableName();
     }
     // @codeCoverageIgnoreEnd
+
+    /**
+     * @param Map $map
+     * @return bool
+     */
+    public static function isCalibratedMap($map)
+    {
+        return count(
+            array_filter(array(
+                $map->getProjection(), $map->getRotation(), $map->getCenter(), $map->getScale()
+            ), function($member) { return is_null($member); }
+            )) === 0
+            && count($map->getRotation()) === 3
+            && count($map->getCenter()) === 2;
+    }
 }
 
 MapHelper::$log = Logger::getLogger("main");
