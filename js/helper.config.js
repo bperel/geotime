@@ -21,9 +21,9 @@ function loadHelperConfig() {
 			process: 'mapLocation',
 			order: 1, step: 'select-calibration-points',
 			title: 'Select locations on both maps',
-			onLoad: [enableCalibrationPointSelection, loadCalibrationPoints, showMapsSideBySide],
+			onLoad: [enableCalibrationPointSelection, loadCalibrationPoints, showMapsSideBySide, showBackgroundMap, enableMapDragResize],
 			validate: checkCalibrationPoints,
-			onUnload: [disableCalibrationPointSelection, unloadCalibrationPoints],
+			onUnload: [disableMapDragResize, disableCalibrationPointSelection, unloadCalibrationPoints],
 			dataUpdate: saveMapProjection
 		}, {
 			process: 'mapLocation',
@@ -41,7 +41,7 @@ function loadHelperConfig() {
             validate: checkSelectedTerritory,
             dataUpdate: saveTerritoriesPosition,
 			afterValidate: [persistTerritoriesPosition],
-			onUnload: [disableTerritorySelection, showBackgroundMap]
+			onUnload: [disableTerritorySelection]
 		}
 	];
 }
