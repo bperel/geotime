@@ -17,16 +17,25 @@
         <link rel="stylesheet" href="css/map.css">
         <link rel="stylesheet" href="css/slider.css">
         <link rel="stylesheet" href="css/helper.css">
+        <link rel="stylesheet" href="js/vendor/bootstrap/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="js/vendor/bootstrap/dist/css/bootstrap-theme.min.css">
 
         <script type="text/javascript" src="js/dependencies.js"></script>
         <script type="text/javascript">
             onLoad = function() {
                 initMapPlaceHolders(function() {
-                    initMapArea();
+                    initBackgroundMap();
+                    resizeBackgroundMap(widthSuperimposed, mapHeight);
+
                     getAndShowBgMap("backgroundMap", "data/external/ne_110m_coastline.json", function() {
+                        applyCurrentProjection();
+                    });
+
+                    d3.select('#view-form').on('submit', function() {
+                        d3.event.preventDefault();
+                        showTerritoriesForYear(d3.select('#year').property('value'));
                     });
                 });
-                d3.select('#loadRandomTerritoryMap').on('click', loadRandomTerritoryMap);
             };
         </script>
         <script data-main="js/main" src="js/vendor/requirejs/require.js"></script>

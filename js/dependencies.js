@@ -16,5 +16,6 @@ var dependencies = [
 var guiDependencies = [
 	'helper.config',
 	'helper.config.calibration',
-	'helper'
+	'helper',
+	'view'
 ];

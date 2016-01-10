@@ -43,10 +43,11 @@ class TerritoryHelper extends AbstractEntityHelper
     /**
      * @param $referencedTerritory ReferencedTerritory
      * @param $coordinates \stdClass
+     * @param $date \DateTime
      * @return Territory
      */
-    public static function buildAndCreateFromNEData($referencedTerritory, $coordinates) {
-        $territory = new Territory($referencedTerritory, false, $coordinates);
+    public static function buildAndCreateFromNEData($referencedTerritory, $coordinates, $date) {
+        $territory = new Territory($referencedTerritory, false, $coordinates, 0, null, $date, $date);
         return self::build($territory);
     }
 
@@ -224,8 +225,10 @@ class TerritoryHelper extends AbstractEntityHelper
 
         if ($locatedTerritoriesOnly) {
             $qb->andWhere($qb->expr()->andx(
-                $qb->expr()->isNotNull('territory.polygon')
-            ));
+                $qb->expr()->isNotNull('territory.polygon'),
+                $qb->expr()->notLike('territory.polygon',':emptyPolygon')
+            ))
+                ->setParameter('emptyPolygon', 'N;');
         }
 
         return $qb->getQuery()->getSingleScalarResult();

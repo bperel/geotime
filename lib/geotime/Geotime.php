@@ -289,6 +289,17 @@ class Geotime {
         $connection->executeQuery('DELETE FROM maps');
         $connection->executeQuery('DELETE FROM referencedTerritories');
     }
+
+    /**
+     * @param $dateStart string
+     * @param $dateEnd string
+     * @return \stdClass
+     */
+    public static function countForPeriod($dateStart, $dateEnd) {
+        $result = new \stdClass();
+        $result->count = TerritoryHelper::countForPeriod(new \DateTime($dateStart), new \DateTime($dateEnd), true);
+        return $result;
+    }
 }
 
 Geotime::$log = Logger::getLogger("main");
