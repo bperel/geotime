@@ -16,8 +16,7 @@ describe('Calibration tests', function() {
         loadJSONFixtures("test/phpunit/_data/countries.json");
 
         jasmine.getFixtures().fixturesPath = 'base';
-        loadFixtures("placeholders/map.html");
-        loadFixtures("placeholders/map-projection.html");
+        loadFixtures("map-placeholders.html");
 
         jasmine.Ajax.install();
 
