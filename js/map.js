@@ -225,6 +225,7 @@ function loadTerritoryMapData(fileName, mapInfo, contentFromFileSystem, callback
 				svgWrapper.innerHTML = contentFromFileSystem;
 				svgMap = d3.select(d3.select("#mapArea").node().insertBefore(d3.select(svgWrapper).select('svg').node(), svg.node()));
 				loadTerritoryMapFromSvgElement(mapFileName, mapInfo);
+				loadExternalMapPosition(getExternalMapOffsetToCenter());
 				return callback(mapInfo);
 			}
 			else {
