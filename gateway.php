@@ -60,7 +60,7 @@ elseif (isset($_POST['addTerritories'])) {
     }
 }
 elseif (isset($_POST['getTerritoriesForYear'])) {
-    $object = Geotime::countForPeriod($_POST['year'].'-01-01', $_POST['year'].'-01-01');
+    $object = Geotime::getFirstTerritoryForPeriod($_POST['year'].'-01-01', $_POST['year'].'-01-01');
 }
 
 echo json_encode($object);

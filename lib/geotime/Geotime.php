@@ -279,6 +279,28 @@ class Geotime {
     }
 
     /**
+     * @param $dateStart string
+     * @param $dateEnd string
+     * @return \stdClass
+     */
+    public static function countForPeriod($dateStart, $dateEnd) {
+        $result = new \stdClass();
+        $result->count = TerritoryHelper::countForPeriod(new \DateTime($dateStart), new \DateTime($dateEnd), true);
+        return $result;
+    }
+
+    /**
+     * @param $dateStart string
+     * @param $dateEnd string
+     * @return \stdClass
+     */
+    public static function getFirstTerritoryForPeriod($dateStart, $dateEnd) {
+        $result = new \stdClass();
+        $result->territory = TerritoryHelper::getFirstTerritoryForPeriod(new \DateTime($dateStart), new \DateTime($dateEnd));
+        return $result;
+    }
+
+    /**
      * Removes maps, territories and periods from the DB
      */
     public static function clean() {
@@ -288,17 +310,6 @@ class Geotime {
         $connection->executeUpdate($platform->getTruncateTableSQL('territories', true));
         $connection->executeQuery('DELETE FROM maps');
         $connection->executeQuery('DELETE FROM referencedTerritories');
-    }
-
-    /**
-     * @param $dateStart string
-     * @param $dateEnd string
-     * @return \stdClass
-     */
-    public static function countForPeriod($dateStart, $dateEnd) {
-        $result = new \stdClass();
-        $result->count = TerritoryHelper::countForPeriod(new \DateTime($dateStart), new \DateTime($dateEnd), true);
-        return $result;
     }
 }
 

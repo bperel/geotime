@@ -1,5 +1,6 @@
 <?php
 namespace geotime\helpers;
+use Doctrine\ORM\QueryBuilder;
 use geotime\models\mariadb\Map;
 use geotime\models\mariadb\Territory;
 use geotime\models\mariadb\ReferencedTerritory;
@@ -213,11 +214,10 @@ class TerritoryHelper extends AbstractEntityHelper
      * @param $startDate \DateTime
      * @param $endDate \DateTime
      * @param $locatedTerritoriesOnly bool
-     * @return int
+     * @return QueryBuilder
      */
-    public static function countForPeriod($startDate, $endDate, $locatedTerritoriesOnly=false) {
+    private static function getTerritoriesByYearQuery($startDate, $endDate, $locatedTerritoriesOnly=false) {
         $qb = ModelHelper::getEm()->createQueryBuilder();
-        $qb->select('count(territory.id)');
         $qb->from(Territory::CLASSNAME,'territory');
         $qb->where('territory.startDate <= :endDate AND territory.endDate >= :startDate')
             ->setParameter('startDate', $startDate)
@@ -230,8 +230,30 @@ class TerritoryHelper extends AbstractEntityHelper
             ))
                 ->setParameter('emptyPolygon', 'N;');
         }
+        return $qb;
+    }
+
+    /**
+     * @param $startDate \DateTime
+     * @param $endDate \DateTime
+     * @param $locatedTerritoriesOnly bool
+     * @return int
+     */
+    public static function countForPeriod($startDate, $endDate, $locatedTerritoriesOnly=false) {
+        /** @var QueryBuilder $qb */
+        $qb = self::getTerritoriesByYearQuery($startDate, $endDate, $locatedTerritoriesOnly);
+        $qb->select('count(territory.id)');
 
         return $qb->getQuery()->getSingleScalarResult();
+    }
+
+    public static function getFirstTerritoryForPeriod($startDate, $endDate) {
+        /** @var QueryBuilder $qb */
+        $qb = self::getTerritoriesByYearQuery($startDate, $endDate, true);
+        $qb->select('territory');
+        $qb->setMaxResults(1);
+
+        return $qb->getQuery()->getSingleResult();
     }
 
     /**
