@@ -19,20 +19,27 @@ class NaturalEarthImporter {
 
     /**
      * @param string $fileName
+     * @param boolean $clean
      * @return int
      */
-    function import($fileName) {
+    function import($fileName, $clean=false) {
 
         $start = microtime(true);
-        /** @var Map $naturalDataMap */
-        $naturalDataMap = ModelHelper::getEm()->getRepository(Map::CLASSNAME)
-            ->findOneBy(array('fileName' => $fileName));
-        if (!is_null($naturalDataMap)) {
-            $nbImportedCountries = count($naturalDataMap->getTerritories());
-            self::$log->info('The Natural Earth data has already been imported');
-            self::$log->info($nbImportedCountries.' country positions from Natural Earth data are stored');
+        if ($clean) {
+            $this->cleanNaturalEarthTerritories();
+        }
+        else {
+            /** @var Map $naturalDataMap */
+            $naturalDataMap = ModelHelper::getEm()->getRepository(Map::CLASSNAME)
+                ->findOneBy(array('fileName' => $fileName));
 
-            return $nbImportedCountries;
+            if (!is_null($naturalDataMap)) {
+                $nbImportedCountries = count($naturalDataMap->getTerritories());
+                self::$log->info('The Natural Earth data has already been imported');
+                self::$log->info($nbImportedCountries.' country positions from Natural Earth data are stored');
+
+                return $nbImportedCountries;
+            }
         }
 
         $countriesAndCoordinates = array();
@@ -61,7 +68,7 @@ class NaturalEarthImporter {
         $territories = array();
         foreach($countriesAndCoordinates as $countryName=>$coordinates) {
             $referencedTerritory = ReferencedTerritoryHelper::buildAndCreate($countryName);
-            $t = TerritoryHelper::buildAndCreateFromNEData($referencedTerritory, $coordinates);
+            $t = TerritoryHelper::buildAndCreateFromNEData($referencedTerritory, $coordinates, new \DateTime(self::$dataDate));
             $t->setMap($map);
             TerritoryHelper::save($t);
             $territories[] = $t;
@@ -80,6 +87,13 @@ class NaturalEarthImporter {
         self::$log->info($nbImportedCountries.' country positions have been imported from Natural Earth data in '.$timeSpent.'s');
 
         return $nbImportedCountries;
+    }
+
+    function cleanNaturalEarthTerritories() {
+        $connection = ModelHelper::getEm()->getConnection();
+        $connection->executeQuery('DELETE FROM territories WHERE userMade=0');
+
+        self::$log->info('Territories from Natural Earth data have been removed');
     }
 }
 

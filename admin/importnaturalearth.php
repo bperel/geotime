@@ -16,6 +16,6 @@ ModelHelper::setEm($entityManager);
 
 
 $naturalEarthImporter = new NaturalEarthImporter();
-$naturalEarthImporter->import('data/external/ne_110m_admin_0_countries.json');
+$naturalEarthImporter->import('data/external/ne_110m_admin_0_countries.json', true);
 
 ?><br /><a href="index.html">Back to admin home</a>
