@@ -247,13 +247,17 @@ class TerritoryHelper extends AbstractEntityHelper
         return $qb->getQuery()->getSingleScalarResult();
     }
 
-    public static function getFirstTerritoryForPeriod($startDate, $endDate) {
+    /**
+     * @param $startDate \DateTime
+     * @param $endDate \DateTime
+     * @return Territory[]
+     */
+    public static function getTerritoriesForPeriod($startDate, $endDate) {
         /** @var QueryBuilder $qb */
         $qb = self::getTerritoriesByYearQuery($startDate, $endDate, true);
         $qb->select('territory');
-        $qb->setMaxResults(1);
 
-        return $qb->getQuery()->getSingleResult();
+        return $qb->getQuery()->getArrayResult();
     }
 
     /**

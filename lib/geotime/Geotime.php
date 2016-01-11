@@ -294,9 +294,9 @@ class Geotime {
      * @param $dateEnd string
      * @return \stdClass
      */
-    public static function getFirstTerritoryForPeriod($dateStart, $dateEnd) {
+    public static function getTerritoriesForPeriod($dateStart, $dateEnd) {
         $result = new \stdClass();
-        $result->territory = TerritoryHelper::getFirstTerritoryForPeriod(new \DateTime($dateStart), new \DateTime($dateEnd));
+        $result->territories = TerritoryHelper::getTerritoriesForPeriod(new \DateTime($dateStart), new \DateTime($dateEnd));
         return $result;
     }
 
