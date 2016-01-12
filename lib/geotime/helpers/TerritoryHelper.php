@@ -255,9 +255,25 @@ class TerritoryHelper extends AbstractEntityHelper
     public static function getTerritoriesForPeriod($startDate, $endDate) {
         /** @var QueryBuilder $qb */
         $qb = self::getTerritoriesByYearQuery($startDate, $endDate, true);
-        $qb->select('territory');
+        $qb->select('territory.polygon, referencedTerritory.name')
+            ->join('territory.referencedTerritory', 'referencedTerritory');
 
-        return $qb->getQuery()->getArrayResult();
+        return self::splitMultipleAreasInTerritories($qb->getQuery()->getArrayResult());
+    }
+
+    /**
+     * @param $territories Territory[]
+     * @return Territory[]
+     */
+    private static function splitMultipleAreasInTerritories($territories) {
+        $outputTerritories = array();
+        foreach($territories as $territory) {
+            $territoryTemplate = $territory;
+            foreach($territory['polygon'] as $area) {
+                $outputTerritories[] = array_replace($territoryTemplate, array('polygon' => array($area)));
+            }
+        }
+        return $outputTerritories;
     }
 
     /**
