@@ -1,9 +1,9 @@
 <?php
-namespace geotime\models\mariadb\types;
+namespace geotime\types;
 
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use geotime\models\mariadb\CalibrationPoint;
+use geotime\models\CalibrationPoint;
 
 class CalibrationPointType extends Type
 {

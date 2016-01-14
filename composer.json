@@ -21,8 +21,8 @@
 	},
 	"autoload": {
 		"psr-4": {
-            "geotime\\models\\mariadb\\": "lib/geotime/models/",
-            "geotime\\models\\mariadb\\types\\": "lib/geotime/types/",
+            "geotime\\models\\": "lib/geotime/models/",
+            "geotime\\types\\": "lib/geotime/types/",
 		  	"geotime\\Test\\Helper\\": "test/phpunit/",
 		  	"geotime\\helpers\\": "lib/geotime/helpers/",
 		  	"geotime\\": "lib/geotime/"

@@ -7,8 +7,8 @@ use geotime\Geotime;
 use geotime\helpers\MapHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
 use geotime\helpers\TerritoryHelper;
-use geotime\models\mariadb\Map;
-use geotime\models\mariadb\Territory;
+use geotime\models\Map;
+use geotime\models\Territory;
 use geotime\NaturalEarthImporter;
 use geotime\Test\Helper\MariaDbTestHelper;
 use geotime\Util;
@@ -264,7 +264,7 @@ class GeotimeTest extends MariaDbTestHelper {
         $this->assertEquals($updatedMap->getScale(), 200);
 
         $calibrationPoints = $updatedMap->getCalibrationPoints();
-        $this->assertInstanceOf('geotime\models\mariadb\CalibrationPoint', $calibrationPoints[0]);
+        $this->assertInstanceOf('geotime\models\CalibrationPoint', $calibrationPoints[0]);
     }
 
     function testUpdateMapMissingData() {

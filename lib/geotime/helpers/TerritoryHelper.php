@@ -1,9 +1,9 @@
 <?php
 namespace geotime\helpers;
 use Doctrine\ORM\QueryBuilder;
-use geotime\models\mariadb\Map;
-use geotime\models\mariadb\Territory;
-use geotime\models\mariadb\ReferencedTerritory;
+use geotime\models\Map;
+use geotime\models\Territory;
+use geotime\models\ReferencedTerritory;
 use geotime\Util;
 use Logger;
 

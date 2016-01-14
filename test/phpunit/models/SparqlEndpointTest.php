@@ -3,7 +3,7 @@
 namespace geotime\Test;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\SparqlEndpointHelper;
-use geotime\models\mariadb\SparqlEndpoint;
+use geotime\models\SparqlEndpoint;
 use geotime\Test\Helper\EntityTestHelper;
 
 include_once('EntityTestHelper.php');

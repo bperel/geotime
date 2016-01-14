@@ -7,7 +7,7 @@ use geotime\helpers\CalibrationPointHelper;
 use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\TerritoryHelper;
-use geotime\models\mariadb\CalibrationPoint;
+use geotime\models\CalibrationPoint;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
@@ -34,7 +34,7 @@ class Geotime {
         $qb
             ->select('map.fileName')
             ->addSelect('count(territory.id) as territoryNumber, coalesce(sum(territory.area), 0) as territoryAreaSum')
-            ->from(models\mariadb\Map::CLASSNAME,'map')
+            ->from(models\Map::CLASSNAME,'map')
             ->leftJoin('map.territories', 'territory')
             ->groupBy('map.fileName');
         if ($svgOnly) {
@@ -45,7 +45,7 @@ class Geotime {
 
         $query = $qb->getQuery();
 
-        /** @var models\mariadb\Map[] $maps */
+        /** @var models\Map[] $maps */
         $mapsAndTerritoryInfo = $query->getResult();
 
         $result = array();
@@ -76,14 +76,14 @@ class Geotime {
         $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb
             ->select('referencedTerritory')
-            ->from(models\mariadb\ReferencedTerritory::CLASSNAME, 'referencedTerritory')
+            ->from(models\ReferencedTerritory::CLASSNAME, 'referencedTerritory')
             ->where($qb->expr()->like('referencedTerritory.name', ':prefix'))
             ->setParameter('prefix', '%' . $like . '%');
 
         $results = $qb->getQuery()->getResult();
 
         return array_map(
-            function (models\mariadb\ReferencedTerritory $referencedTerritory) {
+            function (models\ReferencedTerritory $referencedTerritory) {
                 return array(
                     'id' => $referencedTerritory->getId(),
                     'name' => $referencedTerritory->getName()
@@ -110,7 +110,7 @@ class Geotime {
         $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb
             ->select('territory.startDate, territory.endDate, territory.userMade, sum(territory.area) as areaSum')
-            ->from(models\mariadb\Territory::CLASSNAME,'territory')
+            ->from(models\Territory::CLASSNAME,'territory')
             ->where(
                 $qb->expr()->orX(
                     $qb->expr()->eq('territory.userMade', 'false'),
@@ -153,7 +153,7 @@ class Geotime {
         $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb
             ->addSelect('map.fileName')
-            ->from(models\mariadb\Map::CLASSNAME,'map')
+            ->from(models\Map::CLASSNAME,'map')
             ->where(
                 $qb->expr()->isNotNull('map.uploadDate')
             )
@@ -165,7 +165,7 @@ class Geotime {
 
     /**
      * @param string $fileName
-     * @return models\mariadb\Map|null
+     * @return models\Map|null
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public static function getIncompleteMapInfo($fileName = null)
@@ -177,7 +177,7 @@ class Geotime {
         $qb = ModelHelper::getEm()->createQueryBuilder();
         $qb
             ->addSelect('map')
-            ->from(models\mariadb\Map::CLASSNAME,'map')
+            ->from(models\Map::CLASSNAME,'map')
             ->where(
                 $qb->expr()->isNotNull('map.uploadDate')
             );
@@ -206,10 +206,10 @@ class Geotime {
      * @param $mapCenter string[]|null
      * @param $mapScale int|null
      * @param $calibrationPoints string[]
-     * @return \geotime\models\mariadb\Map|null
+     * @return \geotime\models\Map|null
      */
     public static function updateMap($mapId, $mapProjection = null, $mapRotation = null, $mapCenter = null, $mapScale = null, $calibrationPoints = null) {
-        /** @var \geotime\models\mariadb\Map $map */
+        /** @var \geotime\models\Map $map */
         $map = MapHelper::find($mapId);
         if (is_null($map)) {
             return null;

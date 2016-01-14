@@ -1,8 +1,8 @@
 <?php
 namespace geotime\helpers;
-use geotime\models\mariadb\CalibrationPoint;
-use geotime\models\mariadb\CoordinateLatLng;
-use geotime\models\mariadb\CoordinateXY;
+use geotime\models\CalibrationPoint;
+use geotime\models\CoordinateLatLng;
+use geotime\models\CoordinateXY;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");

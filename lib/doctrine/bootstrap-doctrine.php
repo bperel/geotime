@@ -9,7 +9,7 @@ use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Doctrine\DBAL\Types\Type;
 
-use geotime\models\mariadb\types\CalibrationPointType;
+use geotime\types\CalibrationPointType;
 
 class DoctrineBootstrap {
     /**

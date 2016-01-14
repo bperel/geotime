@@ -34,7 +34,7 @@ class NaturalEarthImporterTest extends MariaDbTestHelper {
     /* Util functions */
 
     /**
-     * @param \geotime\models\mariadb\Territory $territory
+     * @param \geotime\models\Territory $territory
      * @return float
      */
     private function getCoordinatesCount($territory) {
@@ -58,11 +58,11 @@ class NaturalEarthImporterTest extends MariaDbTestHelper {
 
     public function testFullyImportedCountry() {
 
-        /** @var \geotime\models\mariadb\ReferencedTerritory $referencedTerritory */
+        /** @var \geotime\models\ReferencedTerritory $referencedTerritory */
         $referencedTerritory = ReferencedTerritoryHelper::findOneByName('Luxembourg');
         $this->assertNotNull($referencedTerritory);
 
-        /** @var \geotime\models\mariadb\Territory $territory */
+        /** @var \geotime\models\Territory $territory */
         $territory = TerritoryHelper::findOneByReferencedTerritoryId($referencedTerritory->getId());
         $this->assertNotNull($territory);
 
@@ -73,17 +73,17 @@ class NaturalEarthImporterTest extends MariaDbTestHelper {
 
     public function testCountImportedCountries() {
 
-        /** @var \geotime\models\mariadb\ReferencedTerritory $referencedTerritory */
+        /** @var \geotime\models\ReferencedTerritory $referencedTerritory */
         $referencedTerritory = ReferencedTerritoryHelper::findOneByName('Luxembourg');
 
-        /** @var \geotime\models\mariadb\Territory $luxembourg */
+        /** @var \geotime\models\Territory $luxembourg */
         $luxembourg = TerritoryHelper::findOneByReferencedTerritoryId($referencedTerritory->getId());
         $this->assertEquals(7, $this->getCoordinatesCount($luxembourg));
 
-        /** @var \geotime\models\mariadb\ReferencedTerritory $referencedTerritoryJapan */
+        /** @var \geotime\models\ReferencedTerritory $referencedTerritoryJapan */
         $referencedTerritoryJapan = ReferencedTerritoryHelper::findOneByName('Japan');
 
-        /** @var \geotime\models\mariadb\Territory $japan */
+        /** @var \geotime\models\Territory $japan */
         $japan = TerritoryHelper::findOneByReferencedTerritoryId($referencedTerritoryJapan->getId());
         $this->assertEquals(12 + 37 + 16, $this->getCoordinatesCount($japan)); // Japan is made up, in the map, of 3 islands => 12 + 37 + 16 coordinates.
     }

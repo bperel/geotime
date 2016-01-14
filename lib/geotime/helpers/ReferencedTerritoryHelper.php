@@ -1,6 +1,6 @@
 <?php
 namespace geotime\helpers;
-use geotime\models\mariadb\ReferencedTerritory;
+use geotime\models\ReferencedTerritory;
 use Logger;
 
 class ReferencedTerritoryHelper extends AbstractEntityHelper
