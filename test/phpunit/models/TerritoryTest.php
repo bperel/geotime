@@ -6,8 +6,8 @@ use Doctrine\ORM\EntityRepository;
 use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
 use geotime\helpers\TerritoryHelper;
-use geotime\models\mariadb\ReferencedTerritory;
-use geotime\models\mariadb\Territory;
+use geotime\models\ReferencedTerritory;
+use geotime\models\Territory;
 use geotime\NaturalEarthImporter;
 use geotime\Test\Helper\EntityTestHelper;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace geotime\models\mariadb;
+namespace geotime\models;
 
 
 class CalibrationPoint {

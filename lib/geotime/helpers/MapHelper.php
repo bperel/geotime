@@ -1,8 +1,8 @@
 <?php
 namespace geotime\helpers;
 use geotime\Import;
-use geotime\models\mariadb\Map;
-use geotime\models\mariadb\Territory;
+use geotime\models\Map;
+use geotime\models\Territory;
 
 use geotime\Util;
 use Logger;

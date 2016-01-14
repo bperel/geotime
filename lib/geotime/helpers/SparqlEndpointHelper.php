@@ -1,7 +1,7 @@
 <?php
 namespace geotime\helpers;
 
-use geotime\models\mariadb\SparqlEndpoint;
+use geotime\models\SparqlEndpoint;
 use geotime\Util;
 
 class SparqlEndpointHelper extends AbstractEntityHelper

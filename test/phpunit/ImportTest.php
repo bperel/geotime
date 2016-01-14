@@ -7,8 +7,8 @@ use geotime\helpers\ReferencedTerritoryHelper;
 use geotime\helpers\SparqlEndpointHelper;
 use geotime\helpers\TerritoryHelper;
 use geotime\Import;
-use geotime\models\mariadb\Map;
-use geotime\models\mariadb\Territory;
+use geotime\models\Map;
+use geotime\models\Territory;
 use geotime\Test\Helper\MariaDbTestHelper;
 use geotime\Util;
 
@@ -273,7 +273,7 @@ class ImportTest extends MariaDbTestHelper {
         }, $initialTerritories);
         $this->assertEquals(array('Abbasid Caliphate', 'Alania'), $referencedTerritoryNames);
 
-        /** @var \geotime\models\mariadb\ReferencedTerritory $firstTerritory */
+        /** @var \geotime\models\ReferencedTerritory $firstTerritory */
         $firstTerritory = ReferencedTerritoryHelper::findOneByName('Abbasid Caliphate');
         $firstTerritoryPreviousTerritories = $firstTerritory->getPrevious();
         $this->assertEquals(4, count($firstTerritoryPreviousTerritories));
@@ -283,7 +283,7 @@ class ImportTest extends MariaDbTestHelper {
         $this->assertEquals(5, count($firstTerritoryNextTerritories));
         $this->assertEquals('Aghlabids', $firstTerritoryNextTerritories[0]->getName());
 
-        /** @var \geotime\models\mariadb\ReferencedTerritory $secondTerritory */
+        /** @var \geotime\models\ReferencedTerritory $secondTerritory */
         $secondTerritory = ReferencedTerritoryHelper::findOneByName('Alania');
         $secondTerritoryPreviousTerritories = $secondTerritory->getPrevious();
         $this->assertEquals(0, count($secondTerritoryPreviousTerritories));

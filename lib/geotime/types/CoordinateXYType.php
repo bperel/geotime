@@ -1,9 +1,9 @@
 <?php
-namespace geotime\models\mariadb\types;
+namespace geotime\types;
 
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use geotime\models\mariadb\CoordinateXY;
+use geotime\models\CoordinateXY;
 
 class CoordinateXYType extends Type
 {

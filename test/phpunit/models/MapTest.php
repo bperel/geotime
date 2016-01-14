@@ -4,7 +4,7 @@ namespace geotime\Test;
 
 use geotime\helpers\MapHelper;
 use geotime\helpers\ModelHelper;
-use geotime\models\mariadb\Map;
+use geotime\models\Map;
 use geotime\Test\Helper\EntityTestHelper;
 
 include_once('EntityTestHelper.php');

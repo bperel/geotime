@@ -1,5 +1,5 @@
 <?php
-namespace geotime\models\mariadb;
+namespace geotime\models;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Column;

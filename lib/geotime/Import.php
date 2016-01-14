@@ -8,7 +8,7 @@ use geotime\helpers\ModelHelper;
 use geotime\helpers\ReferencedTerritoryHelper;
 use geotime\helpers\SparqlEndpointHelper;
 use geotime\helpers\TerritoryHelper;
-use geotime\models\mariadb\Map;
+use geotime\models\Map;
 use Logger;
 
 Logger::configure("lib/geotime/logger.xml");
@@ -98,7 +98,7 @@ class Import {
      */
     function getSparqlRequestUrlPartsFromQuery($sparqlEndpointName, $sparqlQuery) {
 
-        /** @var \geotime\models\mariadb\SparqlEndpoint $sparqlEndpoint */
+        /** @var \geotime\models\SparqlEndpoint $sparqlEndpoint */
         $sparqlEndpoint = SparqlEndpointHelper::findOneByName($sparqlEndpointName);
 
         if (is_null($sparqlEndpoint)) {
@@ -119,7 +119,7 @@ class Import {
      * @param string $sparqlQuery
      * @param string $fileName|null Cache file name to put the results into
      * @param boolean $getFromCachedJson If FALSE, the results will be queried online
-     * @return models\mariadb\Territory[]|null
+     * @return models\Territory[]|null
      */
     public function storeTerritoriesFromSparqlQuery($sparqlQuery, $fileName = null, $getFromCachedJson = true) {
         $pageAsJson = $this->getJsonDataFromSparqlQuery(
@@ -170,7 +170,7 @@ class Import {
     /**
      * Create Territory object instances from a JSON-formatted SPARQL page
      * @param object $pageAsJson
-     * @return models\mariadb\Territory[]
+     * @return models\Territory[]
      */
     public function storeTerritoriesFromSparqlResults($pageAsJson)
     {
@@ -230,7 +230,7 @@ class Import {
 
     /**
      * Get the images' Wikimedia Commons URLs and upload dates
-     * @param \geotime\models\mariadb\Map[] $maps
+     * @param \geotime\models\Map[] $maps
      * @return array An associative array in the form 'name'=>['url'=>url, 'uploadDate'=>uploadDate]
      */
     public function getCommonsInfos($maps) {
@@ -310,7 +310,7 @@ class Import {
     }
 
     /**
-     * @param \geotime\models\mariadb\Map $map
+     * @param \geotime\models\Map $map
      * @param string $imageMapFullName
      * @param \DateTime $imageMapUploadDate
      * @param string $imageMapUrl NULL if we want the Map object to be stored but not the file to be retrieved

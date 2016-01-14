@@ -1,6 +1,6 @@
 <?php
 
-namespace geotime\models\mariadb;
+namespace geotime\models;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
