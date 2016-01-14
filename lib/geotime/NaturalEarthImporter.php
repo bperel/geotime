@@ -42,38 +42,51 @@ class NaturalEarthImporter {
             }
         }
 
-        $countriesAndCoordinates = array();
-
         $content = json_decode(file_get_contents($fileName));
 
-        foreach($content->features as $country) {
-            $countryName = $country->properties->sovereignt;
-
-            if (!array_key_exists($countryName, $countriesAndCoordinates)) {
-                if (isset($country->geometry->coordinates[0][0][0][0])) { // Ex: Japan, which posesses several separated lands
-                    $countriesAndCoordinates[$countryName] = $country->geometry->coordinates;
-                }
-                else {
-                    $countriesAndCoordinates[$countryName] = array($country->geometry->coordinates);
-                }
-            }
-            else { // Ex: France, which also posesses sovereignty over French Southern and Antarctic Lands
-                $countriesAndCoordinates[$countryName] = array_merge($countriesAndCoordinates[$countryName], $country->geometry->coordinates);
-            }
-        }
+        /** @var SimpleReferencedTerritory[] $countriesAndCoordinates */
+        $countriesAndCoordinates = array();
 
         $map = new Map();
         $map->setFileName($fileName);
 
-        $territories = array();
-        foreach($countriesAndCoordinates as $countryName=>$coordinates) {
-            $referencedTerritory = ReferencedTerritoryHelper::buildAndCreate($countryName);
-            $t = TerritoryHelper::buildAndCreateFromNEData($referencedTerritory, $coordinates, new \DateTime(self::$dataDate));
-            $t->setMap($map);
-            TerritoryHelper::save($t);
-            $territories[] = $t;
+        foreach($content->features as $country) {
+            $countryName = $country->properties->name_long;
+
+            $coordinates = null;
+            if (!array_key_exists($countryName, $countriesAndCoordinates)) {
+                if (isset($country->geometry->coordinates[0][0][0][0])) { // Ex: Japan, which posesses several separated lands
+                    $coordinates = $country->geometry->coordinates;
+                }
+                else {
+                    $coordinates = array($country->geometry->coordinates);
+                }
+            }
+            else { // Ex: France, which also posesses sovereignty over French Southern and Antarctic Lands
+                $coordinates = array_merge($countriesAndCoordinates[$countryName]->coordinates, $country->geometry->coordinates);
+            }
+
+            $countriesAndCoordinates[$countryName] = new SimpleReferencedTerritory(
+                $countryName,
+                $coordinates,
+                $country->properties->type === 'Dependency' ? $country->properties->sovereignt : null
+            );
+
         }
 
+        uasort($countriesAndCoordinates,
+            function($a) {
+                return !is_null($a->dependentOf);
+            }
+        );
+
+        $territories = array();
+        foreach($countriesAndCoordinates as $country) {
+            if (!is_null($country->dependentOf)) {
+                ModelHelper::getEm()->flush();
+            }
+            $territories[] = $country->persist($map);
+        }
 
         $map->setTerritories($territories);
         ModelHelper::getEm()->persist($map);
@@ -92,11 +105,44 @@ class NaturalEarthImporter {
     function cleanNaturalEarthTerritories() {
         $connection = ModelHelper::getEm()->getConnection();
         $connection->executeQuery('DELETE FROM territories WHERE userMade=0');
+        $connection->executeQuery('DELETE FROM referencedTerritories WHERE id NOT IN (SELECT DISTINCT referenced_territory FROM territories)');
 
         self::$log->info('Territories from Natural Earth data have been removed');
     }
 }
 
 NaturalEarthImporter::$log = Logger::getLogger("main");
+
+
+class SimpleReferencedTerritory {
+    public $countryName;
+    public $coordinates;
+    public $dependentOf;
+
+    /**
+     * SimpleReferencedTerritory constructor.
+     * @param string $countryName
+     * @param array $coordinates
+     * @param string $dependentOf
+     */
+    public function __construct($countryName, $coordinates, $dependentOf = null)
+    {
+        $this->countryName = $countryName;
+        $this->coordinates = $coordinates;
+        $this->dependentOf = $dependentOf;
+    }
+
+    /**
+     * @param Map $map
+     * @return models\Territory
+     */
+    public function persist($map) {
+        $referencedTerritory = ReferencedTerritoryHelper::buildAndCreate($this->countryName, null, null, $this->dependentOf);
+        $t = TerritoryHelper::buildAndCreateFromNEData($referencedTerritory, $this->coordinates);
+        $t->setMap($map);
+        TerritoryHelper::save($t, false);
+        return $t;
+    }
+}
 
 ?>

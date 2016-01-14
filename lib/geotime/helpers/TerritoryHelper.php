@@ -42,7 +42,7 @@ class TerritoryHelper extends AbstractEntityHelper
 
     /**
      * @param $referencedTerritory ReferencedTerritory
-     * @param $coordinates \stdClass
+     * @param $coordinates array
      * @return Territory
      */
     public static function buildAndCreateFromNEData($referencedTerritory, $coordinates) {
@@ -120,7 +120,7 @@ class TerritoryHelper extends AbstractEntityHelper
 
         if ($geocoordinates || !$isCalibratedMap) {
             $territory->setMap($map);
-            TerritoryHelper::save($territory);
+            TerritoryHelper::save($territory, true);
 
             $map->addOrUpdateTerritory($territory);
             ModelHelper::getEm()->persist($map);
@@ -298,12 +298,15 @@ class TerritoryHelper extends AbstractEntityHelper
 
     /**
      * @param $territory Territory
+     * @param $flush boolean
      * @return Territory
      */
-    public static function save($territory) {
+    public static function save($territory, $flush) {
         $territory->setArea(self::calculateArea($territory));
         self::persist($territory);
-        self::flush();
+        if ($flush) {
+            self::flush();
+        }
 
         return $territory;
     }

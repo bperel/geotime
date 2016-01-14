@@ -57,7 +57,7 @@ class GeotimeTest extends MariaDbTestHelper {
 
         $this->map->addOrUpdateTerritory($territory);
         $territory->setMap($this->map);
-        TerritoryHelper::save($territory);
+        TerritoryHelper::save($territory, true);
 
         $referencedTerritory2 = ReferencedTerritoryHelper::buildAndCreate('Second referenced territory');
         $territory2 = TerritoryHelper::buildWithReferencedTerritory($referencedTerritory2);
@@ -65,7 +65,7 @@ class GeotimeTest extends MariaDbTestHelper {
 
         $this->map->addOrUpdateTerritory($territory2);
         $territory2->setMap($this->map);
-        TerritoryHelper::save($territory2);
+        TerritoryHelper::save($territory2, true);
 
         ModelHelper::getEm()->persist($this->map);
         ModelHelper::getEm()->flush();
