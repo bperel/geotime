@@ -105,6 +105,7 @@ class NaturalEarthImporter {
     function cleanNaturalEarthTerritories() {
         $connection = ModelHelper::getEm()->getConnection();
         $connection->executeQuery('DELETE FROM territories WHERE userMade=0');
+        $connection->executeQuery('DELETE FROM referencedTerritories WHERE dependency_of NOT IN (SELECT DISTINCT referenced_territory FROM territories)');
         $connection->executeQuery('DELETE FROM referencedTerritories WHERE id NOT IN (SELECT DISTINCT referenced_territory FROM territories)');
 
         self::$log->info('Territories from Natural Earth data have been removed');
