@@ -3,8 +3,10 @@ namespace geotime\models;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\JoinTable;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @Entity @Table(name="referencedTerritories")
@@ -39,11 +41,19 @@ class ReferencedTerritory
      * @param $previous
      * @param $next
      */
-    public function __construct($name, $previous = array(), $next = array())
+
+    /**
+     * @ManyToOne(targetEntity="ReferencedTerritory", fetch="EAGER")
+     * @JoinColumn(name="referenced_territory", referencedColumnName="id")
+     **/
+    var $dependencyOf;
+
+    public function __construct($name, $previous = array(), $next = array(), $dependencyOf = null)
     {
         $this->name = $name;
         $this->previous = $previous;
         $this->next = $next;
+        $this->dependencyOf = $dependencyOf;
     }
 
     // @codeCoverageIgnoreStart
@@ -101,6 +111,22 @@ class ReferencedTerritory
     public function setNext($next)
     {
         $this->next = $next;
+    }
+
+    /**
+     * @return ReferencedTerritory
+     */
+    public function getDependencyOf()
+    {
+        return $this->dependencyOf;
+    }
+
+    /**
+     * @param ReferencedTerritory $dependencyOf
+     */
+    public function setDependencyOf($dependencyOf)
+    {
+        $this->dependencyOf = $dependencyOf;
     }
     // @codeCoverageIgnoreEnd
 }

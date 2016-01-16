@@ -36,16 +36,20 @@ class ReferencedTerritoryHelper extends AbstractEntityHelper
      * @param string $name
      * @param string $previous
      * @param string $next
+     * @param ReferencedTerritory $dependencyOf
      * @return ReferencedTerritory
      */
-    public static function buildAndCreate($name, $previous = null, $next = null)
+    public static function buildAndCreate($name, $previous = null, $next = null, $dependencyOf = null)
     {
-        $referencedTerritory = new ReferencedTerritory($name);
+        $referencedTerritory = new ReferencedTerritory($name, null);
         if (!empty($previous)) {
             $referencedTerritory->setPrevious(self::referencedTerritoriesStringToTerritoryArray($previous));
         }
         if (!empty($next)) {
             $referencedTerritory->setNext(self::referencedTerritoriesStringToTerritoryArray($next));
+        }
+        if (!empty($dependencyOf)) {
+            $referencedTerritory->setDependencyOf(self::findOneByName($dependencyOf));
         }
 
         self::persist($referencedTerritory);

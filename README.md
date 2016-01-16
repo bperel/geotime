@@ -44,6 +44,12 @@ $ chmod -R +w cache
 
 * Create a MySQL or MariaDB empty database called "geotime".
 
+* Generate the database schema from the entities :
+```bash
+$ cd lib/geotime
+$ php ../../vendor/doctrine/orm/bin/doctrine orm:schema-tool:create
+```
+
 * Set up the admin section credentials : the [admin/.htaccess](admin/.htaccess) file references the .htpasswd file containing the admin credentials. Generate the latter using the following command : 
 ```bash
 $ htpasswd -c /path/to/my/web/directory/passwords admin
