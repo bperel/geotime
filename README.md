@@ -46,7 +46,7 @@ $ chmod -R +w cache
 
 * Generate the database schema from the entities :
 ```bash
-$ cd lib/geotime
+$ cd lib/doctrine
 $ php ../../vendor/doctrine/orm/bin/doctrine orm:schema-tool:create
 ```
 

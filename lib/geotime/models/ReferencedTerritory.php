@@ -36,18 +36,19 @@ class ReferencedTerritory
     var $next;
 
     /**
-     * ReferencedTerritory constructor.
-     * @param $name
-     * @param $previous
-     * @param $next
-     */
-
-    /**
      * @ManyToOne(targetEntity="ReferencedTerritory", fetch="EAGER")
-     * @JoinColumn(name="referenced_territory", referencedColumnName="id")
+     * @JoinColumn(name="dependency_of", referencedColumnName="id")
      **/
     var $dependencyOf;
 
+
+    /**
+     * ReferencedTerritory constructor.
+     * @param $name
+     * @param array $previous
+     * @param array $next
+     * @param ReferencedTerritory $dependencyOf
+     */
     public function __construct($name, $previous = array(), $next = array(), $dependencyOf = null)
     {
         $this->name = $name;
