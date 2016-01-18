@@ -282,6 +282,8 @@ function calibrateMapRotation() {
 			.scale(currentProjection.scale())
 			.rotate(currentProjection.rotate());
 
+		applyCurrentProjection();
+
 		var calibrationResults =  calibrateMapRotationForProjection(projectionName);
 		if (calibrationResults.min < bestProjectionResult.min) {
 			bestProjectionResult = JSON.parse(JSON.stringify(calibrationResults));

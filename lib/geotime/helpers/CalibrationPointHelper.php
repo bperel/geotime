@@ -18,7 +18,7 @@ class CalibrationPointHelper
      */
     public static function generateFromStrings($calibrationPoint) {
 
-        $bgPointCoordinates = new CoordinateLatLng($calibrationPoint->bgMap->lng, $calibrationPoint->bgMap->lat);
+        $bgPointCoordinates = new CoordinateLatLng($calibrationPoint->bgMap->lat, $calibrationPoint->bgMap->lng);
         $fgPointCoordinates = new CoordinateXY($calibrationPoint->fgMap->x, $calibrationPoint->fgMap->y);
 
         return new CalibrationPoint($bgPointCoordinates, $fgPointCoordinates);
@@ -33,7 +33,7 @@ class CalibrationPointHelper
             $calibrationPoint->setFgPoint(new CoordinateXY($coordinates->x, $coordinates->y));
         }
         else if ($type === 'bgMap') {
-            $calibrationPoint->setBgPoint(new CoordinateLatLng($coordinates->lng, $coordinates->lat));
+            $calibrationPoint->setBgPoint(new CoordinateLatLng($coordinates->lat, $coordinates->lng));
         }
     }
 }
