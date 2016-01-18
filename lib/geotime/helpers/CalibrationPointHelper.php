@@ -33,7 +33,7 @@ class CalibrationPointHelper
             $calibrationPoint->setFgPoint(new CoordinateXY($coordinates->x, $coordinates->y));
         }
         else if ($type === 'bgMap') {
-            $calibrationPoint->setBgPoint(new CoordinateLatLng($coordinates->lng, $coordinates->lat));
+            $calibrationPoint->setBgPoint(new CoordinateLatLng($coordinates->lat, $coordinates->lng));
         }
     }
 }
