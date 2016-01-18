@@ -18,7 +18,7 @@ class CalibrationPointHelper
      */
     public static function generateFromStrings($calibrationPoint) {
 
-        $bgPointCoordinates = new CoordinateLatLng($calibrationPoint->bgMap->lng, $calibrationPoint->bgMap->lat);
+        $bgPointCoordinates = new CoordinateLatLng($calibrationPoint->bgMap->lat, $calibrationPoint->bgMap->lng);
         $fgPointCoordinates = new CoordinateXY($calibrationPoint->fgMap->x, $calibrationPoint->fgMap->y);
 
         return new CalibrationPoint($bgPointCoordinates, $fgPointCoordinates);
