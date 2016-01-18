@@ -141,7 +141,7 @@ function showBgMap(id, data, error) {
 		svg.append("g")
 			.attr("id", id)
 			.selectAll(".subunit")
-			.data(data.features)
+			.data(data.geometries)
 			.enter()
 				.append("path")
 				.attr("class", "subunit-boundary subunit");
