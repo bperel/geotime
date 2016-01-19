@@ -27,13 +27,17 @@
                     initBackgroundMap();
                     resizeBackgroundMap(widthSuperimposed, mapHeight);
 
-                    getAndShowBgMap("backgroundMap", "data/external/ne_110m_coastline.json", function() {
+                    getAndShowBgMap("backgroundMap", "data/external/ne_50m_coastline.json", function() {
                         applyCurrentProjection();
                     });
 
                     d3.select('#view-form').on('submit', function() {
                         d3.event.preventDefault();
-                        showTerritoriesForYear(d3.select('#year').property('value'));
+                        showTerritoriesForYear(
+                            d3.select('[name="scope"]:checked').property('value') === 'most-recent'
+                                ? null
+                                : d3.select('#year').property('value')
+                        );
                     });
                 });
             };
@@ -44,9 +48,19 @@
     <body>
         <div id="map-placeholders"></div>
         <form id="view-form">
-            <label for="year">What were countries like in</label>
-            <input type="number" id="year" maxlength="5" />
-            <input id="submit-view-form" type="submit" value="Go">
+            <div>What were countries like</div>
+            <div>
+                <input type="radio" name="scope" id="scope_date" value="date"/>
+                <label for="scope_date">in</label>
+                <input type="number" id="year" maxlength="5" />
+            </div>
+            <div>
+                <input type="radio" name="scope" id="scope_most_recent" value="most-recent" checked="checked" />
+                <label for="scope_most_recent">the last time we checked</label>
+            </div>
+            <div>
+                <input id="submit-view-form" type="submit" value="Go">
+            </div>
         </form>
     </body>
 </html>

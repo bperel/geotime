@@ -139,7 +139,7 @@ class SimpleReferencedTerritory {
      */
     public function persist($map) {
         $referencedTerritory = ReferencedTerritoryHelper::buildAndCreate($this->countryName, null, null, $this->dependentOf);
-        $t = TerritoryHelper::buildAndCreateFromNEData($referencedTerritory, $this->coordinates);
+        $t = TerritoryHelper::buildAndCreateFromNEData($referencedTerritory, $this->coordinates, null);
         $t->setMap($map);
         TerritoryHelper::save($t, false);
         return $t;

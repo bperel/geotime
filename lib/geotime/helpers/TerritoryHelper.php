@@ -234,6 +234,26 @@ class TerritoryHelper extends AbstractEntityHelper
     }
 
     /**
+     * @return \geotime\models\Territory[]
+     */
+    public static function getModernTerritories() {
+        $qb = ModelHelper::getEm()->createQueryBuilder();
+        $qb->select('territory.polygon, referencedTerritory.name')
+            ->from(Territory::CLASSNAME,'territory')
+            ->join('territory.referencedTerritory', 'referencedTerritory')
+            ->where($qb->expr()->andx(
+                $qb->expr()->isNull('territory.startDate'),
+                $qb->expr()->isNull('territory.endDate'),
+                $qb->expr()->isNotNull('territory.polygon'),
+                $qb->expr()->notLike('territory.polygon',':emptyPolygon')
+            ))
+
+            ->setParameter('emptyPolygon', 'N;');
+
+        return self::splitMultipleAreasInTerritories($qb->getQuery()->getArrayResult());
+    }
+
+    /**
      * @param $startDate \DateTime
      * @param $endDate \DateTime
      * @param $locatedTerritoriesOnly bool

@@ -290,13 +290,17 @@ class Geotime {
     }
 
     /**
-     * @param $dateStart string
-     * @param $dateEnd string
+     * @param $date string
      * @return \stdClass
      */
-    public static function getTerritoriesForPeriod($dateStart, $dateEnd) {
+    public static function getTerritoriesForPeriod($date) {
         $result = new \stdClass();
-        $result->territories = TerritoryHelper::getTerritoriesForPeriod(new \DateTime($dateStart), new \DateTime($dateEnd));
+        if (empty($date)) {
+            $result->territories = TerritoryHelper::getModernTerritories();
+        }
+        else {
+            $result->territories = TerritoryHelper::getTerritoriesForPeriod(new \DateTime($date.'-01-01'), new \DateTime($date.'-01-01'));
+        }
         return $result;
     }
 
