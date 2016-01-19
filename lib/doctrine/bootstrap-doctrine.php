@@ -42,7 +42,10 @@ class DoctrineBootstrap {
             'password' => $password,
             'host' => 'localhost',
             'driver' => 'pdo_mysql',
-            'server_version' => '15.1'
+            'server_version' => '15.1',
+            'driverOptions' => array(
+                1002=>'SET NAMES utf8'
+            )
         );
 
         return self::getEntityManagerFromConnectionParams($connectionParams);
