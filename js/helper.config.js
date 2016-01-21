@@ -289,7 +289,7 @@ function enableTerritorySelection() {
 			.on("click",     onHoveredTerritoryClick);
 
     d3.select('#addTerritory').on('click', function() {
-        var editTerritory = {
+        var territoryToEdit = {
             element: selectedTerritory,
             startDate: d3.select('#territoryPeriodStart').node().value,
 			endDate: d3.select('#territoryPeriodEnd').node().value,
@@ -301,16 +301,16 @@ function enableTerritorySelection() {
 
 		var isUpdate = false;
 		locatedTerritories.forEach(function(locatedTerritory, index) {
-			if (locatedTerritory.referencedTerritory.id === editTerritory.referencedTerritory.id) {
-				locatedTerritories[index].element = editTerritory.element;
-				locatedTerritories[index].startDate = editTerritory.startDate;
-				locatedTerritories[index].endDate = editTerritory.endDate;
-				locatedTerritories[index].referencedTerritory = editTerritory.referencedTerritory;
+			if (locatedTerritory.referencedTerritory.id === territoryToEdit.referencedTerritory.id) {
+				locatedTerritories[index].element = territoryToEdit.element;
+				locatedTerritories[index].startDate = territoryToEdit.startDate;
+				locatedTerritories[index].endDate = territoryToEdit.endDate;
+				locatedTerritories[index].referencedTerritory = territoryToEdit.referencedTerritory;
 				isUpdate = true;
 			}
 		});
 		if (!isUpdate) {
-			locatedTerritories.push(editTerritory);
+			locatedTerritories.push(territoryToEdit);
 		}
         showLocatedTerritories();
 		hideNewTerritoryForm();
@@ -321,6 +321,8 @@ function enableTerritorySelection() {
 
 function editTerritory(datum) {
 	if (datum && datum.id) {
+		selectedTerritory.animateTerritoryPathOn('in', 500);
+
 		var form = d3.select('#addTerritorySection');
 		form.select('#territoryName')
 			.datum(function() { return {territoryId: datum.referencedTerritory.id, territoryName: datum.referencedTerritory.name }; })
@@ -423,9 +425,14 @@ function showLocatedTerritories() {
 						.classed('hidden', function(d) { return !!d.xpath; });
 
 					element.select('.editLocatedTerritory')
-						.on('click', editTerritory);
+						.on('click', function(d) {
+							if (d.xpath) {
+								selectedTerritory = svgMap.xpath(d.xpath);
+							}
+							editTerritory(d);
+						});
 
-					element.select('.removeLocatedTerritory')
+					element.select('.removeLocatedTerritory:not(.disabled)')
 						.on('click', removeTerritory);
 				}
 			});
@@ -449,6 +456,11 @@ function showLocatedTerritories() {
 
 d3.selection.prototype.animateTerritoryPathOn = function(direction, duration) {
 	this
+		.datum(function(d) {
+			d = d || {};
+			d.initialFill = d.initialFill || d3.rgb(d3.select(this).style('fill'));
+			return d;
+		})
 		.filter(function(d) { return d.initialFill.toString() !== '#000000'; })
 			.transition().duration(duration).ease('linear')
 			.style('fill', function(d) { return d.initialFill[direction === 'in' ? 'brighter' : 'darker'](1.5); })
@@ -470,13 +482,7 @@ d3.selection.prototype.toggleTerritoryHighlight = function(toggle) {
 			.toggleTerritoryLabelHighlight(toggle);
 
 		if (toggle) {
-			this
-				.datum(function(d) {
-					d = d || {};
-					d.initialFill = d3.rgb(d3.select(this).style('fill'));
-					return d;
-				})
-				.animateTerritoryPathOn('in', 1000);
+			this.animateTerritoryPathOn('in', 1000);
 		}
 		else {
 			this.animateTerritoryPathOff();
@@ -500,7 +506,6 @@ d3.selection.prototype.toggleTerritoryLabelHighlight = function(toggle) {
 function onHoveredTerritoryClick() {
 	if (selectedTerritory.empty()) {
 		selectedTerritory = hoveredTerritory;
-		selectedTerritory.animateTerritoryPathOn('in', 500);
 
 		editTerritory(selectedTerritory.datum());
 	}

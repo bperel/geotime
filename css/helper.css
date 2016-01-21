@@ -96,7 +96,6 @@
 .helperStep .removeCalibrationPoint,
 .helperStep .editLocatedTerritory,
 .helperStep .removeLocatedTerritory {
-    cursor: pointer;
     float: right;
 }
 
@@ -124,8 +123,8 @@
 
 .helperStep #locatedTerritories .editLocatedTerritory,
 .helperStep #locatedTerritories .removeLocatedTerritory {
+    float: right;
     margin-left: 10px;
-    margin-right: 0;
 }
 
 .helperStep #locatedTerritories .editTerritoryText {
