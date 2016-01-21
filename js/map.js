@@ -314,6 +314,9 @@ function validateMapLocation(mapData) {
             if (error) {
                 alert(error);
             }
+			else {
+				alert('Done');
+			}
         }
     );
 }
