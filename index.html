@@ -36,34 +36,8 @@
         <script type="text/javascript" src="js/vendor/angular-route/angular-route.min.js"></script>
         <script type="text/javascript" src="js/app.js"></script>
         <script type="text/javascript" src="js/appcontrollers.js"></script>
-
-        <script type="text/javascript">
-            onLoad = function() {
-                initMapPlaceHolders(function() {
-//                    d3.select('#loadRandomTerritoryMap').on('click', loadTerritoryMap);
-                    d3.select('#maps').on('change', function() {
-                        var selectedMapFileName = d3.select(mapSelection.node().options[mapSelection.node().selectedIndex]).datum().fileName;
-                        if (selectedMapFileName !== null) {
-                            loadTerritoryMap(false, selectedMapFileName);
-                        }
-                    });
-
-                    initBackgroundMap();
-                    resizeBackgroundMap(widthSuperimposed, mapHeight);
-
-                    loadUI();
-                    loadHelperConfig();
-                    getAndShowBgMap("backgroundMap", "data/external/ne_50m_coastline.json", function() {
-                        applyCurrentProjection();
-                        loadMaps();
-                    });
-                });
-            };
-        </script>
-
-
     </head>
-    <body ng-controller="MapController">
+    <body>
         <div ng-view></div>
     </body>
 </html>

@@ -1,6 +1,10 @@
 <div id="dragActionContainer" class="hidden"></div>
 
-<div id="mapArea"></div>
+<div id="mapArea">
+    <svg id="map" ng-width="{{ bgMapWidth }}" ng-height="{{ bgMapWidth }}">
+        <rect id="bg" ng-width="{{bgMapWidth}}" ng-height="{{bgMapWidth}}"></rect>
+    </svg>
+</div>
 
 <div id="mapHelper" class="panel panel-default">
     <div id="selectMap">

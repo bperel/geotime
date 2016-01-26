@@ -104,13 +104,7 @@ function initMapPlaceHolders(callback) {
 }
 
 function initBackgroundMap() {
-
-	svg = d3.select("#mapArea").append("svg")
-		.attr("id", "map")
-		.datum({x: 0, y: 0});
-
-	svg.append("rect")
-		.attr("id", "bg");
+	svg = d3.select("#mapArea svg");
 }
 
 function resizeBackgroundMap(width, height) {
