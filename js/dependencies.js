@@ -1,12 +1,14 @@
 var onLoad = function() {};
 
 var dependencies = [
+	'app',
+	'angular',
 	'vendor/modernizr/modernizr',
-	'vendor/d3/d3',
+	'd3',
 	'vendor/topojson/topojson',
 	'autocomplete',
-	'vendor/jquery/dist/jquery.min',
-	'vendor/bootstrap/dist/js/bootstrap.min',
+	'jquery',
+	'bootstrap',
 	'plugins',
 	'util',
 	'd3.xpath',

@@ -21,7 +21,7 @@
         <script type="text/javascript">
             onLoad = function() {
                 initMapPlaceHolders(function() {
-                    d3.select('#loadRandomTerritoryMap').on('click', loadTerritoryMap);
+//                    d3.select('#loadRandomTerritoryMap').on('click', loadTerritoryMap);
                     d3.select('#maps').on('change', function() {
                         var selectedMapFileName = d3.select(mapSelection.node().options[mapSelection.node().selectedIndex]).datum().fileName;
                         if (selectedMapFileName !== null) {
@@ -41,10 +41,13 @@
                 });
             };
         </script>
-        <script data-main="js/main" src="js/vendor/requirejs/require.js"></script>
+
 
     </head>
-    <body>
-        <div id="map-placeholders"></div>
+    <body ng-controller="MapController">
+        {{ helloGeotime }}
+        <div ng-view></div>
+        <!--<div id="map-placeholders"></div>-->
+        <script data-main="js/main" src="js/vendor/requirejs/require.js"></script>
     </body>
 </html>

@@ -4,7 +4,10 @@
 
 <div id="mapHelper" class="panel panel-default">
     <div id="selectMap">
-        <select class="form-control" id="maps"></select>
+        <select class="form-control" id="maps" ng-model="mapFileName" ng-change="loadTerritoryMap(false)">
+            <option>a</option>
+            <option>b</option>
+        </select>
         <!--<a href="javascript:void(0)" id="loadTerritoryMap">Load a random territory</a>-->
     </div>
     <ul id="processTabs" class="nav nav-tabs nav-justified"></ul>
