@@ -1,8 +1,7 @@
 var geotimeControllers = angular.module('geotimeControllers', []);
 
 geotimeControllers.controller('MapController', ['$scope', '$http',
-	function($scope, $http) {
-		$scope.helloGeotime = 'Hello !';
+	function($scope) {
 		$scope.loadTerritoryMap = function(noUi) {
 			loadTerritoryMap(noUi, $scope.mapFileName)
 		};
