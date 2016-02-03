@@ -1,8 +1,14 @@
 var geotimeControllers = angular.module('geotimeControllers', []);
 
+geotimeControllers.controller('MapLocationController', ['$scope',
+	function($scope) {
+	}]
+);
 
 geotimeControllers.controller('MapController', ['$scope', '$templateRequest',
 	function($scope, $templateRequest) {
+		$scope.mapInfo = {};
+
 		$scope.processes = [];
 		$scope.steps = helperStepsData;
 
@@ -118,10 +124,11 @@ geotimeControllers.controller('MapController', ['$scope', '$templateRequest',
 					function(error, incompleteMapInfo) {
 						if (!!incompleteMapInfo) {
 							loadTerritoryMapData(incompleteMapInfo.fileName, incompleteMapInfo, false, noUi ? function() {} : function(mapInfo) {
-								loadUIConfig(mapInfo);
+								$scope.mapInfo = mapInfo;
+								loadUIConfig($scope.mapInfo);
 								$scope.processes = helperProcessesData;
 
-								if (mapInfo.projection || mapInfo.territories.length) {
+								if ($scope.mapInfo.projection || $scope.mapInfo.territories.length) {
 									$scope.loadProcess('territoryIdentification');
 								}
 								else {

@@ -18,7 +18,8 @@ geotimeApp.config(['$stateProvider', '$urlRouterProvider',
 			})
 			.state('map-placeholders.territoryIdentification', {
 				url: '/territoryIdentification',
-				templateUrl: 'templates/territoryIdentification/locate-territories.html'
+				templateUrl: 'templates/territoryIdentification/locate-territories.html',
+				controller: 'TerritoryIdentificationController'
 			});
 
 		$urlRouterProvider.otherwise('/map-placeholders');

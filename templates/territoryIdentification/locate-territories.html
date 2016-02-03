@@ -1,3 +1,56 @@
-Located territories : <span id="locatedTerritoriesNumber"></span>
-<ul id="locatedTerritories" class="list-group"></ul>
+Located territories : <span id="locatedTerritoriesNumber">{{locatedTerritories.length}}</span>
+<ul id="locatedTerritories" class="list-group">
+    <li ng-repeat="(territoryIndex, locatedTerritory) in locatedTerritories" class="locatedTerritory list-group-item">
+        <span class="territoryName">
+            {{locatedTerritory.referencedTerritory.name}}
+        </span>
+        <span class="notLocated label label-danger" ng-class="{ hidden: locatedTerritory.xpath }">Not located</span>
+        <span class="removeLocatedTerritory btn btn-xs btn-danger glyphicon glyphicon-remove" ng-click="removeTerritory(locatedTerritory)"></span>
+        <span class="editLocatedTerritory btn btn-xs btn-warning glyphicon glyphicon-pencil" ng-click="editTerritory(territoryIndex)"></span>
+    </li>
+    <li id="addTerritorySection" class="list-group-item">
+        <div class="editTerritoryText">
+            Click on a territory on the map to identify it
+            <br />
+            Currently selected : <span id="territoryId">None</span>
+        </div>
+        <div id="currentTerritory" class="hidden">
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="territoryName">Territory</label>
+                </div>
+                <div class="col-md-8">
+                    <input class="form-control" type="text" id="territoryName" ng-class="{hovered: locatedTerritory.id === hoveredTerritoryId}"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">had these borders</div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="territoryPeriodStart">from</label>
+                </div>
+                <div class="col-md-8">
+                    <input class="form-control" type="text" id="territoryPeriodStart" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="territoryPeriodEnd">to</label>
+                </div>
+                <div class="col-md-8">
+                    <input class="form-control" type="text" id="territoryPeriodEnd" />
+                </div>
+            </div>
+
+            <div class="clearfix">
+                <input type="button" id="addTerritory" class="col-md-12 btn btn-success" value="Save"/>
+            </div>
+
+            <div class="clearfix">
+                <input type="button" id="cancelTerritory" class="col-md-12 btn btn-default" value="Cancel"/>
+            </div>
+        </div>
+    </li>
+</ul>
 <br />

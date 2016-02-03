@@ -400,11 +400,6 @@ function updateTerritoryLabel() {
 }
 
 function loadLocatedTerritories(mapDatum) {
-	if (mapDatum.territories) {
-		locatedTerritories = mapDatum.territories.filter(function (d) {
-			return d.referencedTerritory;
-		});
-	}
 }
 
 function showLocatedTerritories() {
@@ -415,27 +410,6 @@ function showLocatedTerritories() {
 
 	locatedTerritoriesElements
 		.each(function(d) {
-			d3.select(this).loadTemplate({
-				name: 'locatedTerritory',
-				callback: function(element) {
-					element.select('.territoryName')
-						.text(function (d) { return d.referencedTerritory.name; });
-
-					element.select('.notLocated')
-						.classed('hidden', function(d) { return !!d.xpath; });
-
-					element.select('.editLocatedTerritory')
-						.on('click', function(d) {
-							if (d.xpath) {
-								selectedTerritory = svgMap.xpath(d.xpath);
-							}
-							editTerritory(d);
-						});
-
-					element.select('.removeLocatedTerritory:not(.disabled)')
-						.on('click', removeTerritory);
-				}
-			});
 			if (d.xpath) {
 				var territoryElement = svgMap.xpath(d.xpath);
 				if (territoryElement.empty()) {
@@ -496,9 +470,7 @@ d3.selection.prototype.toggleTerritoryHighlight = function(toggle) {
 
 d3.selection.prototype.toggleTerritoryLabelHighlight = function(toggle) {
 	var territoryDbId = this.datum() && this.datum().id;
-	locatedTerritoriesElements
-		.select('.territoryName')
-			.classed('hovered', function(d) { return toggle && territoryDbId === d.id; });
+	angular.element('#locatedTerritories').scope().toggleTerritoryLabelHighlight(territoryDbId, toggle);
 
 	return this;
 };
