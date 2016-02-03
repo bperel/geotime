@@ -233,21 +233,6 @@ function loadTerritoryMapData(fileName, mapInfo, contentFromFileSystem, callback
     }
 }
 
-function loadTerritoryMap(noUi, fileName) {
-	if (!isLoading) {
-		isLoading = true;
-		ajaxPost(
-			{ getSvg: 1, fileName: fileName },
-			function(error, incompleteMapInfo) {
-				if (!!incompleteMapInfo) {
-					loadTerritoryMapData(incompleteMapInfo.fileName, incompleteMapInfo, false, noUi ? function() {} : loadUIConfig);
-				}
-				isLoading = false;
-			}
-		);
-	}
-}
-
 function loadUI() {
 	addCalibrationDefsMarkers();
 
@@ -282,14 +267,6 @@ function loadUIConfig(mapInfo) {
 	}
 	else {
 		applyProjection('mercator', 0, 0, [0, 0, 0]);
-	}
-
-
-	if (mapInfo.projection || mapInfo.territories.length) {
-		initHelper('territoryIdentification');
-	}
-	else {
-		initHelper('mapLocation');
 	}
 }
 

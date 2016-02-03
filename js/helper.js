@@ -8,62 +8,14 @@ var territoryId;
 var territoryName;
 
 function initHelper(activeProcess) {
-	helper = d3.select("#mapHelper")
-		.classed("hidden", false);
-
-	helperProcessTabs = helper.select('#processTabs').selectAll('li')
-		.data(helperProcessesData);
-
-	helperProcessTabs
-		.enter().append('li')
-			.append('a')
-				.attr('href', '#')
-				.html(function(d) { return d.text; })
-				.on('click', function(d) {
-					loadProcess(d.name);
-				});
-	helperProcessTabs.exit().remove();
-
-	loadProcess(activeProcess);
 }
 
 function loadProcess(processName) {
-	unloadCurrentStep();
 
-	helper.datum({ activeProcess: processName, activeStep: 0 });
-
-	helperProcessesData.forEach(function(processDatum) {
-		processDatum.active = processDatum.name === processName;
-	});
-
-	helperProcessTabs
-		.data(helperProcessesData)
-		.classed('active', function(d) { return d.active; });
-
-	helperStepsForProcess = helper.select('div#helperStepsContainer').selectAll('.helperStep')
-		.data(helperStepsData.filter(function(d) { return d.process === processName; }));
-
-	helperStepsForProcess
-		.enter()
-		.append('div')
-			.classed('helperStep list-group-item', true);
-
-	helperStepsForProcess.each(function(d) {
-		var callback = d.process === processName && d.order === 1 ? activateHelperNextStep : noop;
-
-		d3.select(this).loadTemplate({
-			process: d.process,
-			name: d.step,
-			title: d.title,
-			callback: callback
-		});
-	});
-
-	helperStepsForProcess.exit().remove();
 }
 
 function unloadCurrentStep() {
-	((helperStepsData.filter(isActiveStepFilter)[0] || {})
+	((helperStepsData.filter(isActiveStep)[0] || {})
 		.onUnload || []
 	)
 	.forEach(function (onUnloadAction) {
@@ -77,8 +29,8 @@ function activateHelperNextStep() {
 
 	if (newStep <= helperStepsForProcess.data().length) {
 		helperStepsForProcess
-			.classed("active", isActiveStepFilter)
-			.filter(isActiveStepFilter)
+			.classed("active", isActiveStep)
+			.filter(isActiveStep)
 			.each(function(d) {
 				(d.onLoad || []).forEach(function(onLoadAction) {
 					onLoadAction(d3.select('#externalSvg').datum());
@@ -88,7 +40,7 @@ function activateHelperNextStep() {
 				.each(function () {
 					d3.select(this).on('click', function (btnData) {
 						var stepElement = helperStepsForProcess
-							.filter(isActiveStepFilter)
+							.filter(isActiveStep)
 							.filter(function (d) {
 								return btnData.name !== 'done' || isValidStepFilter(d);
 							});
@@ -121,7 +73,7 @@ function activateHelperNextStep() {
 	}
 }
 
-function isActiveStepFilter(d) {
+function isActiveStep(d) {
 	return helper.datum()
 		&& helper.datum().activeStep === d.order
 		&& helper.datum().activeProcess === d.process;

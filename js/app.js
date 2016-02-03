@@ -1,18 +1,27 @@
 var geotimeApp = angular.module('geotimeApp', [
-	'ngRoute',
+	'ui.router',
 	'geotimeControllers'
 ]);
 
-geotimeApp.config(['$routeProvider',
-	function($routeProvider) {
-		$routeProvider
-			.when('/map-placeholders', {
+geotimeApp.config(['$stateProvider', '$urlRouterProvider',
+	function($stateProvider, $urlRouterProvider) {
+		$stateProvider
+			.state('map-placeholders', {
+				url: '/map-placeholders',
 				templateUrl: 'map-placeholders.html',
 				controller: 'MapController'
 			})
-			.otherwise({
-				redirectTo: '/map-placeholders'
+			.state('map-placeholders.mapLocation', {
+				url: '/mapLocation',
+				templateUrl: 'templates/mapLocation/select-calibration-points.html',
+				controller: 'MapLocationController'
+			})
+			.state('map-placeholders.territoryIdentification', {
+				url: '/territoryIdentification',
+				templateUrl: 'templates/territoryIdentification/locate-territories.html'
 			});
+
+		$urlRouterProvider.otherwise('/map-placeholders');
 	}
 ]);
 

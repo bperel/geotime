@@ -11,6 +11,18 @@
         <select class="form-control" id="maps" ng-model="mapFileName" ng-change="loadTerritoryMap(false)"></select>
         <!--<a href="javascript:void(0)" id="loadTerritoryMap">Load a random territory</a>-->
     </div>
-    <ul id="processTabs" class="nav nav-tabs nav-justified"></ul>
-    <div id="helperStepsContainer" class="list-group"></div>
+    <ul id="processTabs" class="nav nav-tabs nav-justified">
+        <li ng-repeat="process in processes" ng-class="{active: isActiveProcess(process)}">
+            <a ui-sref=".{{process.name}}">{{process.text}}</a>
+            <!--<a ng-click="loadProcess(process)">{{process.text}}</a>-->
+        </li>
+    </ul>
+    <div id="helperStepsContainer" class="list-group">
+        <div class="helperStep list-group-item" ng-repeat="step in steps">
+            <div>
+                <h5 ng-show="step.title"></h5>
+                <ui-view></ui-view>
+            </div>
+        </div>
+    </div>
 </div>
