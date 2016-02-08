@@ -5,8 +5,8 @@ Located territories : <span id="locatedTerritoriesNumber">{{locatedTerritories.l
             {{locatedTerritory.referencedTerritory.name}}
         </span>
         <span class="notLocated label label-danger" ng-class="{ hidden: locatedTerritory.xpath }">Not located</span>
-        <span class="removeLocatedTerritory btn btn-xs btn-danger glyphicon glyphicon-remove" ng-click="removeTerritory(locatedTerritory)"></span>
-        <span class="editLocatedTerritory btn btn-xs btn-warning glyphicon glyphicon-pencil" ng-click="editTerritory(territoryIndex)"></span>
+        <span class="removeLocatedTerritory btn btn-xs btn-danger glyphicon glyphicon-remove" ng-click="removeTerritory(territoryIndex)"></span>
+        <span class="editLocatedTerritory btn btn-xs btn-warning glyphicon glyphicon-pencil" ng-click="editTerritory(locatedTerritory)"></span>
     </li>
     <li id="addTerritorySection" class="list-group-item">
         <div class="editTerritoryText">
@@ -14,13 +14,14 @@ Located territories : <span id="locatedTerritoriesNumber">{{locatedTerritories.l
             <br />
             Currently selected : <span id="territoryId">None</span>
         </div>
-        <div id="currentTerritory" class="hidden">
+        <div id="currentTerritory" ng-show="selectedTerritory != null">
             <div class="row">
                 <div class="col-md-4">
                     <label for="territoryName">Territory</label>
                 </div>
                 <div class="col-md-8">
-                    <input class="form-control" type="text" id="territoryName" ng-class="{hovered: locatedTerritory.id === hoveredTerritoryId}"/>
+                    <input class="form-control" type="text" id="territoryName" ng-class="{hovered: locatedTerritory.id === hoveredTerritoryId}"
+                           ng-model="selectedTerritory.referencedTerritory.name" />
                 </div>
             </div>
             <div class="row">
@@ -31,7 +32,7 @@ Located territories : <span id="locatedTerritoriesNumber">{{locatedTerritories.l
                     <label for="territoryPeriodStart">from</label>
                 </div>
                 <div class="col-md-8">
-                    <input class="form-control" type="text" id="territoryPeriodStart" />
+                    <input class="form-control" type="text" id="territoryPeriodStart" ng-model="selectedTerritory.startDate"/>
                 </div>
             </div>
             <div class="row">
@@ -39,16 +40,16 @@ Located territories : <span id="locatedTerritoriesNumber">{{locatedTerritories.l
                     <label for="territoryPeriodEnd">to</label>
                 </div>
                 <div class="col-md-8">
-                    <input class="form-control" type="text" id="territoryPeriodEnd" />
+                    <input class="form-control" type="text" id="territoryPeriodEnd" ng-model="selectedTerritory.endDate" />
                 </div>
             </div>
 
             <div class="clearfix">
-                <input type="button" id="addTerritory" class="col-md-12 btn btn-success" value="Save"/>
+                <input type="button" id="addTerritory" ng-click="addTerritory()" class="col-md-12 btn btn-success" value="Save"/>
             </div>
 
             <div class="clearfix">
-                <input type="button" id="cancelTerritory" class="col-md-12 btn btn-default" value="Cancel"/>
+                <input type="button" id="cancelTerritory" ng-click="hideNewTerritoryForm()" class="col-md-12 btn btn-default" value="Cancel"/>
             </div>
         </div>
     </li>

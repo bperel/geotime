@@ -287,36 +287,6 @@ function enableTerritorySelection() {
 			.on("mouseover", function() { d3.select(this).toggleTerritoryHighlight(true); })
 			.on("mouseout",  function() { d3.select(this).toggleTerritoryHighlight(false); })
 			.on("click",     onHoveredTerritoryClick);
-
-    d3.select('#addTerritory').on('click', function() {
-        var territoryToEdit = {
-            element: selectedTerritory,
-            startDate: d3.select('#territoryPeriodStart').node().value,
-			endDate: d3.select('#territoryPeriodEnd').node().value,
-            referencedTerritory: {
-                id: territoryName.datum().territoryId,
-                name: territoryName.datum().territoryName
-            }
-        };
-
-		var isUpdate = false;
-		locatedTerritories.forEach(function(locatedTerritory, index) {
-			if (locatedTerritory.referencedTerritory.id === territoryToEdit.referencedTerritory.id) {
-				locatedTerritories[index].element = territoryToEdit.element;
-				locatedTerritories[index].startDate = territoryToEdit.startDate;
-				locatedTerritories[index].endDate = territoryToEdit.endDate;
-				locatedTerritories[index].referencedTerritory = territoryToEdit.referencedTerritory;
-				isUpdate = true;
-			}
-		});
-		if (!isUpdate) {
-			locatedTerritories.push(territoryToEdit);
-		}
-        showLocatedTerritories();
-		hideNewTerritoryForm();
-    });
-
-	d3.select('#cancelTerritory').on('click', hideNewTerritoryForm);
 }
 
 function editTerritory(datum) {
@@ -339,10 +309,9 @@ function removeTerritory(datum, index) {
 }
 
 function hideNewTerritoryForm() {
-	d3.select('#addTerritorySection').remove();
-	selectedTerritory.animateTerritoryPathOff();
-	clearHoveredAndSelectedTerritories();
-	initTerritorySelectionAndAutocomplete();
+	var scope = angular.element('#locatedTerritories').scope();
+	scope.hideNewTerritoryForm();
+	scope.$apply();
 }
 
 function initTerritorySelectionAndAutocomplete() {
@@ -477,9 +446,9 @@ d3.selection.prototype.toggleTerritoryLabelHighlight = function(toggle) {
 
 function onHoveredTerritoryClick() {
 	if (selectedTerritory.empty()) {
-		selectedTerritory = hoveredTerritory;
-
-		editTerritory(selectedTerritory.datum());
+		var scope = angular.element('#locatedTerritories').scope();
+		scope.editTerritory(hoveredTerritory.datum());
+		scope.$apply();
 	}
 }
 

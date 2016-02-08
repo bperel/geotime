@@ -12,9 +12,8 @@
         <!--<a href="javascript:void(0)" id="loadTerritoryMap">Load a random territory</a>-->
     </div>
     <ul id="processTabs" class="nav nav-tabs nav-justified">
-        <li ng-repeat="process in processes" ng-class="{active: isActiveProcess(process)}">
-            <a ui-sref=".{{process.name}}">{{process.text}}</a>
-            <!--<a ng-click="loadProcess(process)">{{process.text}}</a>-->
+        <li ng-repeat="process in processes" ng-class="{active: isActiveProcess(process.name)}">
+            <a ui-sref=".{{process.name}}" ng-click="$parent.activeProcess = process.name">{{process.text}}</a>
         </li>
     </ul>
     <div id="helperStepsContainer" class="list-group">

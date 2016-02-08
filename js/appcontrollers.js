@@ -36,6 +36,7 @@ geotimeControllers.controller('MapController', ['$scope', '$templateRequest',
 					$scope.steps.push(step);
 				}
 			});
+			$scope.$apply();
 		};
 
 		$scope.unloadCurrentStep = function() {

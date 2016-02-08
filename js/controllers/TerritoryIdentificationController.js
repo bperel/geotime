@@ -2,6 +2,7 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 	function($scope) {
 		$scope.locatedTerritories = [];
 		$scope.hoveredTerritoryId = null;
+		$scope.selectedTerritory = null;
 
 		$scope.loadLocatedTerritories = function(mapDatum) {
 			if (mapDatum.territories) {
@@ -12,9 +13,23 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 		};
 
 		$scope.editTerritory = function(territory) {
-			if (territory.xpath) {
-				selectedTerritory = svgMap.xpath(d.xpath);
+			if (territory) {
+				if (territory.id) {
+					$scope.selectedTerritory = territory;
+				}
+				else {
+					$scope.selectedTerritory = {};
+				}
+				selectedTerritory = hoveredTerritory;
+				selectedTerritory.animateTerritoryPathOn('in', 500);
 			}
+		};
+
+		$scope.hideNewTerritoryForm = function() {
+			$scope.selectedTerritory = null;
+			selectedTerritory.animateTerritoryPathOff();
+			clearHoveredAndSelectedTerritories();
+			$scope.initTerritorySelectionAndAutocomplete();
 		};
 
 		$scope.removeTerritory = function(territoryIndex) {
@@ -23,7 +38,7 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 		};
 
 		$scope.showLocatedTerritories = function() {
-			angular.forEach(locatedTerritoriesElements, function(locatedTerritory) {
+			angular.forEach($scope.locatedTerritories, function(locatedTerritory) {
 				if (locatedTerritory.xpath) {
 					var territoryElement = svgMap.xpath(locatedTerritory.xpath);
 					if (territoryElement.empty()) {
@@ -39,33 +54,59 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 		};
 
 		$scope.initTerritorySelectionAndAutocomplete = function() {
-			d3.select('#locatedTerritories')
-				.append('li')
-				.attr('id', 'addTerritorySection')
-				.classed('list-group-item', true)
-				.loadTemplate({
-					name: 'addLocatedTerritory',
-					callback: function() {
-						territoryId = d3.select('#territoryId');
-						territoryName = d3.select('#territoryName');
-						territoryName.node().focus();
+			territoryId = d3.select('#territoryId');
+			territoryName = d3.select('#territoryName');
+			territoryName.node().focus();
 
-						autocomplete(d3.select('#territoryName').node())
-							.dataField("name")
-							.width(960)
-							.height(500)
-							.render();
+			autocomplete(d3.select('#territoryName').node())
+				.dataField("name")
+				.width(960)
+				.height(500)
+				.render();
 
-						enableTerritorySelection();
-					}
-				});
+			enableTerritorySelection();
 		};
 
 		$scope.toggleTerritoryLabelHighlight = function(territoryId, toggle) {
 			$scope.hoveredTerritoryId = toggle ? territoryId : null;
 		};
 
-		$scope.loadLocatedTerritories($scope.$parent.$parent.mapInfo);
+		$scope.addTerritory = function() {
+			var territoryToEdit = {
+				element: selectedTerritory,
+				startDate: $scope.selectedTerritory.territoryPeriodStart,
+				endDate: $scope.selectedTerritory.territoryPeriodEnd,
+				referencedTerritory: {
+					id: territoryName.datum().territoryId,
+					name: $scope.selectedTerritory.referencedTerritory.name
+				}
+			};
+
+			var isUpdate = false;
+			angular.forEach($scope.locatedTerritories, function(locatedTerritory) {
+				if (locatedTerritory.referencedTerritory.id === territoryToEdit.referencedTerritory.id) {
+					locatedTerritory.element = territoryToEdit.element;
+					locatedTerritory.startDate = territoryToEdit.startDate;
+					locatedTerritory.endDate = territoryToEdit.endDate;
+					locatedTerritory.referencedTerritory = territoryToEdit.referencedTerritory;
+					isUpdate = true;
+				}
+			});
+			if (!isUpdate) {
+				locatedTerritories.push(territoryToEdit);
+			}
+			$scope.showLocatedTerritories();
+			$scope.hideNewTerritoryForm();
+		};
+
+		$scope.getMapInfo = function() {
+			return $scope.$parent.$parent.mapInfo;
+		};
+
+		$scope.loadLocatedTerritories($scope.getMapInfo());
+		$scope.showLocatedTerritories();
+		hideBackgroundMapIfNotCalibrated($scope.getMapInfo());
+		showMapsSuperimposed($scope.getMapInfo());
 		$scope.initTerritorySelectionAndAutocomplete();
 	}]
 );
