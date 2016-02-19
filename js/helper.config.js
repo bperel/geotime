@@ -413,7 +413,7 @@ d3.selection.prototype.animateTerritoryPathOn = function(direction, duration) {
 
 d3.selection.prototype.animateTerritoryPathOff = function() {
 	this
-		.filter(function(d) { return d.initialFill.toString() !== '#000000'; })
+		.filter(function(d) { return d.initialFill && d.initialFill.toString() !== '#000000'; })
 			.transition().duration(0).ease('linear')
 			.style('fill', function(d) { return d.initialFill.toString(); });
 	return this;

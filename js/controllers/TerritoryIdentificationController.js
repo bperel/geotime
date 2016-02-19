@@ -16,11 +16,13 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 			if (territory) {
 				if (territory.id) {
 					$scope.selectedTerritory = territory;
+					selectedTerritory = svgMap.xpath($scope.selectedTerritory.xpath);
 				}
 				else {
 					$scope.selectedTerritory = {};
+					selectedTerritory = hoveredTerritory;
 				}
-				selectedTerritory = hoveredTerritory;
+				selectedTerritory.animateTerritoryPathOff();
 				selectedTerritory.animateTerritoryPathOn('in', 500);
 			}
 		};
@@ -67,6 +69,10 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 			enableTerritorySelection();
 		};
 
+		$scope.disableTerritorySelection = function () {
+			disableTerritorySelection();
+		};
+
 		$scope.toggleTerritoryLabelHighlight = function(territoryId, toggle) {
 			$scope.hoveredTerritoryId = toggle ? territoryId : null;
 		};
@@ -108,5 +114,9 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 		hideBackgroundMapIfNotCalibrated($scope.getMapInfo());
 		showMapsSuperimposed($scope.getMapInfo());
 		$scope.initTerritorySelectionAndAutocomplete();
+
+		$scope.$on('$destroy', function() {
+			$scope.disableTerritorySelection();
+		})
 	}]
 );
