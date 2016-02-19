@@ -37,7 +37,7 @@ function loadHelperConfig() {
 			process: 'territoryIdentification',
 			order: 1, step: 'locate-territories',
 			title: 'Locate territories',
-			onLoad: [loadLocatedTerritories, showLocatedTerritories, hideBackgroundMapIfNotCalibrated, showMapsSuperimposed, initTerritorySelectionAndAutocomplete],
+			onLoad: [hideBackgroundMapIfNotCalibrated, showMapsSuperimposed],
             validate: checkSelectedTerritory,
             dataUpdate: saveTerritoriesPosition,
 			afterValidate: [persistTerritoriesPosition],
@@ -274,7 +274,6 @@ function persistMapLocation() {
 
 // Process 2, step 1
 
-var locatedTerritoriesElements;
 var hoveredTerritory = d3.select('nothing');
 var selectedTerritory = d3.select('nothing');
 
@@ -301,41 +300,6 @@ function editTerritory(datum) {
 		form.select('#territoryPeriodEnd').property('value', datum.endDate);
 	}
 	d3.select('#currentTerritory').classed('hidden', false);
-}
-
-function removeTerritory(datum, index) {
-	locatedTerritories.splice(index, 1);
-	showLocatedTerritories();
-}
-
-function hideNewTerritoryForm() {
-	var scope = angular.element('#locatedTerritories').scope();
-	scope.hideNewTerritoryForm();
-	scope.$apply();
-}
-
-function initTerritorySelectionAndAutocomplete() {
-
-	d3.select('#locatedTerritories')
-		.append('li')
-			.attr('id', 'addTerritorySection')
-			.classed('list-group-item', true)
-			.loadTemplate({
-				name: 'addLocatedTerritory',
-				callback: function() {
-					territoryId = d3.select('#territoryId');
-					territoryName = d3.select('#territoryName');
-					territoryName.node().focus();
-
-					autocomplete(d3.select('#territoryName').node())
-							.dataField("name")
-							.width(960)
-							.height(500)
-							.render();
-
-					enableTerritorySelection();
-				}
-			});
 }
 
 function disableTerritorySelection() {
@@ -366,35 +330,6 @@ function updateTerritoryLabel() {
 				!selectedTerritory.empty()
 			 && (hoveredTerritory.empty() || hoveredTerritory.node() === selectedTerritory.node()))
 		.text(id);
-}
-
-function loadLocatedTerritories(mapDatum) {
-}
-
-function showLocatedTerritories() {
-    locatedTerritoriesElements = d3.select('#locatedTerritories').selectAll('.locatedTerritory').data(locatedTerritories);
-    locatedTerritoriesElements.enter()
-		.append('li')
-			.classed('locatedTerritory list-group-item', true);
-
-	locatedTerritoriesElements
-		.each(function(d) {
-			if (d.xpath) {
-				var territoryElement = svgMap.xpath(d.xpath);
-				if (territoryElement.empty()) {
-					console.warn('Could not locate territory with XPath '+ d.xpath);
-				}
-				else {
-					territoryElement
-						.classed('already-identified', true)
-						.datum(d);
-				}
-			}
-		});
-
-    locatedTerritoriesElements.exit().remove();
-
-    d3.select('#locatedTerritoriesNumber').text(locatedTerritories.length);
 }
 
 d3.selection.prototype.animateTerritoryPathOn = function(direction, duration) {

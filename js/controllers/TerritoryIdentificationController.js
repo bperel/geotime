@@ -22,8 +22,9 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 					$scope.selectedTerritory = {};
 					selectedTerritory = hoveredTerritory;
 				}
-				selectedTerritory.animateTerritoryPathOff();
-				selectedTerritory.animateTerritoryPathOn('in', 500);
+				selectedTerritory
+					.animateTerritoryPathOff()
+					.animateTerritoryPathOn('in', 500);
 			}
 		};
 
