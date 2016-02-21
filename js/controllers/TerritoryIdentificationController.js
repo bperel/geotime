@@ -1,7 +1,8 @@
 geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 	function($scope) {
 		$scope.locatedTerritories = [];
-		$scope.hoveredTerritoryId = null;
+
+		$scope.hoveredTerritory = null;
 		$scope.selectedTerritory = null;
 
 		$scope.loadLocatedTerritories = function(mapDatum) {
@@ -16,23 +17,29 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 			if (territory) {
 				if (territory.id) {
 					$scope.selectedTerritory = territory;
-					selectedTerritory = svgMap.xpath($scope.selectedTerritory.xpath);
 				}
-				else {
-					$scope.selectedTerritory = {};
-					selectedTerritory = hoveredTerritory;
-				}
-				selectedTerritory
-					.animateTerritoryPathOff()
-					.animateTerritoryPathOn('in', 500);
 			}
+			else {
+				$scope.selectedTerritory = $scope.hoveredTerritory;
+				$scope.clearHoveredTerritory();
+			}
+			svgMap.xpath($scope.selectedTerritory.xpath)
+				.animateTerritoryPathOff()
+				.animateTerritoryPathOn('in', 500);
+		};
+
+		$scope.clearHoveredTerritory = function() {
+			svgMap.xpath($scope.hoveredTerritory.xpath).animateTerritoryPathOff();
+			$scope.hoveredTerritory = null;
+		};
+
+		$scope.clearSelectedTerritory = function() {
+			svgMap.xpath($scope.selectedTerritory.xpath).animateTerritoryPathOff();
+			$scope.selectedTerritory = null;
 		};
 
 		$scope.hideNewTerritoryForm = function() {
-			$scope.selectedTerritory = null;
-			selectedTerritory.animateTerritoryPathOff();
-			clearHoveredAndSelectedTerritories();
-			$scope.initTerritorySelectionAndAutocomplete();
+			$scope.clearSelectedTerritory();
 		};
 
 		$scope.removeTerritory = function(territoryIndex) {
@@ -72,15 +79,40 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 
 		$scope.disableTerritorySelection = function () {
 			disableTerritorySelection();
+			$scope.clearSelectedTerritory();
 		};
 
-		$scope.toggleTerritoryLabelHighlight = function(territoryId, toggle) {
-			$scope.hoveredTerritoryId = toggle ? territoryId : null;
+		$scope.toggleTerritoryHighlight = function(element, toggle) {
+			if (!$scope.selectedTerritory) {
+				$scope.hoveredTerritory = element.datum() || { };
+				$scope.hoveredTerritory.xpath = element.xpath();
+
+				if (toggle) {
+					svgMap.xpath($scope.hoveredTerritory.xpath).animateTerritoryPathOn('in', 1000);
+				}
+				else {
+					svgMap.xpath($scope.hoveredTerritory.xpath).animateTerritoryPathOff();
+					$scope.hoveredTerritory = null;
+				}
+			}
+		};
+
+		$scope.getTerritoryLabel = function(territory) {
+			return territory
+				   && ((territory.referencedTerritory && territory.referencedTerritory.name)
+				     || territory.xpath
+				);
+		};
+
+		$scope.getCurrentTerritoryLabel = function() {
+			return $scope.getTerritoryLabel($scope.selectedTerritory)
+				|| $scope.getTerritoryLabel($scope.hoveredTerritory)
+				|| 'None';
 		};
 
 		$scope.addTerritory = function() {
 			var territoryToEdit = {
-				element: selectedTerritory,
+				xpath: $scope.selectedTerritory.xpath,
 				startDate: $scope.selectedTerritory.territoryPeriodStart,
 				endDate: $scope.selectedTerritory.territoryPeriodEnd,
 				referencedTerritory: {
@@ -92,7 +124,7 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 			var isUpdate = false;
 			angular.forEach($scope.locatedTerritories, function(locatedTerritory) {
 				if (locatedTerritory.referencedTerritory.id === territoryToEdit.referencedTerritory.id) {
-					locatedTerritory.element = territoryToEdit.element;
+					locatedTerritory.xpath = territoryToEdit.xpath;
 					locatedTerritory.startDate = territoryToEdit.startDate;
 					locatedTerritory.endDate = territoryToEdit.endDate;
 					locatedTerritory.referencedTerritory = territoryToEdit.referencedTerritory;

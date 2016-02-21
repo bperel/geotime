@@ -274,32 +274,13 @@ function persistMapLocation() {
 
 // Process 2, step 1
 
-var hoveredTerritory = d3.select('nothing');
-var selectedTerritory = d3.select('nothing');
-
 function enableTerritorySelection() {
-	selectedTerritory = d3.select('nothing');
-
 	svgMap
 		.classed("onTop", true)
 		.selectAll("path")
 			.on("mouseover", function() { d3.select(this).toggleTerritoryHighlight(true); })
 			.on("mouseout",  function() { d3.select(this).toggleTerritoryHighlight(false); })
 			.on("click",     onHoveredTerritoryClick);
-}
-
-function editTerritory(datum) {
-	if (datum && datum.id) {
-		selectedTerritory.animateTerritoryPathOn('in', 500);
-
-		var form = d3.select('#addTerritorySection');
-		form.select('#territoryName')
-			.datum(function() { return {territoryId: datum.referencedTerritory.id, territoryName: datum.referencedTerritory.name }; })
-			.property('value', function(d) { return d.territoryName; });
-		form.select('#territoryPeriodStart').property('value', datum.startDate);
-		form.select('#territoryPeriodEnd').property('value', datum.endDate);
-	}
-	d3.select('#currentTerritory').classed('hidden', false);
 }
 
 function disableTerritorySelection() {
@@ -309,27 +290,6 @@ function disableTerritorySelection() {
 			.on("mouseover", null)
 			.on("mouseout",  null)
 			.on("click",     null);
-	clearHoveredAndSelectedTerritories();
-}
-
-function clearHoveredAndSelectedTerritories() {
-	hoveredTerritory.animateTerritoryPathOff();
-	hoveredTerritory = d3.select('nothing');
-
-	selectedTerritory.animateTerritoryPathOff();
-	selectedTerritory = d3.select('nothing');
-}
-
-function updateTerritoryLabel() {
-	var id = (!hoveredTerritory.empty()  && ( hoveredTerritory.attr('id') ||  hoveredTerritory.xpath()))
-		  || (!selectedTerritory.empty() && (selectedTerritory.attr('id') || selectedTerritory.xpath()))
-		  || 'None';
-
-	territoryId
-		.classed('clicked',
-				!selectedTerritory.empty()
-			 && (hoveredTerritory.empty() || hoveredTerritory.node() === selectedTerritory.node()))
-		.text(id);
 }
 
 d3.selection.prototype.animateTerritoryPathOn = function(direction, duration) {
@@ -355,36 +315,16 @@ d3.selection.prototype.animateTerritoryPathOff = function() {
 };
 
 d3.selection.prototype.toggleTerritoryHighlight = function(toggle) {
-	if (selectedTerritory.empty()) {
-		hoveredTerritory = this
-			.toggleTerritoryLabelHighlight(toggle);
-
-		if (toggle) {
-			this.animateTerritoryPathOn('in', 1000);
-		}
-		else {
-			this.animateTerritoryPathOff();
-			hoveredTerritory = d3.select('nothing');
-		}
-		updateTerritoryLabel();
-	}
-
-	return this;
-};
-
-d3.selection.prototype.toggleTerritoryLabelHighlight = function(toggle) {
-	var territoryDbId = this.datum() && this.datum().id;
-	angular.element('#locatedTerritories').scope().toggleTerritoryLabelHighlight(territoryDbId, toggle);
-
+	var scope = angular.element('#locatedTerritories').scope();
+	scope.toggleTerritoryHighlight(this, toggle);
+	scope.$apply();
 	return this;
 };
 
 function onHoveredTerritoryClick() {
-	if (selectedTerritory.empty()) {
-		var scope = angular.element('#locatedTerritories').scope();
-		scope.editTerritory(hoveredTerritory.datum());
-		scope.$apply();
-	}
+	var scope = angular.element('#locatedTerritories').scope();
+	scope.editTerritory();
+	scope.$apply();
 }
 
 function checkSelectedTerritory() {
@@ -398,10 +338,6 @@ function checkSelectedTerritory() {
 function saveTerritoriesPosition() {
 	return function(d) {
 		d.territories = locatedTerritories.map(function(locatedTerritory) {
-			if (locatedTerritory.element && !locatedTerritory.element.empty()) {
-				locatedTerritory.xpath = locatedTerritory.element.xpath();
-				delete locatedTerritory.element;
-			}
 			delete locatedTerritory.polygon;
             return locatedTerritory;
         });

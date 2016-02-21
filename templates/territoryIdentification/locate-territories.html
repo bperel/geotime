@@ -12,7 +12,7 @@ Located territories : <span id="locatedTerritoriesNumber">{{locatedTerritories.l
         <div class="editTerritoryText">
             Click on a territory on the map to identify it
             <br />
-            Currently selected : <span id="territoryId">None</span>
+            Currently selected : <span id="territoryId" ng-class="{clicked: selectedTerritory}">{{ getCurrentTerritoryLabel() }}</span>
         </div>
         <div id="currentTerritory" ng-show="selectedTerritory != null">
             <div class="row">
@@ -20,7 +20,19 @@ Located territories : <span id="locatedTerritoriesNumber">{{locatedTerritories.l
                     <label for="territoryName">Territory</label>
                 </div>
                 <div class="col-md-8">
-                    <input class="form-control" type="text" id="territoryName" ng-class="{hovered: locatedTerritory.id === hoveredTerritoryId}"
+                    <!--<angucomplete-alt id="ex2"-->
+                                      <!--placeholder="Search people"-->
+                                      <!--pause="300"-->
+                                      <!--selected-object="selectedPerson"-->
+                                      <!--local-data="people"-->
+                                      <!--local-search="localSearch"-->
+                                      <!--title-field="firstName,surname"-->
+                                      <!--description-field="twitter"-->
+                                      <!--image-field="pic"-->
+                                      <!--minlength="1"-->
+                                      <!--input-class="form-control form-control-small"-->
+                                      <!--match-class="highlight" />-->
+                    <input class="form-control" type="text" id="territoryName" ng-class="{hovered: locatedTerritory.id === hoveredTerritory.id}"
                            ng-model="selectedTerritory.referencedTerritory.name" />
                 </div>
             </div>
