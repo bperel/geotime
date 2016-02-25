@@ -1,5 +1,5 @@
-geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
-	function($scope) {
+geotimeControllers.controller('TerritoryIdentificationController', ['$scope', '$filter',
+	function($scope,$filter) {
 		$scope.locatedTerritories = [];
 
 		$scope.hoveredTerritory = null;
@@ -111,28 +111,8 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 		};
 
 		$scope.addTerritory = function() {
-			var territoryToEdit = {
-				xpath: $scope.selectedTerritory.xpath,
-				startDate: $scope.selectedTerritory.territoryPeriodStart,
-				endDate: $scope.selectedTerritory.territoryPeriodEnd,
-				referencedTerritory: {
-					id: territoryName.datum().territoryId,
-					name: $scope.selectedTerritory.referencedTerritory.name
-				}
-			};
-
-			var isUpdate = false;
-			angular.forEach($scope.locatedTerritories, function(locatedTerritory) {
-				if (locatedTerritory.referencedTerritory.id === territoryToEdit.referencedTerritory.id) {
-					locatedTerritory.xpath = territoryToEdit.xpath;
-					locatedTerritory.startDate = territoryToEdit.startDate;
-					locatedTerritory.endDate = territoryToEdit.endDate;
-					locatedTerritory.referencedTerritory = territoryToEdit.referencedTerritory;
-					isUpdate = true;
-				}
-			});
-			if (!isUpdate) {
-				locatedTerritories.push(territoryToEdit);
+			if (! $filter('filter')($scope.locatedTerritories, $scope.selectedTerritory, true).length) {
+				$scope.locatedTerritories.push($scope.selectedTerritory);
 			}
 			$scope.showLocatedTerritories();
 			$scope.hideNewTerritoryForm();
@@ -140,6 +120,22 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 
 		$scope.getMapInfo = function() {
 			return $scope.$parent.$parent.mapInfo;
+		};
+
+		$scope.validate = function() {
+			if ($scope.locatedTerritories.length) {
+				validateTerritories(
+					$scope.getMapInfo().id,
+					$scope.locatedTerritories.map(function(locatedTerritory) {
+						delete locatedTerritory.polygon;
+						delete locatedTerritory.initialFill;
+						return locatedTerritory;
+					})
+				);
+			}
+			else {
+				alert('No territory has been identified on the map');
+			}
 		};
 
 		$scope.loadLocatedTerritories($scope.getMapInfo());

@@ -48,73 +48,12 @@ geotimeControllers.controller('MapController', ['$scope', '$templateRequest',
 			});
 		};
 
-		$scope.loadStepTemplate = function (args) {
-
-			$templateRequest('templates/' + (args.process || '') + '/' + args.name +'.html').then(function(html){
-				debugger;
-			});
-			/*
-			var title             = args.title,
-				callback          = args.callback,
-				noConditionalShow = args.noConditionalShow,
-				templatePath = 'templates/' + (args.process || '') + '/' + args.name +'.html';
-
-			var element = this;
-			var html =
-				(title ? ('<h5>'+title+'</h5>') : '') +
-				(noConditionalShow ? '[content]' : '<div class="if-active">[content]</div>');
-
-			if (templates[templatePath]) {
-				element.html(html.replace('[content]', templates[templatePath]));
-
-				if (callback) {
-					callback(element);
-				}
-			}
-			else {
-				d3.text(templatePath, function(error, templateHtml) {
-					if (error) {
-						console.log('Could not load template : '+templatePath);
-					}
-					else {
-						element.html(
-							html.replace('[content]', templates[templatePath] = templateHtml)
-						);
-						if (callback) {
-							callback(element);
-						}
-					}
-				});
-			}*/
-
-			return this;
-		};
-
 		$scope.loadProcess = function(processName) {
 			$scope.unloadCurrentStep();
 			$scope.activeProcess = processName;
 			$scope.activeStep = 0;
 
 			$scope.initSteps();
-
-			return;
-
-			angular.forEach($scope.steps, function(step) {
-				var callback = step.process === processName && step.order === 1 ? activateHelperNextStep : noop;
-
-				$scope.loadStepTemplate({
-					name: step.step,
-					process: step.process,
-					callback: callback
-				});
-
-				//d3.select(this).loadTemplate({
-				//	process: step.process,
-				//	name: step.step,
-				//	title: step.title,
-				//	callback: callback
-				//});
-			});
 		};
 
 		$scope.loadTerritoryMap = function(noUi) {

@@ -66,4 +66,8 @@ Located territories : <span id="locatedTerritoriesNumber">{{locatedTerritories.l
         </div>
     </li>
 </ul>
-<br />
+
+<div class="clearfix">
+    <input type="button" id="validateTerritories" ng-disabled="selectedTerritory != null" ng-click="validate()"
+           class="col-md-2 pull-right btn btn-primary" value="Save"/>
+</div>
