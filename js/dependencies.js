@@ -6,7 +6,6 @@ var dependencies = [
 	'vendor/modernizr/modernizr',
 	'd3',
 	'vendor/topojson/topojson',
-	'autocomplete',
 	'jquery',
 	'bootstrap',
 	'plugins',

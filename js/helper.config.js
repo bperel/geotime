@@ -38,9 +38,6 @@ function loadHelperConfig() {
 			order: 1, step: 'locate-territories',
 			title: 'Locate territories',
 			onLoad: [hideBackgroundMapIfNotCalibrated, showMapsSuperimposed],
-            validate: checkSelectedTerritory,
-            dataUpdate: saveTerritoriesPosition,
-			afterValidate: [persistTerritoriesPosition],
 			onUnload: [disableTerritorySelection]
 		}
 	];
@@ -325,26 +322,4 @@ function onHoveredTerritoryClick() {
 	var scope = angular.element('#locatedTerritories').scope();
 	scope.editTerritory();
 	scope.$apply();
-}
-
-function checkSelectedTerritory() {
-	var isSelectedTerritory = locatedTerritories.length;
-	if (!isSelectedTerritory) {
-		alert('No territory has been selected');
-	}
-	return isSelectedTerritory;
-}
-
-function saveTerritoriesPosition() {
-	return function(d) {
-		d.territories = locatedTerritories.map(function(locatedTerritory) {
-			delete locatedTerritory.polygon;
-            return locatedTerritory;
-        });
-		return d;
-	};
-}
-
-function persistTerritoriesPosition() {
-    validateTerritories(svgMap.datum().id, getHelperStepData().territories);
 }

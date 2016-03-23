@@ -20,20 +20,18 @@ Located territories : <span id="locatedTerritoriesNumber">{{locatedTerritories.l
                     <label for="territoryName">Territory</label>
                 </div>
                 <div class="col-md-8">
-                    <!--<angucomplete-alt id="ex2"-->
-                                      <!--placeholder="Search people"-->
-                                      <!--pause="300"-->
-                                      <!--selected-object="selectedPerson"-->
-                                      <!--local-data="people"-->
-                                      <!--local-search="localSearch"-->
-                                      <!--title-field="firstName,surname"-->
-                                      <!--description-field="twitter"-->
-                                      <!--image-field="pic"-->
-                                      <!--minlength="1"-->
-                                      <!--input-class="form-control form-control-small"-->
-                                      <!--match-class="highlight" />-->
-                    <input class="form-control" type="text" id="territoryName" ng-class="{hovered: locatedTerritory.id === hoveredTerritory.id}"
-                           ng-model="selectedTerritory.referencedTerritory.name" />
+                    <angucomplete-alt
+                        id="territoryName"
+                        placeholder="Territory name"
+                        selected-object="setReferencedCountryName"
+                        remote-url="gateway.php"
+                        remote-url-request-formatter="getRemoteUrlRequest"
+                        title-field="name"
+                        minlength="1"
+                        input-class="form-control"
+                        match-class="highlight"
+                        initial-value="selectedTerritory.referencedTerritory.name">
+                    </angucomplete-alt>
                 </div>
             </div>
             <div class="row">
@@ -61,7 +59,7 @@ Located territories : <span id="locatedTerritoriesNumber">{{locatedTerritories.l
             </div>
 
             <div class="clearfix">
-                <input type="button" id="cancelTerritory" ng-click="hideNewTerritoryForm()" class="col-md-12 btn btn-default" value="Cancel"/>
+                <input type="button" id="cancelTerritory" ng-click="cancelAddTerritory()" class="col-md-12 btn btn-default" value="Cancel"/>
             </div>
         </div>
     </li>

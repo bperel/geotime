@@ -45,7 +45,7 @@ a {
     font-size: 14px;
 }
 
-.bp-autocomplete-dropdown {
+.angucomplete-dropdown {
     border: 1px solid #ececec;
     border-radius: 2px;
     cursor: pointer;
@@ -55,29 +55,21 @@ a {
     background-color: #ffffff;
 }
 
-.bp-autocomplete-searching {
+.angucomplete-searching {
     font-size: 14px;
 }
 
-.bp-autocomplete-row {
+.angucomplete-row {
     padding-left: 5px;
     color: #000000;
     margin-bottom: 4px;
 }
 
-.bp-autocomplete-selected-row, .bp-autocomplete-row:hover {
+.angucomplete-selected-row, .angucomplete-row:hover {
     background-color: lightblue;
     color: #ffffff;
 }
-
-.bp-ac {
-    letter-spacing: 0.01em;
-    font-size: 14px;
-    margin: 0;
-    height: 100%;
-    text-align: left;
-}
-.bp-autocomplete-highlight {
+.angucomplete-highlight {
     font-weight:bold;
     color: #0000FF;
 }

@@ -16,11 +16,11 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope', '$
 		$scope.editTerritory = function(territory) {
 			if (territory) {
 				if (territory.id) {
-					$scope.selectedTerritory = territory;
+					$scope.selectedTerritory = angular.copy(territory);
 				}
 			}
 			else {
-				$scope.selectedTerritory = $scope.hoveredTerritory;
+				$scope.selectedTerritory = angular.copy($scope.hoveredTerritory);
 				$scope.clearHoveredTerritory();
 			}
 			svgMap.xpath($scope.selectedTerritory.xpath)
@@ -63,23 +63,15 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope', '$
 			});
 		};
 
-		$scope.initTerritorySelectionAndAutocomplete = function() {
-			territoryId = d3.select('#territoryId');
-			territoryName = d3.select('#territoryName');
-			territoryName.node().focus();
-
-			autocomplete(d3.select('#territoryName').node())
-				.dataField("name")
-				.width(960)
-				.height(500)
-				.render();
-
+		$scope.initTerritorySelection = function() {
 			enableTerritorySelection();
 		};
 
 		$scope.disableTerritorySelection = function () {
 			disableTerritorySelection();
-			$scope.clearSelectedTerritory();
+			if ($scope.selectedTerritory) {
+				$scope.clearSelectedTerritory();
+			}
 		};
 
 		$scope.toggleTerritoryHighlight = function(element, toggle) {
@@ -111,10 +103,22 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope', '$
 		};
 
 		$scope.addTerritory = function() {
-			if (! $filter('filter')($scope.locatedTerritories, $scope.selectedTerritory, true).length) {
+			if ($scope.selectedTerritory.id) {
+				$scope.selectedTerritory2 = $scope.selectedTerritory;
+				angular.forEach($scope.locatedTerritories, function(locatedTerritory, index) {
+					if ($scope.selectedTerritory.id === locatedTerritory.id) {
+						$scope.locatedTerritories[index] = $scope.selectedTerritory;
+					}
+				});
+			}
+			else {
 				$scope.locatedTerritories.push($scope.selectedTerritory);
 			}
 			$scope.showLocatedTerritories();
+			$scope.hideNewTerritoryForm();
+		};
+
+		$scope.cancelAddTerritory = function() {
 			$scope.hideNewTerritoryForm();
 		};
 
@@ -142,10 +146,20 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope', '$
 		$scope.showLocatedTerritories();
 		hideBackgroundMapIfNotCalibrated($scope.getMapInfo());
 		showMapsSuperimposed($scope.getMapInfo());
-		$scope.initTerritorySelectionAndAutocomplete();
+		$scope.initTerritorySelection();
 
 		$scope.$on('$destroy', function() {
 			$scope.disableTerritorySelection();
-		})
+		});
+
+		$scope.getRemoteUrlRequest = function(str) {
+			return {getTerritories: 1, like: str};
+		};
+
+		$scope.setReferencedCountryName = function(selected) {
+			if (selected) {
+				$scope.selectedTerritory.referencedTerritory = selected.description;
+			}
+		}
 	}]
 );

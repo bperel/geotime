@@ -1,5 +1,6 @@
 var geotimeApp = angular.module('geotimeApp', [
 	'ui.router',
+	'angucomplete-alt',
 	'geotimeControllers'
 ]);
 
