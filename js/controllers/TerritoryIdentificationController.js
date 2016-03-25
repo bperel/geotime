@@ -1,5 +1,5 @@
-geotimeControllers.controller('TerritoryIdentificationController', ['$scope', '$filter',
-	function($scope,$filter) {
+geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
+	function($scope) {
 		$scope.locatedTerritories = [];
 
 		$scope.hoveredTerritory = null;

@@ -5,8 +5,8 @@ geotimeControllers.controller('MapLocationController', ['$scope',
 	}]
 );
 
-geotimeControllers.controller('MapController', ['$scope', '$templateRequest',
-	function($scope, $templateRequest) {
+geotimeControllers.controller('MapController', ['$scope',
+	function($scope) {
 		$scope.mapInfo = {};
 
 		$scope.processes = [];
