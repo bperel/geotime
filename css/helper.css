@@ -11,24 +11,24 @@
     float: left !important;
 }
 
-.badge.bgMap .glyphicon,
-.badge.fgMap .glyphicon {
+.badge.bgPoint .glyphicon,
+.badge.fgPoint .glyphicon {
     margin-left: 5px;
 }
 
-#markers .bgMap {
+#markers .bgPoint {
     stroke: #ff0000;
 }
 
-.badge.bgMap .glyphicon {
+.badge.bgPoint .glyphicon {
     color: #ff0000;
 }
 
-#markers .fgMap {
+#markers .fgPoint {
     stroke: #0000ff;
 }
 
-.badge.fgMap .glyphicon {
+.badge.fgPoint .glyphicon {
     color: #0000ff;
 }
 
@@ -46,36 +46,29 @@
     overflow: auto;
 }
 
-#mapHelper a.active {
+#mapHelperDone {
+    text-align: center;
+}
+
+#processTabs .processTitle.active {
     font-weight: bold;
 }
 
-#mapHelperDone {
-    text-align: center;
+#processTabs .processTitle a {
+    cursor: pointer;
 }
 
 .helperStep {
     color: gray;
 }
 
-.helperStep button,
-.helperStep .if-active {
-    display: none;
-}
-
-.helperStep.active {
+.helperStep {
     color: black;
-    font-weight: bold;
 }
 
-.helperStep.active button {
+.helperStep button {
     display: inline;
     margin: 0 5px;
-}
-
-.helperStep.active .if-active {
-    display: block;
-    font-weight: normal;
 }
 
 .helperStep .section {

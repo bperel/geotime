@@ -91,7 +91,7 @@ describe('Calibration tests', function() {
             svg.clickOnMap(clickedPoint);
 
             expect(calibrationPoints.length).toBe(1);
-            expect(calibrationPoints[0].type).toEqual('bgMap');
+            expect(calibrationPoints[0].type).toEqual('bgPoint');
             expect(calibrationPoints[0].coordinates.x).toBe(clickedPoint.x - markerRadius);
             expect(calibrationPoints[0].coordinates.y).toBe(clickedPoint.y - markerRadius);
             // Longitude and latitude are equal to 0 because we clicked on the middle of the map
@@ -111,7 +111,7 @@ describe('Calibration tests', function() {
             svgMap.clickOnMap(clickedPoint);
 
             expect(calibrationPoints.length).toBe(2);
-            expect(calibrationPoints[1].type).toEqual('fgMap');
+            expect(calibrationPoints[1].type).toEqual('fgPoint');
             expect(calibrationPoints[1].coordinates.x).toBe(clickedPoint.x - markerRadius);
             expect(calibrationPoints[1].coordinates.y).toBe(clickedPoint.y - markerRadius);
 

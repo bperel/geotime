@@ -1,5 +1,8 @@
-geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
-	function($scope) {
+geotimeControllers.controller('TerritoryIdentificationController', ['$scope', '$state',
+	function($scope, $state) {
+
+		$state.go($state.current.name+'.locate');
+		
 		$scope.locatedTerritories = [];
 
 		$scope.hoveredTerritory = null;
@@ -123,7 +126,7 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 		};
 
 		$scope.getMapInfo = function() {
-			return $scope.$parent.$parent.mapInfo;
+			return $scope.$parent.mapInfo;
 		};
 
 		$scope.validate = function() {
@@ -160,6 +163,6 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope',
 			if (selected) {
 				$scope.selectedTerritory.referencedTerritory = selected.description;
 			}
-		}
+		};
 	}]
 );

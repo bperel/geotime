@@ -1,7 +1,7 @@
 var calibrationPoints = [];
 
 function getMarkers() {
-    var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgMap'; });
+    var group = markersSvg.selectAll('g.marker-group').filter(function(d) { return d.type === 'bgPoint'; });
     return group.selectAll('use');
 }
 
@@ -52,7 +52,7 @@ function calibrateMapCenter() {
 
 	var groupedCalibrationPoints = getGroupedCalibrationPoints();
 
-    var initialDirections = getDirections(groupedCalibrationPoints[0].bgMap, groupedCalibrationPoints[0].fgMap);
+    var initialDirections = getDirections(groupedCalibrationPoints[0].bgPoint, groupedCalibrationPoints[0].fgPoint);
     var directions = JSON.parse(JSON.stringify(initialDirections));
     while(initialDirections.x === directions.x || initialDirections.y === directions.y) {
         if (initialDirections.x === directions.x) {
@@ -64,7 +64,7 @@ function calibrateMapCenter() {
         projection.center(currentCenter);
         markers.each(positionCalibrationMarker);
 
-        directions = getDirections(groupedCalibrationPoints[0].bgMap, groupedCalibrationPoints[0].fgMap);
+        directions = getDirections(groupedCalibrationPoints[0].bgPoint, groupedCalibrationPoints[0].fgPoint);
     }
 
 	currentCenter[0]+=directions.x;
@@ -74,20 +74,20 @@ function calibrateMapCenter() {
 }
 
 function getCalibrationPointsDistanceDiffsValue() { // distance diff-based value. Smaller is better
-	var pxDistanceSums = {bgMap: 0, fgMap: 0, ratios: [], latitudeRatios: []};
+	var pxDistanceSums = {bgPoint: 0, fgPoint: 0, ratios: [], latitudeRatios: []};
 	var groupedCalibrationPoints = getGroupedCalibrationPoints(true);
 
 	groupedCalibrationPoints.forEach(function(point1, i) {
-		var bgMapPoint1 = [point1.bgMap.x, point1.bgMap.y];
-		var fgMapPoint1 = [point1.fgMap.x, point1.fgMap.y];
+		var bgMapPoint1 = [point1.bgPoint.x, point1.bgPoint.y];
+		var fgMapPoint1 = [point1.fgPoint.x, point1.fgPoint.y];
 		groupedCalibrationPoints.forEach(function(point2, j) {
 			if (i < j) {
-				var bgMapPoint2 = [point2.bgMap.x, point2.bgMap.y];
-				var fgMapPoint2 = [point2.fgMap.x, point2.fgMap.y];
+				var bgMapPoint2 = [point2.bgPoint.x, point2.bgPoint.y];
+				var fgMapPoint2 = [point2.fgPoint.x, point2.fgPoint.y];
 				var bgMapDistance = Math.sqrt(Math.pow(bgMapPoint1[0] - bgMapPoint2[0], 2) + Math.pow(bgMapPoint1[1] - bgMapPoint2[1], 2));
 				var fgMapDistance = Math.sqrt(Math.pow(fgMapPoint1[0] - fgMapPoint2[0], 2) + Math.pow(fgMapPoint1[1] - fgMapPoint2[1], 2));
-				pxDistanceSums.bgMap += bgMapDistance;
-				pxDistanceSums.fgMap += fgMapDistance;
+				pxDistanceSums.bgPoint += bgMapDistance;
+				pxDistanceSums.fgPoint += fgMapDistance;
 				pxDistanceSums.ratios.push(fgMapDistance / bgMapDistance);
 				pxDistanceSums.latitudeRatios.push((Math.abs(fgMapPoint1[1] - fgMapPoint2[1])) / Math.abs(bgMapPoint1[1] - bgMapPoint2[1]));
 			}
@@ -98,7 +98,7 @@ function getCalibrationPointsDistanceDiffsValue() { // distance diff-based value
         value: d3.deviation(pxDistanceSums.ratios),
 		latitudeValue: d3.deviation(pxDistanceSums.latitudeRatios),
         bgFgDistanceRatio: d3.mean(pxDistanceSums.ratios),
-        diff: pxDistanceSums.bgMap - pxDistanceSums.fgMap
+        diff: pxDistanceSums.bgPoint - pxDistanceSums.fgPoint
     };
 }
 
@@ -106,12 +106,10 @@ var markerSide = 9;
 function addCalibrationDefsMarkers() {
 	var markerCircleRadius = markerSide * 2 / 3;
 
-	markersSvg = d3.select("#mapArea")
-		.append("svg").attr("id", "markers")
-		.attr("height", mapHeight);
+	markersSvg = d3.select("#markers");
 
 	markersSvg.selectAll('g')
-		.data([{type: 'bgMap'}, {type: 'fgMap'}])
+		.data([{type: 'bgPoint'}, {type: 'fgPoint'}])
 		.enter()
 		.append('g')
 		.attr('class', function(d) { return 'marker-group '+d.type; });
@@ -143,6 +141,9 @@ function addCalibrationDefsMarkers() {
 function addCalibrationMarker(type, coordinates, showMarkers) {
 
 	var pointId = 0;
+	var scope = angular.element('#calibrationPoints').scope();
+	var calibrationPoints = scope.calibrationPoints;
+
 	calibrationPoints.forEach(function(calibrationPoint) {
 		if (calibrationPoint.type === type && calibrationPoint.pointId >= pointId) {
 			pointId = calibrationPoint.pointId + 1;
@@ -152,11 +153,13 @@ function addCalibrationMarker(type, coordinates, showMarkers) {
 	calibrationPoints.push({pointId: pointId, type: type, coordinates: coordinates});
 
 	if (showMarkers) {
-		markersSvg.repositionCalibrationMarkers(type);
+		markersSvg.repositionCalibrationMarkers(calibrationPoints, type);
 	}
+
+	scope.calibrationPoints = calibrationPoints;
 }
 
-d3.selection.prototype.repositionCalibrationMarkers = function(type) {
+d3.selection.prototype.repositionCalibrationMarkers = function(calibrationPoints, type) {
 	var filter = function(d) { return !type || d.type === type; };
 
 	var groups = markersSvg.selectAll('g.marker-group').filter(filter);
@@ -188,7 +191,7 @@ function getGroupedCalibrationPoints(withProjectedCoords) {
 			};
 		}
 		shownCalibrationPoints[d.pointId][d.type] = d.coordinates;
-		if (d.type === 'bgMap' && !withProjectedCoords) {
+		if (d.type === 'bgPoint' && !withProjectedCoords) {
 			delete shownCalibrationPoints[d.pointId][d.type].x;
 			delete shownCalibrationPoints[d.pointId][d.type].y;
 		}
@@ -204,7 +207,7 @@ function positionCalibrationMarker(d) {
 		d.coordinates.y = xyCoordinates[1].round10pow(6);
 	}
 
-	if (d.type === 'bgMap') {
+	if (d.type === 'bgPoint') {
 		d.coordinates.x -= markerSide;
 		d.coordinates.y -= markerSide;
 	}

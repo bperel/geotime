@@ -61,7 +61,7 @@ function drawPaths() {
 	d3.select('#projectionRotation').text(projection.rotate().map(function(val) { return parseInt(val*10)/10; }));
 
 	if (markersSvg.size() > 0 && helper.size() && helper.datum().activeProcess === 'mapLocation') {
-		markersSvg.repositionCalibrationMarkers('bgMap');
+		markersSvg.repositionCalibrationMarkers('bgPoint');
 	}
 }
 
@@ -344,8 +344,8 @@ function loadExternalMapPosition(projectedLeftTop) {
 
 	markersSvg
 		.attr("width", projectedLeftTop.x + svgMap.attrIntWithoutPx("width"))
-		.selectAll("g.fgMap")
-			.attr("transform", "translate("+[projectedLeftTop.x, projectedLeftTop.y].join(" ")+")")
+		.selectAll("g.fgPoint")
+			.attr("transform", "translate("+[projectedLeftTop.x, projectedLeftTop.y].join(" ")+")");
 }
 
 function resizeExternalMap(forcedWidth, forcedHeight) {

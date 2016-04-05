@@ -6,15 +6,15 @@ function loadHelperConfig() {
 		}
 	];
 
-	helperProcessesData = [
-		{
-			name: 'mapLocation',
-			text: 'Map location'
-		}, {
-			name: 'territoryIdentification',
-			text: 'Territory identification'
-		}
-	];
+		helperProcessesData = [
+			{
+				name: 'mapLocation',
+				text: 'Map location'
+			}, {
+				name: 'territoryIdentification',
+				text: 'Territory identification'
+			}
+		];
 
 	helperStepsData = [
 		{
@@ -47,13 +47,13 @@ function loadHelperConfig() {
 function enableCalibrationPointSelection() {
 	svg.on('click', function() {
 		if (bgMapDragState !== 'drag') {
-			addCalibrationPoint('bgMap', d3.event);
+			addCalibrationPoint('bgPoint', d3.event);
 		}
 	});
 
 	svgMap.on('click', function() {
 		if (!d3.event.defaultPrevented) {
-			addCalibrationPoint('fgMap', d3.event);
+			addCalibrationPoint('fgPoint', d3.event);
 		}
 	});
 }
@@ -63,8 +63,8 @@ function loadCalibrationPoints(mapDatum) {
 	if (mapDatum.calibrationPoints) {
 		for (var i = 0; i < mapDatum.calibrationPoints.length; i++) {
 			var calibrationPoint = mapDatum.calibrationPoints[i];
-			addCalibrationMarker("fgMap", calibrationPoint.fgPoint, false);
-			addCalibrationMarker("bgMap", calibrationPoint.bgPoint, false);
+			addCalibrationMarker("fgPoint", calibrationPoint.fgPoint, false);
+			addCalibrationMarker("bgPoint", calibrationPoint.bgPoint, false);
 		}
 	}
 	markersSvg
@@ -105,7 +105,7 @@ function unloadCalibrationPoints() {
 }
 
 function addCalibrationPoint(mapType, clickedPoint) {
-	var mapOffset = mapType === 'fgMap'
+	var mapOffset = mapType === 'fgPoint'
 		? svgMap.mapOffset()
 		: svg.mapOffset();
 
@@ -115,7 +115,7 @@ function addCalibrationPoint(mapType, clickedPoint) {
 	};
 
 	var coordinates = {};
-	if (mapType === 'bgMap') {
+	if (mapType === 'bgPoint') {
 		var latLngCoordinates = projection.invert([clickedPoint.x, clickedPoint.y]);
 		coordinates.lng = latLngCoordinates[0].round10pow(6);
 		coordinates.lat = latLngCoordinates[1].round10pow(6);
@@ -150,11 +150,11 @@ function showCalibrationPoints() {
 
 	var calibrationPointTypes = [{
 		text: 'Background point',
-		property: 'bgMap',
+		property: 'bgPoint',
 		buttonClass: 'btn-info'
 	}, {
 		text: 'Foreground point',
-		property: 'fgMap',
+		property: 'fgPoint',
 		buttonClass: 'btn-primary'
 	}];
 

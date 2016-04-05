@@ -1,13 +1,8 @@
 var geotimeControllers = angular.module('geotimeControllers', []);
 
-geotimeControllers.controller('MapLocationController', ['$scope',
-	function($scope) {
-	}]
-);
-
-geotimeControllers.controller('MapController', ['$scope',
-	function($scope) {
-		$scope.mapInfo = {};
+geotimeControllers.controller('MapController', ['$scope', '$state',
+	function($scope, $state) {
+		$scope.mapInfo = null;
 
 		$scope.processes = [];
 		$scope.steps = helperStepsData;
@@ -31,12 +26,11 @@ geotimeControllers.controller('MapController', ['$scope',
 
 		$scope.initSteps = function() {
 			$scope.steps = [];
-			angular.forEach(helperStepsData, function(step) {
-				if ($scope.isActiveProcess(step.process)) {
-					$scope.steps.push(step);
-				}
-			});
-			$scope.$apply();
+			// angular.forEach(helperStepsData, function(step) {
+			// 	if ($scope.isActiveProcess(step.process)) {
+			// 		$scope.steps.push(step);
+			// 	}
+			// });
 		};
 
 		$scope.unloadCurrentStep = function() {
@@ -51,7 +45,8 @@ geotimeControllers.controller('MapController', ['$scope',
 		$scope.loadProcess = function(processName) {
 			$scope.unloadCurrentStep();
 			$scope.activeProcess = processName;
-			$scope.activeStep = 0;
+			$scope.activeStep = 1;
+			$state.go('app.map-placeholders.'+processName);
 
 			$scope.initSteps();
 		};
@@ -74,6 +69,7 @@ geotimeControllers.controller('MapController', ['$scope',
 								else {
 									$scope.loadProcess('mapLocation');
 								}
+								$scope.$apply();
 							});
 						}
 						isLoading = false;

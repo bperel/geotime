@@ -18,8 +18,8 @@ class CalibrationPointHelper
      */
     public static function generateFromStrings($calibrationPoint) {
 
-        $bgPointCoordinates = new CoordinateLatLng($calibrationPoint->bgMap->lat, $calibrationPoint->bgMap->lng);
-        $fgPointCoordinates = new CoordinateXY($calibrationPoint->fgMap->x, $calibrationPoint->fgMap->y);
+        $bgPointCoordinates = new CoordinateLatLng($calibrationPoint->bgPoint->lat, $calibrationPoint->bgPoint->lng);
+        $fgPointCoordinates = new CoordinateXY($calibrationPoint->fgPoint->x, $calibrationPoint->fgPoint->y);
 
         return new CalibrationPoint($bgPointCoordinates, $fgPointCoordinates);
     }
@@ -29,10 +29,10 @@ class CalibrationPointHelper
      * @param $coordinates \stdClass
      */
     public static function addCoordinatesForCalibrationPoint(&$calibrationPoint, $type, $coordinates) {
-        if ($type === 'fgMap') {
+        if ($type === 'fgPoint') {
             $calibrationPoint->setFgPoint(new CoordinateXY($coordinates->x, $coordinates->y));
         }
-        else if ($type === 'bgMap') {
+        else if ($type === 'bgPoint') {
             $calibrationPoint->setBgPoint(new CoordinateLatLng($coordinates->lat, $coordinates->lng));
         }
     }

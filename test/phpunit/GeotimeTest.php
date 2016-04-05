@@ -248,11 +248,11 @@ class GeotimeTest extends MariaDbTestHelper {
             $mapId, 'mercator2', array('10', '20', '30'), array('5', '5'), 200,
             array(
                 array('pointId' => 0,
-                      'type' => 'bgMap',
+                      'type' => 'bgPoint',
                       'coordinates' => array('lng' => -4.574, 'lat' => 48.567)
                 ),
                 array('pointId' => 0,
-                      'type' => 'fgMap',
+                      'type' => 'fgPoint',
                       'coordinates' => array('x' => 88, 'y' => 70))
             )
         );

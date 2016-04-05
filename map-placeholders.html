@@ -4,6 +4,8 @@
     <svg id="map" ng-width="{{ bgMapWidth }}" ng-height="{{ bgMapWidth }}">
         <rect id="bg" ng-width="{{bgMapWidth}}" ng-height="{{bgMapWidth}}"></rect>
     </svg>
+    <svg id="markers" ng-width="{{ bgMapWidth }}" ng-height="{{ bgMapWidth }}">
+    </svg>
 </div>
 
 <div id="mapHelper" class="panel panel-default">
@@ -12,16 +14,11 @@
         <!--<a href="javascript:void(0)" id="loadTerritoryMap">Load a random territory</a>-->
     </div>
     <ul id="processTabs" class="nav nav-tabs nav-justified">
-        <li ng-repeat="process in processes" ng-class="{active: isActiveProcess(process.name)}">
-            <a ui-sref=".{{process.name}}" ng-click="$parent.activeProcess = process.name">{{process.text}}</a>
+        <li ng-repeat="process in processes" class="processTitle" ng-class="{active: isActiveProcess(process.name)}">
+            <a ng-click="loadProcess(process.name)">{{process.text}}</a>
         </li>
     </ul>
     <div id="helperStepsContainer" class="list-group">
-        <div class="helperStep list-group-item" ng-repeat="step in steps">
-            <div>
-                <h5 ng-show="step.title"></h5>
-                <ui-view></ui-view>
-            </div>
-        </div>
+        <div ui-view="helperContent"></div>
     </div>
 </div>
