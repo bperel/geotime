@@ -31,7 +31,7 @@ var projection,
 			drawPaths();
 		});
 
-var bgSvgmap_drag = d3.behavior.drag()
+var bgMapDrag = d3.behavior.drag()
 	.origin(function(d) { return d; })
 	.on("dragstart", bgMapDragStarted)
 	.on("drag", bgMapDragMove);

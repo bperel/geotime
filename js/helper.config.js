@@ -255,7 +255,7 @@ function saveMapPosition() {
 
 function enableMapDragResize() {
 	svg
-		.call(bgSvgmap_drag)
+		.call(bgMapDrag)
 		.call(zoom);
 	dragAction.classed('hidden', false);
 }

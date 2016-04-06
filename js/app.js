@@ -23,7 +23,7 @@ geotimeApp.config(['$stateProvider', '$urlRouterProvider',
 				url: '/map-placeholders',
 				views: {
 					'content@': {
-						templateUrl: 'map-placeholders.html',
+						templateUrl: 'templates/map-placeholders.html',
 						controller: 'MapController'
 					}
 				}
