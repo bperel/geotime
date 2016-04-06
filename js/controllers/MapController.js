@@ -4,7 +4,14 @@ geotimeControllers.controller('MapController', ['$scope', '$state',
 	function($scope, $state) {
 		$scope.mapInfo = null;
 
+		$scope.dragActions = [
+			{name: 'pan', text: 'Pan on drag'},
+			{name: 'rotate', text: 'Rotate on drag'}
+		];
+		$scope.dragMode = 'pan';
+		
 		$scope.processes = [];
+		$scope.activeProcess = null;
 		
 		$scope.resizeBackgroundMap = function(width, height) {
 			$scope.bgMapWidth = width;
@@ -12,6 +19,7 @@ geotimeControllers.controller('MapController', ['$scope', '$state',
 		};
 
 		$scope.loadProcess = function(processName) {
+			$scope.activeProcess = processName;
 			$state.go('app.map-placeholders.'+processName);
 		};
 

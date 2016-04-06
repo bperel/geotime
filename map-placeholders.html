@@ -1,4 +1,11 @@
-<div id="dragActionContainer" class="hidden"></div>
+<div id="dragActionContainer" class="hidden">
+    <div ng-repeat="dragAction in dragActions">
+        <input type="radio" name="dragAction" id="dragAction{{dragAction.name}}"
+               ng-model="$parent.dragMode"
+               ng-value="dragAction.name" />
+        <label for="dragAction{{dragAction.name}}">{{dragAction.text}}</label>
+    </div>
+</div>
 
 <div id="mapArea">
     <svg id="map" ng-width="{{ bgMapWidth }}" ng-height="{{ bgMapWidth }}">
@@ -14,7 +21,7 @@
         <!--<a href="javascript:void(0)" id="loadTerritoryMap">Load a random territory</a>-->
     </div>
     <ul id="processTabs" class="nav nav-tabs nav-justified">
-        <li ng-repeat="process in processes" class="processTitle" ng-class="{active: isActiveProcess(process.name)}">
+        <li ng-repeat="process in processes" class="processTitle" ng-class="{active: process.name === activeProcess}">
             <a ng-click="loadProcess(process.name)">{{process.text}}</a>
         </li>
     </ul>

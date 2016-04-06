@@ -237,25 +237,6 @@ function loadUI() {
 	addCalibrationDefsMarkers();
 
 	dragAction = d3.select('#dragActionContainer');
-	dragAction.selectAll('input')
-		.data([
-			{name: 'pan', text: 'Pan on drag'},
-			{name: 'rotate', text: 'Rotate on drag'}
-		])
-		.enter().append('div').each(function (d) {
-			var wrapper = d3.select(this);
-			wrapper.append('input')
-				.attr('type', 'radio')
-				.attr('name', 'dragAction')
-				.attr('id', 'dragAction' + d.name)
-				.attr('checked', d.name === 'pan' ? 'checked' : null)
-				.on('click', function (d) {
-					dragMode = d.name;
-				});
-			wrapper.append("label")
-				.attr("for", 'dragAction' + d.name)
-				.text(d.text);
-		});
 }
 
 function loadUIConfig(mapInfo) {
