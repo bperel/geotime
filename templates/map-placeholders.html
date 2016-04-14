@@ -1,31 +1,5 @@
-<div id="dragActionContainer" class="hidden">
-    <div ng-repeat="dragAction in dragActions">
-        <input type="radio" name="dragAction" id="dragAction{{dragAction.name}}"
-               ng-model="$parent.dragMode"
-               ng-value="dragAction.name" />
-        <label for="dragAction{{dragAction.name}}">{{dragAction.text}}</label>
-    </div>
-</div>
+<div ng-include="'templates/drag.html'"></div>
 
-<div id="mapArea">
-    <svg id="map" ng-width="{{ bgMapWidth }}" ng-height="{{ bgMapWidth }}">
-        <rect id="bg" ng-width="{{bgMapWidth}}" ng-height="{{bgMapWidth}}"></rect>
-    </svg>
-    <svg id="markers" ng-width="{{ bgMapWidth }}" ng-height="{{ bgMapWidth }}">
-    </svg>
-</div>
+<div ng-include="'templates/map.html'"></div>
 
-<div id="mapHelper" class="panel panel-default">
-    <div id="selectMap">
-        <select class="form-control" id="maps" ng-model="mapFileName" ng-change="loadTerritoryMap(false)"></select>
-        <!--<a href="javascript:void(0)" id="loadTerritoryMap">Load a random territory</a>-->
-    </div>
-    <ul id="processTabs" class="nav nav-tabs nav-justified">
-        <li ng-repeat="process in processes" class="processTitle" ng-class="{active: process.name === activeProcess}">
-            <a ng-click="loadProcess(process.name)">{{process.text}}</a>
-        </li>
-    </ul>
-    <div id="helperStepsContainer" class="list-group">
-        <div ui-view="helperContent"></div>
-    </div>
-</div>
+<div ng-include="'templates/helper.html'"></div>

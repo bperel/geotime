@@ -23,8 +23,7 @@ geotimeApp.config(['$stateProvider', '$urlRouterProvider',
 				url: '/map-placeholders',
 				views: {
 					'content@': {
-						templateUrl: 'templates/map-placeholders.html',
-						controller: 'MapController'
+						templateUrl: 'templates/map-placeholders.html'
 					}
 				}
 			})
@@ -76,7 +75,9 @@ geotimeApp.config(['$stateProvider', '$urlRouterProvider',
 	}
 ]);
 
-geotimeApp.controller('MainController', function($scope, $state) {
+var geotimeControllers = angular.module('geotimeControllers', []);
+
+geotimeControllers.controller('MainController', function($scope, $state) {
 	$state.go('app.map-placeholders');
 });
 
