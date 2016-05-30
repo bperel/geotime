@@ -1,7 +1,16 @@
 geotimeControllers.controller('HelperController', ['$scope', '$state',
 	function($scope, $state) {
 
-		$scope.processes = [];
+		$scope.processes = [
+			{
+				name: 'mapLocation',
+				text: 'Map location'
+			}, {
+				name: 'territoryIdentification',
+				text: 'Territory identification'
+			}
+		];
+
 		$scope.activeProcess = null;
 
 		$scope.loadProcess = function(processName) {
@@ -19,7 +28,6 @@ geotimeControllers.controller('HelperController', ['$scope', '$state',
 							loadTerritoryMapData(incompleteMapInfo.fileName, incompleteMapInfo, false, noUi ? function() {} : function(mapInfo) {
 								$scope.mapInfo = mapInfo;
 								loadUIConfig($scope.mapInfo);
-								$scope.processes = helperProcessesData;
 
 								if ($scope.mapInfo.projection || $scope.mapInfo.territories.length) {
 									$scope.loadProcess('territoryIdentification');

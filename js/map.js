@@ -60,9 +60,8 @@ function drawPaths() {
 	d3.select('#projectionCenter').text(projection.center().map(function(val) { return parseInt(val*10)/10; }));
 	d3.select('#projectionRotation').text(projection.rotate().map(function(val) { return parseInt(val*10)/10; }));
 
-	if (markersSvg.size() > 0 && helper.size() && helper.datum().activeProcess === 'mapLocation') {
-		markersSvg.repositionCalibrationMarkers('bgPoint');
-	}
+	var scope = angular.element('#calibrationPoints').scope();
+	markersSvg.repositionCalibrationMarkers(scope && scope.calibrationPoints || [], 'bgPoint');
 }
 
 function bgMapDragStarted() {
@@ -104,7 +103,8 @@ function initMapPlaceHolders(callback) {
 }
 
 function initBackgroundMap() {
-	svg = d3.select("#mapArea svg");
+	svg = d3.select("#mapArea svg")
+		.datum({x: 0, y: 0});
 }
 
 function resizeBackgroundMap(width, height) {

@@ -69,7 +69,7 @@ geotimeControllers.controller('CalibrationController', ['$scope', '$state',
 
 		enableCalibrationPointSelection();
 		showMapsSideBySide();
-		// enableMapDragResize();
+		enableMapDragResize();
 
 		$scope.$on('$destroy', function() {
 			disableMapDragResize();

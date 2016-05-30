@@ -3,7 +3,7 @@
         <select class="form-control" id="maps" ng-model="mapFileName" ng-change="loadTerritoryMap(false)"></select>
         <!--<a href="javascript:void(0)" id="loadTerritoryMap">Load a random territory</a>-->
     </div>
-    <ul id="processTabs" class="nav nav-tabs nav-justified">
+    <ul id="processTabs" ng-show="!!mapInfo" class="nav nav-tabs nav-justified">
         <li ng-repeat="process in processes" class="processTitle" ng-class="{active: process.name === activeProcess}">
             <a ng-click="loadProcess(process.name)">{{process.text}}</a>
         </li>
