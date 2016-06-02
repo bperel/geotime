@@ -1,5 +1,6 @@
 var widthSuperimposed = 960;
 var widthSideBySide = 480;
+var scale = (widthSideBySide - 1) / 2 / Math.PI;
 
 var width = widthSuperimposed;
 
@@ -17,24 +18,41 @@ var projections = [
 var projectionSelection = d3.selectAll('nothing');
 var mapSelection;
 var dragAction;
-var dragMode = 'pan';
-
-var bgMapDragState;
 
 var locatedTerritories = [];
+
+
+var longLatLimits = [180, 90];
+
+var lambda = d3.scale.linear()
+	.domain([0, width])
+	.range([-longLatLimits[0], longLatLimits[0]]);
+
+var phi = d3.scale.linear()
+	.domain([0, mapHeight])
+	.range([longLatLimits[1], -longLatLimits[1]]);
+
 
 var projection,
 	path = d3.geo.path(),
 	zoom = d3.behavior.zoom()
+		.scale(scale)
+		.scaleExtent([scale, 16 * scale])
 		.on("zoom", function() {
-			projection.scale(d3.event.scale);
+			d3.event.sourceEvent.stopPropagation();
+
+			var dragMode = angular.element('#dragActionContainer').scope().dragMode;
+			if (dragMode === 'pan') {
+				projection.translate(zoom.translate())
+			}
+			else {
+				projection.rotate([lambda(d3.event.translate[0]), phi(d3.event.translate[1])]);
+			}
+
+			projection.scale(zoom.scale());
 			drawPaths();
 		});
 
-var bgMapDrag = d3.behavior.drag()
-	.origin(function(d) { return d; })
-	.on("dragstart", bgMapDragStarted)
-	.on("drag", bgMapDragMove);
 
 function applyProjection(name, center, scale, rotation) {
 	projection = d3.geo[name]()
@@ -63,41 +81,6 @@ function drawPaths() {
 	var scope = angular.element('#calibrationPoints').scope();
 	markersSvg.repositionCalibrationMarkers(scope && scope.calibrationPoints || [], 'bgPoint');
 }
-
-function bgMapDragStarted() {
-	bgMapDragState = 'inactive';
-}
-
-var longLatLimits = [180, 90];
-
-var lambda = d3.scale.linear()
-	.domain([0, width])
-	.range([-longLatLimits[0], longLatLimits[0]]);
-
-var phi = d3.scale.linear()
-	.domain([0, mapHeight])
-	.range([longLatLimits[1], -longLatLimits[1]]);
-
-function bgMapDragMove(d) {
-	if (d3.event && d3.event.dx && d3.event.dy) {
-		bgMapDragState = 'drag';
-	}
-	if (dragMode === 'pan') {
-		var currentCenter = projection.center();
-		var newCenter = [
-			Math.min(longLatLimits[0], Math.max(-longLatLimits[0], currentCenter[0]-d3.event.dx)),
-			Math.min(longLatLimits[1], Math.max(-longLatLimits[1], currentCenter[1]+d3.event.dy))
-		];
-		projection.center(newCenter);
-	}
-	else {
-		d.x = (d.x || d3.event.sourceEvent.pageX) + (d3.event ? d3.event.dx : 0);
-		d.y = (d.y || d3.event.sourceEvent.pageY) + (d3.event ? d3.event.dy : 0);
-		projection.rotate([lambda(d.x), phi(d.y)]);
-	}
-	drawPaths();
-}
-
 function initMapPlaceHolders(callback) {
 	$('#map-placeholders').load('map-placeholders.html', {}, callback);
 }

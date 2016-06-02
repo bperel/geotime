@@ -46,7 +46,7 @@ function loadHelperConfig() {
 // Process 1, step 1
 function enableCalibrationPointSelection() {
 	svg.on('click', function() {
-		if (bgMapDragState !== 'drag') {
+		if (!d3.event.defaultPrevented) {
 			addCalibrationPoint('bgPoint', d3.event);
 		}
 	});
@@ -254,9 +254,7 @@ function saveMapPosition() {
 }
 
 function enableMapDragResize() {
-	svg
-		.call(bgMapDrag)
-		.call(zoom);
+	svg.call(zoom);
 	dragAction.classed('hidden', false);
 }
 
