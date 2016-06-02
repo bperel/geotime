@@ -24,7 +24,6 @@ geotimeControllers.controller('CalibrationController', ['$scope', '$rootScope', 
 		$scope.loadCalibrationPoints = function(calibrationPoints) {
 			$scope.calibrationPoints = [];
 			$scope.groupedCalibrationPoints = calibrationPoints;
-			$scope.groupedCalibrationPointsNb = calibrationPoints.length;
 
 			if (calibrationPoints) {
 				angular.forEach(calibrationPoints, function(calibrationPoint) {
@@ -60,11 +59,25 @@ geotimeControllers.controller('CalibrationController', ['$scope', '$rootScope', 
 
 			return d3.values(shownCalibrationPoints);
 		};
+		
+		$scope.updateGroupedCalibrationPoints = function() {
+			$scope.groupedCalibrationPoints = getGroupedCalibrationPoints();
+		};
 
 		$scope.removeCalibrationPoint = function(calibrationPointIndex) {
-			$scope.groupedCalibrationPoints.splice(calibrationPointIndex, 1);
-			$scope.groupedCalibrationPointsNb = calibrationPoints.length;
-			$scope.loadCalibrationPoints($scope.groupedCalibrationPoints);
+			var toDelete = [];
+			$scope.calibrationPoints.forEach(function(calibrationPoint, i) {
+				if (calibrationPoint.pointId === calibrationPointIndex) {
+					toDelete.push(i);
+				}
+			});
+			toDelete.reverse().forEach(function(calibrationPointIndex) {
+				$scope.calibrationPoints.splice(calibrationPointIndex, 1);
+			});
+
+			markersSvg.repositionCalibrationMarkers($scope.calibrationPoints);
+
+			$scope.updateGroupedCalibrationPoints();
 		};
 
 		enableCalibrationPointSelection();

@@ -105,6 +105,8 @@ function unloadCalibrationPoints() {
 }
 
 function addCalibrationPoint(mapType, clickedPoint) {
+	var scope = angular.element('#calibrationPoints').scope();
+
 	var mapOffset = mapType === 'fgPoint'
 		? svgMap.mapOffset()
 		: svg.mapOffset();
@@ -127,71 +129,9 @@ function addCalibrationPoint(mapType, clickedPoint) {
 	}
 
 	addCalibrationMarker(mapType, coordinates, true);
-	showCalibrationPoints();
-}
-
-function removeCalibrationPoint(d) {
-	var toDelete = [];
-	calibrationPoints.forEach(function(calibrationPoint, i) {
-		if (calibrationPoint.pointId === d.pointId) {
-			toDelete.push(i);
-		}
-	});
-	toDelete.reverse().forEach(function(calibrationPointIndex) {
-		calibrationPoints.splice(calibrationPointIndex, 1);
-	});
-
-	showCalibrationPoints();
-	markersSvg.repositionCalibrationMarkers();
-}
-
-function showCalibrationPoints() {
-	var groupedCalibrationPoints = getGroupedCalibrationPoints();
-
-	var calibrationPointTypes = [{
-		text: 'Background point',
-		property: 'bgPoint',
-		buttonClass: 'btn-info'
-	}, {
-		text: 'Foreground point',
-		property: 'fgPoint',
-		buttonClass: 'btn-primary'
-	}];
-
-	var calibrationPointsElements = d3.select('#calibrationPoints').selectAll('.calibrationPointContainer').data(groupedCalibrationPoints);
-	calibrationPointsElements.enter()
-		.append('div')
-			.classed('calibrationPointContainer', true);
-
-	calibrationPointsElements
-		.each(function() {
-			d3.select(this).loadTemplate({
-				name: 'calibrationPoints',
-				callback: function(calibrationPointsItem) {
-					var calibrationPointData = calibrationPointsItem.datum();
-
-					calibrationPointsItem.select('.removeCalibrationPoint')
-						.on('click', removeCalibrationPoint);
-
-					calibrationPointsItem.select('li').selectAll('span.badge').data(
-						calibrationPointTypes.filter(function(calibrationPointType) {
-							return !!calibrationPointData[calibrationPointType.property];
-						})
-					)
-						.enter().append('span')
-							.attr('title', function(d) { return JSON.stringify(calibrationPointData[d.property]); })
-							.attr('class', function(d) { return d.property; })
-							.classed('badge', true)
-							.html(function(d) { return d.text; })
-								.append('span')
-									.classed('glyphicon glyphicon-ok', true);
-				}
-			});
-		});
-
-	calibrationPointsElements.exit().remove();
-
-	d3.select('#calibrationPointsLength').text(groupedCalibrationPoints.length);
+	
+	scope.updateGroupedCalibrationPoints();
+	scope.$apply();
 }
 
 function checkCalibrationPoints() {

@@ -183,6 +183,9 @@ d3.selection.prototype.repositionCalibrationMarkers = function(calibrationPoints
 };
 
 function getGroupedCalibrationPoints(withProjectedCoords) {
+	var scope = angular.element('#calibrationPoints').scope();
+	var calibrationPoints = scope.calibrationPoints;
+	
 	var shownCalibrationPoints = {};
 	calibrationPoints.forEach(function(d) {
 		if (!(shownCalibrationPoints[d.pointId])) {

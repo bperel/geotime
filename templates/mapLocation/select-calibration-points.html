@@ -2,7 +2,7 @@ Select at least 4 points on the maps.
 <br />
 Click on the background map to add a point, then click on the foreground map at the corresponding location.
 <br />
-<span class="badge" id="calibrationPointsLength">{{ groupedCalibrationPointsNb }}</span>
+<span class="badge" id="calibrationPointsLength">{{ groupedCalibrationPoints.length }}</span>
 <label for="calibrationPointsLength">selected points</label>
 
 <ul class="list-group" id="calibrationPoints">
@@ -16,7 +16,7 @@ Click on the background map to add a point, then click on the foreground map at 
             {{ calibrationPointType.text }}
             <span class="glyphicon glyphicon-ok"></span>
         </span>
-        <span class="removeCalibrationPoint" ng-click="removeCalibrationPoint($index)">
+        <span class="removeCalibrationPoint" ng-click="removeCalibrationPoint(calibrationPoint.pointId)">
             <button type="button" class="btn btn-default btn-xs">
                 <span class="glyphicon glyphicon-remove"></span>
             </button>
