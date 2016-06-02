@@ -253,16 +253,6 @@ function saveMapPosition() {
     };
 }
 
-function enableMapDragResize() {
-	svg.call(zoom);
-	dragAction.classed('hidden', false);
-}
-
-function disableMapDragResize() {
-	svg.on('mousedown.drag', null);
-	dragAction.classed('hidden', true);
-}
-
 function persistMapLocation() {
     validateMapLocation(getHelperStepData(helper.datum().activeProcess, 2).map);
 }

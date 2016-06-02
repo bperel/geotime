@@ -17,7 +17,6 @@ var projections = [
 
 var projectionSelection = d3.selectAll('nothing');
 var mapSelection;
-var dragAction;
 
 var locatedTerritories = [];
 
@@ -218,8 +217,6 @@ function loadTerritoryMapData(fileName, mapInfo, contentFromFileSystem, callback
 
 function loadUI() {
 	addCalibrationDefsMarkers();
-
-	dragAction = d3.select('#dragActionContainer');
 }
 
 function loadUIConfig(mapInfo) {

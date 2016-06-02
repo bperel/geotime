@@ -1,4 +1,4 @@
-<div ng-controller="MapDragController" id="dragActionContainer" class="hidden">
+<div ng-controller="MapDragController" id="dragActionContainer" ng-show="showDragActions">
     <div ng-repeat="dragAction in dragActions">
         <input type="radio" name="dragAction" id="dragAction{{dragAction.name}}"
                ng-model="$parent.dragMode"

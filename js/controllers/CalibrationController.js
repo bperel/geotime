@@ -4,8 +4,8 @@ geotimeControllers.controller('MapCalibrationController', ['$scope',
 	}
 ]);
 
-geotimeControllers.controller('CalibrationController', ['$scope', '$state',
-	function($scope, $state) {
+geotimeControllers.controller('CalibrationController', ['$scope', '$rootScope', '$state',
+	function($scope, $rootScope, $state) {
 
 		$scope.getMapInfo = function() {
 			return $scope.$parent.mapInfo;
@@ -69,10 +69,11 @@ geotimeControllers.controller('CalibrationController', ['$scope', '$state',
 
 		enableCalibrationPointSelection();
 		showMapsSideBySide();
-		enableMapDragResize();
+
+		$rootScope.$broadcast('toggleMapDragZoom', { toggle: true });
 
 		$scope.$on('$destroy', function() {
-			disableMapDragResize();
+			$rootScope.$broadcast('toggleMapDragZoom', { toggle: false });
 			disableCalibrationPointSelection();
 			unloadCalibrationPoints();
 		});
