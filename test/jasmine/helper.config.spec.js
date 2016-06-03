@@ -22,7 +22,6 @@ describe('Calibration tests', function() {
 
         initBackgroundMap();
         resizeBackgroundMap(widthSuperimposed, mapHeight);
-        addCalibrationDefsMarkers();
         initProjectionSelect();
         showBgMap("backgroundMap", getJSONFixture("test/phpunit/_data/countries.json"));
 

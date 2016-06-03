@@ -103,40 +103,6 @@ function getCalibrationPointsDistanceDiffsValue() { // distance diff-based value
 }
 
 var markerSide = 9;
-function addCalibrationDefsMarkers() {
-	var markerCircleRadius = markerSide * 2 / 3;
-
-	markersSvg = d3.select("#markers");
-
-	markersSvg.selectAll('g')
-		.data([{type: 'bgPoint'}, {type: 'fgPoint'}])
-		.enter()
-		.append('g')
-		.attr('class', function(d) { return 'marker-group '+d.type; });
-
-	var defs = markersSvg.append('defs');
-	var marker = defs.append('svg:g').attr('id','crosshair-marker');
-
-	marker.selectAll('circle')
-		.data([{stroke: '#000000', r: markerCircleRadius}, {stroke: 'inherit', r: markerCircleRadius + 1}])
-		.enter().append('circle')
-		.attr('style', function(d) { return 'stroke:'+d.stroke; })
-		.attr('cx', markerSide)
-		.attr('cy', markerSide)
-		.attr('r', function(d) { return d.r; });
-
-	marker.selectAll('path')
-		.data([
-			{id: 'up', 	  d: 'M'+[markerSide, markerCircleRadius  ].join(',')+' L'+[markerSide, 0           ].join(',')+' z'},
-			{id: 'down',  d: 'M'+[markerSide, markerCircleRadius*2].join(',')+' L'+[markerSide, markerSide*2].join(',')+' z'},
-			{id: 'left',  d: 'M'+[markerCircleRadius, markerSide  ].join(',')+' L'+[0, markerSide           ].join(',')+' z'},
-			{id: 'right', d: 'M'+[markerCircleRadius*2, markerSide].join(',')+' L'+[markerSide*2, markerSide].join(',')+' z'}
-		])
-		.enter().append('path')
-		.attr('style', 'stroke-width:1')
-		.attr('id', function(d) { return d.id; })
-		.attr('d', function(d) { return d.d; });
-}
 
 function addCalibrationMarker(type, coordinates, showMarkers) {
 
@@ -160,12 +126,15 @@ function addCalibrationMarker(type, coordinates, showMarkers) {
 }
 
 d3.selection.prototype.repositionCalibrationMarkers = function(calibrationPoints, type) {
-	var filter = function(d) { return !type || d.type === type; };
+	var filter = function() { return !type || d3.select(this).classed(type); };
 
 	var groups = markersSvg.selectAll('g.marker-group').filter(filter);
-	groups.each(function(groupData) {
-		var groupCalibrationPoints = d3.select(this).selectAll('use')
-			.data(calibrationPoints.filter(function(d) { return d.type === groupData.type; }));
+
+	groups.each(function() {
+		var group = d3.select(this);
+		var groupType = d3.select(this).attr('class').match(/(bg|fg)Point/)[0];
+		var groupCalibrationPoints = group.selectAll('use')
+			.data(calibrationPoints.filter(function(d) { return d.type === groupType; }));
 
 		groupCalibrationPoints
 			.exit().remove();

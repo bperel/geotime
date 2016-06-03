@@ -215,10 +215,6 @@ function loadTerritoryMapData(fileName, mapInfo, contentFromFileSystem, callback
     }
 }
 
-function loadUI() {
-	addCalibrationDefsMarkers();
-}
-
 function loadUIConfig(mapInfo) {
 	svgMap.datum(mapInfo);
 

@@ -10,7 +10,6 @@ geotimeControllers.controller('MapController', ['$scope',
 		initBackgroundMap();
 		$scope.resizeBackgroundMap(widthSuperimposed, mapHeight);
 
-		loadUI();
 		getAndShowBgMap("backgroundMap", "data/external/ne_50m_coastline.json", function() {
 			applyCurrentProjection();
 			loadMaps();
