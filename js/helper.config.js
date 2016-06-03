@@ -58,21 +58,6 @@ function enableCalibrationPointSelection() {
 	});
 }
 
-function loadCalibrationPoints(mapDatum) {
-	calibrationPoints = [];
-	if (mapDatum.calibrationPoints) {
-		for (var i = 0; i < mapDatum.calibrationPoints.length; i++) {
-			var calibrationPoint = mapDatum.calibrationPoints[i];
-			addCalibrationMarker("fgPoint", calibrationPoint.fgPoint, false);
-			addCalibrationMarker("bgPoint", calibrationPoint.bgPoint, false);
-		}
-	}
-	markersSvg
-		.repositionCalibrationMarkers()
-		.classed('hidden', false);
-	showCalibrationPoints();
-}
-
 function showMapsSideBySide(mapDatum) {
 	resizeBackgroundMap(widthSideBySide, mapHeight);
 	positionExternalMap(true);
@@ -85,14 +70,6 @@ function showMapsSuperimposed(mapDatum) {
 	positionExternalMap(false);
 
 	svgMap.classed('semi-transparent', !!mapDatum.projection);
-}
-
-function hideBackgroundMapIfNotCalibrated(mapDatum) {
-	svg.classed('hidden', !mapDatum.projection);
-}
-
-function showBackgroundMap() {
-	svg.classed('hidden', false);
 }
 
 function disableCalibrationPointSelection() {

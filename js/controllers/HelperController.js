@@ -1,5 +1,5 @@
-geotimeControllers.controller('HelperController', ['$scope', '$state',
-	function($scope, $state) {
+geotimeControllers.controller('HelperController', ['$scope', '$rootScope', '$state',
+	function($scope, $rootScope, $state) {
 
 		$scope.processes = [
 			{
@@ -26,10 +26,10 @@ geotimeControllers.controller('HelperController', ['$scope', '$state',
 					function(error, incompleteMapInfo) {
 						if (!!incompleteMapInfo) {
 							loadTerritoryMapData(incompleteMapInfo.fileName, incompleteMapInfo, false, noUi ? function() {} : function(mapInfo) {
-								$scope.mapInfo = mapInfo;
-								loadUIConfig($scope.mapInfo);
+								$rootScope.mapInfo = mapInfo;
+								loadUIConfig($rootScope.mapInfo);
 
-								if ($scope.mapInfo.projection || $scope.mapInfo.territories.length) {
+								if ($rootScope.mapInfo.projection || $rootScope.mapInfo.territories.length) {
 									$scope.loadProcess('territoryIdentification');
 								}
 								else {

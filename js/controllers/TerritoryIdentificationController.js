@@ -1,5 +1,5 @@
-geotimeControllers.controller('TerritoryIdentificationController', ['$scope', '$state',
-	function($scope, $state) {
+geotimeControllers.controller('TerritoryIdentificationController', ['$scope', '$rootScope', '$state',
+	function($scope, $rootScope, $state) {
 
 		$state.go($state.current.name+'.locate');
 		
@@ -126,13 +126,13 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope', '$
 		};
 
 		$scope.getMapInfo = function() {
-			return $scope.$parent.mapInfo;
+			return $rootScope.mapInfo;
 		};
 
 		$scope.validate = function() {
 			if ($scope.locatedTerritories.length) {
 				validateTerritories(
-					$scope.getMapInfo().id,
+					$rootScope.mapInfo.id,
 					$scope.locatedTerritories.map(function(locatedTerritory) {
 						delete locatedTerritory.polygon;
 						delete locatedTerritory.initialFill;
@@ -145,10 +145,12 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope', '$
 			}
 		};
 
-		$scope.loadLocatedTerritories($scope.getMapInfo());
+		$scope.loadLocatedTerritories($rootScope.mapInfo);
 		$scope.showLocatedTerritories();
-		hideBackgroundMapIfNotCalibrated($scope.getMapInfo());
-		showMapsSuperimposed($scope.getMapInfo());
+
+		$rootScope.$broadcast('toggleBgMap', { toggle: !!$rootScope.mapInfo.projection });
+		
+		showMapsSuperimposed($rootScope.mapInfo);
 		$scope.initTerritorySelection();
 
 		$scope.$on('$destroy', function() {

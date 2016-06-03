@@ -1,5 +1,5 @@
 <div id="mapArea" ng-controller="MapController" >
-    <svg id="map" ng-width="{{ bgMapWidth }}" ng-height="{{ bgMapWidth }}">
+    <svg id="map" ng-width="{{ bgMapWidth }}" ng-height="{{ bgMapWidth }}" ng-show="showBgMap">
         <rect id="bg" ng-width="{{bgMapWidth}}" ng-height="{{bgMapWidth}}"></rect>
     </svg>
     <svg id="markers" ng-width="{{ bgMapWidth }}" ng-height="{{ bgMapWidth }}" ng-controller="CalibrationMarkerController">
