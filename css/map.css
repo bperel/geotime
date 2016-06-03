@@ -35,3 +35,7 @@
 #markers {
     pointer-events: none;
 }
+
+#markers .out-of-bounds {
+    stroke-dasharray: 1;
+}

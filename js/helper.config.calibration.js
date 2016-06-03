@@ -204,7 +204,8 @@ function getGroupedCalibrationPoints(withProjectedCoords) {
 }
 
 function positionCalibrationMarker(d) {
-	if (d.coordinates.lng !== undefined) {
+	var isProjected = d.coordinates.lng !== undefined;
+	if (isProjected) {
 		var xyCoordinates = projection([d.coordinates.lng, d.coordinates.lat]);
 		d.coordinates.x = xyCoordinates[0].round10pow(6);
 		d.coordinates.y = xyCoordinates[1].round10pow(6);
@@ -217,7 +218,8 @@ function positionCalibrationMarker(d) {
 
 	d3.select(this)
 		.attr("x", d.coordinates.x)
-		.attr("y", d.coordinates.y);
+		.attr("y", d.coordinates.y)
+		.attr("class", isProjected && d.coordinates.x > widthSideBySide ? 'out-of-bounds' : '');
 }
 
 function calibrateMapRotationForProjection(projectionName, axisDefaults) {
