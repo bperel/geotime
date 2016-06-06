@@ -1,8 +1,8 @@
 <div id="mapArea" ng-controller="MapController" >
-    <svg id="map" ng-width="{{ bgMapWidth }}" ng-height="{{ bgMapWidth }}" ng-show="showBgMap">
-        <rect id="bg" ng-width="{{bgMapWidth}}" ng-height="{{bgMapWidth}}"></rect>
+    <svg id="map" ng-width="{{ maps.background.width }}" ng-height="{{ maps.background.height }}" ng-show="maps.background.show">
+        <rect id="bg" ng-width="{{maps.background.width}}" ng-height="{{maps.background.height}}"></rect>
     </svg>
-    <svg id="markers" ng-width="{{ bgMapWidth }}" ng-height="{{ bgMapWidth }}" ng-controller="CalibrationMarkerController">
+    <svg id="markers" ng-width="{{ maps.background.width }}" ng-height="{{ maps.background.height }}" ng-controller="CalibrationMarkerController">
         <g class="marker-group bgPoint"></g>
         <g class="marker-group fgPoint"></g>
         <defs>
