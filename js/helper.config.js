@@ -58,13 +58,6 @@ function enableCalibrationPointSelection() {
 	});
 }
 
-function showMapsSideBySide(mapDatum) {
-	resizeBackgroundMap(widthSideBySide, mapHeight);
-	positionExternalMap(true);
-
-	svgMap.classed('semi-transparent', false);
-}
-
 function disableCalibrationPointSelection() {
 	svg.on('click', null);
 	svgMap.on('click', null);

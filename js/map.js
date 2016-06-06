@@ -204,44 +204,6 @@ function validateTerritories(mapId, territoriesData) {
 	);
 }
 
-function getExternalMapOffsetToRight() {
-	return {
-		x: svg.attrIntWithoutPx('width'),
-		y: 0
-	};
-}
-
-function getExternalMapOffsetToCenter() {
-    return {
-        x: (width - svgMap.styleIntWithoutPx("width")) / 2,
-        y: (mapHeight - svgMap.styleIntWithoutPx("height")) / 2
-    };
-}
-
-function positionExternalMap(sideBySide) {
-	loadExternalMapPosition(
-		sideBySide
-			? getExternalMapOffsetToRight()
-			: getExternalMapOffsetToCenter()
-    );
-}
-
-function loadExternalMapPosition(projectedLeftTop) {
-	svgMap.datum(function(d) {
-		d.x = projectedLeftTop.x;
-		d.y = projectedLeftTop.y;
-		return d;
-	});
-	svgMap
-		.style("margin-left", projectedLeftTop.x+"px")
-		.style("margin-top",+ projectedLeftTop.y +"px");
-
-	markersSvg
-		.attr("width", projectedLeftTop.x + svgMap.attrIntWithoutPx("width"))
-		.selectAll("g.fgPoint")
-			.attr("transform", "translate("+[projectedLeftTop.x, projectedLeftTop.y].join(" ")+")");
-}
-
 d3.selection.prototype.mapOffset = function() {
 	return {
 		x: this.styleIntWithoutPx("margin-left"),
