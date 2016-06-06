@@ -10,7 +10,7 @@ geotimeControllers.controller('MapController', ['$scope',
 			$scope.maps.background.show = args.toggle;
 		});
 
-		$scope.initForegroundMap = function() {
+		$scope.$on('initForegroundMap', function() {
 			$scope.maps.foreground.width = svgMap.attrIntWithoutPx("width");
 			$scope.maps.foreground.height = svgMap.attrIntWithoutPx("height");
 
@@ -27,17 +27,20 @@ geotimeControllers.controller('MapController', ['$scope',
 				$compile(element)($scope);
 			});
 			$scope.$apply();
-		};
+		});
 
-		$scope.resizeForegroundMap = function(forcedWidth, forcedHeight) {
-			if (forcedWidth) {
+		$scope.$on('resizeForegroundMap', function(event, args) {
+			var width = args.width,
+				height = args.height;
+
+			if (width) {
 				var foregroundMapOriginalRatio = $scope.maps.foreground.width / $scope.maps.foreground.height;
-				var foregroundMapCurrentRatio = forcedWidth / forcedHeight;
+				var foregroundMapCurrentRatio = width / height;
 				if (foregroundMapCurrentRatio > foregroundMapOriginalRatio) {
-					forcedWidth = forcedHeight * foregroundMapOriginalRatio;
+					width = height * foregroundMapOriginalRatio;
 				}
 				else if (foregroundMapCurrentRatio < foregroundMapOriginalRatio) {
-					forcedHeight = forcedWidth / foregroundMapOriginalRatio;
+					height = width / foregroundMapOriginalRatio;
 				}
 			}
 			else { // Auto fit
@@ -45,17 +48,17 @@ geotimeControllers.controller('MapController', ['$scope',
 				var heightRatio = $scope.maps.background.height / $scope.maps.foreground.height;
 
 				if (widthRatio < heightRatio) {
-					forcedWidth = $scope.maps.background.width * (maxExternalMapSizePercentage / 100);
-					forcedHeight = $scope.maps.foreground.height / ($scope.maps.foreground.width / forcedWidth);
+					width = $scope.maps.background.width * (maxExternalMapSizePercentage / 100);
+					height = $scope.maps.foreground.height / ($scope.maps.foreground.width / width);
 				}
 				else {
-					forcedHeight = $scope.maps.background.height * (maxExternalMapSizePercentage / 100);
-					forcedWidth = $scope.maps.foreground.width / ($scope.maps.foreground.height / forcedHeight);
+					height = $scope.maps.background.height * (maxExternalMapSizePercentage / 100);
+					width = $scope.maps.foreground.width / ($scope.maps.foreground.height / height);
 				}
 			}
-			$scope.maps.foreground.width  = forcedWidth;
-			$scope.maps.foreground.height = forcedHeight;
-		};
+			$scope.maps.foreground.width  = width;
+			$scope.maps.foreground.height = height;
+		});
 
 
 		$scope.maps = {

@@ -145,17 +145,9 @@ function initExternalSvgMap() {
 	isLoading = false;
 }
 
-function loadTerritoryMapFromSvgElement(currentMap, mapInfo) {
-	var element = angular.element(svgMap.node());
-	element.scope().initForegroundMap();
-
-	element.scope().resizeForegroundMap(
-		svg.attrIntWithoutPx('width'),
-		svg.attrIntWithoutPx('height')
-	);
-	
+function loadTerritoryMapFromSvgElement(mapInfo) {
 	svgMap
-		.attr("name", currentMap)
+		.attr("name", mapInfo.fileName)
 		.attr("id", "externalSvg")
 		.classed("externalSvg", true)
 		.attr("preserveAspectRatio", "xMinYMin meet");
@@ -163,34 +155,10 @@ function loadTerritoryMapFromSvgElement(currentMap, mapInfo) {
 	svgMap
 		.datum({
 			id: mapInfo.id,
-			fileName: currentMap,
+			fileName: mapInfo.fileName,
 			x: 0,
 			y: 0
 		});
-}
-
-function loadTerritoryMapData(fileName, mapInfo, contentFromFileSystem, callback) {
-	var currentMap = fileName;
-	if (currentMap) {
-		if (!svgMap || svgMap.datum().fileName !== currentMap) {
-			initExternalSvgMap(currentMap);
-			if (!!contentFromFileSystem) {
-				var svgWrapper = document.createElement('div');
-				svgWrapper.innerHTML = contentFromFileSystem;
-				svgMap = d3.select(d3.select("#mapArea").node().insertBefore(d3.select(svgWrapper).select('svg').node(), svg.node()));
-				loadTerritoryMapFromSvgElement(currentMap, mapInfo);
-				loadExternalMapPosition(getExternalMapOffsetToCenter());
-				return callback(mapInfo);
-			}
-			else {
-				d3.xml("cache/svg/" + currentMap, "image/svg+xml", function (svgDocument) {
-					svgMap = d3.select(d3.select("#mapArea").node().insertBefore(document.importNode(svgDocument.documentElement, true), svg.node()));
-					loadTerritoryMapFromSvgElement(currentMap, mapInfo);
-					callback(mapInfo);
-				});
-			}
-        }
-    }
 }
 
 function loadUIConfig(mapInfo) {
