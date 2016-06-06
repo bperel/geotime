@@ -145,12 +145,14 @@ geotimeControllers.controller('TerritoryIdentificationController', ['$scope', '$
 			}
 		};
 
-		$scope.loadLocatedTerritories($rootScope.mapInfo);
-		$scope.showLocatedTerritories();
+		loadUIConfig($rootScope.mapInfo);
 
 		$rootScope.$broadcast('toggleBgMap', { toggle: !!$rootScope.mapInfo.projection });
-		
-		showMapsSuperimposed($rootScope.mapInfo);
+		$rootScope.$broadcast('positionExternalMap', { sideBySide: false });
+		$rootScope.$broadcast('toggleMapDragZoom', { toggle: false });
+
+		$scope.loadLocatedTerritories($rootScope.mapInfo);
+		$scope.showLocatedTerritories();
 		$scope.initTerritorySelection();
 
 		$scope.$on('$destroy', function() {

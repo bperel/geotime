@@ -2,9 +2,9 @@
     <svg id="map" ng-width="{{ maps.background.width }}" ng-height="{{ maps.background.height }}" ng-show="maps.background.show">
         <rect id="bg" ng-width="{{maps.background.width}}" ng-height="{{maps.background.height}}"></rect>
     </svg>
-    <svg id="markers" ng-width="{{ maps.background.width }}" ng-height="{{ maps.background.height }}" ng-controller="CalibrationMarkerController">
+    <svg id="markers" ng-width="{{ maps.background.width + maps.foreground.width }}" ng-height="{{ maps.background.height + maps.foreground.height }}" ng-controller="CalibrationMarkerController">
         <g class="marker-group bgPoint"></g>
-        <g class="marker-group fgPoint"></g>
+        <g class="marker-group fgPoint" ng-transform="{{ getForegroundMapMarkerOffsetTransform() }}"></g>
         <defs>
             <g id="crosshair-marker">
                 <circle

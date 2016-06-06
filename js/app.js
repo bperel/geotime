@@ -75,13 +75,7 @@ geotimeApp.config(['$stateProvider', '$urlRouterProvider',
 	}
 ]);
 
-var geotimeControllers = angular.module('geotimeControllers', []);
-
-geotimeControllers.controller('MainController', function($scope, $state) {
-	$state.go('app.map-placeholders');
-});
-
-angular.forEach(['cx', 'x', 'cy', 'y', 'r', 'd', 'width', 'height'], function(name) {
+angular.forEach(['transform', 'cx', 'x', 'cy', 'y', 'r', 'd', 'width', 'height'], function(name) {
 	var ngName = 'ng' + name[0].toUpperCase() + name.slice(1);
 	geotimeApp.directive(ngName, function() {
 		return function(scope, element, attrs) {
@@ -90,4 +84,10 @@ angular.forEach(['cx', 'x', 'cy', 'y', 'r', 'd', 'width', 'height'], function(na
 			})
 		};
 	});
+});
+
+var geotimeControllers = angular.module('geotimeControllers', []);
+
+geotimeControllers.controller('MainController', function($scope, $state) {
+	$state.go('app.map-placeholders');
 });

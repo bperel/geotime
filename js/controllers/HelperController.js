@@ -30,6 +30,14 @@ geotimeControllers.controller('HelperController', ['$scope', '$rootScope', '$sta
 			);
 		};
 
+		$scope.positionExternalMap = function(sideBySide) {
+			loadExternalMapPosition(
+				sideBySide
+					? getForegroundMapOffsetToRight()
+					: getForegroundMapOffsetToCenter()
+			);
+		};
+
 		$scope.loadProcess = function(processName) {
 			$scope.activeProcess = processName;
 			$state.go('app.map-placeholders.'+processName);
@@ -49,6 +57,10 @@ geotimeControllers.controller('HelperController', ['$scope', '$rootScope', '$sta
 			loadTerritoryMapFromSvgElement($rootScope.mapInfo);
 		};
 
+		$scope.showMapsSuperimposed = function() {
+			$rootScope.$broadcast('positionExternalMap', { sideBySide: false });
+		};
+
 		$scope.loadTerritoryMapData = function (mapInfo, contentFromFileSystem, callback) {
 			if (mapInfo && mapInfo.fileName) {
 				if (!svgMap || $rootScope.mapInfo.fileName !== mapInfo.fileName) {
@@ -59,7 +71,7 @@ geotimeControllers.controller('HelperController', ['$scope', '$rootScope', '$sta
 						$scope.insertForegroundMap(d3.select(svgWrapper).select('svg').node());
 						
 						$scope.loadTerritoryMapFromSvgElement();
-						loadExternalMapPosition(getExternalMapOffsetToCenter());
+						loadExternalMapPosition(getForegroundMapOffsetToCenter());
 						
 						return callback(mapInfo);
 					}

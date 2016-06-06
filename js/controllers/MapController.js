@@ -1,9 +1,13 @@
-geotimeControllers.controller('MapController', ['$scope',
-	function($scope) {
+geotimeControllers.controller('MapController', ['$scope', '$rootScope',
+	function($scope, $rootScope) {
 
 		$scope.resizeBackgroundMap = function(width, height) {
 			$scope.maps.background.width = width;
 			$scope.maps.background.height = height;
+		};
+
+		$scope.getForegroundMapMarkerOffsetTransform = function() {
+			return 'translate(' + [ $scope.maps.foreground.margin.left, $scope.maps.foreground.margin.top ].join(', ') + ')';
 		};
 
 		$scope.$on('toggleBgMap', function(event, args) {
@@ -18,8 +22,10 @@ geotimeControllers.controller('MapController', ['$scope',
 			svgMap
 				.attr("ng-style",
 					"{" +
-						"width: maps.foreground.width +'px'," +
-						"height: maps.foreground.height +'px'" +
+						"width:"  	  + "maps.foreground.width"       +"+'px'," +
+						"height:" 	  + "maps.foreground.height"      +"+'px'," +
+						"marginLeft:" + "maps.foreground.margin.left" +"+'px'," +
+						"marginTop:"  + "maps.foreground.margin.top"  +"+'px'" +
 					"}")
 				.attr("viewBox", [0, 0, $scope.maps.foreground.width, $scope.maps.foreground.height].join(' '));
 
@@ -60,6 +66,23 @@ geotimeControllers.controller('MapController', ['$scope',
 			$scope.maps.foreground.height = height;
 		});
 
+		$scope.$on('positionExternalMap', function(event, args) {
+			svgMap.classed('semi-transparent', !args.sideBySide && !!$rootScope.mapInfo.projection);
+
+
+			$scope.maps.background.width = args.sideBySide ? widthSideBySide : widthSuperimposed;
+			$scope.maps.background.height = mapHeight;
+			
+			$scope.maps.foreground.margin = {
+				left: args.sideBySide 
+					? $scope.maps.background.width
+					: ($scope.maps.background.width  - $scope.maps.foreground.width ) / 2,
+				top: args.sideBySide 
+					? 0
+					: ($scope.maps.background.height - $scope.maps.foreground.height) / 2
+			};
+		});
+
 
 		$scope.maps = {
 			background: {
@@ -70,7 +93,11 @@ geotimeControllers.controller('MapController', ['$scope',
 			foreground: {
 				show: true,
 				width: null,
-				height: null
+				height: null,
+				margin: {
+					left: 0,
+					top: 0
+				}
 			}
 		};
 

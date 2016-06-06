@@ -89,15 +89,6 @@ function initBackgroundMap() {
 		.datum({x: 0, y: 0});
 }
 
-function resizeBackgroundMap(width, height) {
-	svg
-		.attr("width", width)
-		.attr("height", height)
-		.select("#bg")
-			.attr("width", width)
-			.attr("height", height);
-}
-
 function getSelectedProjection() {
 	return (projectionSelection.size() > 0)
 		? d3.select(projectionSelection.node().options[projectionSelection.node().selectedIndex]).datum().name

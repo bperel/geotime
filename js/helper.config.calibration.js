@@ -41,7 +41,7 @@ function calibrateMapCenter() {
     var markers = getMarkers();
     var currentCenter = projection.center();
 
-    var externalMapOffsetToCenter = getExternalMapOffsetToCenter();
+    var externalMapOffsetToCenter = getForegroundMapOffsetToCenter();
 
     function getDirections(bgMapFirstPoint, fgMapFirstPoint) {
         return {

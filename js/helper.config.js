@@ -65,13 +65,6 @@ function showMapsSideBySide(mapDatum) {
 	svgMap.classed('semi-transparent', false);
 }
 
-function showMapsSuperimposed(mapDatum) {
-	resizeBackgroundMap(widthSuperimposed, mapHeight);
-	positionExternalMap(false);
-
-	svgMap.classed('semi-transparent', !!mapDatum.projection);
-}
-
 function disableCalibrationPointSelection() {
 	svg.on('click', null);
 	svgMap.on('click', null);

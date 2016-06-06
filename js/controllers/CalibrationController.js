@@ -81,10 +81,10 @@ geotimeControllers.controller('CalibrationController', ['$scope', '$rootScope', 
 		};
 
 		enableCalibrationPointSelection();
-		showMapsSideBySide();
 
 		$rootScope.$broadcast('toggleBgMap', { toggle: true });
 		$rootScope.$broadcast('toggleMapDragZoom', { toggle: true });
+		$rootScope.$broadcast('positionExternalMap', { sideBySide: true });
 
 		$scope.$on('$destroy', function() {
 			$rootScope.$broadcast('toggleMapDragZoom', { toggle: false });
