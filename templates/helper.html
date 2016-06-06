@@ -1,6 +1,11 @@
 <div id="mapHelper" ng-controller="HelperController" class="panel panel-default">
     <div id="selectMap">
-        <select class="form-control" id="maps" ng-model="mapFileName" ng-change="loadTerritoryMap(false)"></select>
+        <select ng-options="map.fileName || map.label for map in maps"
+                ng-model="currentMap"
+                ng-change="loadTerritoryMap(false)"
+                class="form-control"
+                id="maps"
+        ></select>
         <!--<a href="javascript:void(0)" id="loadTerritoryMap">Load a random territory</a>-->
     </div>
     <ul id="processTabs" ng-show="!!mapInfo" class="nav nav-tabs nav-justified">

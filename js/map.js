@@ -145,24 +145,7 @@ function initExternalSvgMap() {
 	isLoading = false;
 }
 
-function loadMaps() {
-	ajaxPost(
-		{ getMaps: 1 },
-		function(error, maps) {
-			maps.unshift({fileName: null});
-
-			mapSelection = d3.select('#maps');
-			mapSelection.selectAll('option')
-				.data(maps)
-				.enter().append('option')
-				.text(function (d) {
-					return d.fileName || 'Select a map';
-				});
-		}
-	);
-}
-
-function loadTerritoryMapFromSvgElement(mapFileName, mapInfo) {
+function loadTerritoryMapFromSvgElement(currentMap, mapInfo) {
 	var element = angular.element(svgMap.node());
 	element.scope().initForegroundMap();
 
@@ -172,7 +155,7 @@ function loadTerritoryMapFromSvgElement(mapFileName, mapInfo) {
 	);
 	
 	svgMap
-		.attr("name", mapFileName)
+		.attr("name", currentMap)
 		.attr("id", "externalSvg")
 		.classed("externalSvg", true)
 		.attr("preserveAspectRatio", "xMinYMin meet");
@@ -180,29 +163,29 @@ function loadTerritoryMapFromSvgElement(mapFileName, mapInfo) {
 	svgMap
 		.datum({
 			id: mapInfo.id,
-			fileName: mapFileName,
+			fileName: currentMap,
 			x: 0,
 			y: 0
 		});
 }
 
 function loadTerritoryMapData(fileName, mapInfo, contentFromFileSystem, callback) {
-	var mapFileName = fileName;
-	if (mapFileName) {
-		if (!svgMap || svgMap.datum().fileName !== mapFileName) {
-			initExternalSvgMap(mapFileName);
+	var currentMap = fileName;
+	if (currentMap) {
+		if (!svgMap || svgMap.datum().fileName !== currentMap) {
+			initExternalSvgMap(currentMap);
 			if (!!contentFromFileSystem) {
 				var svgWrapper = document.createElement('div');
 				svgWrapper.innerHTML = contentFromFileSystem;
 				svgMap = d3.select(d3.select("#mapArea").node().insertBefore(d3.select(svgWrapper).select('svg').node(), svg.node()));
-				loadTerritoryMapFromSvgElement(mapFileName, mapInfo);
+				loadTerritoryMapFromSvgElement(currentMap, mapInfo);
 				loadExternalMapPosition(getExternalMapOffsetToCenter());
 				return callback(mapInfo);
 			}
 			else {
-				d3.xml("cache/svg/" + mapFileName, "image/svg+xml", function (svgDocument) {
+				d3.xml("cache/svg/" + currentMap, "image/svg+xml", function (svgDocument) {
 					svgMap = d3.select(d3.select("#mapArea").node().insertBefore(document.importNode(svgDocument.documentElement, true), svg.node()));
-					loadTerritoryMapFromSvgElement(mapFileName, mapInfo);
+					loadTerritoryMapFromSvgElement(currentMap, mapInfo);
 					callback(mapInfo);
 				});
 			}

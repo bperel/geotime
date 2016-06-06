@@ -78,6 +78,5 @@ geotimeControllers.controller('MapController', ['$scope',
 
 		getAndShowBgMap("backgroundMap", "data/external/ne_50m_coastline.json", function() {
 			applyCurrentProjection();
-			loadMaps();
 		});
 	}]);
