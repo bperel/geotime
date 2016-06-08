@@ -35,33 +35,19 @@ geotimeControllers.controller('MapController', ['$scope', '$rootScope',
 			$scope.$apply();
 		});
 
-		$scope.$on('resizeForegroundMap', function(event, args) {
-			var width = args.width,
-				height = args.height;
+		$scope.$on('resizeForegroundMapAsBackgroundMap', function() {
+			var width = $scope.maps.background.width,
+				height = $scope.maps.background.height;
 
-			if (width) {
-				var foregroundMapOriginalRatio = $scope.maps.foreground.width / $scope.maps.foreground.height;
-				var foregroundMapCurrentRatio = width / height;
-				if (foregroundMapCurrentRatio > foregroundMapOriginalRatio) {
-					width = height * foregroundMapOriginalRatio;
-				}
-				else if (foregroundMapCurrentRatio < foregroundMapOriginalRatio) {
-					height = width / foregroundMapOriginalRatio;
-				}
+			var foregroundMapOriginalRatio = $scope.maps.foreground.width / $scope.maps.foreground.height;
+			var foregroundMapCurrentRatio = $scope.maps.background.width / $scope.maps.background.height;
+			if (foregroundMapCurrentRatio > foregroundMapOriginalRatio) {
+				width = height * foregroundMapOriginalRatio;
 			}
-			else { // Auto fit
-				var widthRatio = $scope.maps.background.width / $scope.maps.foreground.width;
-				var heightRatio = $scope.maps.background.height / $scope.maps.foreground.height;
-
-				if (widthRatio < heightRatio) {
-					width = $scope.maps.background.width * (maxExternalMapSizePercentage / 100);
-					height = $scope.maps.foreground.height / ($scope.maps.foreground.width / width);
-				}
-				else {
-					height = $scope.maps.background.height * (maxExternalMapSizePercentage / 100);
-					width = $scope.maps.foreground.width / ($scope.maps.foreground.height / height);
-				}
+			else if (foregroundMapCurrentRatio < foregroundMapOriginalRatio) {
+				height = width / foregroundMapOriginalRatio;
 			}
+			
 			$scope.maps.foreground.width  = width;
 			$scope.maps.foreground.height = height;
 		});

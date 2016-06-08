@@ -49,10 +49,7 @@ geotimeControllers.controller('HelperController', ['$scope', '$rootScope', '$sta
 		
 		$scope.loadTerritoryMapFromSvgElement = function() {
 			$rootScope.$broadcast('initForegroundMap');
-			$rootScope.$broadcast('resizeForegroundMap', {
-				width: svg.attrIntWithoutPx('width'),
-				height: svg.attrIntWithoutPx('height')
-			});
+			$rootScope.$broadcast('resizeForegroundMapAsBackgroundMap');
 
 			loadTerritoryMapFromSvgElement($rootScope.mapInfo);
 		};
