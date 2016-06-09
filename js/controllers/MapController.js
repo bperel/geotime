@@ -18,15 +18,11 @@ geotimeControllers.controller('MapController', ['$scope', '$rootScope',
 			$scope.maps.foreground.width = svgMap.attrIntWithoutPx("width");
 			$scope.maps.foreground.height = svgMap.attrIntWithoutPx("height");
 
+			var templateElement = angular.element('#externalSvgTemplate');
+
 			var element = angular.element(svgMap.node());
 			svgMap
-				.attr("ng-style",
-					"{" +
-						"width:"  	  + "maps.foreground.width"       +"+'px'," +
-						"height:" 	  + "maps.foreground.height"      +"+'px'," +
-						"marginLeft:" + "maps.foreground.margin.left" +"+'px'," +
-						"marginTop:"  + "maps.foreground.margin.top"  +"+'px'" +
-					"}")
+				.attr("ng-style", templateElement.attr("ng-style"))
 				.attr("viewBox", [0, 0, $scope.maps.foreground.width, $scope.maps.foreground.height].join(' '));
 
 			element.injector().invoke(function($compile){
@@ -72,11 +68,13 @@ geotimeControllers.controller('MapController', ['$scope', '$rootScope',
 
 		$scope.maps = {
 			background: {
+				id: 'backgroundMap',
 				show: true,
 				width: null,
 				height: null
 			},
 			foreground: {
+				id: 'externalSvg',
 				show: true,
 				width: null,
 				height: null,

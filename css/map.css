@@ -20,6 +20,10 @@
     position: absolute;
 }
 
+#externalSvgTemplate {
+    display: none;
+}
+
 #externalSvg * {
     pointer-events: none;
 }

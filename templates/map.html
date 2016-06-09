@@ -1,7 +1,17 @@
 <div id="mapArea" ng-controller="MapController" >
+    <svg id="externalSvgTemplate"
+         ng-style="{
+            width: maps.foreground.width + 'px',
+            height: maps.foreground.height +'px',
+            marginLeft: maps.foreground.margin.left +'px',
+            marginTop: maps.foreground.margin.top +'px'
+         }">
+    </svg>
     <svg id="map" ng-width="{{ maps.background.width }}" ng-height="{{ maps.background.height }}" ng-show="maps.background.show">
         <rect id="bg" ng-width="{{maps.background.width}}" ng-height="{{maps.background.height}}"></rect>
+        <g id="{{ maps.background.id }}"></g>
     </svg>
+
     <svg id="markers" ng-width="{{ maps.background.width + maps.foreground.width }}" ng-height="{{ maps.background.height + maps.foreground.height }}" ng-controller="CalibrationMarkerController">
         <g class="marker-group bgPoint"></g>
         <g class="marker-group fgPoint" ng-transform="{{ getForegroundMapMarkerOffsetTransform() }}"></g>

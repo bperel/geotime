@@ -3,6 +3,8 @@ geotimeControllers.controller('MapDragController', ['$scope',
 
 		$scope.longLatLimits = [180, 90];
 
+		$scope.path = d3.geo.path();
+
 		$scope.lambda = d3.scale.linear()
 			.domain([0, width])
 			.range([-$scope.longLatLimits[0], $scope.longLatLimits[0]]);
@@ -28,7 +30,8 @@ geotimeControllers.controller('MapDragController', ['$scope',
 				}
 
 				projection.scale($scope.zoom.scale());
-				drawPaths();
+				
+				drawPaths($scope.path);
 			});
 		
 		$scope.showDragActions = false;

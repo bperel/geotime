@@ -16,7 +16,7 @@ var projections = [
 var projectionSelection = d3.selectAll('nothing');
 
 var projection,
-	path = d3.geo.path();
+	path;
 
 
 function applyProjection(name, center, scale, rotation) {
@@ -32,15 +32,15 @@ function applyProjection(name, center, scale, rotation) {
 }
 
 function applyCurrentProjection() {
-	var zoom = angular.element('#dragActionContainer').scope().zoom;
+	var scope = angular.element('#dragActionContainer').scope();
 
-	path.projection(projection);
-	zoom.scale(projection.scale());
+	scope.path.projection(projection);
+	scope.zoom.scale(projection.scale());
 
-	drawPaths();
+	drawPaths(scope.path);
 }
 
-function drawPaths() {
+function drawPaths(path) {
 	svg.selectAll('path.subunit').attr("d", path);
 	d3.select('#projectionCenter').text(projection.center().map(function(val) { return parseInt(val*10)/10; }));
 	d3.select('#projectionRotation').text(projection.rotate().map(function(val) { return parseInt(val*10)/10; }));
@@ -53,7 +53,7 @@ function initMapPlaceHolders(callback) {
 }
 
 function initBackgroundMap() {
-	svg = d3.select("#mapArea svg")
+	svg = d3.select("#mapArea #map")
 		.datum({x: 0, y: 0});
 }
 
@@ -73,8 +73,7 @@ function showBgMap(id, data, error) {
 		console.error(error);
 	}
 	else {
-		svg.append("g")
-			.attr("id", id)
+		svg.select("g#" + id)
 			.selectAll(".subunit")
 			.data(data.geometries)
 			.enter()
