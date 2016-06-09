@@ -4,7 +4,6 @@ var widthSideBySide = 480;
 var width = widthSuperimposed;
 
 var mapHeight= 480;
-var maxExternalMapSizePercentage = 80;
 var svg;
 var markersSvg = d3.selectAll('nothing');
 
@@ -15,21 +14,6 @@ var projections = [
 ];
 
 var projectionSelection = d3.selectAll('nothing');
-var mapSelection;
-
-var locatedTerritories = [];
-
-
-var longLatLimits = [180, 90];
-
-var lambda = d3.scale.linear()
-	.domain([0, width])
-	.range([-longLatLimits[0], longLatLimits[0]]);
-
-var phi = d3.scale.linear()
-	.domain([0, mapHeight])
-	.range([longLatLimits[1], -longLatLimits[1]]);
-
 
 var projection,
 	path = d3.geo.path();
