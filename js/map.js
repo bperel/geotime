@@ -1,6 +1,5 @@
 var widthSuperimposed = 960;
 var widthSideBySide = 480;
-var scale = (widthSideBySide - 1) / 2 / Math.PI;
 
 var width = widthSuperimposed;
 
@@ -33,24 +32,7 @@ var phi = d3.scale.linear()
 
 
 var projection,
-	path = d3.geo.path(),
-	zoom = d3.behavior.zoom()
-		.scale(scale)
-		.scaleExtent([scale, 16 * scale])
-		.on("zoom", function() {
-			d3.event.sourceEvent.stopPropagation();
-
-			var dragMode = angular.element('#dragActionContainer').scope().dragMode;
-			if (dragMode === 'pan') {
-				projection.translate(zoom.translate())
-			}
-			else {
-				projection.rotate([lambda(d3.event.translate[0]), phi(d3.event.translate[1])]);
-			}
-
-			projection.scale(zoom.scale());
-			drawPaths();
-		});
+	path = d3.geo.path();
 
 
 function applyProjection(name, center, scale, rotation) {
@@ -66,6 +48,8 @@ function applyProjection(name, center, scale, rotation) {
 }
 
 function applyCurrentProjection() {
+	var zoom = angular.element('#dragActionContainer').scope().zoom;
+
 	path.projection(projection);
 	zoom.scale(projection.scale());
 
