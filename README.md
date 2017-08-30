@@ -5,14 +5,14 @@ Kingdoms though time.
 The goal of this project is to produce a world map showing the countries borders' evolution through time, using Wikipedia data and maps, along with some user input.
 
 
-###Requirements
+### Requirements
 
 * *nix
 * NodeJS and NPM
 * Apache+PHP 5 with GD and curl extensions
 
 
-###Installation
+### Installation
 
 * Clone the repo, ```cd``` inside of it.
 * Install Composer : 
@@ -55,7 +55,7 @@ $ php ../../vendor/doctrine/orm/bin/doctrine orm:schema-tool:create
 $ htpasswd -c /path/to/my/web/directory/passwords admin
 ```
 
-###Running tests
+### Running tests
 
 ```bash
 $ ./vendor/phpunit/phpunit/phpunit
@@ -63,13 +63,13 @@ $ ./vendor/phpunit/phpunit/phpunit
 
 An HTML coverage report will be generated in the coverage/ folder.
 
-###Using Geotime
+### Using Geotime
 
 Two main places :
 * The [index.html](index.html) page at the directory root.
 * The [admin section main page](admin/index.php) allowing authorized users to import geographical data into Geotime.
 
-###Troubleshooting
+### Troubleshooting
 
 During the installation of the NodeJS packages, some errors (`node command not found` or similar) may occur if you're using a Debian-based system. As the NodeJS documentation says :
 > The upstream name for the Node.js interpreter command is "node".
